@@ -23,5 +23,6 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 #    && docker-php-ext-enable xdebug
 
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
+RUN a2enmod rewrite
 
-WORKDIR /project
+WORKDIR /var/www/html
