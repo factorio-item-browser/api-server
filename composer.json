@@ -1,0 +1,23 @@
+{
+  "name": "factorio-item-browser/api-server",
+  "description": "The API server of the Factorio Item Browser.",
+  "homepage": "https://www.factorio-item-browser.com/",
+  "type": "project",
+  "keywords": ["Factorio Item Browser", "FIB", "api", "server", "BluePsyduck"],
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "BluePsyduck",
+      "email": "bluepsyduck@gmx.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "FactorioItemBrowser\\Api\\Server\\": "src/"
+    }
+  }
+}
