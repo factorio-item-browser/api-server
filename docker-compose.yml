@@ -9,3 +9,10 @@ services:
       - "8010:80"
     volumes:
       - ".:/var/www/html"
+
+  mysql:
+    container_name: fib-as-mysql
+    image: fib-as-mysql
+    build: ./docker/mysql
+    ports:
+      - "13306:3306"

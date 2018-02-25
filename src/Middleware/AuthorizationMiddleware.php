@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Exception;
+use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use Firebase\JWT\JWT;
 use Psr\Http\Message\ResponseInterface;
@@ -29,6 +30,21 @@ class AuthorizationMiddleware implements MiddlewareInterface
     ];
 
     /**
+     * The mod service.
+     * @var ModService
+     */
+    protected $modService;
+
+    /**
+     * Initializes the authorization middleware class.
+     * @param ModService $modService
+     */
+    public function __construct(ModService $modService)
+    {
+        $this->modService = $modService;
+    }
+
+    /**
      * Process an incoming server request and return a response, optionally delegating
      * response creation to a handler.
      * @param ServerRequestInterface $request
@@ -45,8 +61,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
             try {
                 $token = JWT::decode(substr($authorization, 7), 'wuppdi', ['HS256']);
-                var_dump($token->mds);die;
-                // @todo Do something with the token values.
+                $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds));
             } catch (Exception $e) {
                 throw new ApiServerException('Authorization token is invalid.', 401);
             }

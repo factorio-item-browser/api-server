@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler;
 
+use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Exception\ValidationException;
 use Firebase\JWT\JWT;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\InputFilter\InputFilter;
+use Zend\Validator\NotEmpty;
 
 /**
  * The handler of the /auth request.
@@ -19,26 +23,79 @@ use Zend\Diactoros\Response\JsonResponse;
 class AuthHandler implements RequestHandlerInterface
 {
     /**
+     * The database mod service.
+     * @var ModService
+     */
+    protected $modService;
+
+    /**
+     * Initializes the auth handler.
+     * @param ModService $modService
+     */
+    public function __construct(ModService $modService)
+    {
+        $this->modService = $modService;
+    }
+
+    /**
      * Handle the request and return a response.
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $key = 'wuppdi';
+        $inputFilter = $this->createInputFilter();
+        $inputFilter->setData($request->getParsedBody());
+        if (!$inputFilter->isValid()) {
+            throw new ValidationException($inputFilter->getMessages());
+        }
 
+
+        $key = 'wuppdi'; // @todo Read encryption key from config.
+
+        $this->modService->setEnabledCombinationsByModNames($inputFilter->getValue('enabledModNames'));
         $token = [
             'iat' => time(),
             'exp' => time() + 86400,
-            'lgn' => 'facpsodaikpsdoakgposdkgposdkgpodsk',
-            'mds' => 'foo,bar'
+            'lgn' => (string) $inputFilter->getValue('login'),
+            'mds' => $this->modService->getEnabledModCombinationIds()
         ];
 
-        $jwt = JWT::encode($token, $key);
-
         return new JsonResponse([
-            'authorization' => $jwt,
-            'modHash' => ''
+            'authorizationToken' => JWT::encode($token, $key),
+            'combinationHash' => $this->modService->calculateCombinationHash()
         ]);
+    }
+
+    /**
+     * Creates the input filter to use for the request.
+     * @return InputFilter
+     */
+    protected function createInputFilter()
+    {
+        $inputFilter = new InputFilter();
+        $inputFilter
+            ->add([
+                'name' => 'login',
+                'required' => true,
+                'validators' => [
+                    new NotEmpty()
+                ]
+            ])
+            ->add([
+                'name' => 'accessKey',
+                'required' => true,
+                'validators' => [
+                    new NotEmpty()
+                ]
+            ])
+            ->add([
+                'name' => 'enabledModNames',
+                'required' => true,
+                'validators' => [
+                    new NotEmpty()
+                ]
+            ]);
+        return $inputFilter;
     }
 }

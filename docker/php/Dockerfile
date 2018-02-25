@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
     && docker-php-ext-install \
         bz2 \
         mbstring \
+        pdo_mysql \
         xml \
         zip
 
