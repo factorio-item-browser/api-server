@@ -23,6 +23,7 @@ return [
             Handler\ModListHandler::class => Handler\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
+            Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
         ],
     ],

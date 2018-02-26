@@ -22,34 +22,15 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(ErrorHandler::class);
     $app->pipe(ServerUrlMiddleware::class);
 
-    // Register the routing middleware in the middleware pipeline
     $app->pipe(PathBasedRoutingMiddleware::class);
-
-    $app->pipe(Middleware\AuthorizationMiddleware::class);
-
-    // The following handle routing failures for common conditions:
-    // - method not allowed
-    // - HEAD request but no routes answer that method
-    // - OPTIONS request but no routes answer that method
+    $app->pipe(Middleware\DocumentationRedirectMiddleware::class);
     $app->pipe(MethodNotAllowedMiddleware::class);
     $app->pipe(ImplicitHeadMiddleware::class);
     $app->pipe(ImplicitOptionsMiddleware::class);
-
-    // Seed the UrlHelper with the routing results:
+    $app->pipe(Middleware\AuthorizationMiddleware::class);
     $app->pipe(UrlHelperMiddleware::class);
     $app->pipe(BodyParamsMiddleware::class);
 
-    // Add more middleware here that needs to introspect the routing results; this
-    // might include:
-    //
-    // - route-based authentication
-    // - route-based validation
-    // - etc.
-    // Register the dispatch middleware in the middleware pipeline
     $app->pipe(DispatchMiddleware::class);
-
-    // At this point, if no Response is returned by any middleware, the
-    // NotFoundHandler kicks in; alternately, you can provide other fallback
-    // middleware to execute.
     $app->pipe(Handler\NotFoundHandler::class);
 };
