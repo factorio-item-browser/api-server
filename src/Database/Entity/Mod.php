@@ -25,7 +25,7 @@ class Mod
      * @ORM\Column(name="id", type="integer")
      *
      * The internal id of the mod.
-     * @var int
+     * @var int|null
      */
     protected $id;
 
@@ -102,7 +102,7 @@ class Mod
 
     /**
      * Returns the internal id of the item.
-     * @return int
+     * @return int|null
      */
     public function getId(): ?int
     {

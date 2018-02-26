@@ -2,6 +2,7 @@
 
 namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
 
@@ -18,13 +19,34 @@ class ModCombinationRepository extends EntityRepository
      * @param array|string[] $modNames
      * @return array|ModCombination[]
      */
-    public function findAllByModNames(array $modNames) {
-        $queryBuilder = $this->createQueryBuilder('mc');
+    public function findAllByModNames(array $modNames): array
+    {
+        $queryBuilder = $this->createQueryBuilder('c');
         $queryBuilder->addSelect('m')
-                     ->innerJoin('mc.mod', 'm', 'WITH', 'm.name IN (:modNames)')
-                     ->addOrderBy('mc.order', 'ASC')
+                     ->innerJoin('c.mod', 'm', 'WITH', 'm.name IN (:modNames)')
+                     ->addOrderBy('c.order', 'ASC')
                      ->setParameter('modNames', array_values($modNames));
 
         return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Finds the mod names of the specified combination ids.
+     * @param array|int[] $combinationIds
+     * @return array|string[]
+     */
+    public function findModNamesByIds(array $combinationIds): array
+    {
+        $queryBuilder = $this->createQueryBuilder('c');
+        $queryBuilder->select('m.name')
+                     ->innerJoin('c.mod', 'm', 'WITH', 'c.id IN (:combinationIds)')
+                     ->addGroupBy('m.name')
+                     ->setParameter('combinationIds', array_values($combinationIds));
+
+        $result = [];
+        foreach ($queryBuilder->getQuery()->getResult() as $row) {
+            $result[] = $row['name'];
+        }
+        return $result;
     }
 }

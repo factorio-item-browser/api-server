@@ -71,6 +71,15 @@ class ModService extends AbstractDatabaseService
     }
 
     /**
+     * Returns the names of the currently enabled mods.
+     * @return array|string[]
+     */
+    public function getEnabledModNames(): array
+    {
+        return $this->modCombinationRepository->findModNamesByIds($this->enabledModCombinationIds);
+    }
+
+    /**
      * Sets the enabled mods by their names.
      * @param array|string[] $modNames
      * @return $this
@@ -122,6 +131,20 @@ class ModService extends AbstractDatabaseService
             foreach ($this->modCombinationRepository->findAllByModNames($modNames) as $modCombination) {
                 $result[$modCombination->getId()] = $modCombination;
             }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns all known mods.
+     * @return array|Mod[]
+     */
+    public function getAllMods(): array
+    {
+        $result = [];
+        foreach ($this->modRepository->findAll() as $mod) {
+            /* @var Mod $mod */
+            $result[$mod->getName()] = $mod;
         }
         return $result;
     }

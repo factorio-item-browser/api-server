@@ -20,6 +20,7 @@ return [
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Error\MessageLogger::class => InvokableFactory::class,
             Handler\AuthHandler::class => Handler\AuthHandlerFactory::class,
+            Handler\ModListHandler::class => Handler\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,

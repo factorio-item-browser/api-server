@@ -23,7 +23,7 @@ class ModCombination
      * @ORM\Column(name="id", type="integer")
      *
      * The id of the mod combination.
-     * @var int
+     * @var int|null
      */
     protected $id;
 
@@ -32,7 +32,7 @@ class ModCombination
      * @ORM\JoinColumn(name="modId", referencedColumnName="id")
      *
      * The main mod.
-     * @var Mod
+     * @var Mod|null
      */
     protected $mod;
 
@@ -135,7 +135,7 @@ class ModCombination
 
     /**
      * Returns the id of the mod combination.
-     * @return int
+     * @return int|null
      */
     public function getId(): ?int
     {
@@ -155,7 +155,7 @@ class ModCombination
 
     /**
      * Returns the main mod.
-     * @return Mod
+     * @return Mod|null
      */
     public function getMod(): ?Mod
     {

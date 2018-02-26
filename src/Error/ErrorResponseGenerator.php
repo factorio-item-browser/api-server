@@ -58,10 +58,16 @@ class ErrorResponseGenerator
             $statusCode = $exception->getCode();
             $this->messageLogger->addError($exception->getMessage());
         } else {
-            $statusCode = 500;
-            $this->messageLogger->addError('An unexpected error occurred.');
-            $this->messageLogger->addError(get_class($exception));
-            $this->messageLogger->addError($exception->getMessage());
+            $statusCode = $exception->getCode();
+            if ($statusCode >= 400 && $statusCode < 600) {
+                $this->messageLogger->addError($exception->getMessage());
+            } else {
+                $statusCode = 500;
+                $this->messageLogger->addError('An unexpected error occurred.');
+                // @todo Remove debug info or gate it behind a config value.
+                $this->messageLogger->addInfo(get_class($exception));
+                $this->messageLogger->addInfo($exception->getMessage());
+            }
         }
         return new JsonResponse([], $statusCode);
     }
