@@ -15,13 +15,15 @@ return [
         'factories'  => [
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
-            ErrorResponseGenerator::class => Error\ErrorResponseGeneratorFactory::class,
+            ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
-            Error\MessageLogger::class => InvokableFactory::class,
+            Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
+            Response\MessageLogger::class => InvokableFactory::class,
             Handler\AuthHandler::class => Handler\AuthHandlerFactory::class,
             Handler\ModListHandler::class => Handler\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
+            Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,

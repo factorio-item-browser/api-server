@@ -1,4 +1,4 @@
-FROM php:7.1-apache
+FROM php:7.2-apache
 LABEL maintainer="BluePsyduck <buepsyduck@gmx.com>"
 
 RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
@@ -20,10 +20,11 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
-#RUN pecl install xdebug \
-#    && docker-php-ext-enable xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
+RUN rm -rf /var/www/html && ln -s /project/public /var/www/html
 
-WORKDIR /var/www/html
+WORKDIR /project

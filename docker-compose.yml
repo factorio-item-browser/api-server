@@ -1,6 +1,5 @@
 version: "3"
 services:
-
   php:
     build: ./docker/php
     container_name: fib-as-php
@@ -8,8 +7,7 @@ services:
     ports:
       - "8010:80"
     volumes:
-      - ".:/var/www/html"
-
+      - ".:/project"
   mysql:
     container_name: fib-as-mysql
     image: fib-as-mysql

@@ -28,6 +28,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(ImplicitHeadMiddleware::class);
     $app->pipe(ImplicitOptionsMiddleware::class);
     $app->pipe(Middleware\AuthorizationMiddleware::class);
+    $app->pipe(Middleware\AcceptLanguageMiddleware::class);
     $app->pipe(UrlHelperMiddleware::class);
     $app->pipe(BodyParamsMiddleware::class);
 

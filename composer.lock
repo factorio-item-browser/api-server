@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d181ed13d82fff3be65abb3b843bc6c",
+    "content-hash": "e264e056bb4dd27a6af442cfea696a4c",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -689,6 +689,53 @@
             "time": "2017-12-20T00:38:15+00:00"
         },
         {
+            "name": "factorio-item-browser/api-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/factorio-item-browser/api-client.git",
+                "reference": "a1158d992fec8fbc7260ca5bbffcaffc4077333f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/a1158d992fec8fbc7260ca5bbffcaffc4077333f",
+                "reference": "a1158d992fec8fbc7260ca5bbffcaffc4077333f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0"
+            },
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "FactorioItemBrowser\\Api\\Client\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "BluePsyduck",
+                    "email": "bluepsyduck@gmx.com"
+                }
+            ],
+            "description": "The API client of the Factorio Item Browser.",
+            "homepage": "https://www.factorio-item-browser.com/",
+            "keywords": [
+                "BluePsyduck",
+                "FIB",
+                "Factorio Item Browser",
+                "api",
+                "client"
+            ],
+            "time": "2018-02-27T19:44:01+00:00"
+        },
+        {
             "name": "fig/http-message-util",
             "version": "1.1.2",
             "source": {
@@ -1164,16 +1211,16 @@
         },
         {
             "name": "zendframework/zend-config-aggregator",
-            "version": "1.0.1",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-config-aggregator.git",
-                "reference": "2762abefdb1df1517be7e77a6717540557dca1bb"
+                "reference": "46460b25c09fb572f807a00cf9dfe9c466792a76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-config-aggregator/zipball/2762abefdb1df1517be7e77a6717540557dca1bb",
-                "reference": "2762abefdb1df1517be7e77a6717540557dca1bb",
+                "url": "https://api.github.com/repos/zendframework/zend-config-aggregator/zipball/46460b25c09fb572f807a00cf9dfe9c466792a76",
+                "reference": "46460b25c09fb572f807a00cf9dfe9c466792a76",
                 "shasum": ""
             },
             "require": {
@@ -1194,8 +1241,8 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0-dev",
-                    "dev-develop": "1.1-dev"
+                    "dev-master": "1.1.x-dev",
+                    "dev-develop": "1.2.x-dev"
                 }
             },
             "autoload": {
@@ -1205,29 +1252,28 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD 3-Clause"
+                "BSD-3-Clause"
             ],
-            "authors": [
-                {
-                    "name": "Mateusz Tymek",
-                    "email": "mtymek@gmail.com"
-                }
+            "description": "Lightweight library for collecting and merging configuration from different sources",
+            "keywords": [
+                "ZendFramework",
+                "config-aggregator",
+                "zf"
             ],
-            "description": "Lightweight library for merging and caching application config",
-            "time": "2017-11-06T14:55:00+00:00"
+            "time": "2018-02-26T16:46:30+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
-            "version": "1.7.0",
+            "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "ed6ce7e2105c400ca10277643a8327957c0384b7"
+                "reference": "bf26aff803a11c5cc8eb7c4878a702c403ec67f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/ed6ce7e2105c400ca10277643a8327957c0384b7",
-                "reference": "ed6ce7e2105c400ca10277643a8327957c0384b7",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/bf26aff803a11c5cc8eb7c4878a702c403ec67f1",
+                "reference": "bf26aff803a11c5cc8eb7c4878a702c403ec67f1",
                 "shasum": ""
             },
             "require": {
@@ -1266,7 +1312,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2018-01-04T18:21:48+00:00"
+            "time": "2018-02-26T15:44:50+00:00"
         },
         {
             "name": "zendframework/zend-escaper",
@@ -1314,16 +1360,16 @@
         },
         {
             "name": "zendframework/zend-expressive",
-            "version": "3.0.0alpha9",
+            "version": "3.0.0rc1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-expressive.git",
-                "reference": "b381f5345f1597cab89e88bfa510cfac6bb0a551"
+                "reference": "b82fa26e9fd5acd4eda26d8f2e6a99bde111cce9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-expressive/zipball/b381f5345f1597cab89e88bfa510cfac6bb0a551",
-                "reference": "b381f5345f1597cab89e88bfa510cfac6bb0a551",
+                "url": "https://api.github.com/repos/zendframework/zend-expressive/zipball/b82fa26e9fd5acd4eda26d8f2e6a99bde111cce9",
+                "reference": "b82fa26e9fd5acd4eda26d8f2e6a99bde111cce9",
                 "shasum": ""
             },
             "require": {
@@ -1400,7 +1446,7 @@
                 "zend-expressive",
                 "zf"
             ],
-            "time": "2018-02-22T21:21:56+00:00"
+            "time": "2018-02-27T16:46:47+00:00"
         },
         {
             "name": "zendframework/zend-expressive-fastroute",
@@ -2071,6 +2117,7 @@
     "aliases": [],
     "minimum-stability": "alpha",
     "stability-flags": {
+        "factorio-item-browser/api-client": 20,
         "zendframework/zend-expressive": 15,
         "zendframework/zend-expressive-fastroute": 15,
         "zendframework/zend-expressive-helpers": 15

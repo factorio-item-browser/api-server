@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler;
 
+use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -25,12 +27,20 @@ class ModListHandler implements RequestHandlerInterface
     protected $modService;
 
     /**
+     * The database translation service.
+     * @var TranslationService
+     */
+    protected $translationService;
+
+    /**
      * Initializes the auth handler.
      * @param ModService $modService
+     * @param TranslationService $translationService
      */
-    public function __construct(ModService $modService)
+    public function __construct(ModService $modService, TranslationService $translationService)
     {
         $this->modService = $modService;
+        $this->translationService = $translationService;
     }
 
     /**
@@ -41,17 +51,20 @@ class ModListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $enabledModNames = $this->modService->getEnabledModNames();
-
         $preparedMods = [];
-        foreach ($this->modService->getAllMods() as $mod) {
-            $preparedMods[] = [
-                'name' => $mod->getName(),
-                'author' => $mod->getAuthor(),
-                'version' => $mod->getCurrentVersion(),
-                'isEnabled' => in_array($mod->getName(), $enabledModNames)
-            ];
-        }
+        foreach ($this->modService->getAllMods() as $databaseMod) {
+            $clientMod = new ClientMod();
+            $clientMod->setName($databaseMod->getName())
+                      ->setAuthor($databaseMod->getAuthor())
+                      ->setVersion($databaseMod->getCurrentVersion())
+                      ->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
 
+            $this->translationService->addEntityToTranslate($clientMod);
+            $preparedMods[] = $clientMod;
+        }
+        $this->translationService->translateEntities(false);
+
+        // @todo ClientMod can currently not be converted to an array.
         return new JsonResponse([
             'mods' => $preparedMods
         ]);

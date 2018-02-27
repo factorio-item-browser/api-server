@@ -4,30 +4,30 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Response\MessageLogger;
+use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the meta middleware class.
+ * The factory of the accept language middleware class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class MetaMiddlewareFactory implements FactoryInterface
+class AcceptLanguageMiddlewareFactory implements FactoryInterface
 {
     /**
-     * Creates the meta middleware.
+     * Creates the accept language middleware.
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  null|array $options
-     * @return MetaMiddleware
+     * @return AcceptLanguageMiddleware
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var MessageLogger $messageLogger */
-        $messageLogger = $container->get(MessageLogger::class);
+        /* @var TranslationService $translationService */
+        $translationService = $container->get(TranslationService::class);
 
-        return new MetaMiddleware($messageLogger);
+        return new AcceptLanguageMiddleware($translationService);
     }
 }

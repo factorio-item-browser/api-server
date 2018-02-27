@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Error;
+namespace FactorioItemBrowser\Api\Server\Response;
 
 /**
  * A class logging messages to be inserted into the response.

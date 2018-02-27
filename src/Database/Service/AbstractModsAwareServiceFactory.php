@@ -2,35 +2,34 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Handler;
+namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the mod list handler class.
+ * The factory of the mods aware service classes.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModListHandlerFactory implements FactoryInterface
+class AbstractModsAwareServiceFactory implements FactoryInterface
 {
     /**
-     * Creates the mod list handler.
+     * Creates the service instance.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ModListHandler
+     * @return AbstractModsAwareService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        /* @var EntityManager $entityManager */
+        $entityManager = $container->get(EntityManager::class);
         /* @var ModService $modService */
         $modService = $container->get(ModService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $container->get(TranslationService::class);
 
-        return new ModListHandler($modService, $translationService);
+        return new $requestedName($entityManager, $modService);
     }
 }
