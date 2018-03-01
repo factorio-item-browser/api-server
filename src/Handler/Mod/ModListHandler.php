@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Handler;
+namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
@@ -51,7 +51,7 @@ class ModListHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $enabledModNames = $this->modService->getEnabledModNames();
-        $preparedMods = [];
+        $mods = [];
         foreach ($this->modService->getAllMods() as $databaseMod) {
             $clientMod = new ClientMod();
             $clientMod->setName($databaseMod->getName())
@@ -60,13 +60,16 @@ class ModListHandler implements RequestHandlerInterface
                       ->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
 
             $this->translationService->addEntityToTranslate($clientMod);
-            $preparedMods[] = $clientMod;
+            $mods[] = $clientMod;
         }
         $this->translationService->translateEntities(false);
 
-        // @todo ClientMod can currently not be converted to an array.
+        /* @var ClientMod[] $mods */
+        foreach ($mods as $index => $mod) {
+            $mods[$index] = $mod->writeData();
+        }
         return new JsonResponse([
-            'mods' => $preparedMods
+            'mods' => $mods
         ]);
     }
 }

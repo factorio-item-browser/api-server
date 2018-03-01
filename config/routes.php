@@ -9,6 +9,6 @@ use Zend\Expressive\Application;
 use Zend\Expressive\MiddlewareFactory;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
-    $app->post('/auth', Handler\AuthHandler::class, 'auth');
-    $app->post('/mod/list', Handler\ModListHandler::class, 'mod.list');
+    $app->post('/auth', Handler\Auth\AuthHandler::class, 'auth');
+    $app->post('/mod/list', Handler\Mod\ModListHandler::class, 'mod.list');
 };

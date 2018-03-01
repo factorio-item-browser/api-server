@@ -7,6 +7,51 @@
     "content-hash": "e264e056bb4dd27a6af442cfea696a4c",
     "packages": [
         {
+            "name": "bluepsyduck/common",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BluePsyduck/Common.git",
+                "reference": "909897fdfbcd4b7c72b94f2b365f7df295814fc8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BluePsyduck/Common/zipball/909897fdfbcd4b7c72b94f2b365f7df295814fc8",
+                "reference": "909897fdfbcd4b7c72b94f2b365f7df295814fc8",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BluePsyduck\\Common\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "BluePsyduck",
+                    "email": "bluepsyduck@gmx.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Some classes commonly used in other projects.",
+            "homepage": "https://github.com/BluePsyduck/Common",
+            "keywords": [
+                "BluePsyduck",
+                "common"
+            ],
+            "time": "2018-02-16T20:20:50+00:00"
+        },
+        {
             "name": "container-interop/container-interop",
             "version": "1.2.0",
             "source": {
@@ -608,16 +653,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "v2.6.0",
+            "version": "v2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/doctrine2.git",
-                "reference": "374e7ace49d864dad8cddbc55346447c8a6a2083"
+                "reference": "87ee409783a4a322b5597ebaae558661404055a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/374e7ace49d864dad8cddbc55346447c8a6a2083",
-                "reference": "374e7ace49d864dad8cddbc55346447c8a6a2083",
+                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/87ee409783a4a322b5597ebaae558661404055a7",
+                "reference": "87ee409783a4a322b5597ebaae558661404055a7",
                 "shasum": ""
             },
             "require": {
@@ -686,7 +731,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2017-12-20T00:38:15+00:00"
+            "time": "2018-02-27T07:30:56+00:00"
         },
         {
             "name": "factorio-item-browser/api-client",
@@ -694,15 +739,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "a1158d992fec8fbc7260ca5bbffcaffc4077333f"
+                "reference": "032b63cf3b6178e079af60ec33abd7a29bb69d6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/a1158d992fec8fbc7260ca5bbffcaffc4077333f",
-                "reference": "a1158d992fec8fbc7260ca5bbffcaffc4077333f",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/032b63cf3b6178e079af60ec33abd7a29bb69d6c",
+                "reference": "032b63cf3b6178e079af60ec33abd7a29bb69d6c",
                 "shasum": ""
             },
             "require": {
+                "bluepsyduck/common": "~1.0",
                 "php": "^7.2"
             },
             "require-dev": {
@@ -733,7 +779,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-02-27T19:44:01+00:00"
+            "time": "2018-03-01T14:50:48+00:00"
         },
         {
             "name": "fig/http-message-util",

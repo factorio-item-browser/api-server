@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Handler;
+namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use Interop\Container\ContainerInterface;
