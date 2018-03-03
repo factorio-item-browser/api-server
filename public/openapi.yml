@@ -24,7 +24,7 @@ paths:
       summary: "Authorizes the access to the API by specifying the used mods."
       description:
         This request is used to create an authorization token to be used in all other requests. Part of the
-        authorization is a login and an accessKey provided by the administrator, as well as the names of mods which
+        authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
         should be enabled for the token. The token will normally last for 24 hours, but may invalidate at any point
         when the database changed and the mod names must be re-evaluated. Whenever you encounter a 401 error in the
         other requests, re-authorize to get a new token.
@@ -44,6 +44,8 @@ paths:
           $ref: "#/components/response/badRequest"
         "403":
           $ref: "#/components/response/accessDenied"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
   /item/ingredient:
     post:
@@ -68,6 +70,8 @@ paths:
           $ref: "#/components/response/unauthorized"
         "404":
           $ref: "#/components/response/itemNotFound"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
   /item/product:
     post:
@@ -92,6 +96,8 @@ paths:
           $ref: "#/components/response/unauthorized"
         "404":
           $ref: "#/components/response/itemNotFound"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
   /mod/list:
     post:
@@ -114,6 +120,8 @@ paths:
           $ref: "#/components/response/badRequest"
         "401":
           $ref: "#/components/response/unauthorized"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
   /recipe/details:
     post:
@@ -138,6 +146,8 @@ paths:
           $ref: "#/components/response/unauthorized"
         "404":
           $ref: "#/components/response/recipeNotFound"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
   /search/query:
     post:
@@ -160,6 +170,8 @@ paths:
           $ref: "#/components/response/badRequest"
         "401":
           $ref: "#/components/response/unauthorized"
+        "500":
+          $ref: "#/components/response/unexpectedError"
 
 definitions:
   EntityWithRecipes:
@@ -306,9 +318,9 @@ components:
       schema:
         type: "object"
         properties:
-          login:
+          agent:
             type: "string"
-            description: "The login to use for the API, provided by the admin."
+            description: "The agent to use for the API, provided by the admin."
           accessKey:
             type: "string"
             description: "The access key to the API, provided by the admin."
@@ -318,11 +330,11 @@ components:
             items:
               type: "string"
         required:
-          - login
+          - agent
           - accessKey
           - enabledModNames
         example:
-          login: "foo"
+          agent: "foo"
           accessKey: "bar"
           enabledModNames:
             - base
@@ -403,13 +415,9 @@ components:
           authorization:
             type: "string"
             description: "The authorization token to use in the other requests."
-          modHash:
-            type: "string"
-            description: "A hash value describing the enabled mods to easily identify changes."
       examples:
         Response:
           authorization: "SomeEncryptedValue"
-          modHash: "ABCD0123"
           meta:
             statusCode: 200
             executionTime: 13.37
@@ -742,7 +750,7 @@ components:
 
     # 403 responses
     accessDenied:
-      description: "Access denied. Please check your login and accessKey values."
+      description: "Access denied. Please check your agent and accessKey values."
       schema:
         $ref: "#/definitions/Meta"
       examples:
@@ -752,7 +760,7 @@ components:
             executionTime: 13.37
             messages:
               - level: "error"
-                message: "Invalid login or accessKey."
+                message: "Invalid agent or access key."
 
     # 404 responses
     itemNotFound:
@@ -787,3 +795,19 @@ components:
               - level: "error"
                 message: "Recipe not known: invalid-recipe"
 
+    # 500 responses
+    unexpectedError:
+      description: "An unexpected error occurred. Please try again later. If the problem persists, please contact the admin."
+      schema:
+        type: "object"
+        properties:
+          meta:
+            $ref: "#/definitions/Meta"
+        examples:
+          Response:
+            meta:
+              statusCode: 500
+              executionTime: 13.37
+              messages:
+                - level: "error"
+                  message: "An unexpected error occurred."

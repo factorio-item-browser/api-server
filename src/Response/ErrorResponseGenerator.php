@@ -51,7 +51,7 @@ class ErrorResponseGenerator
             $statusCode = $exception->getCode();
             foreach ($exception->getValidatorMessages() as $element => $messages) {
                 foreach ($messages as $message) {
-                    $this->messageLogger->addError($message);
+                    $this->messageLogger->addError($element . ': ' . $message);
                 }
             }
         } elseif ($exception instanceof ApiServerException) {

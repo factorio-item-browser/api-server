@@ -57,13 +57,12 @@ class AuthHandler implements RequestHandlerInterface
         $token = [
             'iat' => time(),
             'exp' => time() + 86400,
-            'lgn' => (string) $inputFilter->getValue('login'),
+            'agt' => (string) $inputFilter->getValue('agent'),
             'mds' => $this->modService->getEnabledModCombinationIds()
         ];
 
         return new JsonResponse([
-            'authorizationToken' => JWT::encode($token, $key),
-            'combinationHash' => $this->modService->calculateCombinationHash()
+            'authorizationToken' => JWT::encode($token, $key)
         ]);
     }
 
@@ -76,7 +75,7 @@ class AuthHandler implements RequestHandlerInterface
         $inputFilter = new InputFilter();
         $inputFilter
             ->add([
-                'name' => 'login',
+                'name' => 'agent',
                 'required' => true,
                 'validators' => [
                     new NotEmpty()
