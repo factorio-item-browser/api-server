@@ -18,6 +18,7 @@ return [
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
+            Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Response\MessageLogger::class => InvokableFactory::class,
             Handler\Auth\AuthHandler::class => Handler\Auth\AuthHandlerFactory::class,

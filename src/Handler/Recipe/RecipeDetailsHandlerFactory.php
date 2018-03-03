@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
+use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -25,9 +26,11 @@ class RecipeDetailsHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        /* @var RecipeService $recipeService */
+        $recipeService = $container->get(RecipeService::class);
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new RecipeDetailsHandler($translationService);
+        return new RecipeDetailsHandler($recipeService, $translationService);
     }
 }

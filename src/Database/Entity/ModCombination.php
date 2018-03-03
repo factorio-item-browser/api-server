@@ -71,8 +71,8 @@ class ModCombination
     protected $order = 0;
 
     /**
-     * @ ORM\ManyToMany(targetEntity="Item", inversedBy="modCombinations")
-     * @ ORM\JoinTable(name="ModCombinationXItem",
+     * @ORM\ManyToMany(targetEntity="Item", inversedBy="modCombinations")
+     * @ORM\JoinTable(name="ModCombinationXItem",
      *     joinColumns={@ORM\JoinColumn(name="modCombinationId", referencedColumnName="id")},
      *     inverseJoinColumns={@ORM\JoinColumn(name="itemId", referencedColumnName="id")}
      * )
@@ -83,8 +83,8 @@ class ModCombination
     protected $items;
 
     /**
-     * @ ORM\ManyToMany(targetEntity="Recipe", inversedBy="modCombinations")
-     * @ ORM\JoinTable(name="ModCombinationXRecipe",
+     * @ORM\ManyToMany(targetEntity="Recipe", inversedBy="modCombinations")
+     * @ORM\JoinTable(name="ModCombinationXRecipe",
      *     joinColumns={@ORM\JoinColumn(name="modCombinationId", referencedColumnName="id")},
      *     inverseJoinColumns={@ORM\JoinColumn(name="recipeId", referencedColumnName="id")}
      * )
