@@ -23,6 +23,7 @@ return [
             Handler\Auth\AuthHandler::class => Handler\Auth\AuthHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
+            Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\TranslatedEntityInterface;
 use FactorioItemBrowser\Api\Server\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Server\Database\Repository\TranslationRepository;
@@ -78,7 +79,7 @@ class TranslationService extends AbstractModsAwareService
         $entities = [];
         $namesByTypes = [];
         foreach ($this->entitiesToTranslate as $entity) {
-            $type = $entity->getTranslationType();
+            $type = $entity->getType();
             $name = $entity->getName();
 
             $namesByTypes[$type][] = $name;
@@ -91,23 +92,50 @@ class TranslationService extends AbstractModsAwareService
                 $namesByTypes,
                 $useEnabledMods ? $this->modService->getEnabledModCombinationIds() : []
             );
+            $translations = $this->sortTranslationData($translations);
+            $this->matchTranslationDataToEntities($entities, $translations);
+        }
+        return $this;
+    }
 
-            usort($translations, function (array $left, array $right): int {
-                $result = ($left['locale'] !== 'en') <=> ($right['locale'] !== 'en');
+    /**
+     * Sorts the translation data so that translation with higher priority come later in the array.
+     * @param array $translationData
+     * @return array
+     */
+    protected function sortTranslationData(array $translationData): array
+    {
+        usort($translationData, function (array $left, array $right): int {
+            $result = ($left['locale'] !== 'en') <=> ($right['locale'] !== 'en');
+            if ($result === 0) {
+                $result = $left['type'] <=> $right['type'];
                 if ($result === 0) {
-                    $result = $left['type'] <=> $right['type'];
+                    $result = $left['order'] <=> $right['order'];
                     if ($result === 0) {
-                        $result = $left['order'] <=> $right['order'];
-                        if ($result === 0) {
-                            $result = $left['name'] <=> $right['name'];
-                        }
+                        $result = $left['name'] <=> $right['name'];
                     }
                 }
-                return $result;
-            });
+            }
+            return $result;
+        });
+        return $translationData;
+    }
 
-            foreach ($translations as $translation) {
-                $key = $translation['type'] . '|' . $translation['name'];
+    /**
+     * Matches the translation data to the entities.
+     * @param array|TranslatedEntityInterface[] $entities
+     * @param array $translationData
+     * @return $this
+     */
+    protected function matchTranslationDataToEntities(array $entities, array $translationData)
+    {
+        foreach ($translationData as $translation) {
+            $keys = [$translation['type'] . '|' . $translation['name']];
+            if ($translation['isDuplicatedByRecipe']) {
+                $keys[] = EntityType::RECIPE . '|' . $translation['name'];
+            }
+
+            foreach ($keys as $key) {
                 foreach ($entities[$key] ?? [] as $entity) {
                     /* @var TranslatedEntityInterface $entity */
                     if (strlen($translation['value']) > 0) {

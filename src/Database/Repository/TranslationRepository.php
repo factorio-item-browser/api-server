@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use FactorioItemBrowser\Api\Client\Constant\EntityType;
 
 /**
  * The repository of the translation database table.
@@ -32,6 +33,7 @@ class TranslationRepository extends EntityRepository
             't.name AS name',
             't.value AS value',
             't.description AS description',
+            't.isDuplicatedByRecipe AS isDuplicatedByRecipe',
             'mc.order AS order'
         ];
 
@@ -49,7 +51,13 @@ class TranslationRepository extends EntityRepository
         $index = 0;
         $conditions = [];
         foreach ($namesByTypes as $type => $names) {
-            $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+            if ($type === EntityType::RECIPE) {
+                // Special case: Recipes may re-use the translations provided by the item with the same name.
+                $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByRecipe = 1) '
+                    . 'AND t.name IN (:names' . $index . '))';
+            } else {
+                $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+            }
             $queryBuilder->setParameter('type' . $index, $type)
                          ->setParameter('names' . $index, array_values($names));
             ++$index;
