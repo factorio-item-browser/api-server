@@ -75,6 +75,26 @@ class RecipeService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the ids with one of the specified items as ingredient, grouped by recipe.
+     * @param array|int[] $itemIds
+     * @return array|int[][]
+     */
+    public function getIdsWithProducts(array $itemIds): array
+    {
+        $result = [];
+        if (count($itemIds) > 0) {
+            $recipeData = $this->recipeRepository->findIdDataWithProductItemId(
+                $itemIds,
+                $this->modService->getEnabledModCombinationIds()
+            );
+            foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
+                $result[$data['name']][] = $data['id'];
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Returns the details of the recipes with the specified IDs.
      * @param array|int[] $ids
      * @return array|Recipe[]

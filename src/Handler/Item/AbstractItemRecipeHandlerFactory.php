@@ -11,19 +11,19 @@ use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the item ingredient handler.
+ * The abstract factory of the item recipe handlers.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ItemIngredientHandlerFactory implements FactoryInterface
+class AbstractItemRecipeHandlerFactory implements FactoryInterface
 {
     /**
-     * Creates the item ingredient handler.
+     * Creates the item recipe handler.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ItemIngredientHandler
+     * @return AbstractItemRecipeHandler
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -34,6 +34,6 @@ class ItemIngredientHandlerFactory implements FactoryInterface
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new ItemIngredientHandler($itemService, $recipeService, $translationService);
+        return new $requestedName($itemService, $recipeService, $translationService);
     }
 }
