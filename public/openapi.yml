@@ -125,8 +125,10 @@ paths:
 
   /recipe/details:
     post:
-      summary: "Returns the details of a specific recipe. If the recipe has a normal and an expensive version, then both are returned."
-      operationId: "recipeDetails"
+      summary:
+        Returns the details of specific recipes, including the ingredients and products. If the recipe has a normal and
+        an expensive version, then both are returned. The order of the returned recipesmust be assumed to be random.
+      operationId: "recipe.details"
       tags:
         - Recipes
       consumes:
@@ -144,8 +146,6 @@ paths:
           $ref: "#/components/response/badRequest"
         "401":
           $ref: "#/components/response/unauthorized"
-        "404":
-          $ref: "#/components/response/recipeNotFound"
         "500":
           $ref: "#/components/response/unexpectedError"
 
@@ -374,13 +374,17 @@ components:
       schema:
         type: "object"
         properties:
-          name:
-            type: "string"
-            description: "The internal name of the recipe to return the details of."
+          names:
+            type: "array"
+            description: "The internal names of the recipe to return the details of."
+            items:
+              type: string
         required:
-          - name
+          - names
         example:
-          name: "electronic-circuit"
+          names:
+            - "electronic-circuit"
+            - "advanced-circuit"
       required: true
 
     searchQuery:
@@ -778,22 +782,6 @@ components:
             messages:
               - level: "error"
                 message: "Recipe not known: invalid-item"
-
-    recipeNotFound:
-      description: "The requested recipe is not known to the browser, or not available in the enabled mods."
-      schema:
-        type: "object"
-        properties:
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          meta:
-            statusCode: 404
-            executionTime: 13.37
-            messages:
-              - level: "error"
-                message: "Recipe not known: invalid-recipe"
 
     # 500 responses
     unexpectedError:

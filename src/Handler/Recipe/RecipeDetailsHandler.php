@@ -14,6 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
 
@@ -61,8 +62,8 @@ class RecipeDetailsHandler implements RequestHandlerInterface
             throw new ValidationException($inputFilter->getMessages());
         }
 
-        $recipeName = $inputFilter->getValue('name');
-        $recipeIds = $this->recipeService->getIdsByNames([$recipeName]);
+        $recipeNames = $inputFilter->getValue('names');
+        $recipeIds = $this->recipeService->getIdsByNames($recipeNames);
         $recipes = $this->recipeService->getDetailsByIds($recipeIds);
 
         foreach ($recipes as $index => $recipe) {
@@ -88,7 +89,8 @@ class RecipeDetailsHandler implements RequestHandlerInterface
         $inputFilter = new InputFilter();
         $inputFilter
             ->add([
-                'name' => 'name',
+                'type' => ArrayInput::class,
+                'name' => 'names',
                 'required' => true,
                 'validators' => [
                     new NotEmpty()
