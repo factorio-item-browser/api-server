@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
+use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Entity\Item as ClientItem;
 use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
-use FactorioItemBrowser\Api\Server\Exception\ValidationException;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response\JsonResponse;
+use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -24,7 +21,7 @@ use Zend\Validator\NotEmpty;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeDetailsHandler implements RequestHandlerInterface
+class RecipeDetailsHandler extends AbstractRequestHandler
 {
     /**
      * The database recipe service.
@@ -50,41 +47,10 @@ class RecipeDetailsHandler implements RequestHandlerInterface
     }
 
     /**
-     * Handle the request and return a response.
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
-    {
-        $inputFilter = $this->createInputFilter();
-        $inputFilter->setData($request->getParsedBody());
-        if (!$inputFilter->isValid()) {
-            throw new ValidationException($inputFilter->getMessages());
-        }
-
-        $recipeNames = $inputFilter->getValue('names');
-        $recipeIds = $this->recipeService->getIdsByNames($recipeNames);
-        $recipes = $this->recipeService->getDetailsByIds($recipeIds);
-
-        foreach ($recipes as $index => $recipe) {
-            $recipes[$index] = $this->mapDatabaseRecipeToClientRecipe($recipe);
-        }
-        $this->translationService->translateEntities(true);
-
-        /* @var ClientRecipe[] $recipes */
-        foreach ($recipes as $index => $recipe) {
-            $recipes[$index] = $recipe->writeData();
-        }
-        return new JsonResponse([
-            'recipes' => $recipes
-        ]);
-    }
-
-    /**
      * Creates the input filter to use for the request.
      * @return InputFilter
      */
-    protected function createInputFilter()
+    protected function createInputFilter(): InputFilter
     {
         $inputFilter = new InputFilter();
         $inputFilter
@@ -97,6 +63,26 @@ class RecipeDetailsHandler implements RequestHandlerInterface
                 ]
             ]);
         return $inputFilter;
+    }
+
+    /**
+     * Creates the response data from the validated request data.
+     * @param DataContainer $requestData
+     * @return array
+     */
+    protected function handleRequest(DataContainer $requestData): array
+    {
+        $recipeNames = $requestData->getArray('names');
+        $recipeIds = $this->recipeService->getIdsByNames($recipeNames);
+        $recipes = $this->recipeService->getDetailsByIds($recipeIds);
+        foreach ($recipes as $index => $recipe) {
+            $recipes[$index] = $this->mapDatabaseRecipeToClientRecipe($recipe);
+        }
+        $this->translationService->translateEntities(true);
+
+        return [
+            'recipes' => $recipes
+        ];
     }
 
     /**
