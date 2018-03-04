@@ -48,11 +48,8 @@ class ErrorResponseGenerator
     {
         $statusCode = $exception->getCode();
         if ($exception instanceof ValidationException) {
-            // @todo Does not work for deep arrays of input elements
-            foreach ($exception->getValidatorMessages() as $element => $messages) {
-                foreach ($messages as $message) {
-                    $this->messageLogger->addError($element . ': ' . $message);
-                }
+            foreach ($this->flattenValidatorMessages($exception->getValidatorMessages(), '') as $element => $message) {
+                $this->messageLogger->addError(trim($element, '/') . ': ' . $message);
             }
         } else {
             if ($statusCode >= 400 && $statusCode < 600) {
@@ -66,5 +63,27 @@ class ErrorResponseGenerator
             }
         }
         return new JsonResponse([], $statusCode, $response->getHeaders());
+    }
+
+    /**
+     * Flattens the validator messages to a simple array.
+     * @param array $messages
+     * @param string $currentKey
+     * @return array|string[]
+     */
+    protected function flattenValidatorMessages(array $messages, string $currentKey): array
+    {
+        $result = [];
+        foreach ($messages as $key => $message) {
+            if (is_array($message)) {
+                $result = array_merge(
+                    $result,
+                    $this->flattenValidatorMessages($message, $currentKey . '/' . $key)
+                );
+            } else {
+                $result[$currentKey] = $message;
+            }
+        }
+        return $result;
     }
 }
