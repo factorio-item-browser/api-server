@@ -42,7 +42,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
     protected $translationService;
 
     /**
-     * Initializes the auth handler.
+     * Initializes the request handler.
      * @param ItemService $itemService
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
@@ -115,7 +115,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
             }
         }
 
-        $this->translationService->translateEntities(true);
+        $this->translationService->translateEntities();
         return [
             'entities' => $entities
         ];

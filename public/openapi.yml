@@ -82,7 +82,12 @@ paths:
     post:
       summary:
         Provides all recipes in which a specific item as an ingredient of.
-      operationId: "itemIngredient"
+      description:
+        This request will return all recipes with a specific item as one of its ingredients. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: "item.ingredient"
       tags:
         - Items
       consumes:
@@ -107,8 +112,14 @@ paths:
 
   /item/product:
     post:
-      summary: "Provides all recipes which produce a specific item."
-      operationId: "itemProduct"
+      summary:
+        Provides all recipes which produce a specific item.
+      description:
+        This request will return all recipes with a specific item as one of its products. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: "item.product"
       tags:
         - Items
       consumes:
@@ -547,7 +558,7 @@ components:
         properties:
           item:
             $ref: "#/definitions/Item"
-          recipes:
+          groupedRecipes:
             type: "array"
             items:
               $ref: "#/definitions/GenericEntityWithRecipes"
@@ -562,34 +573,39 @@ components:
             name: "electric-furnace"
             label: "Electric furnace"
             description: ""
-          recipes:
-            - type: "normal"
+          groupedRecipes:
+            - type: "recipe"
               name: "electric-furnace"
               label: "Electric furnace"
               description: ""
-              ingredients:
-                - type: "item"
-                  name: "steel-plate"
-                  label: "Steel plate"
-                  description: ""
-                  amount: 10
-                - type: "item"
-                  name: "advanced-circuit"
-                  label: "Advanced circuit"
-                  description: ""
-                  amount: 5
-                - type: "item"
-                  name: "stone-brick"
-                  label: "Stone brick"
-                  description: ""
-                  amount: 10
-              products:
-                - type: "item"
-                  name: "electric-furnace"
+              recipes:
+                - name: "electric-furnace"
+                  mode: "normal"
                   label: "Electric furnace"
                   description: ""
-                  amount: 1
-              craftingTime: 5
+                  ingredients:
+                    - type: "item"
+                      name: "steel-plate"
+                      label: "Steel plate"
+                      description: ""
+                      amount: 10
+                    - type: "item"
+                      name: "advanced-circuit"
+                      label: "Advanced circuit"
+                      description: ""
+                      amount: 5
+                    - type: "item"
+                      name: "stone-brick"
+                      label: "Stone brick"
+                      description: ""
+                      amount: 10
+                  products:
+                    - type: "item"
+                      name: "electric-furnace"
+                      label: "Electric furnace"
+                      description: ""
+                      amount: 1
+                  craftingTime: 5
           totalNumberOfRecipes: 1
           meta:
             statusCode: 200
@@ -603,7 +619,7 @@ components:
         properties:
           item:
             $ref: "#/definitions/Item"
-          recipes:
+          groupedRecipes:
             type: "array"
             items:
               $ref: "#/definitions/GenericEntityWithRecipes"
@@ -618,29 +634,34 @@ components:
             name: "electric-furnace"
             label: "Electric furnace"
             description: ""
-          recipes:
-            - type: "normal"
+          groupedRecipes:
+            - type: "recipe"
               name: "production-science-pack"
               label: "Production science pack"
               description: "Used in labs for research."
-              ingredients:
-                - type: "item"
-                  name: "electric-engine-unit"
-                  label: "Electric engine unit"
-                  description: ""
-                  amount: 1
-                - type: "item"
-                  name: "electric-furnace"
-                  label: "electric-furnace"
-                  description: ""
-                  amount: 1
-              products:
-                - type: "item"
-                  name: "production-science-lab"
-                  label: "Production science lab"
-                  description: ""
-                  amount: 2
-              craftingTime: 14
+              recipes:
+                - name: "production-science-pack"
+                  mode: "normal"
+                  label: "Production science pack"
+                  description: "Used in labs for research."
+                  ingredients:
+                    - type: "item"
+                      name: "electric-engine-unit"
+                      label: "Electric engine unit"
+                      description: ""
+                      amount: 1
+                    - type: "item"
+                      name: "electric-furnace"
+                      label: "electric-furnace"
+                      description: ""
+                      amount: 1
+                  products:
+                    - type: "item"
+                      name: "production-science-lab"
+                      label: "Production science lab"
+                      description: ""
+                      amount: 2
+                  craftingTime: 14
           totalNumberOfRecipes: 1
           meta:
             statusCode: 200
@@ -690,8 +711,8 @@ components:
       examples:
         Response:
           recipes:
-            - type: "normal"
-              name: "electronic-circuit"
+            - name: "electronic-circuit"
+              mode: "normal"
               label: "Electronic circuit"
               description: ""
               ingredients:
@@ -712,8 +733,8 @@ components:
                   description: ""
                   amount: 1
               craftingTime: 0.5
-            - type: "expensive"
-              name: "electronic-circuit"
+            - name: "electronic-circuit"
+              mode: "expensive"
               label: "Electronic circuit"
               description: ""
               ingredients:
@@ -757,14 +778,13 @@ components:
       examples:
         Response:
           results:
-            - group: "recipe"
-              type: "normal"
+            - type: "recipe"
               name: "advanced-oil-processing"
               label: "Advanced oil processing"
               description: ""
               recipes:
-                - type: "normal"
-                  name: "advanced-oil-processing"
+                - name: "advanced-oil-processing"
+                  mode: "normal"
                   label: "Advanced oil processing"
                   description: ""
                   ingredients:
@@ -795,14 +815,13 @@ components:
                       description: ""
                       amount: 55
                   craftingTime: 5
-            - group: "item"
-              type: "fluid"
+            - type: "fluid"
               name: "crude-oil"
               label: "Crude oil"
               description: ""
               recipes:
-                - type: "normal"
-                  name: "empty-crude-oil-barrel"
+                - name: "empty-crude-oil-barrel"
+                  mode: "normal"
                   label: "Empty Crude oil barrel"
                   description: ""
                   ingredients:

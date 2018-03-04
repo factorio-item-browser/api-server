@@ -70,7 +70,7 @@ class ModListHandler extends AbstractRequestHandler
             $this->translationService->addEntityToTranslate($clientMod);
             $mods[] = $clientMod;
         }
-        $this->translationService->translateEntities(false);
+        $this->translationService->translateEntities();
 
         return [
             'mods' => $mods

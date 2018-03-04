@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use FactorioItemBrowser\Api\Server\Database\Entity\Item;
 
 /**
  * The repository class of the item database table.
@@ -18,18 +19,11 @@ class ItemRepository extends EntityRepository
      * Finds the id data of the items with the specified types and names.
      * @param array|string[][] $namesByTypes
      * @param array|int[] $modCombinationIds
-     * @return array
+     * @return array|Item[]
      */
     public function findIdDataByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
     {
-        $columns = [
-            'i.id AS id',
-            'i.type AS type',
-            'i.name AS name'
-        ];
-
         $queryBuilder = $this->createQueryBuilder('i');
-        $queryBuilder->select($columns);
 
         $index = 0;
         $conditions = [];
@@ -42,7 +36,7 @@ class ItemRepository extends EntityRepository
         $queryBuilder->andWhere('(' . implode(' OR ', $conditions) . ')');
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder->andWhere('i.modCombinations IN (:modCombinationIds)')
+            $queryBuilder->innerJoin('i.modCombinations', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
                          ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 

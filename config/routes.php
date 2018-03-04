@@ -11,6 +11,7 @@ use Zend\Expressive\MiddlewareFactory;
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->post('/auth', Handler\Auth\AuthHandler::class, 'auth');
     $app->post('/generic/details', Handler\Generic\GenericDetailsHandler::class, 'generic.details');
+    $app->post('/item/ingredient', Handler\Item\ItemIngredientHandler::class, 'item.ingredient');
     $app->post('/mod/list', Handler\Mod\ModListHandler::class, 'mod.list');
     $app->post('/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, 'recipe.details');
 };

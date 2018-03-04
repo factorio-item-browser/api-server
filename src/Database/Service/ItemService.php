@@ -34,6 +34,21 @@ class ItemService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the item with the specified type and name.
+     * @param string $type
+     * @param string $name
+     * @return Item|null
+     */
+    public function getByTypeAndName(string $type, string $name): ?Item
+    {
+        $items = $this->itemRepository->findIdDataByTypesAndNames(
+            [$type => [$name]],
+            $this->modService->getEnabledModCombinationIds()
+        );
+        return array_shift($items);
+    }
+
+    /**
      * Filters the specified recipe names to only include the actually available ones.
      * @param array|string[][] $namesByTypes
      * @return array|string[][]
@@ -42,9 +57,9 @@ class ItemService extends AbstractModsAwareService
     {
         $result = [];
         if (count($namesByTypes) > 0) {
-            $itemData = $this->itemRepository->findIdDataByTypesAndNames($namesByTypes);
-            foreach ($itemData as $data) {
-                $result[$data['type']][] = $data['name'];
+            $items = $this->itemRepository->findIdDataByTypesAndNames($namesByTypes);
+            foreach ($items as $item) {
+                $result[$item->getType()][] = $item->getName();
             }
         }
         return $result;

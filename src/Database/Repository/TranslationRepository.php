@@ -44,8 +44,9 @@ class TranslationRepository extends EntityRepository
                      ->setParameter('locales', [$locale, 'en']);
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder->andWhere('t.modCombination IN (:modCombinationIds)')
-                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('(t.modCombination IN (:modCombinationIds) OR t.type = :typeMod)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds))
+                         ->setParameter('typeMod', 'mod');
         }
 
         $index = 0;

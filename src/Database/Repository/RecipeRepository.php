@@ -21,7 +21,7 @@ class RecipeRepository extends EntityRepository
      * @param array|int[] $modCombinationIds
      * @return array
      */
-    public function findIdDataByNames(array $names, array $modCombinationIds = [])
+    public function findIdDataByNames(array $names, array $modCombinationIds = []): array
     {
         $columns = [
             'r.id AS id',
@@ -35,6 +35,38 @@ class RecipeRepository extends EntityRepository
                      ->innerJoin('r.modCombinations', 'mc')
                      ->andWhere('r.name IN (:names)')
                      ->setParameter('names', array_values($names));
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Finds the id data of the recipes having the specified items as ingredients.
+     * @param array|int[] $itemIds
+     * @param array|int[] $modCombinationIds
+     * @return array
+     */
+    public function findIdDataWithIngredientItemId(array $itemIds, array $modCombinationIds = []): array
+    {
+        $columns = [
+            'r.id AS id',
+            'r.name AS name',
+            'r.mode AS mode',
+            'mc.order AS order'
+        ];
+
+        $queryBuilder = $this->createQueryBuilder('r');
+        $queryBuilder->select($columns)
+                     ->innerJoin('r.ingredients', 'ri')
+                     ->innerJoin('r.modCombinations', 'mc')
+                     ->andWhere('ri.item IN (:itemIds)')
+                     ->setParameter('itemIds', array_values($itemIds))
+                     ->addOrderBy('r.name', 'ASC')
+                     ->addOrderBy('r.mode', 'ASC');
 
         if (count($modCombinationIds) > 0) {
             $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')

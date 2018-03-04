@@ -71,10 +71,9 @@ class TranslationService extends AbstractModsAwareService
 
     /**
      * Translates the entities which have been added to the service.
-     * @param bool $useEnabledMods
      * @return $this
      */
-    public function translateEntities(bool $useEnabledMods)
+    public function translateEntities()
     {
         $entities = [];
         $namesByTypes = [];
@@ -90,7 +89,7 @@ class TranslationService extends AbstractModsAwareService
             $translations = $this->translationRepository->findAllTranslationsByTypesAndNames(
                 $this->currentLocale,
                 $namesByTypes,
-                $useEnabledMods ? $this->modService->getEnabledModCombinationIds() : []
+                $this->modService->getEnabledModCombinationIds()
             );
             $translations = $this->sortTranslationData($translations);
             $this->matchTranslationDataToEntities($entities, $translations);
