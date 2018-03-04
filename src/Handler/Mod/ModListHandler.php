@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
 use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Mapper\ModMapper;
 use Zend\InputFilter\InputFilter;
 
 /**
@@ -61,13 +61,8 @@ class ModListHandler extends AbstractRequestHandler
         $enabledModNames = $this->modService->getEnabledModNames();
         $mods = [];
         foreach ($this->modService->getAllMods() as $databaseMod) {
-            $clientMod = new ClientMod();
-            $clientMod->setName($databaseMod->getName())
-                      ->setAuthor($databaseMod->getAuthor())
-                      ->setVersion($databaseMod->getCurrentVersion())
-                      ->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
-
-            $this->translationService->addEntityToTranslate($clientMod);
+            $clientMod = ModMapper::mapDatabaseItemToClientItem($databaseMod, $this->translationService);
+            $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
             $mods[] = $clientMod;
         }
         $this->translationService->translateEntities();
