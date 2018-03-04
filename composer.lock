@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e264e056bb4dd27a6af442cfea696a4c",
+    "content-hash": "d3dc08d50faee2ff832d8841a6063bfd",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -739,12 +739,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "c2d97010105fbb52159fec9ceb4b2067a8bf998a"
+                "reference": "3e16a7476ede02ddebcbfd0b8d8aa4e016485da2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/c2d97010105fbb52159fec9ceb4b2067a8bf998a",
-                "reference": "c2d97010105fbb52159fec9ceb4b2067a8bf998a",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/3e16a7476ede02ddebcbfd0b8d8aa4e016485da2",
+                "reference": "3e16a7476ede02ddebcbfd0b8d8aa4e016485da2",
                 "shasum": ""
             },
             "require": {
@@ -779,7 +779,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-03-02T10:30:43+00:00"
+            "time": "2018-03-04T10:34:49+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -2171,7 +2171,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.1"
+        "php": "^7.2"
     },
     "platform-dev": []
 }

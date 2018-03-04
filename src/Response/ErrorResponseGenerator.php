@@ -48,6 +48,7 @@ class ErrorResponseGenerator
     {
         $statusCode = $exception->getCode();
         if ($exception instanceof ValidationException) {
+            // @todo Does not work for deep arrays of input elements
             foreach ($exception->getValidatorMessages() as $element => $messages) {
                 foreach ($messages as $message) {
                     $this->messageLogger->addError($element . ': ' . $message);

@@ -5,10 +5,12 @@ info:
   title: "Factorio Item Browser API"
 basePath: "/"
 servers:
-  - url: https://www.factorio-item-browser.com/api
+  - url: "https://www.factorio-item-browser.com/api"
 tags:
   - name: "Authorization"
     description: "Requests for authorize against the API."
+  - name: "Generic"
+    description: "Requests providing generic data to entities."
   - name: "Items"
     description: "Requests providing data to a specific item."
   - name: "Mods"
@@ -21,7 +23,8 @@ tags:
 paths:
   /auth:
     post:
-      summary: "Authorizes the access to the API by specifying the used mods."
+      summary:
+        Authorizes the access to the API by specifying the used mods.
       description:
         This request is used to create an authorization token to be used in all other requests. Part of the
         authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
@@ -47,9 +50,38 @@ paths:
         "500":
           $ref: "#/components/response/unexpectedError"
 
+  /generic/details:
+    post:
+      summary:
+        Provides basic data to items and recipes.
+      description:
+        This request provides very basic information to items and recipes, like the translated labels and description.
+        It will NOT provide any additional data like ingredients and products of recipes.
+      operationId: "generic.details"
+      tags:
+        - Generic
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: "#/components/request/genericDetails"
+        - $ref: "#/components/header/Authorization"
+        - $ref: "#/components/header/Accept-Language"
+      responses:
+        "200":
+          $ref: "#/components/response/genericDetails"
+        "400":
+          $ref: "#/components/response/badRequest"
+        "401":
+          $ref: "#/components/response/unauthorized"
+        "500":
+          $ref: "#/components/response/unexpectedError"
+
   /item/ingredient:
     post:
-      summary: "Provides all recipes in which a specific item as an ingredient of."
+      summary:
+        Provides all recipes in which a specific item as an ingredient of.
       operationId: "itemIngredient"
       tags:
         - Items
@@ -101,11 +133,12 @@ paths:
 
   /mod/list:
     post:
-      summary: "Lists the mods available in the browser."
+      summary:
+        Lists the mods available in the browser.
       description:
         This request will list all mods known to the browser, including whether they are enabled for the current token
         or not.
-      operationId: "mods"
+      operationId: "mod.list"
       tags:
         - Mods
       produces:
@@ -174,18 +207,36 @@ paths:
           $ref: "#/components/response/unexpectedError"
 
 definitions:
-  EntityWithRecipes:
+  GenericEntity:
     type: "object"
     properties:
-      group:
-        type: "string"
-        description: "The group of the entity with the recipes."
-        enum:
-          - item
-          - recipe
       type:
         type: "string"
-        description: "The type of the entity. May be 'item' or 'fluid' for items, and 'normal' or 'expensive' for recipes."
+        description: "The type of the entity"
+        enum:
+          - fluid
+          - item
+          - recipe
+      name:
+        type: "string"
+        description: "The internal name of the entity."
+      label:
+        type: "string"
+        description: "The translated label of the entity."
+      description:
+        type: "string"
+        description: "The translated description of the entity."
+
+  GenericEntityWithRecipes:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        description: "The type of the entity"
+        enum:
+          - fluid
+          - item
+          - recipe
       name:
         type: "string"
         description: "The internal name of the entity."
@@ -296,18 +347,18 @@ definitions:
 components:
   header:
     Authorization:
-      in: header
-      name: Authorization
+      in: "header"
+      name: "Authorization"
       description: "The token received from the auth request in the format \"Bearer AUTH_TOKEN\"."
       schema:
-        type: string
+        type: "string"
       required: true
     Accept-Language:
-      in: header
-      name: Accept-Language
+      in: "header"
+      name: "Accept-Language"
       description: "The language code to use for translating labels and descriptions."
       schema:
-        type: string
+        type: "string"
       required: false
       default: "en"
 
@@ -340,6 +391,41 @@ components:
             - base
             - bobplates
       required: true
+
+    genericDetails:
+      in: "body"
+      name: "Request body"
+      schema:
+        type: "object"
+        properties:
+          entities:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                type:
+                  type: "string"
+                  description: "The type of the entity."
+                  enum:
+                    - fluid
+                    - item
+                    - recipe
+                name:
+                  type: "string"
+                  description: "The name of the entity."
+              required:
+                - type
+                - name
+        required:
+          - entities
+        example:
+          entities:
+            - type: "item"
+              name: "sulfur"
+            - type: "fluid"
+              name: "sulfuric-acid"
+            - type: "recipe"
+              name: "fill-sulfuric-acid-barrel"
 
     itemRecipes:
       in: "body"
@@ -378,7 +464,7 @@ components:
             type: "array"
             description: "The internal names of the recipe to return the details of."
             items:
-              type: string
+              type: "string"
         required:
           - names
         example:
@@ -427,17 +513,44 @@ components:
             executionTime: 13.37
             messages: []
 
+    genericDetails:
+      description: "The generic details of entities."
+      schema:
+        type: "object"
+        properties:
+          entities:
+            $ref: "#/definitions/GenericEntity"
+      examples:
+        Response:
+          entities:
+            - type: "item"
+              name: "sulfur"
+              label: "Sulfur"
+              description: ""
+            - type: "fluid"
+              name: "sulfuric-acid"
+              label: "Sulfuric acid"
+              description: ""
+            - type: "recipe"
+              name: "fill-sulfuric-acid-barrel"
+              label: "Fill Sulfuric acid barrel"
+              description: ""
+          meta:
+            statusCode: 200
+            executionTime: 13.37
+            messages: []
+
     itemIngredient:
       description: "The recipes using the item as ingredient."
       schema:
-        type: object
+        type: "object"
         properties:
           item:
             $ref: "#/definitions/Item"
           recipes:
             type: "array"
             items:
-              $ref: "#/definitions/EntityWithRecipes"
+              $ref: "#/definitions/GenericEntityWithRecipes"
           totalNumberOfRecipes:
             type: "integer"
           meta:
@@ -486,14 +599,14 @@ components:
     itemProduct:
       description: "The recipes having the item as product."
       schema:
-        type: object
+        type: "object"
         properties:
           item:
             $ref: "#/definitions/Item"
           recipes:
             type: "array"
             items:
-              $ref: "#/definitions/EntityWithRecipes"
+              $ref: "#/definitions/GenericEntityWithRecipes"
           totalNumberOfRecipes:
             type: "integer"
           meta:
@@ -566,7 +679,7 @@ components:
     recipeDetails:
       description: "The details of the requested recipe."
       schema:
-        type: object
+        type: "object"
         properties:
           recipes:
             type: "array"
@@ -635,7 +748,7 @@ components:
             type: "array"
             description: "The results returned by the search."
             items:
-              $ref: "#/definitions/EntityWithRecipes"
+              $ref: "#/definitions/GenericEntityWithRecipes"
           totalNumberOfResults:
             type: "integer"
             description: "The total number of results of the search."

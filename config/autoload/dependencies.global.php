@@ -20,15 +20,19 @@ return [
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Response\MessageLogger::class => InvokableFactory::class,
+
             Handler\Auth\AuthHandler::class => Handler\Auth\AuthHandlerFactory::class,
+            Handler\Generic\GenericDetailsHandler::class => Handler\Generic\GenericDetailsHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
+
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
+
+            Response\MessageLogger::class => InvokableFactory::class,
         ],
     ],
 ];

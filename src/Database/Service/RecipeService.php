@@ -40,14 +40,16 @@ class RecipeService extends AbstractModsAwareService
      */
     public function getIdsByNames(array $names): array
     {
-        $recipeData = $this->recipeRepository->findIdDataByNames(
-            $names,
-            $this->modService->getEnabledModCombinationIds()
-        );
-
         $result = [];
-        foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
-            $result[] = $data['id'];
+        if (count($names) > 0) {
+            $recipeData = $this->recipeRepository->findIdDataByNames(
+                $names,
+                $this->modService->getEnabledModCombinationIds()
+            );
+
+            foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
+                $result[] = $data['id'];
+            }
         }
         return $result;
     }
@@ -64,5 +66,25 @@ class RecipeService extends AbstractModsAwareService
             $result = $this->recipeRepository->findByIds($ids);
         }
         return $result;
+    }
+
+    /**
+     * Filters the specified recipe names to only include the actually available ones.
+     * @param array|string[] $names
+     * @return array|string[]
+     */
+    public function filterAvailableNames(array $names): array
+    {
+        $result = [];
+        if (count($names) > 0) {
+            $recipeData = $this->recipeRepository->findIdDataByNames(
+                $names,
+                $this->modService->getEnabledModCombinationIds()
+            );
+            foreach ($recipeData as $data) {
+                $result[$data['name']] = true;
+            }
+        }
+        return array_keys($result);
     }
 }
