@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use Firebase\JWT\JWT;
 use Zend\InputFilter\InputFilter;
@@ -20,6 +21,18 @@ use Zend\Validator\NotEmpty;
 class AuthHandler extends AbstractRequestHandler
 {
     /**
+     * The key used for creating the authorization token.
+     * @var string
+     */
+    protected $authorizationKey;
+
+    /**
+     * The agents of the API.
+     * @var array
+     */
+    protected $agents;
+
+    /**
      * The database mod service.
      * @var ModService
      */
@@ -27,10 +40,14 @@ class AuthHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
+     * @param string $authorizationKey
+     * @param array $agents
      * @param ModService $modService
      */
-    public function __construct(ModService $modService)
+    public function __construct(string $authorizationKey, array $agents, ModService $modService)
     {
+        $this->authorizationKey = $authorizationKey;
+        $this->agents = $agents;
         $this->modService = $modService;
     }
 
@@ -73,7 +90,11 @@ class AuthHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $key = 'wuppdi'; // @todo Read encryption key from config.
+        $agent = $requestData->getString('agent');
+        $accessKey = $requestData->getString('accessKey');
+        if (!isset($this->agents[$agent]) || $this->agents[$agent] !== $accessKey) {
+            throw new ApiServerException('Invalid agent or access key.', 403);
+        }
 
         $this->modService->setEnabledCombinationsByModNames($requestData->getArray('enabledModNames'));
         $token = [
@@ -84,7 +105,7 @@ class AuthHandler extends AbstractRequestHandler
         ];
 
         return [
-            'authorizationToken' => JWT::encode($token, $key)
+            'authorizationToken' => JWT::encode($token, $this->authorizationKey)
         ];
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -47,18 +46,14 @@ class ErrorResponseGenerator
         ResponseInterface $response
     ): ResponseInterface
     {
+        $statusCode = $exception->getCode();
         if ($exception instanceof ValidationException) {
-            $statusCode = $exception->getCode();
             foreach ($exception->getValidatorMessages() as $element => $messages) {
                 foreach ($messages as $message) {
                     $this->messageLogger->addError($element . ': ' . $message);
                 }
             }
-        } elseif ($exception instanceof ApiServerException) {
-            $statusCode = $exception->getCode();
-            $this->messageLogger->addError($exception->getMessage());
         } else {
-            $statusCode = $exception->getCode();
             if ($statusCode >= 400 && $statusCode < 600) {
                 $this->messageLogger->addError($exception->getMessage());
             } else {
@@ -69,6 +64,6 @@ class ErrorResponseGenerator
                 $this->messageLogger->addInfo($exception->getMessage());
             }
         }
-        return new JsonResponse([], $statusCode);
+        return new JsonResponse([], $statusCode, $response->getHeaders());
     }
 }

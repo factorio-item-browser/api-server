@@ -30,6 +30,12 @@ class AuthorizationMiddleware implements MiddlewareInterface
     ];
 
     /**
+     * The key used for creating the authorization token.
+     * @var string
+     */
+    protected $authorizationKey;
+
+    /**
      * The mod service.
      * @var ModService
      */
@@ -37,10 +43,12 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
     /**
      * Initializes the authorization middleware class.
+     * @param string $authorizationKey
      * @param ModService $modService
      */
-    public function __construct(ModService $modService)
+    public function __construct(string $authorizationKey, ModService $modService)
     {
+        $this->authorizationKey = $authorizationKey;
         $this->modService = $modService;
     }
 
@@ -60,7 +68,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
             }
 
             try {
-                $token = JWT::decode(substr($authorization, 7), 'wuppdi', ['HS256']);
+                $token = JWT::decode(substr($authorization, 7), $this->authorizationKey, ['HS256']);
                 $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds));
             } catch (Exception $e) {
                 throw new ApiServerException('Authorization token is invalid.', 401);

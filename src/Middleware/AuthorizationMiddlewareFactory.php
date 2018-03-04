@@ -25,9 +25,12 @@ class AuthorizationMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        $config = $container->get('config');
+        $authorizationConfig = $config['factorio-item-browser']['api-server']['authorization'];
+
         /* @var ModService $modService */
         $modService = $container->get(ModService::class);
 
-        return new AuthorizationMiddleware($modService);
+        return new AuthorizationMiddleware($authorizationConfig['key'], $modService);
     }
 }
