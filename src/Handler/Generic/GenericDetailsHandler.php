@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
+use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
@@ -23,6 +24,12 @@ use Zend\Validator\NotEmpty;
 class GenericDetailsHandler extends AbstractRequestHandler
 {
     /**
+     * The database item service.
+     * @var ItemService
+     */
+    protected $itemService;
+    
+    /**
      * The database recipe service.
      * @var RecipeService
      */
@@ -36,11 +43,16 @@ class GenericDetailsHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
+     * @param ItemService $itemService
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
-    public function __construct(RecipeService $recipeService, TranslationService $translationService)
-    {
+    public function __construct(
+        ItemService $itemService,
+        RecipeService $recipeService,
+        TranslationService $translationService
+    ) {
+        $this->itemService = $itemService;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -96,6 +108,12 @@ class GenericDetailsHandler extends AbstractRequestHandler
             $entities[] = $this->createGenericEntity(EntityType::RECIPE, $recipeName);
         }
         unset($namesByTypes[EntityType::RECIPE]);
+
+        foreach ($this->itemService->filterAvailableTypesAndNames($namesByTypes) as $type => $itemNames) {
+            foreach ($itemNames as $itemName) {
+                $entities[] = $this->createGenericEntity($type, $itemName);
+            }
+        }
 
         $this->translationService->translateEntities(true);
         return [

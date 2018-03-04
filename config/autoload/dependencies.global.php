@@ -17,6 +17,7 @@ return [
             EntityManager::class => EntityManagerFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
+            Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
