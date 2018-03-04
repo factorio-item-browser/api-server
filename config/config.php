@@ -27,7 +27,11 @@ $aggregator = new ConfigAggregator([
     //   - `*.global.php`
     //   - `local.php`
     //   - `*.local.php`
-    new PhpFileProvider(realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php'),
+    //   - `[FIB_ENV].php`
+    //   - `*.[FIB_ENV].php`
+    new PhpFileProvider(
+        realpath(__DIR__) . sprintf('/autoload/{{,*.}global,{,*.}local,{,*.}%s}.php', getenv('FIB_ENV') ?: 'production')
+    ),
 ], $cacheConfig['config_cache_path']);
 
 return $aggregator->getMergedConfig();

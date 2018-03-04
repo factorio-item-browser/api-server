@@ -1,5 +1,6 @@
 FROM php:7.2-apache
 LABEL maintainer="BluePsyduck <buepsyduck@gmx.com>"
+ENV FIB_ENV development
 
 RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
         git \
@@ -14,7 +15,7 @@ RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
         xml \
         zip
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_ALLOW_SUPERUSER 1
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && php -r "unlink('composer-setup.php');" \
