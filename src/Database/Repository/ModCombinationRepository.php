@@ -20,7 +20,7 @@ class ModCombinationRepository extends EntityRepository
      * @param array|string[] $modNames
      * @return array|ModCombination[]
      */
-    public function findAllByModNames(array $modNames): array
+    public function findByModNames(array $modNames): array
     {
         $queryBuilder = $this->createQueryBuilder('c');
         $queryBuilder->addSelect('m')

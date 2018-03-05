@@ -22,7 +22,7 @@ class TranslationRepository extends EntityRepository
      * @param array|int[] $modCombinationIds The IDs of the mod combinations, or empty to use all translations.
      * @return array|string[][]
      */
-    public function findAllTranslationsByTypesAndNames(
+    public function findByTypesAndNames(
         string $locale,
         array $namesByTypes,
         array $modCombinationIds

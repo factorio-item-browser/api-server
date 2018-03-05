@@ -86,7 +86,7 @@ class TranslationService extends AbstractModsAwareService
         }
 
         if (!empty($namesByTypes)) {
-            $translations = $this->translationRepository->findAllTranslationsByTypesAndNames(
+            $translations = $this->translationRepository->findByTypesAndNames(
                 $this->currentLocale,
                 $namesByTypes,
                 $this->modService->getEnabledModCombinationIds()

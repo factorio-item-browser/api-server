@@ -95,7 +95,7 @@ class ModCombination
     protected $recipes;
 
     /**
-     * @ ORM\OneToMany(targetEntity="Translation", mappedBy="modCombination")
+     * @ORM\OneToMany(targetEntity="Translation", mappedBy="modCombination")
      *
      * The translations added by the mod combination.
      * @var Collection|Translation[]
@@ -103,7 +103,7 @@ class ModCombination
     protected $translations;
 
     /**
-     * @ ORM\OneToMany(targetEntity="Icon", mappedBy="modCombination")
+     * @ORM\OneToMany(targetEntity="Icon", mappedBy="modCombination")
      *
      * The icons used by the mod combination.
      * @var Collection|Icon[]

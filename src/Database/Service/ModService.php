@@ -112,7 +112,7 @@ class ModService extends AbstractDatabaseService
     {
         $result = [];
         if (count($modNames) > 0) {
-            foreach ($this->modRepository->findAllByNamesWithDependencies($modNames) as $mod) {
+            foreach ($this->modRepository->findByNamesWithDependencies($modNames) as $mod) {
                 $result[$mod->getName()] = $mod;
             }
         }
@@ -128,7 +128,7 @@ class ModService extends AbstractDatabaseService
     {
         $result = [];
         if (count($modNames) > 0) {
-            foreach ($this->modCombinationRepository->findAllByModNames($modNames) as $modCombination) {
+            foreach ($this->modCombinationRepository->findByModNames($modNames) as $modCombination) {
                 $result[$modCombination->getId()] = $modCombination;
             }
         }

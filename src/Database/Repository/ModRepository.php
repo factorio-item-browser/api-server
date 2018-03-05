@@ -20,7 +20,7 @@ class ModRepository extends EntityRepository
      * @param array|string[] $modNames
      * @return array|Mod[]
      */
-    public function findAllByNamesWithDependencies(array $modNames)
+    public function findByNamesWithDependencies(array $modNames)
     {
         $queryBuilder = $this->createQueryBuilder('m');
         $queryBuilder->addSelect('d')
