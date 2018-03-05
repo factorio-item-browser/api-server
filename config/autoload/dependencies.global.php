@@ -15,7 +15,6 @@ return [
         'factories'  => [
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
-            ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
@@ -34,9 +33,10 @@ return [
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
-            Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
-
-            Response\MessageLogger::class => InvokableFactory::class,
+            Middleware\MetaMiddleware::class => InvokableFactory::class,
         ],
+        'invokables' => [
+            ErrorResponseGenerator::class => Response\ErrorResponseGenerator::class,
+        ]
     ],
 ];

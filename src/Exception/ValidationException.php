@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Exception;
 
 use Exception;
+use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * The exception thrown when a request could not be validated.
@@ -27,7 +28,7 @@ class ValidationException extends ApiServerException
      */
     public function __construct(array $validatorMessages, Exception $previous = null)
     {
-        parent::__construct('Validation failed.', 400, $previous);
+        parent::__construct(json_encode($validatorMessages, JsonResponse::DEFAULT_JSON_FLAGS), 400, $previous);
         $this->validatorMessages = $validatorMessages;
     }
 

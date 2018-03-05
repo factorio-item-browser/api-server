@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use FactorioItemBrowser\Api\Client\Entity\Meta;
 use FactorioItemBrowser\Api\Server\Response\MessageLogger;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -33,11 +34,9 @@ class MetaMiddleware implements MiddlewareInterface
 
     /**
      * Initializes the meta middleware.
-     * @param MessageLogger $messageLogger
      */
-    public function __construct(MessageLogger $messageLogger)
+    public function __construct()
     {
-        $this->messageLogger = $messageLogger;
         $this->startTime = microtime(true);
     }
 
@@ -51,15 +50,20 @@ class MetaMiddleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
         if ($response instanceof JsonResponse) {
+            $meta = new Meta();
+            $meta->setStatusCode($response->getStatusCode())
+                 ->setExecutionTime(round(microtime(true) - $this->startTime, 3));
+
             $data = $response->getPayload();
             if (!is_array($data)) {
-                $data = [];
+                $meta->setErrorMessage((string) $data);
+                $data = [
+                    'meta' => $meta->writeData()
+                ];
+            } else {
+                $data['meta'] = $meta->writeData();
             }
-            $data['meta'] = [
-                'statusCode' => $response->getStatusCode(),
-                'executionTime' => round(microtime(true) - $this->startTime, 3),
-                'messages' => $this->messageLogger->getMessages()
-            ];
+
             $response = new JsonResponse($data, $response->getStatusCode(), $response->getHeaders());
         }
         return $response;
