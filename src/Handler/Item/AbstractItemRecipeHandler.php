@@ -155,7 +155,7 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
         return [
             'item' => $clientItem,
             'groupedRecipes' => array_values($groupedRecipes),
-            'totalNumberOfRecipes' => count($groupedRecipeIds)
+            'totalNumberOfResults' => count($groupedRecipeIds)
         ];
     }
 

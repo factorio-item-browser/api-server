@@ -29,6 +29,7 @@ return [
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
+            Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
 
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,

@@ -196,7 +196,7 @@ paths:
   /search/query:
     post:
       summary: "Searches for items, recipes etc. using a query string."
-      operationId: "search"
+      operationId: "search.query"
       tags:
         - Search
       consumes:
@@ -562,7 +562,7 @@ components:
             type: "array"
             items:
               $ref: "#/definitions/GenericEntityWithRecipes"
-          totalNumberOfRecipes:
+          totalNumberOfResults:
             type: "integer"
           meta:
             $ref: "#/definitions/Meta"
@@ -606,7 +606,7 @@ components:
                       description: ""
                       amount: 1
                   craftingTime: 5
-          totalNumberOfRecipes: 1
+          totalNumberOfResults: 1
           meta:
             statusCode: 200
             executionTime: 13.37
@@ -623,7 +623,7 @@ components:
             type: "array"
             items:
               $ref: "#/definitions/GenericEntityWithRecipes"
-          totalNumberOfRecipes:
+          totalNumberOfResults:
             type: "integer"
           meta:
             $ref: "#/definitions/Meta"
@@ -662,7 +662,7 @@ components:
                       description: ""
                       amount: 2
                   craftingTime: 14
-          totalNumberOfRecipes: 1
+          totalNumberOfResults: 1
           meta:
             statusCode: 200
             executionTime: 13.37
