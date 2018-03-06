@@ -6,6 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Server\Database\Entity\Icon;
+use FactorioItemBrowser\Api\Server\Database\Entity\IconFile;
+use FactorioItemBrowser\Api\Server\Database\Repository\IconFileRepository;
 use FactorioItemBrowser\Api\Server\Database\Repository\IconRepository;
 
 /**
@@ -23,6 +25,12 @@ class IconService extends AbstractModsAwareService
     protected $iconRepository;
 
     /**
+     * The repository of the icon files.
+     * @var IconFileRepository
+     */
+    protected $iconFileRepository;
+
+    /**
      * Initializes the repositories needed by the service.
      * @param EntityManager $entityManager
      * @return $this
@@ -30,6 +38,7 @@ class IconService extends AbstractModsAwareService
     protected function initializeRepositories(EntityManager $entityManager)
     {
         $this->iconRepository = $entityManager->getRepository(Icon::class);
+        $this->iconFileRepository = $entityManager->getRepository(IconFile::class);
         return $this;
     }
 
@@ -54,9 +63,9 @@ class IconService extends AbstractModsAwareService
     }
 
     /**
-     * Returns the icons using the specified hashes, grouped by the hashes.
+     * Returns the icons using the specified hashes.
      * @param array $iconFileHashes
-     * @return array|Icon[][]
+     * @return array|Icon[]
      */
     public function getIconsByHashes(array $iconFileHashes): array
     {
@@ -75,8 +84,24 @@ class IconService extends AbstractModsAwareService
 
             foreach ($icons as $icon) {
                 if (in_array($icon->getFile()->getHash(), $usedHashes)) {
-                    $result[$icon->getFile()->getHash()][] = $icon;
+                    $result[] = $icon;
                 }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns the icon files with the specified hashes.
+     * @param array|int[] $iconFileHashes
+     * @return array|IconFile[]
+     */
+    public function getIconFilesByHashes(array $iconFileHashes): array
+    {
+        $result = [];
+        if (count($iconFileHashes) > 0) {
+            foreach ($this->iconFileRepository->findByHashes($iconFileHashes) as $iconFile) {
+                $result[$iconFile->getHash()] = $iconFile;
             }
         }
         return $result;

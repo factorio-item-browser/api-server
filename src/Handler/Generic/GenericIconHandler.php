@@ -7,7 +7,6 @@ namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Entity\Icon as ClientIcon;
 use FactorioItemBrowser\Api\Client\Entity\IconEntity as ClientIconEntity;
-use FactorioItemBrowser\Api\Server\Database\Entity\Icon as DatabaseIcon;
 use FactorioItemBrowser\Api\Server\Database\Service\IconService;
 
 /**
@@ -43,27 +42,36 @@ class GenericIconHandler extends AbstractGenericHandler
         $namesByTypes = $this->getEntityNamesByType($requestData);
         $iconFileHashes = $this->iconService->getIconFileHashesByTypesAndNames($namesByTypes);
 
-        $groupedDatabaseIcons = $this->iconService->getIconsByHashes($iconFileHashes);
-        $clientIcons = [];
-        foreach ($groupedDatabaseIcons as $databaseIcons) {
-            $clientIcon = null;
-            foreach ($databaseIcons as $databaseIcon) {
-                /* @var DatabaseIcon $databaseIcon */
-                if (is_null($clientIcon)) {
-                    $clientIcon = new ClientIcon();
-                    $clientIcon->setContent(base64_encode($databaseIcon->getFile()->getImage()));
-                }
+        $clientIcons = $this->prepareClientIcons($iconFileHashes);
+        foreach ($this->iconService->getIconsByHashes($iconFileHashes) as $databaseIcon) {
+            $hash = $databaseIcon->getFile()->getHash();
+            if (isset($clientIcons[$hash])) {
                 $clientIconEntity = new ClientIconEntity();
                 $clientIconEntity
                     ->setType($databaseIcon->getType())
                     ->setName($databaseIcon->getName());
-                $clientIcon->addEntity($clientIconEntity);
+                $clientIcons[$hash]->addEntity($clientIconEntity);
             }
-            $clientIcons[] = $clientIcon;
         }
 
         return [
-            'icons' => $clientIcons,
+            'icons' => array_values($clientIcons),
         ];
+    }
+
+    /**
+     * Prepares the client icons for the specified hashes.
+     * @param array|int[] $iconFileHashes
+     * @return array|ClientIcon[]
+     */
+    protected function prepareClientIcons(array $iconFileHashes): array
+    {
+        $result = [];
+        foreach ($this->iconService->getIconFilesByHashes($iconFileHashes) as $iconFile) {
+            $clientIcon = new ClientIcon();
+            $clientIcon->setContent(base64_encode($iconFile->getImage()));
+            $result[$iconFile->getHash()] = $clientIcon;
+        }
+        return $result;
     }
 }
