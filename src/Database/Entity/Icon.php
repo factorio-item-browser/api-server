@@ -36,20 +36,12 @@ class Icon
 
     /**
      * @ORM\ManyToOne(targetEntity="IconFile")
-     * @ORM\JoinColumn(name="iconFileId", referencedColumnName="id")
+     * @ORM\JoinColumn(name="iconFileHash", referencedColumnName="hash")
      *
      * The file of the icon.
      * @var IconFile
      */
     protected $file;
-
-    /**
-     * @ORM\Column(name="layerHash")
-     *
-     * The hash value of the icon layers.
-     * @var string
-     */
-    protected $layerHash = '';
 
     /**
      * @ORM\Column(name="type")
@@ -136,26 +128,6 @@ class Icon
     public function getFile(): IconFile
     {
         return $this->file;
-    }
-
-    /**
-     * Sets the hash value of the icon layers.
-     * @param string $layerHash
-     * @return $this Implementing fluent interface.
-     */
-    public function setLayerHash(string $layerHash)
-    {
-        $this->layerHash = $layerHash;
-        return $this;
-    }
-
-    /**
-     * Returns the hash value of the icon layers.
-     * @return string
-     */
-    public function getLayerHash(): string
-    {
-        return $this->layerHash;
     }
 
     /**

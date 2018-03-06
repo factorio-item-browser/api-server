@@ -17,21 +17,13 @@ class IconFile
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(name="id", type="integer")
+     * @ORM\Column(name="`hash`", type="integer")
+     * Note: BINARY(4) would be more appropriate, but Doctrine makes using binary fields in queries complicated.
      *
-     * The internal id of the icon file.
+     * The hash of the icon file.
      * @var int|null
      */
-    protected $id;
-
-    /**
-     * @ORM\Column(name="layerHash")
-     *
-     * The hash value of the icon layers.
-     * @var string
-     */
-    protected $layerHash;
+    protected $hash;
 
     /**
      * @ORM\Column(name="image", type="blob")
@@ -43,51 +35,31 @@ class IconFile
 
     /**
      * Initializes the entity.
-     * @param string $layerHash
+     * @param int $hash
      */
-    public function __construct(string $layerHash)
+    public function __construct(int $hash)
     {
-        $this->layerHash = $layerHash;
+        $this->hash = $hash;
     }
 
     /**
-     * Sets the internal id of the icon file.
-     * @param int $id
+     * Sets the hash of the icon.
+     * @param int $hash
      * @return $this Implementing fluent interface.
      */
-    public function setId(int $id)
+    public function setHash(int $hash)
     {
-        $this->id = $id;
+        $this->hash = $hash;
         return $this;
     }
 
     /**
-     * Returns the internal id of the icon file.
+     * Returns the hash of the icon.
      * @return int
      */
-    public function getId(): ?int
+    public function getHash(): int
     {
-        return $this->id;
-    }
-
-    /**
-     * Sets the hash value of the icon layers.
-     * @param string $layerHash
-     * @return $this Implementing fluent interface.
-     */
-    public function setLayerHash(string $layerHash)
-    {
-        $this->layerHash = $layerHash;
-        return $this;
-    }
-
-    /**
-     * Returns the hash value of the icon layers.
-     * @return string
-     */
-    public function getLayerHash(): string
-    {
-        return $this->layerHash;
+        return $this->hash;
     }
 
     /**

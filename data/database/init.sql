@@ -77,7 +77,8 @@ CREATE TABLE `Recipe` (
   `type` ENUM('normal','expensive') NOT NULL COMMENT 'The type of the recipe.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the recipe.',
   `craftingTime` INT(10) UNSIGNED NOT NULL COMMENT 'The required time in milliseconds to craft the recipe.',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_name` (`name`)
 )
 COMMENT='The recipes to craft the items.'
 COLLATE='utf8_general_ci'
@@ -131,11 +132,9 @@ ENGINE=InnoDB;
 
 -- Icon related tables
 CREATE TABLE `IconFile` (
-  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the icon file.',
-  `layerHash` CHAR(32) NOT NULL COMMENT 'The hash value of the icon layers.',
+  `hash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the icon file.',
   `image` BLOB NOT NULL COMMENT 'The actual image.',
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `uq_layerHash` (`layerHash`)
+  PRIMARY KEY (`hash`)
 )
 COMMENT='The table holding the actual file data of the icons.'
 COLLATE='utf8_general_ci'
@@ -144,14 +143,14 @@ ENGINE=InnoDB;
 CREATE TABLE `Icon` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the icon.',
   `modCombinationId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the mod combination adding the icon.',
-  `iconFileId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the icon file.',
-  `layerHash` CHAR(32) NOT NULL COMMENT 'The hash value of the icon layers.',
+  `iconFileHash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the icon file.',
   `type` VARCHAR(32) NOT NULL COMMENT 'The type of the icon\'s prototype.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the icon\'s prototype.',
   PRIMARY KEY (`id`),
   INDEX `idx_modId` (`modCombinationId`),
-  INDEX `idx_iconFileId` (`iconFileId`),
-  CONSTRAINT `fk_I_iconFileId` FOREIGN KEY (`iconFileId`) REFERENCES `IconFile` (`id`),
+  INDEX `idx_iconFileHash` (`iconFileHash`),
+  INDEX `idx_type_name` (`type`, `name`),
+  CONSTRAINT `fk_I_iconFileHash` FOREIGN KEY (`iconFileHash`) REFERENCES `IconFile` (`hash`),
   CONSTRAINT `fk_I_modCombinationId` FOREIGN KEY (`modCombinationId`) REFERENCES `ModCombination` (`id`)
 )
 COMMENT='The table holding the icons of the items and recipes.'
