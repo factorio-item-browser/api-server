@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 
+use FactorioItemBrowser\Api\Server\Database\Service\IconService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -24,6 +25,9 @@ class GenericIconHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new GenericIconHandler();
+        /* @var IconService $iconService */
+        $iconService = $container->get(IconService::class);
+
+        return new GenericIconHandler($iconService);
     }
 }

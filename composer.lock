@@ -739,12 +739,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "25d132698db8d9e02072261ecf51d82a5cb0e682"
+                "reference": "b987098018b88b94ce9667864db9553b5e40337c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/25d132698db8d9e02072261ecf51d82a5cb0e682",
-                "reference": "25d132698db8d9e02072261ecf51d82a5cb0e682",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/b987098018b88b94ce9667864db9553b5e40337c",
+                "reference": "b987098018b88b94ce9667864db9553b5e40337c",
                 "shasum": ""
             },
             "require": {
@@ -779,7 +779,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-03-05T16:53:02+00:00"
+            "time": "2018-03-06T15:53:59+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -1130,7 +1130,7 @@
         },
         {
             "name": "symfony/console",
-            "version": "v4.0.5",
+            "version": "v4.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",

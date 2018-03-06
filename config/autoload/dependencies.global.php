@@ -16,6 +16,7 @@ return [
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
 
+            Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
