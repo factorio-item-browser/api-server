@@ -23,6 +23,7 @@ return [
 
             Handler\Auth\AuthHandler::class => Handler\Auth\AuthHandlerFactory::class,
             Handler\Generic\GenericDetailsHandler::class => Handler\Generic\GenericDetailsHandlerFactory::class,
+            Handler\Generic\GenericIconHandler::class => Handler\Generic\GenericIconHandlerFactory::class,
             Handler\Item\ItemIngredientHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemProductHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,

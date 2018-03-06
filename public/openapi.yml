@@ -11,14 +11,14 @@ tags:
     description: "Requests for authorize against the API."
   - name: "Generic"
     description: "Requests providing generic data to entities."
-  - name: "Items"
-    description: "Requests providing data to a specific item."
   - name: "Mods"
     description: "Requests providing mod related data."
-  - name: "Recipes"
-    description: "Requests providing data to a specific recipe."
   - name: "Search"
     description: "Requests for searching for items, recipes etc. using queries."
+  - name: "Items"
+    description: "Requests providing data to a specific item."
+  - name: "Recipes"
+    description: "Requests providing data to a specific recipe."
 
 paths:
   /auth:
@@ -65,12 +65,42 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - $ref: "#/components/request/genericDetails"
+        - $ref: "#/components/request/genericEntities"
         - $ref: "#/components/header/Authorization"
         - $ref: "#/components/header/Accept-Language"
       responses:
         "200":
           $ref: "#/components/response/genericDetails"
+        "400":
+          $ref: "#/components/response/badRequest"
+        "401":
+          $ref: "#/components/response/unauthorized"
+        "500":
+          $ref: "#/components/response/unexpectedError"
+
+  /generic/icon:
+    post:
+      summary:
+        Provides the icon file contents to specific items and recipes.
+      description:
+        This request will return the icon file in base64 encoding. The icons are always provided in PNG format. Make
+        sure to cache the returned icons, and remember to clear the cache when the mods are changed.
+        The response may contain types and names of entities not explicitely requested, but which have the same icon as
+        one of the requested one.
+      operationId: "generic.icon"
+      tags:
+        - Generic
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: "#/components/request/genericEntities"
+        - $ref: "#/components/header/Authorization"
+        - $ref: "#/components/header/Accept-Language"
+      responses:
+        "200":
+          $ref: "#/components/response/genericIcon"
         "400":
           $ref: "#/components/response/badRequest"
         "401":
@@ -170,8 +200,10 @@ paths:
   /recipe/details:
     post:
       summary:
-        Returns the details of specific recipes, including the ingredients and products. If the recipe has a normal and
-        an expensive version, then both are returned. The order of the returned recipesmust be assumed to be random.
+        Returns the details of specific recipes, including the ingredients and products.
+      description:
+        This request will return all details to specific recipes. If the recipe has a normal and an expensive version,
+        then both are returned. The order of the returned recipes must be assumed to be random.
       operationId: "recipe.details"
       tags:
         - Recipes
@@ -261,6 +293,25 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Recipe"
+
+  Icon:
+    type: "object"
+    properties:
+      entities:
+        type: "array"
+        description: "The entities using the icon file with the current enabled mods."
+        items:
+          type: "object"
+          properties:
+            type:
+              type: "string"
+              description: "The type of the entity using this icon."
+            name:
+              type: "string"
+              description: "The name of the entity using this icon."
+      content:
+        type: "string"
+        description: "The base64 encoded contents of the icon file."
 
   Item:
     type: "object"
@@ -403,7 +454,7 @@ components:
             - bobplates
       required: true
 
-    genericDetails:
+    genericEntities:
       in: "body"
       name: "Request body"
       schema:
@@ -531,6 +582,8 @@ components:
         properties:
           entities:
             $ref: "#/definitions/GenericEntity"
+          meta:
+            $ref: "#/definitions/Meta"
       examples:
         Response:
           entities:
@@ -546,6 +599,33 @@ components:
               name: "fill-sulfuric-acid-barrel"
               label: "Fill Sulfuric acid barrel"
               description: ""
+          meta:
+            statusCode: 200
+            executionTime: 13.37
+            messages: []
+
+    genericIcon:
+      description: "The icons of the entities."
+      schema:
+        type: "object"
+        properties:
+          icons:
+            type: "array"
+            items:
+              $ref: "#/definitions/Icon"
+          meta:
+            $ref: "#/definitions/Meta"
+      examples:
+        Response:
+          icons:
+            - entities:
+                - type: "item"
+                  name: "iron-plate"
+                - type: "item"
+                  name: "bob-iron-plate"
+                - type: "recipe"
+                  name: "iron-plate"
+              content: "<base64 string>"
           meta:
             statusCode: 200
             executionTime: 13.37
