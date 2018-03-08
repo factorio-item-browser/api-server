@@ -131,4 +131,22 @@ class RecipeService extends AbstractModsAwareService
         }
         return array_keys($result);
     }
+
+    /**
+     * Returns the items matching the specified keywords.
+     * @param array|string[] $keywords
+     * @return array
+     */
+    public function getIdDataByKeywords(array $keywords): array
+    {
+        $results = [];
+        if (count($keywords) > 0) {
+            $results = $this->recipeRepository->findIdDataByKeywords(
+                $keywords,
+                $this->modService->getEnabledModCombinationIds()
+            );
+            $results = $this->filterData($results, ['name', 'mode']);
+        }
+        return $results;
+    }
 }

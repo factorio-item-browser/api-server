@@ -133,4 +133,40 @@ class RecipeRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Finds the id data of the recipes with the specified keywords.
+     * @param array|string[] $keywords
+     * @param array|int[] $modCombinationIds
+     * @return array
+     */
+    public function findIdDataByKeywords(array $keywords, array $modCombinationIds = []): array
+    {
+        $columns = [
+            'r.id AS id',
+            'r.name AS name',
+            'r.mode AS mode',
+            'mc.order AS order'
+        ];
+
+        $queryBuilder = $this->createQueryBuilder('r');
+        $queryBuilder
+            ->select($columns)
+            ->innerJoin('r.modCombinations', 'mc');
+
+        $index = 0;
+        foreach ($keywords as $keyword) {
+            $queryBuilder->andWhere('r.name LIKE :keyword' . $index)
+                ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
+            ++$index;
+        }
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder
+                ->andWhere('mc.id IN (:modCombinationIds)')
+                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
 }

@@ -36,6 +36,11 @@ return [
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
             Middleware\MetaMiddleware::class => InvokableFactory::class,
+
+            Search\Handler\ItemHandler::class => Search\Handler\ItemHandlerFactory::class,
+            Search\Handler\RecipeHandler::class => Search\Handler\RecipeHandlerFactory::class,
+            Search\Handler\SearchHandlerManager::class => Search\Handler\SearchHandlerManagerFactory::class,
+            Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
         ],
         'invokables' => [
             ErrorResponseGenerator::class => Response\ErrorResponseGenerator::class,

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
+use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -25,9 +27,13 @@ class SearchQueryHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        /* @var SearchHandlerManager $searchHandlerManager */
+        $searchHandlerManager = $container->get(SearchHandlerManager::class);
+        /* @var SearchDecorator $searchDecorator */
+        $searchDecorator = $container->get(SearchDecorator::class);
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new SearchQueryHandler($translationService);
+        return new SearchQueryHandler($searchHandlerManager, $searchDecorator, $translationService);
     }
 }

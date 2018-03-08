@@ -49,6 +49,39 @@ class ItemService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the items with the specified ids.
+     * @param array|int[] $itemIds
+     * @return array|Item[]
+     */
+    public function getByIds(array $itemIds): array
+    {
+        $result = [];
+        if (count($itemIds) > 0) {
+            foreach ($this->itemRepository->findByIds($itemIds) as $item) {
+                $result[$item->getId()] = $item;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns the items matching the specified keywords.
+     * @param array|string[] $keywords
+     * @return array|Item[]
+     */
+    public function getByKeywords(array $keywords): array
+    {
+        $result = [];
+        if (count($keywords) > 0) {
+            $result = $this->itemRepository->findByKeywords(
+                $keywords,
+                $this->modService->getEnabledModCombinationIds()
+            );
+        }
+        return $result;
+    }
+
+    /**
      * Filters the specified recipe names to only include the actually available ones.
      * @param array|string[][] $namesByTypes
      * @return array|string[][]

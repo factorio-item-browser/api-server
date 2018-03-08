@@ -7,6 +7,10 @@ namespace FactorioItemBrowser\Api\Server\Handler\Search;
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
+use FactorioItemBrowser\Api\Server\Search\Result\ResultCollection;
+use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
+use FactorioItemBrowser\Api\Server\Search\SearchQueryParser;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -20,6 +24,18 @@ use Zend\Validator\NotEmpty;
 class SearchQueryHandler extends AbstractRequestHandler
 {
     /**
+     * The search handler manager.
+     * @var SearchHandlerManager
+     */
+    protected $searchHandlerManager;
+
+    /**
+     * The search decorator.
+     * @var SearchDecorator
+     */
+    protected $searchDecorator;
+
+    /**
      * The database translation service.
      * @var TranslationService
      */
@@ -27,10 +43,17 @@ class SearchQueryHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
+     * @param SearchHandlerManager $searchHandlerManager
+     * @param SearchDecorator $searchDecorator
      * @param TranslationService $translationService
      */
-    public function __construct(TranslationService $translationService)
-    {
+    public function __construct(
+        SearchHandlerManager $searchHandlerManager,
+        SearchDecorator $searchDecorator,
+        TranslationService $translationService
+    ) {
+        $this->searchHandlerManager = $searchHandlerManager;
+        $this->searchDecorator = $searchDecorator;
         $this->translationService = $translationService;
     }
 
@@ -82,12 +105,20 @@ class SearchQueryHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $results = [];
+        $searchQuery = (new SearchQueryParser())->parse($requestData->getString('query'));
+        $numberOfResults = $requestData->getInteger('numberOfResults');
+        $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
+
+        $searchResults = new ResultCollection();
+        $this->searchHandlerManager->handle($searchQuery, $searchResults);
+        $searchResults->sort();
+
+        $results = $this->searchDecorator->decorate($searchResults->toArray($numberOfResults, $indexOfFirstResult));
 
         $this->translationService->translateEntities();
         return [
             'results' => $results,
-            'totalNumberOfResults' => 0
+            'totalNumberOfResults' => $searchResults->count()
         ];
     }
 }

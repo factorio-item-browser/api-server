@@ -42,4 +42,43 @@ class ItemRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Finds the items with the specified ids.
+     * @param array|int[] $ids
+     * @return array|Item[]
+     */
+    public function findByIds(array $ids): array
+    {
+        $queryBuilder = $this->createQueryBuilder('i');
+        $queryBuilder->andWhere('i.id IN (:ids)')
+                     ->setParameter('ids', array_values($ids));
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Finds the items matching the specified keywords.
+     * @param array|string[] $keywords
+     * @param array|int[] $modCombinationIds
+     * @return array|Item[]
+     */
+    public function findByKeywords(array $keywords, array $modCombinationIds = []): array
+    {
+        $queryBuilder = $this->createQueryBuilder('i');
+
+        $index = 0;
+        foreach ($keywords as $keyword) {
+            $queryBuilder->andWhere('i.name LIKE :keyword' . $index)
+                         ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
+            ++$index;
+        }
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder->innerJoin('i.modCombinations', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
+                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
 }
