@@ -114,4 +114,19 @@ class ItemService extends AbstractModsAwareService
         }
         return $result;
     }
+
+    /**
+     * Returns random items from the database.
+     * @param int $numberOfItems
+     * @return array|Item[]
+     */
+    public function getRandom(int $numberOfItems): array
+    {
+        $result = [];
+        $items = $this->itemRepository->findRandom($numberOfItems, $this->modService->getEnabledModCombinationIds());
+        foreach ($items as $item) {
+            $result[$item->getId()] = $item;
+        }
+        return $result;
+    }
 }

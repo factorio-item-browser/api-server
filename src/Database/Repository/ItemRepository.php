@@ -82,4 +82,26 @@ class ItemRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Finds random items.
+     * @param int $numberOfItems
+     * @param array|int[] $modCombinationIds
+     * @return array|Item[]
+     */
+    public function findRandom(int $numberOfItems, array $modCombinationIds = []): array
+    {
+        $queryBuilder = $this->createQueryBuilder('i');
+        $queryBuilder->addSelect('RAND() AS HIDDEN rand')
+                     ->addOrderBy('rand')
+                     ->setMaxResults($numberOfItems);
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder
+                ->innerJoin('i.modCombinations', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
+                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
 }

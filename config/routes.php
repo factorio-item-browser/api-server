@@ -14,6 +14,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->post('/generic/icon', Handler\Generic\GenericIconHandler::class, 'generic.icon');
     $app->post('/item/ingredient', Handler\Item\ItemIngredientHandler::class, 'item.ingredient');
     $app->post('/item/product', Handler\Item\ItemProductHandler::class, 'item.product');
+    $app->post('/item/random', Handler\Item\ItemRandomHandler::class, 'item.random');
     $app->post('/mod/list', Handler\Mod\ModListHandler::class, 'mod.list');
     $app->post('/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, 'recipe.details');
     $app->post('/search/query', Handler\Search\SearchQueryHandler::class, 'search.query');

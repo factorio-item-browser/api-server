@@ -28,6 +28,7 @@ return [
             Handler\Generic\GenericIconHandler::class => Handler\Generic\GenericIconHandlerFactory::class,
             Handler\Item\ItemIngredientHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemProductHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
+            Handler\Item\ItemRandomHandler::class => Handler\Item\ItemRandomHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,

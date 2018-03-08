@@ -172,6 +172,29 @@ paths:
         "500":
           $ref: "#/components/response/unexpectedError"
 
+  /item/random:
+    post:
+      summary:
+        Provides random items of the currently enabled mods.
+      operationId: "item.random"
+      tags:
+        - Items
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: "#/components/request/itemRandom"
+        - $ref: "#/components/header/Authorization"
+        - $ref: "#/components/header/Accept-Language"
+      responses:
+        "200":
+          $ref: "#/components/response/itemRandom"
+        "401":
+          $ref: "#/components/response/unauthorized"
+        "500":
+          $ref: "#/components/response/unexpectedError"
+
   /mod/list:
     post:
       summary:
@@ -341,20 +364,9 @@ definitions:
       executionTime:
         type: "number"
         description: "The execution time of the request, in seconds."
-      messages:
-        type: "array"
-        items:
-          type: "object"
-          properties:
-            level:
-              type: "string"
-              enum:
-                - error
-                - warning
-                - info
-              description: "The level of the message."
-            message:
-              type: "string"
+      errorMessage:
+        type: "string"
+        description: "The error message if the request failed."
 
   Mod:
     type: "object"
@@ -489,6 +501,18 @@ components:
             - type: "recipe"
               name: "fill-sulfuric-acid-barrel"
 
+    itemRandom:
+      in: "body"
+      name: "Request body"
+      schema:
+        type: "object"
+        properties:
+          numberOfResults:
+            type: "integer"
+            description: "The number of results to return."
+        example:
+          numberOfResults: 10
+
     itemRecipes:
       in: "body"
       name: "Request body"
@@ -573,7 +597,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     genericDetails:
       description: "The generic details of entities."
@@ -602,7 +626,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     genericIcon:
       description: "The icons of the entities."
@@ -629,7 +653,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     itemIngredient:
       description: "The recipes using the item as ingredient."
@@ -690,7 +714,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     itemProduct:
       description: "The recipes having the item as product."
@@ -746,7 +770,53 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
+
+    itemRandom:
+      description: "The random items."
+      schema:
+        type: "object"
+        properties:
+          items:
+            type: "array"
+            items:
+              $ref: "#/definitions/GenericEntityWithRecipes"
+          meta:
+            $ref: "#/definitions/Meta"
+      examples:
+        Response:
+          items:
+            - type: "item"
+              name: "iron-ore"
+              label: "Iron ore"
+              description: ""
+              recipes: []
+            - type: "item"
+              name: "wooden-chest"
+              label: "Wooden chest"
+              description: ""
+              recipes:
+                - name: "wooden-chest"
+                  mode: "normal"
+                  label: "Wooden chest"
+                  description: ""
+                  ingredients:
+                    - type: "item"
+                      name: "wood"
+                      label: "Wood"
+                      description: ""
+                      amount: 4
+                  products:
+                    - name: "wooden-chest"
+                      mode: "normal"
+                      label: "Wooden chest"
+                      description: ""
+                      amount: 1
+                  craftingTime: 0.5
+          meta:
+            statusCode: 200
+            executionTime: 13.37
+            errorMessage: ""
 
     modList:
       description: "The list of available mods."
@@ -775,7 +845,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     recipeDetails:
       description: "The details of the requested recipe."
@@ -838,7 +908,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     searchQuery:
       description: "The found items, recipes etc."
@@ -926,7 +996,7 @@ components:
           meta:
             statusCode: 200
             executionTime: 13.37
-            messages: []
+            errorMessage: ""
 
     # 400 responses
     badRequest:
@@ -943,9 +1013,7 @@ components:
           meta:
             statusCode: 400
             executionTime: 13.37
-            messages:
-              - level: "error"
-                message: "Parameter X must not be empty."
+            errorMessage: "Parameter X must not be empty."
 
     # 401 responses
     unauthorized:
@@ -960,9 +1028,7 @@ components:
           meta:
             statusCode: 401
             executionTime: 13.37
-            messages:
-              - level: "error"
-                message: "Authorization token is missing or was invalid."
+            errorMessage: "Authorization token is missing or was invalid."
 
     # 403 responses
     accessDenied:
@@ -974,9 +1040,7 @@ components:
           meta:
             statusCode: 403
             executionTime: 13.37
-            messages:
-              - level: "error"
-                message: "Invalid agent or access key."
+            errorMessage: "Invalid agent or access key."
 
     # 404 responses
     itemNotFound:
@@ -991,9 +1055,7 @@ components:
           meta:
             statusCode: 404
             executionTime: 13.37
-            messages:
-              - level: "error"
-                message: "Recipe not known: invalid-item"
+            errorMessage: "Recipe not known: invalid-item"
 
     # 500 responses
     unexpectedError:
@@ -1008,6 +1070,4 @@ components:
             meta:
               statusCode: 500
               executionTime: 13.37
-              messages:
-                - level: "error"
-                  message: "An unexpected error occurred."
+              errorMessage: "An unexpected error occurred."

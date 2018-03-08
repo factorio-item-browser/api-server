@@ -9,6 +9,13 @@ use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 
 return [
     'doctrine' => [
+        'configuration' => [
+            'orm_default' => [
+                'numeric_functions' => [
+                    'Rand' => Database\Functions\RandFunction::class,
+                ]
+            ]
+        ],
         'driver' => [
             'orm_default' => [
                 'class' => MappingDriverChain::class,
