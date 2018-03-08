@@ -43,7 +43,7 @@ class MissingRecipeIdHandler implements SearchHandlerInterface
         /* @var RecipeResult[] $recipeResults */
         $recipeResults = [];
         $recipeNames = [];
-        foreach ($searchResults->toArray() as $result) {
+        foreach ($searchResults->getResults() as $result) {
             if ($result instanceof RecipeResult && $result->getId() === 0) {
                 $recipeNames[] = $result->getName();
                 $recipeResults[] = $result;

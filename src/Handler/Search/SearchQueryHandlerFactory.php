@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
+use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
 use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
@@ -31,9 +32,16 @@ class SearchQueryHandlerFactory implements FactoryInterface
         $searchHandlerManager = $container->get(SearchHandlerManager::class);
         /* @var SearchDecorator $searchDecorator */
         $searchDecorator = $container->get(SearchDecorator::class);
+        /* @var CachedSearchResultService $cachedSearchResultService */
+        $cachedSearchResultService = $container->get(CachedSearchResultService::class);
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new SearchQueryHandler($searchHandlerManager, $searchDecorator, $translationService);
+        return new SearchQueryHandler(
+            $searchHandlerManager,
+            $searchDecorator,
+            $cachedSearchResultService,
+            $translationService
+        );
     }
 }

@@ -176,3 +176,15 @@ CREATE TABLE `Translation` (
 COMMENT='The table holding the localized translations of the items and recipes.'
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB;
+
+
+-- Other tables
+CREATE TABLE `CachedSearchResult` (
+  `hash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the search.',
+  `resultData` TEXT NOT NULL COMMENT 'The result data of the search.',
+  `lastSearchTime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'The time when the search result was last used.',
+  PRIMARY KEY (`hash`)
+)
+COMMENT='The table caching the search results.'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;

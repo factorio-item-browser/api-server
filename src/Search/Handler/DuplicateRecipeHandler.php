@@ -30,7 +30,7 @@ class DuplicateRecipeHandler implements SearchHandlerInterface
         /* @var ItemResult[][] $itemsByRecipeIds */
         $itemsByRecipeIds = [];
 
-        foreach ($searchResults->toArray() as $result) {
+        foreach ($searchResults->getResults() as $result) {
             if ($result instanceof RecipeResult) {
                 $recipes[] = $result;
             } elseif ($result instanceof ItemResult) {

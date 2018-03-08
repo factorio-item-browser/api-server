@@ -41,7 +41,7 @@ class MissingItemIdHandler implements SearchHandlerInterface
     public function handle(SearchQuery $searchQuery, ResultCollection $searchResults)
     {
         $namesByTypes = [];
-        foreach ($searchResults->toArray() as $searchResult) {
+        foreach ($searchResults->getResults() as $searchResult) {
             if ($searchResult instanceof ItemResult && $searchResult->getId() === 0) {
                 $namesByTypes[$searchResult->getType()][] = $searchResult->getName();
             }

@@ -6,28 +6,31 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The abstract factory for the database service classes.
+ * The factory of the cached search result service.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class AbstractDatabaseServiceFactory implements FactoryInterface
+class CachedSearchResultServiceFactory
 {
     /**
-     * Creates the service instance.
+     * Creates the cached search result service instance.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return AbstractDatabaseService
+     * @return CachedSearchResultService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         /* @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
+        /* @var ModService $modService */
+        $modService = $container->get(ModService::class);
+        /* @var TranslationService $translationService */
+        $translationService = $container->get(TranslationService::class);
 
-        return new $requestedName($entityManager);
+        return new CachedSearchResultService($entityManager, $modService, $translationService);
     }
 }

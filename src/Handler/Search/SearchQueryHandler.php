@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
 use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
+use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
 use FactorioItemBrowser\Api\Server\Search\Result\ResultCollection;
 use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
 use FactorioItemBrowser\Api\Server\Search\SearchQueryParser;
@@ -36,6 +38,12 @@ class SearchQueryHandler extends AbstractRequestHandler
     protected $searchDecorator;
 
     /**
+     * The database cached search result service.
+     * @var CachedSearchResultService
+     */
+    protected $cachedSearchResultService;
+
+    /**
      * The database translation service.
      * @var TranslationService
      */
@@ -45,15 +53,18 @@ class SearchQueryHandler extends AbstractRequestHandler
      * Initializes the request handler.
      * @param SearchHandlerManager $searchHandlerManager
      * @param SearchDecorator $searchDecorator
+     * @param CachedSearchResultService $cachedSearchResultService
      * @param TranslationService $translationService
      */
     public function __construct(
         SearchHandlerManager $searchHandlerManager,
         SearchDecorator $searchDecorator,
+        CachedSearchResultService $cachedSearchResultService,
         TranslationService $translationService
     ) {
         $this->searchHandlerManager = $searchHandlerManager;
         $this->searchDecorator = $searchDecorator;
+        $this->cachedSearchResultService = $cachedSearchResultService;
         $this->translationService = $translationService;
     }
 
@@ -109,16 +120,23 @@ class SearchQueryHandler extends AbstractRequestHandler
         $numberOfResults = $requestData->getInteger('numberOfResults');
         $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
 
-        $searchResults = new ResultCollection();
-        $this->searchHandlerManager->handle($searchQuery, $searchResults);
-        $searchResults->sort();
+        $cachedSearchResults = $this->cachedSearchResultService->getSearchResults($searchQuery);
+        if (!$cachedSearchResults instanceof CachedResultCollection) {
+            $searchResults = new ResultCollection();
+            $this->searchHandlerManager->handle($searchQuery, $searchResults);
+            $searchResults->sort();
 
-        $results = $this->searchDecorator->decorate($searchResults->toArray($numberOfResults, $indexOfFirstResult));
+            $cachedSearchResults = $this->cachedSearchResultService->persistSearchResults($searchQuery, $searchResults);
+        }
+
+        $results = $this->searchDecorator->decorate(
+            $cachedSearchResults->getResults($numberOfResults, $indexOfFirstResult)
+        );
 
         $this->translationService->translateEntities();
         return [
             'results' => $results,
-            'totalNumberOfResults' => $searchResults->count()
+            'totalNumberOfResults' => $cachedSearchResults->count()
         ];
     }
 }

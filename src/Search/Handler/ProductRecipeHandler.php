@@ -42,7 +42,7 @@ class ProductRecipeHandler implements SearchHandlerInterface
     {
         /* @var ItemResult[] $itemResults */
         $itemResults = [];
-        foreach ($searchResults->toArray() as $result) {
+        foreach ($searchResults->getResults() as $result) {
             if ($result instanceof ItemResult)  {
                 $itemResults[$result->getId()] = $result;
             }

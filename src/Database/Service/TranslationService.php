@@ -59,6 +59,15 @@ class TranslationService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the locale to be used for translations.
+     * @return string
+     */
+    public function getCurrentLocale(): string
+    {
+        return $this->currentLocale;
+    }
+
+    /**
      * Adds an entity to be translated at a later point.
      * @param TranslatedEntityInterface $entity
      * @return $this

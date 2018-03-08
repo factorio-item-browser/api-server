@@ -65,27 +65,12 @@ class ResultCollection
     }
 
     /**
-     * Returns the number of available search results.
-     * @return int
-     */
-    public function count(): int
-    {
-        return count($this->results);
-    }
-
-    /**
-     * Returns an array of the search results.
-     * @param int $limit
-     * @param int $offset
+     * Returns the search results as array.
      * @return array|AbstractResult[]
      */
-    public function toArray(int $limit = 0, int $offset = 0)
+    public function getResults()
     {
-        $result = $this->results;
-        if ($limit > 0) {
-            $result = array_slice($result, $offset, $limit);
-        }
-        return array_values($result);
+        return array_values($this->results);
     }
 
     /**
