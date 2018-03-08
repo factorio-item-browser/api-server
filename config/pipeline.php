@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use FactorioItemBrowser\Api\Server\Middleware\CleanupMiddleware;
 use Psr\Container\ContainerInterface;
 use Zend\Expressive\Application;
 use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
@@ -20,8 +21,9 @@ use Zend\Stratigility\Middleware\ErrorHandler;
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->pipe(Middleware\MetaMiddleware::class);
     $app->pipe(ErrorHandler::class);
-    $app->pipe(ServerUrlMiddleware::class);
+    $app->pipe(CleanupMiddleware::class);
 
+    $app->pipe(ServerUrlMiddleware::class);
     $app->pipe(PathBasedRoutingMiddleware::class);
     $app->pipe(Middleware\DocumentationRedirectMiddleware::class);
     $app->pipe(MethodNotAllowedMiddleware::class);

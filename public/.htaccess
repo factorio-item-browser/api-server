@@ -12,3 +12,8 @@
     RewriteRule ^(.*) - [E=BASE:%1]
     RewriteRule ^(.*)$ %{ENV:BASE}index.php [NC,L]
 </IfModule>
+
+# Enable GZIP compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>

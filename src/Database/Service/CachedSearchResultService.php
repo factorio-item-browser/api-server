@@ -142,4 +142,14 @@ class CachedSearchResultService extends AbstractModsAwareService
         }
         return $cachedResultCollection;
     }
+
+    /**
+     * Cleans up the database table.
+     * @return $this
+     */
+    public function cleanup()
+    {
+        $this->cachedSearchResultRepository->cleanup();
+        return $this;
+    }
 }
