@@ -23,6 +23,8 @@ class SearchHandlerManagerFactory
         TranslationHandler::class,
         MissingItemIdHandler::class,
         MissingRecipeIdHandler::class,
+        ProductRecipeHandler::class,
+        DuplicateRecipeHandler::class,
     ];
 
     /**

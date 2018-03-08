@@ -55,6 +55,17 @@ class RecipeService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the ids with the specified item as an ingredient, grouped by recipe.
+     * @param int $itemId
+     * @return array
+     */
+    public function getIdsWithIngredient(int $itemId): array
+    {
+        $recipeIds = $this->getIdsWithIngredients([$itemId]);
+        return $recipeIds[$itemId] ?: [];
+    }
+
+    /**
      * Returns the ids with one of the specified items as ingredient, grouped by recipe.
      * @param array|int[] $itemIds
      * @return array|int[][]
@@ -67,17 +78,28 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
-                $result[$data['name']][] = $data['id'];
+            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+                $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }
         return $result;
     }
 
     /**
-     * Returns the ids with one of the specified items as ingredient, grouped by recipe.
+     * Returns the ids with the specified item as a product, grouped by recipe.
+     * @param int $itemId
+     * @return array
+     */
+    public function getIdsWithProduct(int $itemId): array
+    {
+        $recipeIds = $this->getIdsWithProducts([$itemId]);
+        return $recipeIds[$itemId] ?: [];
+    }
+
+    /**
+     * Returns the ids with one of the specified items as product, grouped by item and recipe.
      * @param array|int[] $itemIds
-     * @return array|int[][]
+     * @return array|int[][][] Keys are the item id and the recipe name, and values are the recipe ids.
      */
     public function getIdsWithProducts(array $itemIds): array
     {
@@ -87,8 +109,8 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
-                $result[$data['name']][] = $data['id'];
+            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+                $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }
         return $result;

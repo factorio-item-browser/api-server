@@ -58,6 +58,7 @@ class RecipeRepository extends EntityRepository
             'r.id AS id',
             'r.name AS name',
             'r.mode AS mode',
+            'IDENTITY(ri.item) AS itemId',
             'mc.order AS order'
         ];
 
@@ -92,6 +93,7 @@ class RecipeRepository extends EntityRepository
             'r.id AS id',
             'r.name AS name',
             'r.mode AS mode',
+            'IDENTITY(rp.item) AS itemId',
             'mc.order AS order'
         ];
 

@@ -35,6 +35,17 @@ class ResultCollection
     }
 
     /**
+     * Removes the specified result from the collection.
+     * @param AbstractResult $result
+     * @return $this
+     */
+    public function remove(AbstractResult $result)
+    {
+        unset($this->results[$this->getResultKey($result)]);
+        return $this;
+    }
+
+    /**
      * Sorts the results of the collection.
      * @return $this
      */

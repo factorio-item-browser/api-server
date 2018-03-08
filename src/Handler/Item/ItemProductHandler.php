@@ -21,6 +21,6 @@ class ItemProductHandler extends AbstractItemRecipeHandler
      */
     protected function fetchGroupedRecipeIds(DatabaseItem $item): array
     {
-        return $this->recipeService->getIdsWithProducts([$item->getId()]);
+        return $this->recipeService->getIdsWithProduct($item->getId());
     }
 }
