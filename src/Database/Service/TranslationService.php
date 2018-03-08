@@ -148,4 +148,22 @@ class TranslationService extends AbstractModsAwareService
         }
         return $this;
     }
+
+    /**
+     * Returns the types and names of translations matching the specified keywords.
+     * @param array|string[] $keywords
+     * @return array
+     */
+    public function getTypesAndNamesByKeywords(array $keywords): array
+    {
+        $result = [];
+        if (count($keywords) > 0) {
+            $result = $this->translationRepository->findTypesAndNamesByKeywords(
+                $this->currentLocale,
+                $keywords,
+                $this->modService->getEnabledModCombinationIds()
+            );
+        }
+        return $result;
+    }
 }

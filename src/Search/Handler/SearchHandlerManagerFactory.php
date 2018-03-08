@@ -20,6 +20,9 @@ class SearchHandlerManagerFactory
     const HANDLER_CLASSES = [
         ItemHandler::class,
         RecipeHandler::class,
+        TranslationHandler::class,
+        MissingItemIdHandler::class,
+        MissingRecipeIdHandler::class,
     ];
 
     /**

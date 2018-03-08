@@ -63,4 +63,18 @@ class ItemResult extends AbstractResult
     {
         return $this->type;
     }
+
+    /**
+     * Merges the specified result into the current one.
+     * @param AbstractResult $result
+     * @return $this
+     */
+    public function merge(AbstractResult $result)
+    {
+        parent::merge($result);
+        if ($result instanceof ItemResult && $this->id === 0) {
+            $this->id = $result->getId();
+        }
+        return $this;
+    }
 }

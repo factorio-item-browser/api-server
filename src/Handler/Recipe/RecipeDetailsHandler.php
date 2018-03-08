@@ -71,15 +71,21 @@ class RecipeDetailsHandler extends AbstractRequestHandler
     protected function handleRequest(DataContainer $requestData): array
     {
         $recipeNames = $requestData->getArray('names');
-        $recipeIds = $this->recipeService->getIdsByNames($recipeNames);
-        $recipes = $this->recipeService->getDetailsByIds($recipeIds);
-        foreach ($recipes as $index => $recipe) {
-            $recipes[$index] = RecipeMapper::mapDatabaseRecipeToClientRecipe($recipe, $this->translationService);
+        $groupedRecipeIds = $this->recipeService->getIdsByNames($recipeNames);
+        $recipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+        $databaseRecipes = $this->recipeService->getDetailsByIds($recipeIds);
+
+        $clientRecipes = [];
+        foreach ($databaseRecipes as $databaseRecipe) {
+            $clientRecipes[] = RecipeMapper::mapDatabaseRecipeToClientRecipe(
+                $databaseRecipe,
+                $this->translationService
+            );
         }
 
         $this->translationService->translateEntities();
         return [
-            'recipes' => $recipes
+            'recipes' => $clientRecipes
         ];
     }
 }

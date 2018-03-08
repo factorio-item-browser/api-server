@@ -16,12 +16,12 @@ use FactorioItemBrowser\Api\Server\Database\Entity\Item;
 class ItemRepository extends EntityRepository
 {
     /**
-     * Finds the id data of the items with the specified types and names.
+     * Finds the items with the specified types and names.
      * @param array|string[][] $namesByTypes
      * @param array|int[] $modCombinationIds
      * @return array|Item[]
      */
-    public function findIdDataByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
+    public function findByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
     {
         $queryBuilder = $this->createQueryBuilder('i');
 
@@ -75,7 +75,8 @@ class ItemRepository extends EntityRepository
         }
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder->innerJoin('i.modCombinations', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
+            $queryBuilder
+                ->innerJoin('i.modCombinations', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
                 ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 

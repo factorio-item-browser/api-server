@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
+use FactorioItemBrowser\Api\Server\Search\Result\ResultPriority;
 
 /**
  * The repository of the translation database table.
@@ -22,11 +23,8 @@ class TranslationRepository extends EntityRepository
      * @param array|int[] $modCombinationIds The IDs of the mod combinations, or empty to use all translations.
      * @return array|string[][]
      */
-    public function findByTypesAndNames(
-        string $locale,
-        array $namesByTypes,
-        array $modCombinationIds
-    ): array {
+    public function findByTypesAndNames(string $locale, array $namesByTypes, array $modCombinationIds = []): array
+    {
         $columns = [
             't.locale AS locale',
             't.type AS type',
@@ -64,6 +62,52 @@ class TranslationRepository extends EntityRepository
             ++$index;
         }
         $queryBuilder->andWhere('(' . implode(' OR ', $conditions) . ')');
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Finds the types and names matching the specified keywords.
+     * @param string $locale
+     * @param array|string[] $keywords
+     * @param array|int[] $modCombinationIds
+     * @return array
+     */
+    public function findTypesAndNamesByKeywords(string $locale, array $keywords, array $modCombinationIds = []): array
+    {
+        $concat = 'LOWER(CONCAT(t.type, t.name, t.value, t.description))';
+        $priorityCase = 'CASE WHEN t.locale = :localePrimary THEN :priorityPrimary '
+            . 'WHEN t.locale = :localeSecondary THEN :prioritySecondary ELSE :priorityAny END';
+
+        $columns = [
+            't.type AS type',
+            't.name AS name',
+            'MIN(' . $priorityCase . ') AS priority'
+        ];
+
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder
+            ->select($columns)
+            ->addGroupBy('t.type')
+            ->addGroupBy('t.name')
+            ->setParameter('localePrimary', $locale)
+            ->setParameter('localeSecondary', 'en')
+            ->setParameter('priorityPrimary', ResultPriority::PRIMARY_LOCALE_MATCH)
+            ->setParameter('prioritySecondary', ResultPriority::SECONDARY_LOCALE_MATCH)
+            ->setParameter('priorityAny', ResultPriority::ANY_MATCH);
+
+        $index = 0;
+        foreach ($keywords as $keyword) {
+            $queryBuilder->andWhere($concat . 'LIKE :keyword' . $index)
+                         ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
+            ++$index;
+        }
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder
+                ->innerJoin('t.modCombination', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
+                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
 
         return $queryBuilder->getQuery()->getResult();
     }

@@ -26,7 +26,7 @@ abstract class AbstractResult
 
     /**
      * The IDs of the recipes attached to the search result.
-     * @var array|int[]
+     * @var array
      */
     protected $recipeIds = [];
 
@@ -89,7 +89,8 @@ abstract class AbstractResult
      */
     public function setRecipeIds(array $recipeIds)
     {
-        $this->recipeIds = array_filter(array_map('intval', $recipeIds));
+        $recipeIds = array_filter(array_map('intval', $recipeIds));
+        $this->recipeIds = array_combine($recipeIds, array_fill(0, count($recipeIds), true));
         return $this;
     }
 
@@ -100,7 +101,7 @@ abstract class AbstractResult
      */
     public function addRecipeId(int $recipeId)
     {
-        $this->recipeIds[] = $recipeId;
+        $this->recipeIds[$recipeId] = true;
         return $this;
     }
 
@@ -110,7 +111,7 @@ abstract class AbstractResult
      */
     public function getRecipeIds()
     {
-        return $this->recipeIds;
+        return array_keys($this->recipeIds);
     }
 
     /**
@@ -120,6 +121,20 @@ abstract class AbstractResult
      */
     public function hasRecipeId(int $recipeId)
     {
-        return in_array($recipeId, $this->recipeIds);
+        return isset($this->recipeIds[$recipeId]);
+    }
+
+    /**
+     * Merges the specified result into the current one.
+     * @param AbstractResult $result
+     * @return $this
+     */
+    public function merge(AbstractResult $result)
+    {
+        $this->priority = min($this->priority, $result->getPriority());
+        foreach ($result->getRecipeIds() as $recipeId) {
+            $this->addRecipeId($recipeId);
+        }
+        return $this;
     }
 }

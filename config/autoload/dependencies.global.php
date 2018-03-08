@@ -38,8 +38,11 @@ return [
             Middleware\MetaMiddleware::class => InvokableFactory::class,
 
             Search\Handler\ItemHandler::class => Search\Handler\ItemHandlerFactory::class,
+            Search\Handler\MissingItemIdHandler::class => Search\Handler\MissingItemIdHandlerFactory::class,
+            Search\Handler\MissingRecipeIdHandler::class => Search\Handler\MissingRecipeIdHandlerFactory::class,
             Search\Handler\RecipeHandler::class => Search\Handler\RecipeHandlerFactory::class,
             Search\Handler\SearchHandlerManager::class => Search\Handler\SearchHandlerManagerFactory::class,
+            Search\Handler\TranslationHandler::class => Search\Handler\TranslationHandlerFactory::class,
             Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
         ],
         'invokables' => [

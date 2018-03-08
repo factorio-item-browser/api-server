@@ -34,7 +34,7 @@ class RecipeService extends AbstractModsAwareService
     }
 
     /**
-     * Returns the IDs of the recipes with the specified names, of all modes.
+     * Returns the IDs of the recipes with the specified names, of all modes and grouped by the names.
      * @param array|string[] $names
      * @return array|int[]
      */
@@ -48,7 +48,7 @@ class RecipeService extends AbstractModsAwareService
             );
 
             foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
-                $result[] = $data['id'];
+                $result[$data['name']][] = (int) $data['id'];
             }
         }
         return $result;

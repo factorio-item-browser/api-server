@@ -25,7 +25,12 @@ class ResultCollection
      */
     public function add(AbstractResult $result)
     {
-        $this->results[] = $result;
+        $key = $this->getResultKey($result);
+        if (isset($this->results[$key])) {
+            $this->results[$key]->merge($result);
+        } else {
+            $this->results[$key] = $result;
+        }
         return $this;
     }
 
@@ -35,7 +40,7 @@ class ResultCollection
      */
     public function sort()
     {
-        usort($this->results, function (AbstractResult $left, AbstractResult $right): int {
+        uasort($this->results, function (AbstractResult $left, AbstractResult $right): int {
             $result =  $left->getPriority() <=> $right->getPriority();
             if ($result === 0) {
                 $result = $left->getName() <=> $right->getName();
@@ -69,6 +74,16 @@ class ResultCollection
         if ($limit > 0) {
             $result = array_slice($result, $offset, $limit);
         }
-        return $result;
+        return array_values($result);
+    }
+
+    /**
+     * Returns the key of the specified result.
+     * @param AbstractResult $result
+     * @return string
+     */
+    protected function getResultKey(AbstractResult $result): string
+    {
+        return $result->getType() . '|' . $result->getName();
     }
 }
