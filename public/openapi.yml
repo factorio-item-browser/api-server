@@ -1,20 +1,25 @@
-swagger: "3.0"
+openapi: "3.0.0"
 info:
-  version: "alpha"
-  description: ""
   title: "Factorio Item Browser API"
-basePath: "/"
+  description: ""
+  contact:
+    name: "BluePsyduck"
+    email: "bluepsyduck@gmx.com"
+  version: "alpha"
 servers:
   - url: "https://www.factorio-item-browser.com/api"
+    description: "Live API server"
+  - url: "http://localhost:8010/"
+    description: "Local development API server (Docker)"
 tags:
   - name: "Authorization"
-    description: "Requests for authorize against the API."
+    description: "Requests to authorize against the API."
   - name: "Generic"
     description: "Requests providing generic data to entities."
   - name: "Mods"
     description: "Requests providing mod related data."
   - name: "Search"
-    description: "Requests for searching for items, recipes etc. using queries."
+    description: "Requests to search for items, recipes etc. using queries."
   - name: "Items"
     description: "Requests providing data to a specific item."
   - name: "Recipes"
@@ -34,21 +39,17 @@ paths:
       operationId: "auth"
       tags:
         - Authorization
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - $ref: "#/components/request/auth"
+      requestBody:
+        $ref: "#/components/requestBodies/auth"
       responses:
         "200":
-          $ref: "#/components/response/auth"
+          $ref: "#/components/responses/auth"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "403":
-          $ref: "#/components/response/accessDenied"
+          $ref: "#/components/responses/accessDenied"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
 
   /generic/details:
     post:
@@ -60,23 +61,22 @@ paths:
       operationId: "generic.details"
       tags:
         - Generic
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/genericEntities"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/genericEntities"
       responses:
         "200":
-          $ref: "#/components/response/genericDetails"
+          $ref: "#/components/responses/genericDetails"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /generic/icon:
     post:
@@ -90,23 +90,22 @@ paths:
       operationId: "generic.icon"
       tags:
         - Generic
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/genericEntities"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/genericEntities"
       responses:
         "200":
-          $ref: "#/components/response/genericIcon"
+          $ref: "#/components/responses/genericIcon"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /item/ingredient:
     post:
@@ -120,25 +119,24 @@ paths:
       operationId: "item.ingredient"
       tags:
         - Items
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/itemRecipes"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRecipes"
       responses:
         "200":
-          $ref: "#/components/response/itemIngredient"
+          $ref: "#/components/responses/itemIngredient"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "404":
-          $ref: "#/components/response/itemNotFound"
+          $ref: "#/components/responses/itemNotFound"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /item/product:
     post:
@@ -152,25 +150,24 @@ paths:
       operationId: "item.product"
       tags:
         - Items
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/itemRecipes"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRecipes"
       responses:
         "200":
-          $ref: "#/components/response/itemProduct"
+          $ref: "#/components/responses/itemProduct"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "404":
-          $ref: "#/components/response/itemNotFound"
+          $ref: "#/components/responses/itemNotFound"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /item/random:
     post:
@@ -179,21 +176,22 @@ paths:
       operationId: "item.random"
       tags:
         - Items
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/itemRandom"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRandom"
       responses:
         "200":
-          $ref: "#/components/response/itemRandom"
+          $ref: "#/components/responses/itemRandom"
+        "400":
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /mod/list:
     post:
@@ -205,20 +203,20 @@ paths:
       operationId: "mod.list"
       tags:
         - Mods
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
       responses:
         "200":
-          $ref: "#/components/response/modList"
+          $ref: "#/components/responses/modList"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /recipe/details:
     post:
@@ -230,861 +228,893 @@ paths:
       operationId: "recipe.details"
       tags:
         - Recipes
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/recipeDetails"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/recipeDetails"
       responses:
         "200":
-          $ref: "#/components/response/recipeDetails"
+          $ref: "#/components/responses/recipeDetails"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
   /search/query:
     post:
-      summary: "Searches for items, recipes etc. using a query string."
+      summary:
+        Searches for items, recipes etc. using a query string.
       operationId: "search.query"
       tags:
         - Search
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
       parameters:
-        - $ref: "#/components/request/searchQuery"
-        - $ref: "#/components/header/Authorization"
-        - $ref: "#/components/header/Accept-Language"
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/searchQuery"
       responses:
         "200":
-          $ref: "#/components/response/searchQuery"
+          $ref: "#/components/responses/searchQuery"
         "400":
-          $ref: "#/components/response/badRequest"
+          $ref: "#/components/responses/badRequest"
         "401":
-          $ref: "#/components/response/unauthorized"
+          $ref: "#/components/responses/unauthorized"
         "500":
-          $ref: "#/components/response/unexpectedError"
-
-definitions:
-  GenericEntity:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-        description: "The type of the entity"
-        enum:
-          - fluid
-          - item
-          - recipe
-      name:
-        type: "string"
-        description: "The internal name of the entity."
-      label:
-        type: "string"
-        description: "The translated label of the entity."
-      description:
-        type: "string"
-        description: "The translated description of the entity."
-
-  GenericEntityWithRecipes:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-        description: "The type of the entity"
-        enum:
-          - fluid
-          - item
-          - recipe
-      name:
-        type: "string"
-        description: "The internal name of the entity."
-      label:
-        type: "string"
-        description: "The translated label of the entity."
-      description:
-        type: "string"
-        description: "The translated description of the entity."
-      recipes:
-        type: "array"
-        description: "The recipes related to the entity."
-        items:
-          $ref: "#/definitions/Recipe"
-      totalNumberOfRecipes:
-        type: "integer"
-        description: "The total number of recipes available for the entity."
-
-  Icon:
-    type: "object"
-    properties:
-      entities:
-        type: "array"
-        description: "The entities using the icon file with the current enabled mods."
-        items:
-          type: "object"
-          properties:
-            type:
-              type: "string"
-              description: "The type of the entity using this icon."
-            name:
-              type: "string"
-              description: "The name of the entity using this icon."
-      content:
-        type: "string"
-        description: "The base64 encoded contents of the icon file."
-
-  Item:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-        description: "The type of the item."
-      name:
-        type: "string"
-        description: "The name of the item."
-      label:
-        type: "string"
-        description: "The translated label of the item."
-      description:
-        type: "string"
-        description: "The translated description of the item, if available."
-      amount:
-        type: "number"
-        description: "The amount of the item as ingredient or product."
-
-  Meta:
-    type: "object"
-    properties:
-      statusCode:
-        type: "integer"
-        description: "The status code of the response, identical to the HTTP status code of the response header."
-      executionTime:
-        type: "number"
-        description: "The execution time of the request, in seconds."
-      errorMessage:
-        type: "string"
-        description: "The error message if the request failed."
-
-  Mod:
-    type: "object"
-    properties:
-      name:
-        type: "string"
-        description: "The internal name of the mod."
-      label:
-        type: "string"
-        description: "The translated label of the mod."
-      description:
-        type: "string"
-        description: "The translated description of the mod."
-      author:
-        type: "string"
-        description: "The author of the mod."
-      version:
-        type: "string"
-        description: "The version of the mod available in the browser."
-      isEnabled:
-        type: "boolean"
-        description: "Whether the mod is currently enabled for the specified authorization token."
-
-  Recipe:
-    type: "object"
-    properties:
-      type:
-        type: "string"
-        description: "The type of the recipe."
-      name:
-        type: "string"
-        description: "The name of the recipe."
-      label:
-        type: "string"
-        description: "The translated label of the recipe."
-      description:
-        type: "string"
-        description: "The translated description of the recipe, if available."
-      ingredients:
-        type: "array"
-        description: "The ingredients of the recipe."
-        items:
-          $ref: "#/definitions/Item"
-      products:
-        type: "array"
-        description: "The products of the recipe."
-        items:
-          $ref: "#/definitions/Item"
-      craftingTime:
-        type: "number"
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
 
 components:
-  header:
-    Authorization:
-      in: "header"
-      name: "Authorization"
-      description: "The token received from the auth request in the format \"Bearer AUTH_TOKEN\"."
-      schema:
-        type: "string"
-      required: true
-    Accept-Language:
-      in: "header"
-      name: "Accept-Language"
-      description: "The language code to use for translating labels and descriptions."
-      schema:
-        type: "string"
-      required: false
-      default: "en"
+  schemas:
+    GenericEntity:
+      type: "object"
+      properties:
+        type:
+          type: "string"
+          description: "The type of the entity"
+          enum:
+            - fluid
+            - item
+            - recipe
+        name:
+          type: "string"
+          description: "The internal name of the entity."
+        label:
+          type: "string"
+          description: "The translated label of the entity."
+        description:
+          type: "string"
+          description: "The translated description of the entity."
 
-  request:
-    auth:
-      in: "body"
-      name: "Request body"
+    GenericEntityWithRecipes:
+      type: "object"
+      properties:
+        type:
+          type: "string"
+          description: "The type of the entity"
+          enum:
+            - fluid
+            - item
+            - recipe
+        name:
+          type: "string"
+          description: "The internal name of the entity."
+        label:
+          type: "string"
+          description: "The translated label of the entity."
+        description:
+          type: "string"
+          description: "The translated description of the entity."
+        recipes:
+          type: "array"
+          description: "The recipes related to the entity."
+          items:
+            $ref: "#/components/schemas/Recipe"
+        totalNumberOfRecipes:
+          type: "integer"
+          description: "The total number of recipes available for the entity."
+
+    Icon:
+      type: "object"
+      properties:
+        entities:
+          type: "array"
+          description: "The entities using the icon file with the current enabled mods."
+          items:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+                description: "The type of the entity using this icon."
+              name:
+                type: "string"
+                description: "The name of the entity using this icon."
+        content:
+          type: "string"
+          description: "The base64 encoded contents of the icon file."
+
+    Item:
+      type: "object"
+      properties:
+        type:
+          type: "string"
+          description: "The type of the item."
+          enum:
+            - fluid
+            - item
+        name:
+          type: "string"
+          description: "The name of the item."
+        label:
+          type: "string"
+          description: "The translated label of the item."
+        description:
+          type: "string"
+          description: "The translated description of the item, if available."
+        amount:
+          type: "number"
+          description: "The amount of the item as ingredient or product."
+
+    Meta:
+      type: "object"
+      properties:
+        statusCode:
+          type: "integer"
+          description: "The status code of the response, identical to the HTTP status code of the response header."
+        executionTime:
+          type: "number"
+          description: "The execution time of the request, in seconds."
+        errorMessage:
+          type: "string"
+          description: "The error message if the request failed."
+
+    Mod:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "The internal name of the mod."
+        label:
+          type: "string"
+          description: "The translated label of the mod."
+        description:
+          type: "string"
+          description: "The translated description of the mod."
+        author:
+          type: "string"
+          description: "The author of the mod."
+        version:
+          type: "string"
+          description: "The version of the mod available in the browser."
+        isEnabled:
+          type: "boolean"
+          description: "Whether the mod is currently enabled for the specified authorization token."
+
+    Recipe:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "The name of the recipe."
+        mode:
+          type: "string"
+          description: "The mode of the recipe."
+          enum:
+            - normal
+            - expensive
+        label:
+          type: "string"
+          description: "The translated label of the recipe."
+        description:
+          type: "string"
+          description: "The translated description of the recipe, if available."
+        ingredients:
+          type: "array"
+          description: "The ingredients of the recipe."
+          items:
+            $ref: "#/components/schemas/Item"
+        products:
+          type: "array"
+          description: "The products of the recipe."
+          items:
+            $ref: "#/components/schemas/Item"
+        craftingTime:
+          type: "number"
+
+  parameters:
+    Authorization:
+      name: "Authorization"
+      in: "header"
+      description:
+        The token received from the auth request.
       schema:
-        type: "object"
-        properties:
-          agent:
-            type: "string"
-            description: "The agent to use for the API, provided by the admin."
-          accessKey:
-            type: "string"
-            description: "The access key to the API, provided by the admin."
-          enabledModNames:
-            type: "array"
-            description: "The internal names of the mods to enable."
-            items:
-              type: "string"
-        required:
-          - agent
-          - accessKey
-          - enabledModNames
-        example:
-          agent: "foo"
-          accessKey: "bar"
-          enabledModNames:
-            - base
-            - bobplates
+        type: "string"
+      example: "Bearer {TOKEN}"
+      required: true
+
+    Accept-Language:
+      name: "Accept-Language"
+      in: "header"
+      description:
+        The language code to use for translating labels and descriptions.
+      schema:
+        type: "string"
+      example: "en"
+
+  requestBodies:
+    auth:
+      content:
+        application/json:
+          schema:
+            properties:
+              agent:
+                type: "string"
+                description: "The agent to use for the API, provided by the admin."
+              accessKey:
+                type: "string"
+                description: "The access key to the API, provided by the admin."
+              enabledModNames:
+                type: "array"
+                description: "The internal names of the mods to enable."
+                items:
+                  type: "string"
+            required:
+              - agent
+              - accessKey
+              - enabledModNames
+            example:
+              agent: "foo"
+              accessKey: "bar"
+              enabledModNames:
+                - base
+                - bobplates
       required: true
 
     genericEntities:
-      in: "body"
-      name: "Request body"
-      schema:
-        type: "object"
-        properties:
-          entities:
-            type: "array"
-            items:
-              type: "object"
-              properties:
-                type:
-                  type: "string"
-                  description: "The type of the entity."
-                  enum:
-                    - fluid
-                    - item
-                    - recipe
-                name:
-                  type: "string"
-                  description: "The name of the entity."
-              required:
-                - type
-                - name
-        required:
-          - entities
-        example:
-          entities:
-            - type: "item"
-              name: "sulfur"
-            - type: "fluid"
-              name: "sulfuric-acid"
-            - type: "recipe"
-              name: "fill-sulfuric-acid-barrel"
+      content:
+        application/json:
+          schema:
+            properties:
+              entities:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    type:
+                      type: "string"
+                      description: "The type of the entity."
+                      enum:
+                        - fluid
+                        - item
+                        - recipe
+                    name:
+                      type: "string"
+                      description: "The name of the entity."
+                  required:
+                    - type
+                    - name
+            required:
+              - entities
+            example:
+              entities:
+                - type: "item"
+                  name: "sulfur"
+                - type: "fluid"
+                  name: "sulfuric-acid"
+                - type: "recipe"
+                  name: "fill-sulfuric-acid-barrel"
+      required: true
 
     itemRandom:
-      in: "body"
-      name: "Request body"
-      schema:
-        type: "object"
-        properties:
-          numberOfResults:
-            type: "integer"
-            description: "The number of results to return."
-          numberOfRecipesPerResult:
-            type: "integer"
-            description: "The number of recipes to return for each result."
-        example:
-          numberOfResults: 10
-          numberOfRecipesPerResult: 3
+      content:
+        application/json:
+          schema:
+            properties:
+              numberOfResults:
+                type: "integer"
+                description: "The number of results to return."
+              numberOfRecipesPerResult:
+                type: "integer"
+                description: "The number of recipes to return for each result."
+            example:
+              numberOfResults: 10
+              numberOfRecipesPerResult: 3
 
     itemRecipes:
-      in: "body"
-      name: "Request body"
-      schema:
-        type: "object"
-        properties:
-          type:
-            type: "string"
-            description: "The type of the item."
-          name:
-            type: "string"
-            description: "The name of the item."
-          numberOfResults:
-            type: "integer"
-            description: "The number of results to return."
-          indexOfFirstResult:
-            type: "integer"
-            description: "The 0-based index of the first result to return."
-        required:
-          - type
-          - name
-        example:
-          type: "item"
-          name: "electric-furnace"
-          numberOfResults: 10
-          indexOfFirstResult: 0
+      content:
+        application/json:
+          schema:
+            properties:
+              type:
+                type: "string"
+                description: "The type of the item."
+              name:
+                type: "string"
+                description: "The name of the item."
+              numberOfResults:
+                type: "integer"
+                description: "The number of results to return."
+              indexOfFirstResult:
+                type: "integer"
+                description: "The 0-based index of the first result to return."
+            required:
+              - type
+              - name
+            example:
+              type: "item"
+              name: "electric-furnace"
+              numberOfResults: 10
+              indexOfFirstResult: 0
+      required: true
 
     recipeDetails:
-      in: "body"
-      name: "Request body"
-      schema:
-        type: "object"
-        properties:
-          names:
-            type: "array"
-            description: "The internal names of the recipe to return the details of."
-            items:
-              type: "string"
-        required:
-          - names
-        example:
-          names:
-            - "electronic-circuit"
-            - "advanced-circuit"
+      content:
+        application/json:
+          schema:
+            properties:
+              names:
+                type: "array"
+                description: "The internal names of the recipe to return the details of."
+                items:
+                  type: "string"
+            required:
+              - names
+            example:
+              names:
+                - "electronic-circuit"
+                - "advanced-circuit"
       required: true
 
     searchQuery:
-      in: "body"
-      name: "Request body"
-      schema:
-        type: "object"
-        properties:
-          query:
-            type: "string"
-            description: "The query to search for."
-          numberOfResults:
-            type: "integer"
-            description: "The number of results to return."
-          indexOfFirstResult:
-            type: "integer"
-            description: "The 0-based index of the first result to return."
-          numberOfRecipesPerResult:
-            type: "integer"
-            description: "The number of recipes to return for each result."
-        required:
-          - query
-        example:
-          query: "oil"
-          numberOfResults: 10
-          indexOfFirstResult: 0
-          numberOfRecipesPerResult: 3
+      content:
+        application/json:
+          schema:
+            properties:
+              query:
+                type: "string"
+                description: "The query to search for."
+              numberOfResults:
+                type: "integer"
+                description: "The number of results to return."
+              indexOfFirstResult:
+                type: "integer"
+                description: "The 0-based index of the first result to return."
+              numberOfRecipesPerResult:
+                type: "integer"
+                description: "The number of recipes to return for each result."
+            required:
+              - query
+            example:
+              query: "oil"
+              numberOfResults: 10
+              indexOfFirstResult: 0
+              numberOfRecipesPerResult: 3
+      required: true
 
-  response:
+  responses:
     # 200 responses
     auth:
-      description: "Authorization succeeded."
-      schema:
-        type: "object"
-        properties:
-          authorization:
-            type: "string"
-            description: "The authorization token to use in the other requests."
-      examples:
-        Response:
-          authorization: "SomeEncryptedValue"
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+      description:
+        Authorization succeeded.
+      content:
+        application/json:
+          schema:
+            properties:
+              authorization:
+                type: "string"
+                description: "The authorization token to use in the other requests."
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              authorization: "SomeEncryptedValue"
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     genericDetails:
-      description: "The generic details of entities."
-      schema:
-        type: "object"
-        properties:
-          entities:
-            $ref: "#/definitions/GenericEntity"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          entities:
-            - type: "item"
-              name: "sulfur"
-              label: "Sulfur"
-              description: ""
-            - type: "fluid"
-              name: "sulfuric-acid"
-              label: "Sulfuric acid"
-              description: ""
-            - type: "recipe"
-              name: "fill-sulfuric-acid-barrel"
-              label: "Fill Sulfuric acid barrel"
-              description: ""
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+      description:
+        The generic details of entities.
+      content:
+        application/json:
+          schema:
+            properties:
+              entities:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GenericEntity"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              entities:
+                - type: "item"
+                  name: "sulfur"
+                  label: "Sulfur"
+                  description: ""
+                - type: "fluid"
+                  name: "sulfuric-acid"
+                  label: "Sulfuric acid"
+                  description: ""
+                - type: "recipe"
+                  name: "fill-sulfuric-acid-barrel"
+                  label: "Fill Sulfuric acid barrel"
+                  description: ""
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     genericIcon:
-      description: "The icons of the entities."
-      schema:
-        type: "object"
-        properties:
-          icons:
-            type: "array"
-            items:
-              $ref: "#/definitions/Icon"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          icons:
-            - entities:
-                - type: "item"
-                  name: "iron-plate"
-                - type: "item"
-                  name: "bob-iron-plate"
-                - type: "recipe"
-                  name: "iron-plate"
-              content: "<base64 string>"
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+      description:
+        The icons of the entities.
+      content:
+        application/json:
+          schema:
+            properties:
+              items:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Icon"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              icons:
+                - items:
+                    - type: "item"
+                      name: "iron-plate"
+                    - type: "item"
+                      name: "bob-iron-plate"
+                    - type: "recipe"
+                      name: "iron-plate"
+                  content: "{base64 string}"
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     itemIngredient:
-      description: "The recipes using the item as ingredient."
-      schema:
-        type: "object"
-        properties:
-          item:
-            $ref: "#/definitions/Item"
-          groupedRecipes:
-            type: "array"
-            items:
-              $ref: "#/definitions/GenericEntityWithRecipes"
-          totalNumberOfResults:
-            type: "integer"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          item:
-            type: "item"
-            name: "electric-furnace"
-            label: "Electric furnace"
-            description: ""
-          groupedRecipes:
-            - type: "recipe"
-              name: "electric-furnace"
-              label: "Electric furnace"
-              description: ""
-              recipes:
-                - name: "electric-furnace"
-                  mode: "normal"
+      description:
+        The recipes using the item as ingredient.
+      content:
+        application/json:
+          schema:
+            properties:
+              item:
+                $ref: "#/components/schemas/Item"
+              groupedRecipes:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+              totalNumberOfResults:
+                type: "integer"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              item:
+                type: "item"
+                name: "electric-furnace"
+                label: "Electric furnace"
+                description: ""
+              groupedRecipes:
+                - type: "recipe"
+                  name: "electric-furnace"
                   label: "Electric furnace"
                   description: ""
-                  ingredients:
-                    - type: "item"
-                      name: "steel-plate"
-                      label: "Steel plate"
-                      description: ""
-                      amount: 10
-                    - type: "item"
-                      name: "advanced-circuit"
-                      label: "Advanced circuit"
-                      description: ""
-                      amount: 5
-                    - type: "item"
-                      name: "stone-brick"
-                      label: "Stone brick"
-                      description: ""
-                      amount: 10
-                  products:
-                    - type: "item"
-                      name: "electric-furnace"
+                  recipes:
+                    - name: "electric-furnace"
+                      mode: "normal"
                       label: "Electric furnace"
                       description: ""
-                      amount: 1
-                  craftingTime: 5
-              totalNumberOfRecipes: 2
-          totalNumberOfResults: 1
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+                      ingredients:
+                        - type: "item"
+                          name: "steel-plate"
+                          label: "Steel plate"
+                          description: ""
+                          amount: 10
+                        - type: "item"
+                          name: "advanced-circuit"
+                          label: "Advanced circuit"
+                          description: ""
+                          amount: 5
+                        - type: "item"
+                          name: "stone-brick"
+                          label: "Stone brick"
+                          description: ""
+                          amount: 10
+                      products:
+                        - type: "item"
+                          name: "electric-furnace"
+                          label: "Electric furnace"
+                          description: ""
+                          amount: 1
+                      craftingTime: 5
+                  totalNumberOfRecipes: 2
+              totalNumberOfResults: 1
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     itemProduct:
-      description: "The recipes having the item as product."
-      schema:
-        type: "object"
-        properties:
-          item:
-            $ref: "#/definitions/Item"
-          groupedRecipes:
-            type: "array"
-            items:
-              $ref: "#/definitions/GenericEntityWithRecipes"
-          totalNumberOfResults:
-            type: "integer"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          item:
-            type: "item"
-            name: "electric-furnace"
-            label: "Electric furnace"
-            description: ""
-          groupedRecipes:
-            - type: "recipe"
-              name: "production-science-pack"
-              label: "Production science pack"
-              description: "Used in labs for research."
-              recipes:
-                - name: "production-science-pack"
-                  mode: "normal"
+      description:
+        The recipes having the item as product.
+      content:
+        application/json:
+          schema:
+            properties:
+              item:
+                $ref: "#/components/schemas/Item"
+              groupedRecipes:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+              totalNumberOfResults:
+                type: "integer"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              item:
+                type: "item"
+                name: "electric-furnace"
+                label: "Electric furnace"
+                description: ""
+              groupedRecipes:
+                - type: "recipe"
+                  name: "production-science-pack"
                   label: "Production science pack"
                   description: "Used in labs for research."
-                  ingredients:
-                    - type: "item"
-                      name: "electric-engine-unit"
-                      label: "Electric engine unit"
-                      description: ""
-                      amount: 1
-                    - type: "item"
-                      name: "electric-furnace"
-                      label: "electric-furnace"
-                      description: ""
-                      amount: 1
-                  products:
-                    - type: "item"
-                      name: "production-science-lab"
-                      label: "Production science lab"
-                      description: ""
-                      amount: 2
-                  craftingTime: 14
-              totalNumberOfRecipes: 2
-          totalNumberOfResults: 1
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+                  recipes:
+                    - name: "production-science-pack"
+                      mode: "normal"
+                      label: "Production science pack"
+                      description: "Used in labs for research."
+                      ingredients:
+                        - type: "item"
+                          name: "electric-engine-unit"
+                          label: "Electric engine unit"
+                          description: ""
+                          amount: 1
+                        - type: "item"
+                          name: "electric-furnace"
+                          label: "electric-furnace"
+                          description: ""
+                          amount: 1
+                      products:
+                        - type: "item"
+                          name: "production-science-lab"
+                          label: "Production science lab"
+                          description: ""
+                          amount: 2
+                      craftingTime: 14
+                  totalNumberOfRecipes: 2
+              totalNumberOfResults: 1
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     itemRandom:
-      description: "The random items."
-      schema:
-        type: "object"
-        properties:
-          items:
-            type: "array"
-            items:
-              $ref: "#/definitions/GenericEntityWithRecipes"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          items:
-            - type: "item"
-              name: "iron-ore"
-              label: "Iron ore"
-              description: ""
-              recipes: []
-            - type: "item"
-              name: "wooden-chest"
-              label: "Wooden chest"
-              description: ""
-              recipes:
-                - name: "wooden-chest"
-                  mode: "normal"
+      description:
+        The random items.
+      content:
+        application/json:
+          schema:
+            properties:
+              items:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              items:
+                - type: "item"
+                  name: "iron-ore"
+                  label: "Iron ore"
+                  description: ""
+                  recipes: []
+                - type: "item"
+                  name: "wooden-chest"
                   label: "Wooden chest"
                   description: ""
-                  ingredients:
-                    - type: "item"
-                      name: "wood"
-                      label: "Wood"
-                      description: ""
-                      amount: 4
-                  products:
+                  recipes:
                     - name: "wooden-chest"
                       mode: "normal"
                       label: "Wooden chest"
                       description: ""
-                      amount: 1
-                  craftingTime: 0.5
-              totalNumberOfRecipes: 1
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+                      ingredients:
+                        - type: "item"
+                          name: "wood"
+                          label: "Wood"
+                          description: ""
+                          amount: 4
+                      products:
+                        - name: "wooden-chest"
+                          mode: "normal"
+                          label: "Wooden chest"
+                          description: ""
+                          amount: 1
+                      craftingTime: 0.5
+                  totalNumberOfRecipes: 1
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     modList:
-      description: "The list of available mods."
-      schema:
-        type: "object"
-        properties:
-          mods:
-            type: "array"
-            items:
-              $ref: "#/definitions/Mod"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          mods:
-          - name: "base"
-            label: "Base Mod"
-            description: "Basic mod with all the default game data and standard campaign."
-            author: "Factorio team"
-            version: "0.15.37"
-          - name: "bobplates"
-            label: "Bob's Metals, Chemicals and Intermediates"
-            description: "Smelt extra ores into plates, and make useful intermediate products."
-            author: "Bobingabout"
-            version: "0.60.0"
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+      description:
+        The list of available mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              mods:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Mod"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              mods:
+                - name: "base"
+                  label: "Base Mod"
+                  description: "Basic mod with all the default game data and standard campaign."
+                  author: "Factorio team"
+                  version: "0.15.37"
+                - name: "bobplates"
+                  label: "Bob's Metals, Chemicals and Intermediates"
+                  description: "Smelt extra ores into plates, and make useful intermediate products."
+                  author: "Bobingabout"
+                  version: "0.60.0"
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     recipeDetails:
-      description: "The details of the requested recipe."
-      schema:
-        type: "object"
-        properties:
-          recipes:
-            type: "array"
-            items:
-              $ref: "#/definitions/Recipe"
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          recipes:
-            - name: "electronic-circuit"
-              mode: "normal"
-              label: "Electronic circuit"
-              description: ""
-              ingredients:
-                - type: "item"
-                  name: "iron-plate"
-                  label: "Iron plate"
-                  description: ""
-                  amount: 1
-                - type: "item"
-                  name: "copper-cable"
-                  label: "Copper cable"
-                  description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
-                  amount: 3
-              products:
-                - type: "item"
-                  name: "electronic-circuit"
+      description:
+        The details of the requested recipe.
+      content:
+        application/json:
+          schema:
+            properties:
+              recipes:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Recipe"
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              recipes:
+                - name: "electronic-circuit"
+                  mode: "normal"
                   label: "Electronic circuit"
                   description: ""
-                  amount: 1
-              craftingTime: 0.5
-            - name: "electronic-circuit"
-              mode: "expensive"
-              label: "Electronic circuit"
-              description: ""
-              ingredients:
-                - type: "item"
-                  name: "iron-plate"
-                  label: "Iron plate"
-                  description: ""
-                  amount: 2
-                - type: "item"
-                  name: "copper-cable"
-                  label: "Copper cable"
-                  description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
-                  amount: 10
-              products:
-                - type: "item"
-                  name: "electronic-circuit"
+                  ingredients:
+                    - type: "item"
+                      name: "iron-plate"
+                      label: "Iron plate"
+                      description: ""
+                      amount: 1
+                    - type: "item"
+                      name: "copper-cable"
+                      label: "Copper cable"
+                      description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
+                      amount: 3
+                  products:
+                    - type: "item"
+                      name: "electronic-circuit"
+                      label: "Electronic circuit"
+                      description: ""
+                      amount: 1
+                  craftingTime: 0.5
+                - name: "electronic-circuit"
+                  mode: "expensive"
                   label: "Electronic circuit"
                   description: ""
-                  amount: 1
-              craftingTime: 0.5
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+                  ingredients:
+                    - type: "item"
+                      name: "iron-plate"
+                      label: "Iron plate"
+                      description: ""
+                      amount: 2
+                    - type: "item"
+                      name: "copper-cable"
+                      label: "Copper cable"
+                      description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
+                      amount: 10
+                  products:
+                    - type: "item"
+                      name: "electronic-circuit"
+                      label: "Electronic circuit"
+                      description: ""
+                      amount: 1
+                  craftingTime: 0.5
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     searchQuery:
-      description: "The found items, recipes etc."
-      schema:
-        type: "object"
-        properties:
-          results:
-            type: "array"
-            description: "The results returned by the search."
-            items:
-              $ref: "#/definitions/GenericEntityWithRecipes"
-          totalNumberOfResults:
-            type: "integer"
-            description: "The total number of results of the search."
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          results:
-            - type: "recipe"
-              name: "advanced-oil-processing"
-              label: "Advanced oil processing"
-              description: ""
-              recipes:
-                - name: "advanced-oil-processing"
-                  mode: "normal"
+      description:
+        The found items, recipes etc.
+      content:
+        application/json:
+          schema:
+            properties:
+              results:
+                type: "array"
+                description: "The results returned by the search."
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+              totalNumberOfResults:
+                type: "integer"
+                description: "The total number of results of the search."
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              results:
+                - type: "recipe"
+                  name: "advanced-oil-processing"
                   label: "Advanced oil processing"
                   description: ""
-                  ingredients:
-                    - type: "fluid"
-                      name: "water"
-                      label: "Water"
+                  recipes:
+                    - name: "advanced-oil-processing"
+                      mode: "normal"
+                      label: "Advanced oil processing"
                       description: ""
-                      amount: 50
-                    - type: "fluid"
-                      name: "crude-oil"
-                      label: "Crude oil"
-                      description: ""
-                      amount: 100
-                  products:
-                    - type: "fluid"
-                      name: "heavy-oil"
-                      label: "Heavy oil"
-                      description: ""
-                      amount: 10
-                    - type: "fluid"
-                      name: "light-oil"
-                      label: "Light oil"
-                      description: ""
-                      amount: 45
-                    - type: "fluid"
-                      name: "petroleum-gas"
-                      label: "Petroleum gas"
-                      description: ""
-                      amount: 55
-                  craftingTime: 5
-              totalNumberOfRecipes: 1
-            - type: "fluid"
-              name: "crude-oil"
-              label: "Crude oil"
-              description: ""
-              recipes:
-                - name: "empty-crude-oil-barrel"
-                  mode: "normal"
-                  label: "Empty Crude oil barrel"
+                      ingredients:
+                        - type: "fluid"
+                          name: "water"
+                          label: "Water"
+                          description: ""
+                          amount: 50
+                        - type: "fluid"
+                          name: "crude-oil"
+                          label: "Crude oil"
+                          description: ""
+                          amount: 100
+                      products:
+                        - type: "fluid"
+                          name: "heavy-oil"
+                          label: "Heavy oil"
+                          description: ""
+                          amount: 10
+                        - type: "fluid"
+                          name: "light-oil"
+                          label: "Light oil"
+                          description: ""
+                          amount: 45
+                        - type: "fluid"
+                          name: "petroleum-gas"
+                          label: "Petroleum gas"
+                          description: ""
+                          amount: 55
+                      craftingTime: 5
+                  totalNumberOfRecipes: 1
+                - type: "fluid"
+                  name: "crude-oil"
+                  label: "Crude oil"
                   description: ""
-                  ingredients:
-                    - type: "item"
-                      name: "crude-oil-barrel"
-                      label: "Crude oil barrel"
+                  recipes:
+                    - name: "empty-crude-oil-barrel"
+                      mode: "normal"
+                      label: "Empty Crude oil barrel"
                       description: ""
-                      amount: 1
-                  products:
-                    - type: "item"
-                      name: "empty-barrel"
-                      label: "Empty barrel"
-                      description: ""
-                      amount: 1
-                    - type: "fluid"
-                      name: "crude-oil"
-                      label: "Crude oil"
-                      description: ""
-                      amount: 50
-                  craftingTime: 0.2
-              totalNumberOfRecipes: 1
-          totalNumberOfResults: 17
-          meta:
-            statusCode: 200
-            executionTime: 13.37
-            errorMessage: ""
+                      ingredients:
+                        - type: "item"
+                          name: "crude-oil-barrel"
+                          label: "Crude oil barrel"
+                          description: ""
+                          amount: 1
+                      products:
+                        - type: "item"
+                          name: "empty-barrel"
+                          label: "Empty barrel"
+                          description: ""
+                          amount: 1
+                        - type: "fluid"
+                          name: "crude-oil"
+                          label: "Crude oil"
+                          description: ""
+                          amount: 50
+                      craftingTime: 0.2
+                  totalNumberOfRecipes: 1
+              totalNumberOfResults: 17
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
 
     # 400 responses
     badRequest:
       description:
-        The request was not valid. Please make sure the "Content-Type" is set to "application/json",
-        the request body is a valid JSON string, and all required parameters are present.
-      schema:
-        type: "object"
-        properties:
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          meta:
-            statusCode: 400
-            executionTime: 13.37
-            errorMessage: "Parameter X must not be empty."
+        The request was not valid. Please make sure the "Content-Type" is set to "application/json", the request body
+        is a valid JSON string, and all required parameters are present.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 400
+                executionTime: 13.37
+                errorMessage: "Parameter X must not be empty."
 
     # 401 responses
     unauthorized:
-      description: "Authorization token is missing or was invalid. Use the /auth request to get a new token."
-      schema:
-        type: "object"
-        properties:
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          meta:
-            statusCode: 401
-            executionTime: 13.37
-            errorMessage: "Authorization token is missing or was invalid."
+      description:
+        Authorization token is missing or was invalid. Use the /auth request to get a new token.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 401
+                executionTime: 13.37
+                errorMessage: "Authorization token is missing or was invalid."
 
     # 403 responses
     accessDenied:
-      description: "Access denied. Please check your agent and accessKey values."
-      schema:
-        $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          meta:
-            statusCode: 403
-            executionTime: 13.37
-            errorMessage: "Invalid agent or access key."
+      description:
+        Access denied. Please check your agent and accessKey values.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 403
+                executionTime: 13.37
+                errorMessage: "Invalid agent or access key."
 
     # 404 responses
     itemNotFound:
-      description: "The requested item is not known to the browser, or not available in the enabled mods."
-      schema:
-        type: "object"
-        properties:
-          meta:
-            $ref: "#/definitions/Meta"
-      examples:
-        Response:
-          meta:
-            statusCode: 404
-            executionTime: 13.37
-            errorMessage: "Recipe not known: invalid-item"
+      description:
+        The requested item is not known to the browser, or not available in the enabled mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 404
+                executionTime: 13.37
+                errorMessage: "Recipe not known: invalid-item"
 
     # 500 responses
     unexpectedError:
-      description: "An unexpected error occurred. Please try again later. If the problem persists, please contact the admin."
-      schema:
-        type: "object"
-        properties:
-          meta:
-            $ref: "#/definitions/Meta"
-        examples:
-          Response:
-            meta:
-              statusCode: 500
-              executionTime: 13.37
-              errorMessage: "An unexpected error occurred."
+      description:
+        An unexpected error occurred. Please try again later. If the problem persists, please contact the admin.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 500
+                executionTime: 13.37
+                errorMessage: "An unexpected error occurred."
+
+  securitySchemes:
+    jwt:
+      description: "JWT Token for the Factorio Item Browser API"
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
