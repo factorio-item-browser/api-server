@@ -314,8 +314,12 @@ definitions:
         description: "The translated description of the entity."
       recipes:
         type: "array"
+        description: "The recipes related to the entity."
         items:
           $ref: "#/definitions/Recipe"
+      totalNumberOfRecipes:
+        type: "integer"
+        description: "The total number of recipes available for the entity."
 
   Icon:
     type: "object"
@@ -510,8 +514,12 @@ components:
           numberOfResults:
             type: "integer"
             description: "The number of results to return."
+          numberOfRecipesPerResult:
+            type: "integer"
+            description: "The number of recipes to return for each result."
         example:
           numberOfResults: 10
+          numberOfRecipesPerResult: 3
 
     itemRecipes:
       in: "body"
@@ -574,12 +582,16 @@ components:
           indexOfFirstResult:
             type: "integer"
             description: "The 0-based index of the first result to return."
+          numberOfRecipesPerResult:
+            type: "integer"
+            description: "The number of recipes to return for each result."
         required:
           - query
         example:
           query: "oil"
           numberOfResults: 10
           indexOfFirstResult: 0
+          numberOfRecipesPerResult: 3
 
   response:
     # 200 responses
@@ -710,6 +722,7 @@ components:
                       description: ""
                       amount: 1
                   craftingTime: 5
+              totalNumberOfRecipes: 2
           totalNumberOfResults: 1
           meta:
             statusCode: 200
@@ -766,6 +779,7 @@ components:
                       description: ""
                       amount: 2
                   craftingTime: 14
+              totalNumberOfRecipes: 2
           totalNumberOfResults: 1
           meta:
             statusCode: 200
@@ -813,6 +827,7 @@ components:
                       description: ""
                       amount: 1
                   craftingTime: 0.5
+              totalNumberOfRecipes: 1
           meta:
             statusCode: 200
             executionTime: 13.37
@@ -965,6 +980,7 @@ components:
                       description: ""
                       amount: 55
                   craftingTime: 5
+              totalNumberOfRecipes: 1
             - type: "fluid"
               name: "crude-oil"
               label: "Crude oil"
@@ -992,6 +1008,7 @@ components:
                       description: ""
                       amount: 50
                   craftingTime: 0.2
+              totalNumberOfRecipes: 1
           totalNumberOfResults: 17
           meta:
             statusCode: 200

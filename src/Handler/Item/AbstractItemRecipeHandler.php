@@ -146,9 +146,11 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
                 $groupedRecipes[$databaseRecipe->getName()] = $groupedRecipe;
             }
 
-            $groupedRecipes[$databaseRecipe->getName()]->addRecipe(
+            $groupedRecipe = $groupedRecipes[$databaseRecipe->getName()];
+            $groupedRecipe->addRecipe(
                 RecipeMapper::mapDatabaseRecipeToClientRecipe($databaseRecipe, $this->translationService)
             );
+            $groupedRecipe->setTotalNumberOfRecipes($groupedRecipe->getTotalNumberOfRecipes() + 1);
         }
 
         $this->translationService->translateEntities();

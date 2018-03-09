@@ -59,15 +59,19 @@ class SearchDecorator
     /**
      * Decorates the search results to client entities.
      * @param array|AbstractResult[] $searchResults
+     * @param int $numberOfRecipesPerResult
      * @return array|GenericEntityWithRecipes[]
      */
-    public function decorate(array $searchResults): array
+    public function decorate(array $searchResults, int $numberOfRecipesPerResult): array
     {
         $itemIds = [];
         $recipeIds = [];
 
         foreach ($searchResults as $searchResult) {
-            $recipeIds = array_merge($recipeIds, $searchResult->getRecipeIds());
+            $recipeIds = array_merge(
+                $recipeIds,
+                array_slice($searchResult->getRecipeIds(), 0, $numberOfRecipesPerResult)
+            );
             if ($searchResult instanceof ItemResult) {
                 $itemIds[] = $searchResult->getId();
             }
@@ -90,7 +94,7 @@ class SearchDecorator
                      ->setName($recipes[$searchResult->getId()]->getName());
             }
 
-            foreach ($searchResult->getRecipeIds() as $recipeId) {
+            foreach (array_slice($searchResult->getRecipeIds(), 0, $numberOfRecipesPerResult) as $recipeId) {
                 if (isset($recipes[$recipeId])) {
                     $entity->addRecipe(RecipeMapper::mapDatabaseRecipeToClientRecipe(
                         $recipes[$recipeId],
@@ -98,6 +102,7 @@ class SearchDecorator
                     ));
                 }
             }
+            $entity->setTotalNumberOfRecipes(count($searchResult->getRecipeIds()));
 
             $this->translationService->addEntityToTranslate($entity);
             $entities[] = $entity;

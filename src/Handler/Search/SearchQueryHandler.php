@@ -104,6 +104,17 @@ class SearchQueryHandler extends AbstractRequestHandler
                 'validators' => [
                     new NotEmpty()
                 ]
+            ])
+            ->add([
+                'name' => 'numberOfRecipesPerResult',
+                'required' => true,
+                'fallback_value' => 3,
+                'filters' => [
+                    new ToInt()
+                ],
+                'validators' => [
+                    new NotEmpty()
+                ]
             ]);
 
         return $inputFilter;
@@ -119,6 +130,7 @@ class SearchQueryHandler extends AbstractRequestHandler
         $searchQuery = (new SearchQueryParser())->parse($requestData->getString('query'));
         $numberOfResults = $requestData->getInteger('numberOfResults');
         $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
+        $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
 
         $cachedSearchResults = $this->cachedSearchResultService->getSearchResults($searchQuery);
         if (!$cachedSearchResults instanceof CachedResultCollection) {
@@ -130,7 +142,8 @@ class SearchQueryHandler extends AbstractRequestHandler
         }
 
         $results = $this->searchDecorator->decorate(
-            $cachedSearchResults->getResults($numberOfResults, $indexOfFirstResult)
+            $cachedSearchResults->getResults($numberOfResults, $indexOfFirstResult),
+            $numberOfRecipesPerResult
         );
 
         $this->translationService->translateEntities();
