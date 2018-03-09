@@ -8,6 +8,7 @@ use DateTime;
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Server\Database\Entity\CachedSearchResult;
 use FactorioItemBrowser\Api\Server\Database\Repository\CachedSearchResultRepository;
+use FactorioItemBrowser\Api\Server\Search\Result\AbstractResult;
 use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
 use FactorioItemBrowser\Api\Server\Search\Result\ItemResult;
 use FactorioItemBrowser\Api\Server\Search\Result\RecipeResult;
@@ -22,6 +23,11 @@ use FactorioItemBrowser\Api\Server\Search\SearchQuery;
  */
 class CachedSearchResultService extends AbstractModsAwareService
 {
+    /**
+     * The maximal number of search results to allow.
+     */
+    const MAX_SEARCH_RESULTS = 1000;
+
     /**
      * The database translation service.
      * @var TranslationService
@@ -89,7 +95,8 @@ class CachedSearchResultService extends AbstractModsAwareService
     ): CachedResultCollection
     {
         $resultDataArray = [];
-        foreach ($resultCollection->getResults() as $result) {
+        foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
+            /* @var AbstractResult $result */
             $ids = array_merge(
                 [$result instanceof RecipeResult ? 0 : $result->getId()],
                 $result->getRecipeIds()

@@ -31,9 +31,11 @@ class ErrorResponseGenerator
     ): ResponseInterface
     {
         $statusCode = $exception->getCode();
+        $message = $exception->getMessage();
         if ($statusCode < 400 || $statusCode >= 600) {
             $statusCode = 500;
+            $message = 'An unexpected error occurred.';
         }
-        return new JsonResponse($exception->getMessage(), $statusCode, $response->getHeaders());
+        return new JsonResponse($message, $statusCode, $response->getHeaders());
     }
 }
