@@ -12,10 +12,10 @@ use Zend\Expressive\Helper\ServerUrlMiddleware;
 use Zend\Expressive\Helper\UrlHelperMiddleware;
 use Zend\Expressive\MiddlewareFactory;
 use Zend\Expressive\Router\Middleware\DispatchMiddleware;
-use Zend\Expressive\Router\Middleware\PathBasedRoutingMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitHeadMiddleware;
 use Zend\Expressive\Router\Middleware\ImplicitOptionsMiddleware;
 use Zend\Expressive\Router\Middleware\MethodNotAllowedMiddleware;
+use Zend\Expressive\Router\Middleware\RouteMiddleware;
 use Zend\Stratigility\Middleware\ErrorHandler;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
@@ -24,7 +24,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(CleanupMiddleware::class);
 
     $app->pipe(ServerUrlMiddleware::class);
-    $app->pipe(PathBasedRoutingMiddleware::class);
+    $app->pipe(RouteMiddleware::class);
     $app->pipe(Middleware\DocumentationRedirectMiddleware::class);
     $app->pipe(MethodNotAllowedMiddleware::class);
     $app->pipe(ImplicitHeadMiddleware::class);

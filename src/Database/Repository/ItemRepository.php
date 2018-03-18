@@ -104,4 +104,30 @@ class ItemRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Removes any orphaned items, i.e. items no longer used by any combination.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $queryBuilder = $this->createQueryBuilder('i');
+        $queryBuilder->select('i.id AS id')
+                     ->leftJoin('i.modCombinations', 'mc')
+                     ->andWhere('mc.id IS NULL');
+
+        $itemIds = [];
+        foreach ($queryBuilder->getQuery()->getResult() as $data) {
+            $itemIds[] = $data['id'];
+        }
+
+        if (count($itemIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('i');
+            $queryBuilder->delete($this->_entityName, 'i')
+                         ->andWhere('i.id IN (:itemIds)')
+                         ->setParameter('itemIds', array_values($itemIds));
+            $queryBuilder->getQuery()->execute();
+        }
+        return $this;
+    }
 }

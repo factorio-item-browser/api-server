@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server;
 
 use ContainerInteropDoctrine\EntityManagerFactory;
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\ExportData\Service\ExportDataService;
 use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
 use Zend\Expressive\Middleware\ErrorResponseGenerator;
 use Zend\ServiceManager\Factory\InvokableFactory;
@@ -13,9 +14,6 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'dependencies' => [
         'factories'  => [
-            BodyParamsMiddleware::class => InvokableFactory::class,
-            EntityManager::class => EntityManagerFactory::class,
-
             Database\Service\CachedSearchResultService::class => Database\Service\CachedSearchResultServiceFactory::class,
             Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
@@ -29,10 +27,14 @@ return [
             Handler\Item\ItemIngredientHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemProductHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemRandomHandler::class => Handler\Item\ItemRandomHandlerFactory::class,
+            Handler\Import\ImportHandler::class => Handler\Import\ImportHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
+
+            Import\ImporterManager::class => Import\ImporterManagerFactory::class,
+            Import\ItemImporter::class => Import\ItemImporterFactory::class,
 
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
@@ -49,6 +51,11 @@ return [
             Search\Handler\SearchHandlerManager::class => Search\Handler\SearchHandlerManagerFactory::class,
             Search\Handler\TranslationHandler::class => Search\Handler\TranslationHandlerFactory::class,
             Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
+
+            // Dependencies of other libraries
+            BodyParamsMiddleware::class => InvokableFactory::class,
+            EntityManager::class => EntityManagerFactory::class,
+            ExportDataService::class => ExportData\ExportDataServiceFactory::class,
         ],
         'invokables' => [
             ErrorResponseGenerator::class => Response\ErrorResponseGenerator::class,
