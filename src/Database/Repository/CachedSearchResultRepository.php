@@ -60,4 +60,16 @@ class CachedSearchResultRepository extends EntityRepository
     {
         return new DateTime('-' . self::CACHE_TIMEOUT . 'seconds');
     }
+
+    /**
+     * Clears the database table, emptying the cache.
+     * @return $this
+     */
+    public function clear()
+    {
+        $queryBuilder = $this->createQueryBuilder('r');
+        $queryBuilder->delete($this->_entityName, 'r');
+        $queryBuilder->getQuery()->execute();
+        return $this;
+    }
 }

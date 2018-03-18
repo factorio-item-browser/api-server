@@ -25,6 +25,7 @@ class ImporterManagerFactory implements FactoryInterface
         ItemImporter::class,
         RecipeImporter::class,
         TranslationImporter::class,
+        IconImporter::class,
         OrderImporter::class,
     ];
 

@@ -180,8 +180,8 @@ class RecipeRepository extends EntityRepository
     {
         $queryBuilder = $this->createQueryBuilder('r');
         $queryBuilder->select('r.id AS id')
-            ->leftJoin('r.modCombinations', 'mc')
-            ->andWhere('mc.id IS NULL');
+                     ->leftJoin('r.modCombinations', 'mc')
+                     ->andWhere('mc.id IS NULL');
 
         $recipeIds = [];
         foreach ($queryBuilder->getQuery()->getResult() as $data) {

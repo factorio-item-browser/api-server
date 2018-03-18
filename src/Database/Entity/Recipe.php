@@ -64,7 +64,6 @@ class Recipe
 
     /**
      * @ORM\OneToMany(targetEntity="RecipeIngredient", mappedBy="recipe")
-     * @ORM\OrderBy({"order" = "ASC"})
      *
      * The ingredients of the recipe.
      * @var Collection|RecipeIngredient[]
@@ -73,7 +72,6 @@ class Recipe
 
     /**
      * @ORM\OneToMany(targetEntity="RecipeProduct", mappedBy="recipe")
-     * @ORM\OrderBy({"order" = "ASC"})
      *
      * The products of the recipe.
      * @var Collection|RecipeProduct[]

@@ -28,4 +28,30 @@ class IconFileRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Removes any orphaned icon files, i.e. icon files no longer used by any icon.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $queryBuilder = $this->createQueryBuilder('if');
+        $queryBuilder->select('if.hash AS hash')
+                     ->leftJoin('if.icons', 'i')
+                     ->andWhere('i.id IS NULL');
+
+        $hashes = [];
+        foreach ($queryBuilder->getQuery()->getResult() as $data) {
+            $hashes[] = $data['hash'];
+        }
+
+        if (count($hashes) > 0) {
+            $queryBuilder = $this->createQueryBuilder('if');
+            $queryBuilder->delete($this->_entityName, 'if')
+                         ->andWhere('if.hash IN (:hashes)')
+                         ->setParameter('hashes', array_values($hashes));
+            $queryBuilder->getQuery()->execute();
+        }
+        return $this;
+    }
 }

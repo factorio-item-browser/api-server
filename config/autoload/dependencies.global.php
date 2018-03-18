@@ -34,6 +34,7 @@ return [
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
 
             Import\CombinationImporter::class => Import\CombinationImporterFactory::class,
+            Import\IconImporter::class => Import\IconImporterFactory::class,
             Import\ImporterManager::class => Import\ImporterManagerFactory::class,
             Import\ItemImporter::class => Import\ItemImporterFactory::class,
             Import\ModImporter::class => Import\ModImporterFactory::class,

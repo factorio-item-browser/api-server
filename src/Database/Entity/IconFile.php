@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,12 +38,21 @@ class IconFile
     protected $image;
 
     /**
+     * @ORM\OneToMany(targetEntity="Icon", mappedBy="file")
+     *
+     * The icons using the file.
+     * @var Collection|Icon[]
+     */
+    protected $icons;
+
+    /**
      * Initializes the entity.
      * @param int $hash
      */
     public function __construct(int $hash)
     {
         $this->hash = $hash;
+        $this->icons = new ArrayCollection();
     }
 
     /**
@@ -85,5 +96,14 @@ class IconFile
             $this->image = stream_get_contents($this->image);
         }
         return $this->image;
+    }
+
+    /**
+     * Returns the icons using this file.
+     * @return Collection|Icon[]
+     */
+    public function getIcons(): Collection
+    {
+        return $this->icons;
     }
 }
