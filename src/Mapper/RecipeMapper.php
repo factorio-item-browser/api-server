@@ -32,7 +32,7 @@ class RecipeMapper
             ->setMode($databaseRecipe->getMode())
             ->setCraftingTime($databaseRecipe->getCraftingTime());
 
-        foreach ($databaseRecipe->getIngredients() as $databaseIngredient) {
+        foreach ($databaseRecipe->getOrderedIngredients() as $databaseIngredient) {
             $clientItem = new ClientItem();
             $clientItem->setName($databaseIngredient->getItem()->getName())
                 ->setType($databaseIngredient->getItem()->getType())
@@ -41,7 +41,7 @@ class RecipeMapper
             $translationService->addEntityToTranslate($clientItem);
         }
 
-        foreach ($databaseRecipe->getProducts() as $databaseProduct) {
+        foreach ($databaseRecipe->getOrderedProducts() as $databaseProduct) {
             $clientItem = new ClientItem();
             $clientItem->setName($databaseProduct->getItem()->getName())
                 ->setType($databaseProduct->getItem()->getType())
