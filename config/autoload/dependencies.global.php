@@ -33,8 +33,11 @@ return [
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
 
+            Import\CombinationImporter::class => Import\CombinationImporterFactory::class,
             Import\ImporterManager::class => Import\ImporterManagerFactory::class,
             Import\ItemImporter::class => Import\ItemImporterFactory::class,
+            Import\ModImporter::class => Import\ModImporterFactory::class,
+            Import\OrderImporter::class => Import\OrderImporterFactory::class,
 
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,

@@ -20,7 +20,10 @@ class ImporterManagerFactory implements FactoryInterface
      * The importer classes to use.
      */
     const IMPORTER_CLASSES = [
+        ModImporter::class,
+        CombinationImporter::class,
         ItemImporter::class,
+        OrderImporter::class,
     ];
 
     /**
