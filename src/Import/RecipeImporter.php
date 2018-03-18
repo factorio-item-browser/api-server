@@ -140,23 +140,20 @@ class RecipeImporter implements ImporterInterface
      */
     protected function hashExportRecipe(ExportRecipe $exportRecipe): string
     {
-        $data = [
-            'name' => $exportRecipe->getName(),
-            'mode' => $exportRecipe->getMode(),
-            'craftingTime' => $exportRecipe->getCraftingTime(),
-            'ingredients' => [],
-            'products' => []
-        ];
+        $ingredients = [];
         foreach ($exportRecipe->getIngredients() as $ingredient) {
-            $data['ingredients'][$ingredient->getOrder()] = [
+            $ingredients[$ingredient->getOrder()] = [
                 $ingredient->getType(),
                 $ingredient->getName(),
                 $ingredient->getAmount()
             ];
             $this->seenItemTypesAndNames[$ingredient->getType()][$ingredient->getName()] = $ingredient->getName();
         }
+        ksort($ingredients);
+
+        $products = [];
         foreach ($exportRecipe->getProducts() as $product) {
-            $data['products'][] = [
+            $products[$product->getOrder()] = [
                 $product->getType(),
                 $product->getName(),
                 $product->getAmountMin(),
@@ -165,6 +162,15 @@ class RecipeImporter implements ImporterInterface
             ];
             $this->seenItemTypesAndNames[$product->getType()][$product->getName()] = $product->getName();
         }
+        ksort($products);
+
+        $data = [
+            'name' => $exportRecipe->getName(),
+            'mode' => $exportRecipe->getMode(),
+            'craftingTime' => $exportRecipe->getCraftingTime(),
+            'ingredients' => $ingredients,
+            'products' => $products
+        ];
         return hash('crc32b', json_encode($data));
     }
 
@@ -175,22 +181,19 @@ class RecipeImporter implements ImporterInterface
      */
     protected function hashDatabaseRecipe(DatabaseRecipe $databaseRecipe): string
     {
-        $data = [
-            'name' => $databaseRecipe->getName(),
-            'mode' => $databaseRecipe->getMode(),
-            'craftingTime' => $databaseRecipe->getCraftingTime(),
-            'ingredients' => [],
-            'products' => []
-        ];
+        $ingredients = [];
         foreach ($databaseRecipe->getIngredients() as $ingredient) {
-            $data['ingredients'][$ingredient->getOrder()] = [
+            $ingredients[$ingredient->getOrder()] = [
                 $ingredient->getItem()->getType(),
                 $ingredient->getItem()->getName(),
                 $ingredient->getAmount()
             ];
         }
+        ksort($ingredients);
+
+        $products = [];
         foreach ($databaseRecipe->getProducts() as $product) {
-            $data['products'][] = [
+            $products[$product->getOrder()] = [
                 $product->getItem()->getType(),
                 $product->getItem()->getName(),
                 $product->getAmountMin(),
@@ -198,6 +201,15 @@ class RecipeImporter implements ImporterInterface
                 $product->getProbability()
             ];
         }
+        ksort($products);
+
+        $data = [
+            'name' => $databaseRecipe->getName(),
+            'mode' => $databaseRecipe->getMode(),
+            'craftingTime' => $databaseRecipe->getCraftingTime(),
+            'ingredients' => $ingredients,
+            'products' => $products
+        ];
         return hash('crc32b', json_encode($data));
     }
 
