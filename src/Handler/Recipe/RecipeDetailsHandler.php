@@ -72,7 +72,11 @@ class RecipeDetailsHandler extends AbstractRequestHandler
     {
         $recipeNames = $requestData->getArray('names');
         $groupedRecipeIds = $this->recipeService->getIdsByNames($recipeNames);
-        $recipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+        if (count($groupedRecipeIds) > 0) {
+            $recipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+        } else {
+            $recipeIds = [];
+        }
         $databaseRecipes = $this->recipeService->getDetailsByIds($recipeIds);
 
         $clientRecipes = [];

@@ -50,7 +50,7 @@ class ProductRecipeHandler implements SearchHandlerInterface
 
         $groupedRecipeIds = $this->recipeService->getIdsWithProducts(array_keys($itemResults));
         foreach ($groupedRecipeIds as $itemId => $recipeIds) {
-            if (isset($itemResults[$itemId])) {
+            if (isset($itemResults[$itemId]) && count($recipeIds) > 0) {
                 $itemResult = $itemResults[$itemId];
                 foreach (call_user_func_array('array_merge', $recipeIds) as $recipeId) {
                     $itemResult->addRecipeId($recipeId);

@@ -36,7 +36,7 @@ class RecipeService extends AbstractModsAwareService
     /**
      * Returns the IDs of the recipes with the specified names, of all modes and grouped by the names.
      * @param array|string[] $names
-     * @return array|int[]
+     * @return array|int[][]
      */
     public function getIdsByNames(array $names): array
     {
@@ -47,7 +47,10 @@ class RecipeService extends AbstractModsAwareService
                 $this->modService->getEnabledModCombinationIds()
             );
 
-            foreach($this->filterData($recipeData, ['name', 'mode']) as $data) {
+            if (count($this->modService->getEnabledModCombinationIds()) > 0) {
+                $recipeData = $this->filterData($recipeData, ['name', 'mode']);
+            }
+            foreach($recipeData as $data) {
                 $result[$data['name']][] = (int) $data['id'];
             }
         }
@@ -170,5 +173,15 @@ class RecipeService extends AbstractModsAwareService
             $results = $this->filterData($results, ['name', 'mode']);
         }
         return $results;
+    }
+
+    /**
+     * Removes any orphaned recipes, i.e. recipes no longer used by any combination.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $this->recipeRepository->removeOrphans();
+        return $this;
     }
 }

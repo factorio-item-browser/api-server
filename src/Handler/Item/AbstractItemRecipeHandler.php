@@ -180,6 +180,11 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
         if ($limit > 0) {
             $groupedRecipeIds = array_slice($groupedRecipeIds, $offset, $limit);
         }
-        return call_user_func_array('array_merge', $groupedRecipeIds);
+        if (count($groupedRecipeIds) > 0) {
+            $recipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+        } else {
+            $recipeIds = [];
+        }
+        return $recipeIds;
     }
 }

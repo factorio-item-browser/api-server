@@ -171,4 +171,30 @@ class RecipeRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Removes any orphaned recipes, i.e. recipes no longer used by any combination.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $queryBuilder = $this->createQueryBuilder('r');
+        $queryBuilder->select('r.id AS id')
+            ->leftJoin('r.modCombinations', 'mc')
+            ->andWhere('mc.id IS NULL');
+
+        $recipeIds = [];
+        foreach ($queryBuilder->getQuery()->getResult() as $data) {
+            $recipeIds[] = $data['id'];
+        }
+
+        if (count($recipeIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('r');
+            $queryBuilder->delete($this->_entityName, 'r')
+                         ->andWhere('r.id IN (:recipeIds)')
+                         ->setParameter('recipeIds', array_values($recipeIds));
+            $queryBuilder->getQuery()->execute();
+        }
+        return $this;
+    }
 }
