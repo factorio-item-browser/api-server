@@ -39,6 +39,7 @@ return [
             Import\ModImporter::class => Import\ModImporterFactory::class,
             Import\OrderImporter::class => Import\OrderImporterFactory::class,
             Import\RecipeImporter::class => Import\RecipeImporterFactory::class,
+            Import\TranslationImporter::class => Import\TranslationImporterFactory::class,
 
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
