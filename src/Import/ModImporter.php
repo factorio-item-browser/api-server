@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Server\Database\Constant\ModDependencyType;
 use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Server\Database\Entity\ModDependency as DatabaseDependency;
+use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
 use FactorioItemBrowser\ExportData\Entity\Mod\Combination as ExportCombination;
+use FactorioItemBrowser\ExportData\Entity\Mod\Dependency as ExportDependency;
 
 /**
  * The class importing the actual mod.
@@ -25,12 +30,20 @@ class ModImporter implements ImporterInterface
     protected $entityManager;
 
     /**
+     * The database service of the mods.
+     * @var ModService
+     */
+    protected $modService;
+
+    /**
      * Initializes the importer.
      * @param EntityManager $entityManager
+     * @param ModService $modService
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, ModService $modService)
     {
         $this->entityManager = $entityManager;
+        $this->modService = $modService;
     }
 
     /**
@@ -43,9 +56,83 @@ class ModImporter implements ImporterInterface
     {
         $databaseMod->setAuthor($exportMod->getAuthor())
                     ->setCurrentVersion($exportMod->getVersion());
-
         $this->entityManager->persist($databaseMod);
+
+        $this->processDependencies($exportMod, $databaseMod);
         return $this;
+    }
+
+    /**
+     * Processes the dependencies of the mod.
+     * @param ExportMod $exportMod
+     * @param DatabaseMod $databaseMod
+     * @return $this
+     */
+    protected function processDependencies(ExportMod $exportMod, DatabaseMod $databaseMod)
+    {
+        $databaseDependencies = [];
+        foreach ($databaseMod->getDependencies() as $databaseDependency) {
+            $databaseDependencies[$databaseDependency->getRequiredMod()->getName()] = $databaseDependency;
+        }
+
+        foreach ($exportMod->getDependencies() as $exportDependency) {
+            $databaseDependency = $databaseDependencies[$exportDependency->getRequiredModName()] ?? null;
+            if ($databaseDependency instanceof DatabaseDependency) {
+                // Update existing dependency
+                $databaseDependency->setRequiredVersion($exportDependency->getRequiredVersion());
+                if ($exportDependency->getIsMandatory()) {
+                    $databaseDependency->setType(ModDependencyType::MANDATORY);
+                } else {
+                    $databaseDependency->setType(ModDependencyType::OPTIONAL);
+                }
+                unset($databaseDependencies[$exportDependency->getRequiredModName()]);
+            } else {
+                // Add new dependency
+                $databaseDependency = $this->convertDependency($exportDependency, $databaseMod);
+                if ($databaseDependency instanceof DatabaseDependency) {
+                    $databaseMod->getDependencies()->add($databaseDependency);
+                    $this->entityManager->persist($databaseDependency);
+                }
+            }
+        }
+
+        foreach ($databaseDependencies as $databaseDependency) {
+            $databaseMod->getDependencies()->removeElement($databaseDependency);
+            $this->entityManager->remove($databaseDependency);
+        }
+        return $this;
+    }
+
+    /**
+     * Converts the specified export dependency to a database one.
+     * @param ExportDependency $exportDependency
+     * @param DatabaseMod $databaseMod
+     * @return DatabaseDependency|null
+     */
+    protected function convertDependency(
+        ExportDependency $exportDependency,
+        DatabaseMod $databaseMod
+    ): ?DatabaseDependency
+    {
+        $databaseDependency = null;
+        $requiredMods = $this->modService->getModsWithDependencies([$exportDependency->getRequiredModName()]);
+        if (isset($requiredMods[$exportDependency->getRequiredModName()])) {
+            $databaseDependency = new DatabaseDependency(
+                $databaseMod,
+                $requiredMods[$exportDependency->getRequiredModName()]
+            );
+            $databaseDependency->setRequiredVersion($exportDependency->getRequiredVersion());
+            if ($exportDependency->getIsMandatory()) {
+                $databaseDependency->setType(ModDependencyType::MANDATORY);
+            } else {
+                $databaseDependency->setType(ModDependencyType::OPTIONAL);
+            }
+        } elseif ($exportDependency->getIsMandatory()) {
+            throw new ApiServerException(
+                'Missing mandatory dependency in database: ' . $exportDependency->getRequiredModName()
+            );
+        }
+        return $databaseDependency;
     }
 
     /**

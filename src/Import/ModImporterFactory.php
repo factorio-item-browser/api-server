@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use Interop\Container\ContainerInterface;
 
 /**
@@ -26,7 +27,9 @@ class ModImporterFactory
     {
         /* @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
+        /* @var ModService $modService */
+        $modService = $container->get(ModService::class);
 
-        return new ModImporter($entityManager);
+        return new ModImporter($entityManager, $modService);
     }
 }
