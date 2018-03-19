@@ -104,6 +104,7 @@ class ImportHandler extends AbstractRequestHandler
             $databaseCombinations[$databaseCombination->getName()] = $databaseCombination;
         }
 
+        // @todo We need the empty combination (no optional mods) for mod meta.
         foreach ($exportMod->getCombinations() as $exportCombination) {
             $this->importCombination(
                 $exportCombination,

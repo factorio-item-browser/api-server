@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Import;
 
 use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
 use FactorioItemBrowser\ExportData\Entity\Mod\Combination as ExportCombination;
@@ -30,6 +31,12 @@ class OrderImporter implements ImporterInterface
      * @var ExportDataService
      */
     protected $exportDataService;
+
+    /**
+     * The order of the mods.
+     * @var array|int[]
+     */
+    protected $modOrders;
 
     /**
      * Initializes the importer.
@@ -71,8 +78,56 @@ class OrderImporter implements ImporterInterface
      */
     public function importCombination(ExportCombination $exportCombination, DatabaseCombination $databaseCombination)
     {
-        // @todo Implement ordering of combinations.
+        $this->modOrders = $this->getModOrders();
+        $combinations = $this->modService->getAllCombinations();
+        uasort($combinations, function (ModCombination $left, ModCombination $right): int {
+            $result = $left->getMod()->getOrder() <=> $right->getMod()->getOrder();
+            if ($result === 0) {
+                $leftOrders = $this->mapModIdsToOrders($left->getOptionalModIds());
+                $rightOrders = $this->mapModIdsToOrders($right->getOptionalModIds());
+                $result = count($leftOrders) <=> count($rightOrders);
+                while ($result === 0 && !empty($leftOrders)) {
+                    $result = array_shift($leftOrders) <=> array_shift($rightOrders);
+                }
+            }
+            return $result;
+        });
+
+        $order = 1;
+        foreach ($combinations as $combination) {
+            $combination->setOrder($order);
+            ++$order;
+        }
+
         return $this;
+    }
+
+    /**
+     * Returns the orders of the mods.
+     * @return array|int[]
+     */
+    protected function getModOrders(): array
+    {
+        $result = [];
+        foreach ($this->modService->getAllMods() as $mod) {
+            $result[$mod->getId()] = $mod->getOrder();
+        }
+        return $result;
+    }
+
+    /**
+     * Maps the mod ids to their orders.
+     * @param array|int[] $modIds
+     * @return array|int[]
+     */
+    protected function mapModIdsToOrders(array $modIds): array
+    {
+        $result = [];
+        foreach ($modIds as $modId) {
+            $result[] = $this->modOrders[$modId];
+        }
+        sort($result);
+        return $result;
     }
 
     /**

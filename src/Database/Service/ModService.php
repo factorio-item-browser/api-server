@@ -148,4 +148,18 @@ class ModService extends AbstractDatabaseService
         }
         return $result;
     }
+
+    /**
+     * Returns all known combinations.
+     * @return array|ModCombination[]
+     */
+    public function getAllCombinations(): array
+    {
+        $result = [];
+        foreach ($this->modCombinationRepository->findAll() as $combination) {
+            /* @var ModCombination $combination */
+            $result[$combination->getName()] = $combination;
+        }
+        return $result;
+    }
 }
