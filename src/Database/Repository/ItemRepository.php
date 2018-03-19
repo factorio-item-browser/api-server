@@ -6,6 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use FactorioItemBrowser\Api\Server\Database\Entity\Item;
+use FactorioItemBrowser\Api\Server\Database\Entity\RecipeIngredient;
+use FactorioItemBrowser\Api\Server\Database\Entity\RecipeProduct;
 
 /**
  * The repository class of the item database table.
@@ -114,7 +116,11 @@ class ItemRepository extends EntityRepository
         $queryBuilder = $this->createQueryBuilder('i');
         $queryBuilder->select('i.id AS id')
                      ->leftJoin('i.modCombinations', 'mc')
-                     ->andWhere('mc.id IS NULL');
+                     ->leftJoin(RecipeIngredient::class, 'ri', 'WITH', 'ri.item = i.id')
+                     ->leftJoin(RecipeProduct::class, 'rp', 'WITH', 'rp.item = i.id')
+                     ->andWhere('mc.id IS NULL')
+                     ->andWhere('ri.item IS NULL')
+                     ->andWhere('rp.item IS NULL');
 
         $itemIds = [];
         foreach ($queryBuilder->getQuery()->getResult() as $data) {

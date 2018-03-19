@@ -6,6 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Database\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
+use FactorioItemBrowser\Api\Server\Database\Entity\RecipeIngredient;
+use FactorioItemBrowser\Api\Server\Database\Entity\RecipeProduct;
 
 /**
  * The repository class of the recipe database table.
@@ -189,6 +191,21 @@ class RecipeRepository extends EntityRepository
         }
 
         if (count($recipeIds) > 0) {
+            // First delete the ingredients...
+            $queryBuilder = $this->createQueryBuilder('r');
+            $queryBuilder->delete(RecipeIngredient::class, 'ri')
+                         ->where('ri.recipe IN (:recipeIds)')
+                         ->setParameter('recipeIds', array_values($recipeIds));
+            $queryBuilder->getQuery()->execute();
+
+            // ... and the products.
+            $queryBuilder = $this->createQueryBuilder('r');
+            $queryBuilder->delete(RecipeProduct::class, 'rp')
+                         ->where('rp.recipe IN (:recipeIds)')
+                         ->setParameter('recipeIds', array_values($recipeIds));
+            $queryBuilder->getQuery()->execute();
+
+            // And finally the recipes itself.
             $queryBuilder = $this->createQueryBuilder('r');
             $queryBuilder->delete($this->_entityName, 'r')
                          ->andWhere('r.id IN (:recipeIds)')

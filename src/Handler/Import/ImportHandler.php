@@ -80,6 +80,7 @@ class ImportHandler extends AbstractRequestHandler
 
             break; // Let's try base mod only for now.
         }
+        $this->importerManager->clean();
 
         return [];
     }
