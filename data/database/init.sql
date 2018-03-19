@@ -34,7 +34,6 @@ CREATE TABLE `ModCombination` (
   `modId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the main mod.',
   `optionalModIds` TEXT NOT NULL COMMENT 'The list of the ids of the loaded optional mods.',
   `name` TEXT NOT NULL COMMENT 'The name of the mod combination.',
-  `flags` SET('hasItems','hasRecipes','hasIcons','hasTranslations') NOT NULL COMMENT 'The flags of the mod combination.',
   `order` INT(10) UNSIGNED NOT NULL COMMENT 'The order of the mod combination.',
   PRIMARY KEY (`id`),
   INDEX `idx_modId` (`modId`),

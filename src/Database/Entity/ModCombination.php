@@ -39,7 +39,7 @@ class ModCombination
     protected $mod;
 
     /**
-     * @ORM\Column(name="optionalModIds", type="flags")
+     * @ORM\Column(name="optionalModIds", type="json")
      *
      * The list of the loaded optional mods.
      * @var array|int[]
@@ -53,14 +53,6 @@ class ModCombination
      * @var string
      */
     protected $name = '';
-
-    /**
-     * @ORM\Column(name="flags", type="flags")
-     *
-     * The flags of the mod combination.
-     * @var array|string[]
-     */
-    protected $flags = [];
 
     /**
      * @ORM\Column(name="`order`", type="integer")
@@ -202,27 +194,6 @@ class ModCombination
     public function getName(): string
     {
         return $this->name;
-    }
-
-    /**
-     * Sets the flags of the mod combination.
-     * @param array|string[] $flags
-     * @return $this Implementing fluent interface.
-     */
-    public function setFlags(array $flags)
-    {
-        $this->flags = $flags;
-        return $this;
-    }
-
-    /**
-     * Returns whether the specified flag is present.
-     * @param string $flagName
-     * @return bool
-     */
-    public function hasFlag(string $flagName): bool
-    {
-        return isset($this->flags[$flagName]);
     }
 
     /**

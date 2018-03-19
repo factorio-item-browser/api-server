@@ -32,8 +32,5 @@ return [
                 ]
             ]
         ],
-        'types' => [
-            'flags' => Database\Type\Flags::class
-        ],
     ]
 ];
