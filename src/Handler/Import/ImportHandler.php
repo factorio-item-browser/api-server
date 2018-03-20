@@ -124,7 +124,19 @@ class ImportHandler extends AbstractRequestHandler
             $databaseCombinations[$databaseCombination->getName()] = $databaseCombination;
         }
 
-        // @todo We need the empty combination (no optional mods) for mod meta.
+        if (!$this->hasCombinationWithoutOptionalMods($exportMod)) {
+            // We always need the combination with no optional mods loaded because mod meta data are assigned to it.
+            $emptyCombination = new ExportCombination();
+            $emptyCombination->setName($exportMod->getName())
+                             ->setMainModName($exportMod->getName());
+
+            $this->importCombination(
+                $emptyCombination,
+                $databaseMod,
+                $databaseCombinations[$exportMod->getName()] ?? null
+            );
+        }
+
         foreach ($exportMod->getCombinations() as $exportCombination) {
             $this->importCombination(
                 $exportCombination,
@@ -133,6 +145,23 @@ class ImportHandler extends AbstractRequestHandler
             );
         }
         return $this;
+    }
+
+    /**
+     * Checks whether the mod has a combination with no optional mods loaded.
+     * @param ExportMod $exportMod
+     * @return bool
+     */
+    protected function hasCombinationWithoutOptionalMods(ExportMod $exportMod): bool
+    {
+        $result = false;
+        foreach ($exportMod->getCombinations() as $exportCombination) {
+            if (count($exportCombination->getLoadedOptionalModNames()) === 0) {
+                $result = true;
+                break;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -153,7 +182,9 @@ class ImportHandler extends AbstractRequestHandler
             $databaseCombination->setName($exportCombination->getName());
         }
 
-        $this->exportDataService->loadCombinationData($exportCombination);
+        if (!$exportCombination->getIsDataLoaded()) {
+            $this->exportDataService->loadCombinationData($exportCombination);
+        }
         $this->importerManager->importCombination($exportCombination, $databaseCombination);
         return $this;
     }
