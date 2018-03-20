@@ -37,7 +37,10 @@ return [
             'authorization' => [
                 'key' => 'factorio-item-browser',
                 'agents' => [
-                    'debug' => 'factorio-item-browser'
+                    'debug' => [
+                        'accessKey' => 'factorio-item-browser',
+                        'allowImport' => true
+                    ]
                 ]
             ]
         ]

@@ -25,6 +25,6 @@ class NotFoundHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        throw new ApiServerException('Method not found: ' . ltrim($request->getRequestTarget(), '/'), 404);
+        throw new ApiServerException('API endpoint not found: ' . $request->getRequestTarget(), 404);
     }
 }

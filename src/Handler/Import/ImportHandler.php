@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Import;
 
 use BluePsyduck\Common\Data\DataContainer;
+use Exception;
 use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Import\ImporterManager;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
 use FactorioItemBrowser\ExportData\Entity\Mod\Combination as ExportCombination;
 use FactorioItemBrowser\ExportData\Service\ExportDataService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Zend\InputFilter\InputFilter;
 
 /**
@@ -59,6 +63,19 @@ class ImportHandler extends AbstractRequestHandler
     }
 
     /**
+     * Handle the request and return a response.
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        if (!$request->getAttribute('allowImport')) {
+            throw new ApiServerException('API endpoint not found: ' . $request->getRequestTarget(), 404);
+        }
+        return parent::handle($request);
+    }
+
+    /**
      * Creates the input filter to use to verify the request.
      * @return InputFilter
      */
@@ -74,13 +91,16 @@ class ImportHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $databaseMods = $this->modService->getAllMods();
-        foreach ($this->exportDataService->getMods() as $exportMod) {
-            $this->importMod($exportMod, $databaseMods[$exportMod->getName()] ?? null);
-
-            break; // Let's try base mod only for now.
+        try {
+            $databaseMods = $this->modService->getAllMods();
+            foreach ($this->exportDataService->getMods() as $exportMod) {
+                $this->importMod($exportMod, $databaseMods[$exportMod->getName()] ?? null);
+            }
+            $this->importerManager->clean();
+        } catch (Exception $e) {
+            // Set exception code to 500 to have the exception message printed into the response.
+            throw new ApiServerException($e->getMessage(), 500, $e);
         }
-        $this->importerManager->clean();
 
         return [];
     }

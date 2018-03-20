@@ -92,7 +92,8 @@ class AuthHandler extends AbstractRequestHandler
     {
         $agent = $requestData->getString('agent');
         $accessKey = $requestData->getString('accessKey');
-        if (!isset($this->agents[$agent]) || $this->agents[$agent] !== $accessKey) {
+        $agentConfig = $this->agents[$agent] ?? [];
+        if (empty($agentConfig) || !isset($agentConfig['accessKey']) || $agentConfig['accessKey'] !== $accessKey) {
             throw new ApiServerException('Invalid agent or access key.', 403);
         }
 
@@ -103,6 +104,9 @@ class AuthHandler extends AbstractRequestHandler
             'agt' => $requestData->getString('agent'),
             'mds' => $this->modService->getEnabledModCombinationIds()
         ];
+        if ($agentConfig['allowImport'] ?? false) {
+            $token['imp'] = 1;
+        }
 
         return [
             'authorizationToken' => JWT::encode($token, $this->authorizationKey)
