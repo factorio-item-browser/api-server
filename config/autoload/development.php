@@ -17,7 +17,7 @@ return [
     'debug' => true,
     'doctrine' => [
         'connection' => [
-            'orm_default' => [
+            'docker' => [
                 'driverClass' => PDOMySqlDriver::class,
                 'params' => [
                     'host'     => 'mysql',
@@ -41,6 +41,12 @@ return [
                         'accessKey' => 'factorio-item-browser',
                         'allowImport' => true
                     ]
+                ]
+            ],
+            'databaseConnection' => [
+                'aliases' => [
+                    'default' => 'docker',
+                    'import' => 'docker'
                 ]
             ]
         ]

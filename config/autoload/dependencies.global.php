@@ -45,6 +45,7 @@ return [
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
+            Middleware\DatabaseConfigurationMiddleware::class => Middleware\DatabaseConfigurationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
             Middleware\MetaMiddleware::class => InvokableFactory::class,
 
