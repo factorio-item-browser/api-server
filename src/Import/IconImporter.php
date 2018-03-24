@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
+use FactorioItemBrowser\Api\Client\Constant\RecipeMode;
 use FactorioItemBrowser\Api\Server\Database\Entity\Icon as DatabaseIcon;
 use FactorioItemBrowser\Api\Server\Database\Entity\IconFile as DatabaseIconFile;
 use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
@@ -165,7 +166,7 @@ class IconImporter implements ImporterInterface
 
         // Process recipe icons
         foreach ($exportCombination->getData()->getRecipes() as $exportRecipe) {
-            if (strlen($exportRecipe->getIconHash()) > 0) {
+            if (strlen($exportRecipe->getIconHash()) > 0 && $exportRecipe->getMode() === RecipeMode::NORMAL) {
                 $hash = hexdec($exportRecipe->getIconHash());
                 $key = EntityType::RECIPE . '|' . $exportRecipe->getName();
                 if (isset($combinationIcons[$key])) {
