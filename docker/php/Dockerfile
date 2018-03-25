@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
         libbz2-dev \
         libxml2-dev \
         ssh \
+        subversion \
         zlib1g-dev \
     && docker-php-ext-install \
         bz2 \

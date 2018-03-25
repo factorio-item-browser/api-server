@@ -8,6 +8,9 @@ services:
       - "8010:80"
     volumes:
       - ".:/project"
+      - "$SSH_AUTH_SOCK:/ssh-agent"
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
   mysql:
     container_name: fib-as-mysql
     image: fib-as-mysql
