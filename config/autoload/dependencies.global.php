@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use Blast\BaseUrl\BasePathHelper;
+use Blast\BaseUrl\BaseUrlMiddleware;
+use Blast\BaseUrl\BaseUrlMiddlewareFactory;
 use ContainerInteropDoctrine\EntityManagerFactory;
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\ExportData\Service\ExportDataService;
@@ -46,7 +49,7 @@ return [
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
             Middleware\DatabaseConfigurationMiddleware::class => Middleware\DatabaseConfigurationMiddlewareFactory::class,
-            Middleware\DocumentationRedirectMiddleware::class => InvokableFactory::class,
+            Middleware\DocumentationRedirectMiddleware::class => Middleware\DocumentationRedirectMiddlewareFactory::class,
             Middleware\MetaMiddleware::class => InvokableFactory::class,
 
             Search\Handler\DuplicateRecipeHandler::class => InvokableFactory::class,
@@ -60,6 +63,8 @@ return [
             Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
 
             // Dependencies of other libraries
+            BasePathHelper::class => InvokableFactory::class,
+            BaseUrlMiddleware::class => BaseUrlMiddlewareFactory::class,
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
             ExportDataService::class => ExportData\ExportDataServiceFactory::class,

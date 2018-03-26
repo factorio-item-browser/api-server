@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use Blast\BaseUrl\BasePathHelper;
 use Fig\Http\Message\RequestMethodInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,6 +21,21 @@ use Zend\Diactoros\Response\RedirectResponse;
 class DocumentationRedirectMiddleware implements MiddlewareInterface
 {
     /**
+     * The base path helper.
+     * @var BasePathHelper
+     */
+    protected $basePathHelper;
+
+    /**
+     * Initializes the middleware.
+     * @param BasePathHelper $basePathHelper
+     */
+    public function __construct(BasePathHelper $basePathHelper)
+    {
+        $this->basePathHelper = $basePathHelper;
+    }
+
+    /**
      * Process an incoming server request and return a response, optionally delegating response creation to a handler.
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
@@ -28,7 +44,7 @@ class DocumentationRedirectMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($request->getMethod() === RequestMethodInterface::METHOD_GET) {
-            $result = new RedirectResponse('/docs');
+            $result = new RedirectResponse(($this->basePathHelper)('/docs'));
         } else {
             $result = $handler->handle($request);
         }
