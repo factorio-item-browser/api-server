@@ -56,7 +56,7 @@ class IconService extends AbstractModsAwareService
                 $this->modService->getEnabledModCombinationIds()
             );
             foreach ($this->filterData($iconData, ['type', 'name']) as $data) {
-                $hashes[intval($data['hash'])] = true;
+                $hashes[bin2hex($data['hash'])] = true;
             }
         }
         return array_keys($hashes);
