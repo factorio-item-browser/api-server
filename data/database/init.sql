@@ -73,8 +73,8 @@ ENGINE=InnoDB;
 -- Recipe related tables
 CREATE TABLE `Recipe` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the recipe.',
-  `type` ENUM('normal','expensive') NOT NULL COMMENT 'The type of the recipe.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the recipe.',
+  `mode` ENUM('normal','expensive') NOT NULL COMMENT 'The mode of the recipe.',
   `craftingTime` INT(10) UNSIGNED NOT NULL COMMENT 'The required time in milliseconds to craft the recipe.',
   PRIMARY KEY (`id`),
   INDEX `idx_name` (`name`)
@@ -131,7 +131,7 @@ ENGINE=InnoDB;
 
 -- Icon related tables
 CREATE TABLE `IconFile` (
-  `hash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the icon file.',
+  `hash` BINARY(4) NOT NULL COMMENT 'The hash of the icon file.',
   `image` BLOB NOT NULL COMMENT 'The actual image.',
   PRIMARY KEY (`hash`)
 )
@@ -142,7 +142,7 @@ ENGINE=InnoDB;
 CREATE TABLE `Icon` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the icon.',
   `modCombinationId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the mod combination adding the icon.',
-  `iconFileHash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the icon file.',
+  `iconFileHash` BINARY(4) NOT NULL COMMENT 'The hash of the icon file.',
   `type` VARCHAR(32) NOT NULL COMMENT 'The type of the icon\'s prototype.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the icon\'s prototype.',
   PRIMARY KEY (`id`),
@@ -179,7 +179,7 @@ ENGINE=InnoDB;
 
 -- Other tables
 CREATE TABLE `CachedSearchResult` (
-  `hash` INT(10) UNSIGNED NOT NULL COMMENT 'The hash of the search.',
+  `hash` BINARY(4) NOT NULL COMMENT 'The hash of the search.',
   `resultData` TEXT NOT NULL COMMENT 'The result data of the search.',
   `lastSearchTime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'The time when the search result was last used.',
   PRIMARY KEY (`hash`)

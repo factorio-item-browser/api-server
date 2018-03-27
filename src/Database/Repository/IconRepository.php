@@ -38,7 +38,8 @@ class IconRepository extends EntityRepository
         $conditions = [];
         foreach ($namesByTypes as $type => $names) {
             $conditions[] = '(i.type = :type' . $index . ' AND i.name IN (:names' . $index . '))';
-            $queryBuilder->setParameter('type' . $index, $type)
+            $queryBuilder
+                ->setParameter('type' . $index, $type)
                 ->setParameter('names' . $index, array_values($names));
             ++$index;
         }
@@ -63,7 +64,7 @@ class IconRepository extends EntityRepository
     {
         $queryBuilder = $this->createQueryBuilder('i');
         $queryBuilder->andWhere('i.file IN (:hashes)')
-                     ->setParameter('hashes', array_values($hashes));
+                     ->setParameter('hashes', array_map('hex2bin', array_values($hashes)));
 
         if (count($modCombinationIds) > 0) {
             $queryBuilder

@@ -24,7 +24,7 @@ class IconFileRepository extends EntityRepository
     {
         $queryBuilder = $this->createQueryBuilder('if');
         $queryBuilder->andWhere('if.hash IN (:hashes)')
-                     ->setParameter('hashes', array_values($hashes));
+                     ->setParameter('hashes', array_map('hex2bin', array_values($hashes)));
 
         return $queryBuilder->getQuery()->getResult();
     }

@@ -20,10 +20,10 @@ class CachedSearchResult
 {
     /**
      * @ORM\Id
-     * @ORM\Column(name="hash", type="integer")
+     * @ORM\Column(name="hash")
      *
      * The hash of the search result.
-     * @var int
+     * @var string
      */
     protected $hash;
 
@@ -45,32 +45,32 @@ class CachedSearchResult
 
     /**
      * Initializes the entity.
-     * @param int $hash
+     * @param string $hash
      */
-    public function __construct(int $hash)
+    public function __construct(string $hash)
     {
-        $this->hash = $hash;
+        $this->setHash($hash);
         $this->lastSearchTime = new DateTime();
     }
 
     /**
      * Sets the hash of the search result.
-     * @param int $hash
+     * @param string $hash
      * @return $this
      */
-    public function setHash(int $hash)
+    public function setHash(string $hash)
     {
-        $this->hash = $hash;
+        $this->hash = hex2bin($hash);
         return $this;
     }
 
     /**
      * Returns the hash of the search result.
-     * @return int
+     * @return string
      */
-    public function getHash(): int
+    public function getHash(): string
     {
-        return $this->hash;
+        return bin2hex($this->hash);
     }
 
     /**

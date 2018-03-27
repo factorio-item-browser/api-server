@@ -116,11 +116,11 @@ class CachedSearchResultService extends AbstractModsAwareService
     /**
      * Calculates and returns the hash to use for the search results.
      * @param SearchQuery $searchQuery
-     * @return int
+     * @return string
      */
-    protected function buildSearchHash(SearchQuery $searchQuery): int
+    protected function buildSearchHash(SearchQuery $searchQuery): string
     {
-        return crc32(json_encode([
+        return hash('crc32b', json_encode([
             'queryHash' => $searchQuery->getHash(),
             'enabledMods' => $this->modService->getEnabledModCombinationIds(),
             'locale' => $this->translationService->getCurrentLocale()

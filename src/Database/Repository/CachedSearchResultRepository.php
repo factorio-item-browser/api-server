@@ -23,15 +23,15 @@ class CachedSearchResultRepository extends EntityRepository
 
     /**
      * Finds the search results with the specified hash.
-     * @param int $hash
+     * @param string $hash
      * @return CachedSearchResult|null
      */
-    public function findByHash(int $hash): ?CachedSearchResult
+    public function findByHash(string $hash): ?CachedSearchResult
     {
         $queryBuilder = $this->createQueryBuilder('r');
         $queryBuilder->andWhere('r.hash = :hash')
                      ->andWhere('r.lastSearchTime > :timeCut')
-                     ->setParameter('hash', $hash)
+                     ->setParameter('hash', hex2bin($hash))
                      ->setParameter('timeCut', $this->getTimeCut());
 
         return $queryBuilder->getQuery()->getOneOrNullResult();

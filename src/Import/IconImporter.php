@@ -100,7 +100,7 @@ class IconImporter implements ImporterInterface
     {
         $hashes = [];
         foreach ($exportCombination->getData()->getIcons() as $exportIcon) {
-            $hashes[] = hexdec($exportIcon->getIconHash());
+            $hashes[] = $exportIcon->getIconHash();
         }
 
         return $this->iconService->getIconFilesByHashes($hashes);
@@ -114,7 +114,7 @@ class IconImporter implements ImporterInterface
     protected function updateIconFiles(ExportCombination $exportCombination, array $databaseIconFiles): array
     {
         foreach ($exportCombination->getData()->getIcons() as $exportIcon) {
-            $hash = hexdec($exportIcon->getIconHash());
+            $hash = $exportIcon->getIconHash();
             if (!isset($databaseIconFiles[$hash])) {
                 $databaseIconFile = new DatabaseIconFile($hash);
                 $databaseIconFiles[$hash] = $databaseIconFile;
@@ -148,7 +148,7 @@ class IconImporter implements ImporterInterface
         // Process item icons
         foreach ($exportCombination->getData()->getItems() as $exportItem) {
             if (strlen($exportItem->getIconHash()) > 0) {
-                $hash = hexdec($exportItem->getIconHash());
+                $hash = $exportItem->getIconHash();
                 $key = $exportItem->getType() . '|' . $exportItem->getName();
                 if (isset($combinationIcons[$key])) {
                     $combinationIcon = $combinationIcons[$key];
@@ -167,7 +167,7 @@ class IconImporter implements ImporterInterface
         // Process recipe icons
         foreach ($exportCombination->getData()->getRecipes() as $exportRecipe) {
             if (strlen($exportRecipe->getIconHash()) > 0 && $exportRecipe->getMode() === RecipeMode::NORMAL) {
-                $hash = hexdec($exportRecipe->getIconHash());
+                $hash = $exportRecipe->getIconHash();
                 $key = EntityType::RECIPE . '|' . $exportRecipe->getName();
                 if (isset($combinationIcons[$key])) {
                     $combinationIcon = $combinationIcons[$key];
@@ -191,11 +191,11 @@ class IconImporter implements ImporterInterface
 
     /**
      * Returns the icon file with the specified hash, fetching it from the database if not already done.
-     * @param int $hash
+     * @param string $hash
      * @return DatabaseIconFile
      * @throws ApiServerException
      */
-    protected function getIconFile(int $hash): DatabaseIconFile
+    protected function getIconFile(string $hash): DatabaseIconFile
     {
         if (!isset($this->databaseIconFiles[$hash])) {
             $newIconFiles = $this->iconService->getIconFilesByHashes([$hash]);

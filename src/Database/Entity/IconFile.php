@@ -21,11 +21,10 @@ class IconFile
 {
     /**
      * @ORM\Id
-     * @ORM\Column(name="`hash`", type="integer")
-     * Note: BINARY(4) would be more appropriate, but Doctrine makes using binary fields in queries complicated.
+     * @ORM\Column(name="`hash`")
      *
      * The hash of the icon file.
-     * @var int|null
+     * @var string
      */
     protected $hash;
 
@@ -47,32 +46,32 @@ class IconFile
 
     /**
      * Initializes the entity.
-     * @param int $hash
+     * @param string $hash
      */
-    public function __construct(int $hash)
+    public function __construct(string $hash)
     {
-        $this->hash = $hash;
+        $this->setHash($hash);
         $this->icons = new ArrayCollection();
     }
 
     /**
      * Sets the hash of the icon.
-     * @param int $hash
+     * @param string $hash
      * @return $this Implementing fluent interface.
      */
-    public function setHash(int $hash)
+    public function setHash(string $hash)
     {
-        $this->hash = $hash;
+        $this->hash = hex2bin($hash);
         return $this;
     }
 
     /**
      * Returns the hash of the icon.
-     * @return int
+     * @return string
      */
-    public function getHash(): int
+    public function getHash(): string
     {
-        return $this->hash;
+        return bin2hex($this->hash);
     }
 
     /**

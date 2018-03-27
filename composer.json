@@ -21,6 +21,7 @@
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^0.2",
     "zendframework/zend-config-aggregator": "^1.0",
+    "zendframework/zend-diactoros": "^1.7",
     "zendframework/zend-expressive": "^3.0",
     "zendframework/zend-expressive-fastroute": "^3.0",
     "zendframework/zend-expressive-helpers": "^5.0",
