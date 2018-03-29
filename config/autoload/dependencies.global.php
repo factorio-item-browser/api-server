@@ -67,10 +67,8 @@ return [
             BaseUrlMiddleware::class => BaseUrlMiddlewareFactory::class,
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
+            ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
             ExportDataService::class => ExportData\ExportDataServiceFactory::class,
-        ],
-        'invokables' => [
-            ErrorResponseGenerator::class => Response\ErrorResponseGenerator::class,
         ]
     ],
 ];

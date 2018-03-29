@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Response;
 
 use Interop\Container\ContainerInterface;
+use Zend\Log\LoggerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
@@ -24,6 +25,9 @@ class ErrorResponseGeneratorFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new ErrorResponseGenerator();
+        /* @var LoggerInterface $logger */
+        $logger = $container->get('logger.factorio-item-browser');
+
+        return new ErrorResponseGenerator($logger);
     }
 }

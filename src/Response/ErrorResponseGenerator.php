@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Log\LoggerInterface;
 
 /**
  * The class generating the error response.
@@ -17,6 +18,21 @@ use Zend\Diactoros\Response\JsonResponse;
  */
 class ErrorResponseGenerator
 {
+    /**
+     * The logger.
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * Initializes the generator.
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * Handles the thrown exception.
      * @param Throwable $exception
@@ -35,6 +51,8 @@ class ErrorResponseGenerator
         if ($statusCode < 400 || $statusCode >= 600) {
             $statusCode = 500;
             $message = 'An unexpected error occurred.';
+
+            $this->logger->crit($exception);
         }
         return new JsonResponse($message, $statusCode, $response->getHeaders());
     }

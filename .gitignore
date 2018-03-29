@@ -1,3 +1,4 @@
 /.idea
-/data/export
+/data/*
+!/data/database
 /vendor
