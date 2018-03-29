@@ -5,12 +5,10 @@ info:
   contact:
     name: "BluePsyduck"
     email: "bluepsyduck@gmx.com"
-  version: "alpha"
+  version: "1.0.0-rc1"
 servers:
   - url: "https://www.factorio-item-browser.com/api"
     description: "Live API server"
-  - url: "http://localhost:8010/"
-    description: "Local development API server (Docker)"
 tags:
   - name: "Authorization"
     description: "Requests to authorize against the API."
@@ -35,7 +33,10 @@ paths:
         authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
         should be enabled for the token. The token will normally last for 24 hours, but may invalidate at any point
         when the database changed and the mod names must be re-evaluated. Whenever you encounter a 401 error in the
-        other requests, re-authorize to get a new token.
+        other requests, re-authorize to get a new token.<br />
+        <br />
+        To get a first look into the API, you may use the "demo" agent with the access key "factorio-item-browser".
+        This agent is restricted to base mod only, though.
       operationId: "auth"
       tags:
         - Authorization
@@ -468,11 +469,10 @@ components:
               - accessKey
               - enabledModNames
             example:
-              agent: "foo"
-              accessKey: "bar"
+              agent: "demo"
+              accessKey: "factorio-item-browser"
               enabledModNames:
                 - base
-                - bobplates
       required: true
 
     genericEntities:
