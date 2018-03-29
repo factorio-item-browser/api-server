@@ -97,7 +97,8 @@ class AuthHandler extends AbstractRequestHandler
             throw new ApiServerException('Invalid agent or access key.', 403);
         }
 
-        $this->modService->setEnabledCombinationsByModNames($requestData->getArray('enabledModNames'));
+        $enabledModNames = ($agentConfig['isDemo'] ?? false) ? ['base'] : $requestData->getArray('enabledModNames');
+        $this->modService->setEnabledCombinationsByModNames($enabledModNames);
         $token = [
             'iat' => time(),
             'exp' => time() + 86400,

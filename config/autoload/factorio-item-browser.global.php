@@ -8,6 +8,18 @@
 
 return [
     'factorio-item-browser' => [
+        'api-server' => [
+            'authorization' => [
+                'key' => 'factorio-item-browser',
+                'agents' => [
+                    'demo' => [
+                        'accessKey' => 'factorio-item-browser',
+                        'allowImport' => false,
+                        'isDemo' => true
+                    ]
+                ]
+            ]
+        ],
         'export-data' => [
             'directory' => __DIR__ . '/../../data/export'
         ]
