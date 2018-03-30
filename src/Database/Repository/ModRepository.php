@@ -20,7 +20,7 @@ class ModRepository extends EntityRepository
      * @param array|string[] $modNames
      * @return array|Mod[]
      */
-    public function findByNamesWithDependencies(array $modNames)
+    public function findByNamesWithDependencies(array $modNames): array
     {
         $queryBuilder = $this->createQueryBuilder('m');
         $queryBuilder->addSelect('d')
@@ -30,5 +30,24 @@ class ModRepository extends EntityRepository
                      ->setParameter('names', array_values($modNames));
 
         return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Counts the mods.
+     * @param array|int[] $modCombinationIds
+     * @return int
+     */
+    public function count(array $modCombinationIds = []): int
+    {
+        $queryBuilder = $this->createQueryBuilder('m');
+        $queryBuilder->select('COUNT(m.id) AS numberOfMods');
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder->innerJoin('m.combinations', 'c')
+                         ->andWhere('c.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
+        }
+
+        return (int) $queryBuilder->getQuery()->getSingleScalarResult();
     }
 }

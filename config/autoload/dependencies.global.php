@@ -32,6 +32,7 @@ return [
             Handler\Item\ItemRandomHandler::class => Handler\Item\ItemRandomHandlerFactory::class,
             Handler\Import\ImportHandler::class => Handler\Import\ImportHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
+            Handler\Mod\ModMetaHandler::class => Handler\Mod\ModMetaHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,

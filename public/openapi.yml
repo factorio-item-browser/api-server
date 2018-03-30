@@ -5,7 +5,7 @@ info:
   contact:
     name: "BluePsyduck"
     email: "bluepsyduck@gmx.com"
-  version: "1.0.0-rc1"
+  version: "1.0.0"
 servers:
   - url: "https://www.factorio-item-browser.com/api"
     description: "Live API server"
@@ -93,7 +93,6 @@ paths:
         - Generic
       parameters:
         - $ref: "#/components/parameters/Authorization"
-        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/genericEntities"
       responses:
@@ -210,6 +209,30 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/modList"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+        "500":
+          $ref: "#/components/responses/unexpectedError"
+      security:
+        - jwt: []
+
+  /mods/meta:
+    post:
+      summary:
+        Provides some meta information about the currently enabled mods.
+      description:
+        This request will provide some meta information of the mods like the number of available and enabled mods. This
+        request is to avoid requesting the full list of mods to get these information.
+      operationId: "mod.meta"
+      tags:
+        - Mods
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      responses:
+        "200":
+          $ref: "#/components/responses/modMeta"
         "400":
           $ref: "#/components/responses/badRequest"
         "401":
@@ -879,6 +902,29 @@ components:
                   description: "Smelt extra ores into plates, and make useful intermediate products."
                   author: "Bobingabout"
                   version: "0.60.0"
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
+
+    modMeta:
+      description:
+        The meta information of the mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              numberOfAvailableMods:
+                type: "integer"
+                description: "The number of available mods in the browser."
+              numberOfEnabledMods:
+                type: "integer"
+                description: "The number of currently enabled mods."
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              numberOfAvailableMods: 42
+              numberOfEnabledMods: 21
               meta:
                 statusCode: 200
                 executionTime: 13.37

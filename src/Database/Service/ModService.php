@@ -162,4 +162,22 @@ class ModService extends AbstractDatabaseService
         }
         return $result;
     }
+
+    /**
+     * Returns the number of available mods.
+     * @return int
+     */
+    public function getNumberOfAvailableMods(): int
+    {
+        return $this->modRepository->count();
+    }
+
+    /**
+     * Returns the number of enabled mods.
+     * @return int
+     */
+    public function getNumberOfEnabledMods(): int
+    {
+        return $this->modRepository->count($this->enabledModCombinationIds);
+    }
 }
