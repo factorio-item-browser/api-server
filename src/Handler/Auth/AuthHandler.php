@@ -9,6 +9,7 @@ use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use Firebase\JWT\JWT;
+use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
 
@@ -74,6 +75,7 @@ class AuthHandler extends AbstractRequestHandler
                 ]
             ])
             ->add([
+                'type' => ArrayInput::class,
                 'name' => 'enabledModNames',
                 'required' => true,
                 'validators' => [

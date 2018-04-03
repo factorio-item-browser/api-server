@@ -1,7 +1,9 @@
 openapi: "3.0.0"
 info:
   title: "Factorio Item Browser API"
-  description: ""
+  description:
+    This API provides access to the mod data of the Factorio Item Browser, including item details, recipe details as
+    well as any translation available from the mods.
   contact:
     name: "BluePsyduck"
     email: "bluepsyduck@gmx.com"

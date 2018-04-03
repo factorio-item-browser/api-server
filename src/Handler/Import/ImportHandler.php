@@ -18,6 +18,7 @@ use FactorioItemBrowser\ExportData\Service\ExportDataService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\InputFilter\InputFilter;
+use Zend\Validator\NotEmpty;
 
 /**
  * The handler of the /import request.
@@ -81,7 +82,16 @@ class ImportHandler extends AbstractRequestHandler
      */
     protected function createInputFilter(): InputFilter
     {
-        return new InputFilter();
+        $inputFilter = new InputFilter();
+        $inputFilter
+            ->add([
+                'name' => 'modName',
+                'required' => true,
+                'validators' => [
+                    new NotEmpty()
+                ]
+            ]);
+        return $inputFilter;
     }
 
     /**
@@ -91,11 +101,16 @@ class ImportHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
+        ini_set('max_execution_time', '0');
+
         try {
+            $modName = $requestData->getString('modName');
             $databaseMods = $this->modService->getAllMods();
-            foreach ($this->exportDataService->getMods() as $exportMod) {
-                $this->importMod($exportMod, $databaseMods[$exportMod->getName()] ?? null);
+            $exportMod = $this->exportDataService->getMod($modName);
+            if (!$exportMod instanceof ExportMod) {
+                throw new ApiServerException('Unknown mod to import: ' . $modName);
             }
+            $this->importMod($exportMod, $databaseMods[$exportMod->getName()] ?? null);
             $this->importerManager->clean();
         } catch (Exception $e) {
             // Set exception code to 500 to have the exception message printed into the response.
@@ -128,7 +143,8 @@ class ImportHandler extends AbstractRequestHandler
             // We always need the combination with no optional mods loaded because mod meta data are assigned to it.
             $emptyCombination = new ExportCombination();
             $emptyCombination->setName($exportMod->getName())
-                             ->setMainModName($exportMod->getName());
+                             ->setMainModName($exportMod->getName())
+                             ->setIsDataLoaded(true); // Do not try to load non-existing combination.
 
             $this->importCombination(
                 $emptyCombination,
