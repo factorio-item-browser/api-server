@@ -220,7 +220,7 @@ paths:
       security:
         - jwt: []
 
-  /mods/meta:
+  /mod/meta:
     post:
       summary:
         Provides some meta information about the currently enabled mods.
