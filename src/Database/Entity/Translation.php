@@ -77,12 +77,12 @@ class Translation
     protected $description = '';
 
     /**
-     * @ORM\Column(name="isDuplicatedByRecipe", type="integer")
+     * @ORM\Column(name="isDuplicatedByRecipe", type="boolean")
      *
      * Whether this translation is duplicated by the recipe.
-     * @var int
+     * @var bool
      */
-    protected $isDuplicatedByRecipe = 0;
+    protected $isDuplicatedByRecipe = false;
 
     /**
      * Sets the internal id of the translation.
@@ -231,7 +231,7 @@ class Translation
      */
     public function setIsDuplicatedByRecipe(bool $isDuplicatedByRecipe)
     {
-        $this->isDuplicatedByRecipe = $isDuplicatedByRecipe ? 1 : 0;
+        $this->isDuplicatedByRecipe = $isDuplicatedByRecipe;
         return $this;
     }
 
@@ -241,6 +241,6 @@ class Translation
      */
     public function getIsDuplicatedByRecipe(): bool
     {
-        return $this->isDuplicatedByRecipe === 1;
+        return $this->isDuplicatedByRecipe;
     }
 }
