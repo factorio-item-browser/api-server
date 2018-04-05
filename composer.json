@@ -37,7 +37,7 @@
   },
   "scripts": {
     "post-autoload-dump": [
-      "mkdir -p data/cache data/log && chmod 0777 data/cache data/log"
+      "mkdir -p data/cache && chmod 0777 data/cache"
     ]
   }
 }
