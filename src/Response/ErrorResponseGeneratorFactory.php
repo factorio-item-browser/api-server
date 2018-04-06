@@ -25,8 +25,11 @@ class ErrorResponseGeneratorFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var LoggerInterface $logger */
-        $logger = $container->get('logger.factorio-item-browser');
+        $logger = null;
+        if ($container->has('logger.factorio-item-browser')) {
+            /* @var LoggerInterface $logger */
+            $logger = $container->get('logger.factorio-item-browser');
+        }
 
         return new ErrorResponseGenerator($logger);
     }

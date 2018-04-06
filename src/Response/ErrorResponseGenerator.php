@@ -20,15 +20,15 @@ class ErrorResponseGenerator
 {
     /**
      * The logger.
-     * @var LoggerInterface
+     * @var LoggerInterface|null
      */
     protected $logger;
 
     /**
      * Initializes the generator.
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(?LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
@@ -52,7 +52,9 @@ class ErrorResponseGenerator
             $statusCode = 500;
             $message = 'An unexpected error occurred.';
 
-            $this->logger->crit($exception);
+            if ($this->logger instanceof LoggerInterface) {
+                $this->logger->crit($exception);
+            }
         }
         return new JsonResponse($message, $statusCode, $response->getHeaders());
     }
