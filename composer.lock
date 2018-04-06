@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "27d1c515d8296a4d1a73394beb5fe61f",
+    "content-hash": "855d0afa819e9a648c29ac7b0b77aa4f",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -452,16 +452,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "v2.6.3",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "e3eed9b1facbb0ced3a0995244843a189e7d1b13"
+                "reference": "f76bf5ef631cec551a86c2291fc749534febebf1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/e3eed9b1facbb0ced3a0995244843a189e7d1b13",
-                "reference": "e3eed9b1facbb0ced3a0995244843a189e7d1b13",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/f76bf5ef631cec551a86c2291fc749534febebf1",
+                "reference": "f76bf5ef631cec551a86c2291fc749534febebf1",
                 "shasum": ""
             },
             "require": {
@@ -470,9 +470,11 @@
                 "php": "^7.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.4.6",
+                "doctrine/coding-standard": "^4.0",
+                "phpunit/phpunit": "^7.0",
                 "phpunit/phpunit-mock-objects": "!=3.2.4,!=3.2.5",
-                "symfony/console": "2.*||^3.0"
+                "symfony/console": "^2.0.5||^3.0",
+                "symfony/phpunit-bridge": "^3.4.5|^4.0.5"
             },
             "suggest": {
                 "symfony/console": "For helpful console commands such as SQL execution and import of files."
@@ -483,7 +485,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.6.x-dev"
+                    "dev-master": "2.7.x-dev"
                 }
             },
             "autoload": {
@@ -521,7 +523,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2017-11-19T13:38:54+00:00"
+            "time": "2018-04-01T23:33:17+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -782,16 +784,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-master",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "93198dfd8b2e977d1b848b5d77d0fb946a857ec2"
+                "reference": "d500ee0c911ee0263f93becc211e6ea32279477b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/93198dfd8b2e977d1b848b5d77d0fb946a857ec2",
-                "reference": "93198dfd8b2e977d1b848b5d77d0fb946a857ec2",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/d500ee0c911ee0263f93becc211e6ea32279477b",
+                "reference": "d500ee0c911ee0263f93becc211e6ea32279477b",
                 "shasum": ""
             },
             "require": {
@@ -800,9 +802,9 @@
                 "php": "^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.0"
+                "phpunit/phpunit": "^6.0"
             },
-            "type": "project",
+            "type": "library",
             "autoload": {
                 "psr-4": {
                     "FactorioItemBrowser\\Api\\Client\\": "src"
@@ -819,7 +821,7 @@
                 }
             ],
             "description": "The API client of the Factorio Item Browser.",
-            "homepage": "https://www.factorio-item-browser.com/",
+            "homepage": "https://github.com/factorio-item-browser/api-client",
             "keywords": [
                 "BluePsyduck",
                 "FIB",
@@ -827,20 +829,20 @@
                 "api",
                 "client"
             ],
-            "time": "2018-03-24T12:21:41+00:00"
+            "time": "2018-04-05T19:41:27+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",
-            "version": "dev-master",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/export-data.git",
-                "reference": "8e31ead4e5556d57f009556166de31bc04748193"
+                "reference": "828248c8a86fb6637c0d04f1e025836b06bcb34c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/8e31ead4e5556d57f009556166de31bc04748193",
-                "reference": "8e31ead4e5556d57f009556166de31bc04748193",
+                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/828248c8a86fb6637c0d04f1e025836b06bcb34c",
+                "reference": "828248c8a86fb6637c0d04f1e025836b06bcb34c",
                 "shasum": ""
             },
             "require": {
@@ -868,14 +870,14 @@
                 }
             ],
             "description": "The export data structure of the Factorio Item Browser.",
-            "homepage": "https://www.factorio-item-browser.com/",
+            "homepage": "https://github.com/factorio-item-browser/export-data",
             "keywords": [
                 "BluePsyduck",
                 "FIB",
                 "Factorio Item Browser",
                 "export"
             ],
-            "time": "2018-03-17T17:57:33+00:00"
+            "time": "2018-04-05T19:11:07+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -1326,16 +1328,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v4.0.6",
+            "version": "v4.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "555c8dbe0ae9e561740451eabdbed2cc554b6a51"
+                "reference": "aad9a6fe47319f22748fd764f52d3a7ca6fa6b64"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/555c8dbe0ae9e561740451eabdbed2cc554b6a51",
-                "reference": "555c8dbe0ae9e561740451eabdbed2cc554b6a51",
+                "url": "https://api.github.com/repos/symfony/console/zipball/aad9a6fe47319f22748fd764f52d3a7ca6fa6b64",
+                "reference": "aad9a6fe47319f22748fd764f52d3a7ca6fa6b64",
                 "shasum": ""
             },
             "require": {
@@ -1390,7 +1392,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2018-02-26T15:55:47+00:00"
+            "time": "2018-04-03T05:24:00+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1453,16 +1455,16 @@
         },
         {
             "name": "zendframework/zend-config-aggregator",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-config-aggregator.git",
-                "reference": "46460b25c09fb572f807a00cf9dfe9c466792a76"
+                "reference": "2a08547b64119a73b6700bde3301d978258dfcb5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-config-aggregator/zipball/46460b25c09fb572f807a00cf9dfe9c466792a76",
-                "reference": "46460b25c09fb572f807a00cf9dfe9c466792a76",
+                "url": "https://api.github.com/repos/zendframework/zend-config-aggregator/zipball/2a08547b64119a73b6700bde3301d978258dfcb5",
+                "reference": "2a08547b64119a73b6700bde3301d978258dfcb5",
                 "shasum": ""
             },
             "require": {
@@ -1478,7 +1480,9 @@
                 "zendframework/zend-servicemanager": "^2.7.7 || ^3.1.1"
             },
             "suggest": {
-                "zendframework/zend-config": "Allows loading configuration from XML, INI, YAML, and JSON files"
+                "zendframework/zend-config": "Allows loading configuration from XML, INI, YAML, and JSON files",
+                "zendframework/zend-config-aggregator-modulemanager": "Allows loading configuration from zend-mvc Module classes",
+                "zendframework/zend-config-aggregator-parameters": "Allows usage of templated parameters within your configuration"
             },
             "type": "library",
             "extra": {
@@ -1502,7 +1506,7 @@
                 "config-aggregator",
                 "zf"
             ],
-            "time": "2018-02-26T16:46:30+00:00"
+            "time": "2018-04-04T20:37:31+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -2288,16 +2292,16 @@
         },
         {
             "name": "zendframework/zend-stratigility",
-            "version": "3.0.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-stratigility.git",
-                "reference": "89fc799df3ce7d279bc06575252d466be9c1b5d6"
+                "reference": "1efae7142c64a795034fd0dbf8013aa8f531edf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-stratigility/zipball/89fc799df3ce7d279bc06575252d466be9c1b5d6",
-                "reference": "89fc799df3ce7d279bc06575252d466be9c1b5d6",
+                "url": "https://api.github.com/repos/zendframework/zend-stratigility/zipball/1efae7142c64a795034fd0dbf8013aa8f531edf3",
+                "reference": "1efae7142c64a795034fd0dbf8013aa8f531edf3",
                 "shasum": ""
             },
             "require": {
@@ -2350,7 +2354,7 @@
                 "psr-7",
                 "zf"
             ],
-            "time": "2018-03-15T14:10:32+00:00"
+            "time": "2018-04-04T17:47:35+00:00"
         },
         {
             "name": "zendframework/zend-validator",
@@ -2427,10 +2431,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-client": 20,
-        "factorio-item-browser/export-data": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
