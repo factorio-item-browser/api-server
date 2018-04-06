@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+ini_set('serialize_precision', '-1');
+
 chdir(dirname(__DIR__));
 require(__DIR__ . '/../vendor/autoload.php');
 
