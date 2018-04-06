@@ -1,7 +1,7 @@
 {
   "name": "factorio-item-browser/api-server",
   "description": "The API server of the Factorio Item Browser.",
-  "homepage": "https://www.factorio-item-browser.com/",
+  "homepage": "https://github.com/factorio-item-browser/api-server",
   "type": "project",
   "keywords": ["Factorio Item Browser", "FIB", "api", "server", "BluePsyduck"],
   "license": "GPL-3.0-or-later",
