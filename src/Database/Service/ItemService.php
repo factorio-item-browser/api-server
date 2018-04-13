@@ -107,7 +107,10 @@ class ItemService extends AbstractModsAwareService
     {
         $result = [];
         if (count($namesByTypes) > 0) {
-            $items = $this->itemRepository->findByTypesAndNames($namesByTypes);
+            $items = $this->itemRepository->findByTypesAndNames(
+                $namesByTypes,
+                $this->modService->getEnabledModCombinationIds()
+            );
             foreach ($items as $item) {
                 $result[$item->getType()][] = $item->getName();
             }
