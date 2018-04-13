@@ -135,17 +135,20 @@ class CachedSearchResultService extends AbstractModsAwareService
     protected function createResultCollectionFromData(string $resultData): CachedResultCollection
     {
         $cachedResultCollection = new CachedResultCollection();
+
         foreach (explode('|', $resultData) as $recipeIdData) {
-            $recipeIds = explode(',', $recipeIdData);
-            $itemId = (int) array_shift($recipeIds);
-            if ($itemId > 0) {
-                $result = new ItemResult();
-                $result->setId($itemId);
-            } else {
-                $result = new RecipeResult();
+            if (strlen($recipeIdData) > 0) {
+                $recipeIds = explode(',', $recipeIdData);
+                $itemId = (int) array_shift($recipeIds);
+                if ($itemId > 0) {
+                    $result = new ItemResult();
+                    $result->setId($itemId);
+                } else {
+                    $result = new RecipeResult();
+                }
+                $result->setRecipeIds($recipeIds);
+                $cachedResultCollection->add($result);
             }
-            $result->setRecipeIds($recipeIds);
-            $cachedResultCollection->add($result);
         }
         return $cachedResultCollection;
     }

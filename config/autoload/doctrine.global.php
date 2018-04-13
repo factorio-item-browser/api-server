@@ -28,7 +28,7 @@ return [
                 'class' => AnnotationDriver::class,
                 'cache' => 'array',
                 'paths' => [
-                    __DIR__ . '/../../src/Entity',
+                    __DIR__ . '/../../src/Database/Entity',
                 ]
             ]
         ],

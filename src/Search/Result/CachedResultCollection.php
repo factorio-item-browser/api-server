@@ -16,7 +16,7 @@ class CachedResultCollection
      * The items of the collection.
      * @var array|AbstractResult[]
      */
-    protected $results;
+    protected $results = [];
 
     /**
      * Adds a new result to the collection.
