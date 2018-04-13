@@ -40,7 +40,7 @@ class ModRepository extends EntityRepository
     public function count(array $modCombinationIds = []): int
     {
         $queryBuilder = $this->createQueryBuilder('m');
-        $queryBuilder->select('COUNT(m.id) AS numberOfMods');
+        $queryBuilder->select('COUNT(DISTINCT m.id) AS numberOfMods');
 
         if (count($modCombinationIds) > 0) {
             $queryBuilder->innerJoin('m.combinations', 'c')
