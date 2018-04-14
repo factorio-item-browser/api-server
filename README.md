@@ -1,6 +1,8 @@
 # Factorio Item Browser - API Server
 
-This repository contains the server side of the Factorio Item Browser API provide the required data to the browser and
+[![Latest Stable Version](https://poser.pugx.org/factorio-item-browser/api-server/v/stable)](https://packagist.org/packages/factorio-item-browser/api-server) [![License](https://poser.pugx.org/factorio-item-browser/api-server/license)](https://packagist.org/packages/factorio-item-browser/api-server)
+
+This repository contains the server side of the Factorio Item Browser API providing the data to the browser and
 other tools.
 
-API is still under construction and not functional at the moment.
+The documentation of the API can be found at https://www.factorio-item-browser.com/api/docs
