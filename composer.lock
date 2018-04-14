@@ -784,16 +784,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "d500ee0c911ee0263f93becc211e6ea32279477b"
+                "reference": "8578611ad3b1940e13fb80c697a869b313a40ce6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/d500ee0c911ee0263f93becc211e6ea32279477b",
-                "reference": "d500ee0c911ee0263f93becc211e6ea32279477b",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/8578611ad3b1940e13fb80c697a869b313a40ce6",
+                "reference": "8578611ad3b1940e13fb80c697a869b313a40ce6",
                 "shasum": ""
             },
             "require": {
@@ -829,7 +829,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-04-05T19:41:27+00:00"
+            "time": "2018-04-14T16:53:59+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",

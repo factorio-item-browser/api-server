@@ -6,7 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
-use FactorioItemBrowser\Api\Client\Entity\TranslatedEntityInterface;
+use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Server\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Server\Database\Repository\TranslationRepository;
 
@@ -32,7 +32,7 @@ class TranslationService extends AbstractModsAwareService
 
     /**
      * The entities which need to be translated.
-     * @var array|TranslatedEntityInterface[]
+     * @var array|GenericEntity[]
      */
     protected $entitiesToTranslate = [];
 
@@ -69,10 +69,10 @@ class TranslationService extends AbstractModsAwareService
 
     /**
      * Adds an entity to be translated at a later point.
-     * @param TranslatedEntityInterface $entity
+     * @param GenericEntity $entity
      * @return $this
      */
-    public function addEntityToTranslate(TranslatedEntityInterface $entity)
+    public function addEntityToTranslate(GenericEntity $entity)
     {
         $this->entitiesToTranslate[] = $entity;
         return $this;
@@ -131,7 +131,7 @@ class TranslationService extends AbstractModsAwareService
 
     /**
      * Matches the translation data to the entities.
-     * @param array|TranslatedEntityInterface[] $entities
+     * @param array|GenericEntity[][] $entities
      * @param array $translationData
      * @return $this
      */
@@ -145,7 +145,6 @@ class TranslationService extends AbstractModsAwareService
 
             foreach ($keys as $key) {
                 foreach ($entities[$key] ?? [] as $entity) {
-                    /* @var TranslatedEntityInterface $entity */
                     if (strlen($translation['value']) > 0) {
                         $entity->setLabel($translation['value']);
                     }
