@@ -87,6 +87,18 @@ class ModCombination
     protected $recipes;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Machine", inversedBy="modCombinations")
+     * @ORM\JoinTable(name="ModCombinationXMachine",
+     *     joinColumns={@ORM\JoinColumn(name="modCombinationId", referencedColumnName="id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="machineId", referencedColumnName="id")}
+     * )
+     *
+     * The machines added by the mod combination.
+     * @var Collection|Machine[]
+     */
+    protected $machines;
+
+    /**
      * @ORM\OneToMany(targetEntity="Translation", mappedBy="modCombination")
      *
      * The translations added by the mod combination.
@@ -112,6 +124,7 @@ class ModCombination
 
         $this->items = new ArrayCollection();
         $this->recipes = new ArrayCollection();
+        $this->machines = new ArrayCollection();
         $this->translations = new ArrayCollection();
         $this->icons = new ArrayCollection();
     }
@@ -232,6 +245,15 @@ class ModCombination
     public function getRecipes(): Collection
     {
         return $this->recipes;
+    }
+
+    /**
+     * Returns the machines added by the mod combination.
+     * @return Collection|Machine[]
+     */
+    public function getMachines(): Collection
+    {
+        return $this->machines;
     }
 
     /**
