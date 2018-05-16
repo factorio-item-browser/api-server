@@ -18,6 +18,7 @@ return [
     'dependencies' => [
         'factories'  => [
             Database\Service\CachedSearchResultService::class => Database\Service\CachedSearchResultServiceFactory::class,
+            Database\Service\CraftingCategoryService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ModService::class => Database\Service\ModServiceFactory::class,
@@ -38,6 +39,7 @@ return [
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
 
             Import\CombinationImporter::class => Import\CombinationImporterFactory::class,
+            Import\CraftingCategoryImporter::class => Import\CraftingCategoryImporterFactory::class,
             Import\IconImporter::class => Import\IconImporterFactory::class,
             Import\ImporterManager::class => Import\ImporterManagerFactory::class,
             Import\ItemImporter::class => Import\ItemImporterFactory::class,

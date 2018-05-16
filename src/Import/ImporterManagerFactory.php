@@ -22,6 +22,7 @@ class ImporterManagerFactory implements FactoryInterface
     const IMPORTER_CLASSES = [
         ModImporter::class,
         CombinationImporter::class,
+        CraftingCategoryImporter::class,
         ItemImporter::class,
         RecipeImporter::class,
         TranslationImporter::class,

@@ -6,24 +6,23 @@ namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the recipe importer.
+ * The factory of the craftingCategory importer.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeImporterFactory
+class CraftingCategoryImporterFactory implements FactoryInterface
 {
     /**
-     * Creates the recipe importer.
+     * Creates the crafting category importer.
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  null|array $options
-     * @return RecipeImporter
+     * @return CraftingCategoryImporter
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -31,11 +30,7 @@ class RecipeImporterFactory
         $entityManager = $container->get(EntityManager::class);
         /* @var CraftingCategoryService $craftingCategoryService */
         $craftingCategoryService = $container->get(CraftingCategoryService::class);
-        /* @var ItemService $itemService */
-        $itemService = $container->get(ItemService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $container->get(RecipeService::class);
 
-        return new RecipeImporter($entityManager, $craftingCategoryService, $itemService, $recipeService);
+        return new CraftingCategoryImporter($entityManager, $craftingCategoryService);
     }
 }
