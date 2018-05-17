@@ -32,4 +32,40 @@ class MachineService extends AbstractModsAwareService
         $this->machineRepository = $entityManager->getRepository(Machine::class);
         return $this;
     }
+
+    /**
+     * Returns the machines with the specified names.
+     * @param array|string[] $names
+     * @return array|Machine[]
+     */
+    public function getByNames(array $names): array
+    {
+        $result = [];
+        if (count($names) > 0) {
+            $machineData = $this->machineRepository->findIdDataByNames(
+                $names,
+                $this->modService->getEnabledModCombinationIds()
+            );
+
+            if (count($this->modService->getEnabledModCombinationIds()) > 0) {
+                $machineData = $this->filterData($machineData, ['name']);
+            }
+            $machineIds = [];
+            foreach ($machineData as $data) {
+                $machineIds[] = intval($data['id']);
+            }
+            $result = $this->machineRepository->findByIds($machineIds);
+        }
+        return $result;
+    }
+
+    /**
+     * Removes any orphaned machines, i.e. machines no longer used by any combination.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $this->machineRepository->removeOrphans();
+        return $this;
+    }
 }

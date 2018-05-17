@@ -44,6 +44,7 @@ return [
             Import\IconImporter::class => Import\IconImporterFactory::class,
             Import\ImporterManager::class => Import\ImporterManagerFactory::class,
             Import\ItemImporter::class => Import\ItemImporterFactory::class,
+            Import\MachineImporter::class => Import\MachineImporterFactory::class,
             Import\ModImporter::class => Import\ModImporterFactory::class,
             Import\OrderImporter::class => Import\OrderImporterFactory::class,
             Import\RecipeImporter::class => Import\RecipeImporterFactory::class,

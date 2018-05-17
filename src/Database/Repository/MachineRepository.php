@@ -89,4 +89,30 @@ class MachineRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+    /**
+     * Removes any orphaned machines, i.e. machines no longer used by any combination.
+     * @return $this
+     */
+    public function removeOrphans()
+    {
+        $queryBuilder = $this->createQueryBuilder('m');
+        $queryBuilder->select('m.id AS id')
+                     ->leftJoin('m.modCombinations', 'mc')
+                     ->andWhere('mc.id IS NULL');
+
+        $machineIds = [];
+        foreach ($queryBuilder->getQuery()->getResult() as $data) {
+            $machineIds[] = $data['id'];
+        }
+
+        if (count($machineIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('m');
+            $queryBuilder->delete($this->_entityName, 'm')
+                         ->andWhere('m.id IN (:machineIds)')
+                         ->setParameter('machineIds', array_values($machineIds));
+            $queryBuilder->getQuery()->execute();
+        }
+        return $this;
+    }
 }

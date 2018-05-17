@@ -21,13 +21,13 @@ class AbstractDatabaseServiceFactory implements FactoryInterface
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ModService
+     * @return AbstractDatabaseService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         /* @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
 
-        return new ModService($entityManager);
+        return new $requestedName($entityManager);
     }
 }

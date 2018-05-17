@@ -25,6 +25,7 @@ class ImporterManagerFactory implements FactoryInterface
         CraftingCategoryImporter::class,
         ItemImporter::class,
         RecipeImporter::class,
+        MachineImporter::class,
         TranslationImporter::class,
         IconImporter::class,
         OrderImporter::class,
