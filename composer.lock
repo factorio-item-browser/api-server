@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c35e38b392d6d7a85154973e6275979",
+    "content-hash": "c24fbf67fc19d5b3f681aaacaebe576b",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -784,16 +784,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "1.0.1",
+            "version": "dev-feature/machines",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "ae66201baa00112d11a4e62dbc0deeea5da45823"
+                "reference": "be9664f4051666b03f92f834d26522329217d51c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/ae66201baa00112d11a4e62dbc0deeea5da45823",
-                "reference": "ae66201baa00112d11a4e62dbc0deeea5da45823",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/be9664f4051666b03f92f834d26522329217d51c",
+                "reference": "be9664f4051666b03f92f834d26522329217d51c",
                 "shasum": ""
             },
             "require": {
@@ -802,7 +802,7 @@
                 "php": "^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.0"
+                "phpunit/phpunit": "^6.0 || ^7.0"
             },
             "type": "library",
             "autoload": {
@@ -829,7 +829,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-04-14T16:53:59+00:00"
+            "time": "2018-05-17T14:55:04+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",
@@ -837,12 +837,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/export-data.git",
-                "reference": "8c9df1d4653e719378233d84f47d564f4267f27f"
+                "reference": "d93d51de342e923232c9d5172cdce296bf64558b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/8c9df1d4653e719378233d84f47d564f4267f27f",
-                "reference": "8c9df1d4653e719378233d84f47d564f4267f27f",
+                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/d93d51de342e923232c9d5172cdce296bf64558b",
+                "reference": "d93d51de342e923232c9d5172cdce296bf64558b",
                 "shasum": ""
             },
             "require": {
@@ -877,7 +877,7 @@
                 "Factorio Item Browser",
                 "export"
             ],
-            "time": "2018-05-15T19:28:11+00:00"
+            "time": "2018-05-17T13:43:34+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -2437,6 +2437,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "factorio-item-browser/api-client": 20,
         "factorio-item-browser/export-data": 20
     },
     "prefer-stable": false,

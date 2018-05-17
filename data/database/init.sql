@@ -221,6 +221,7 @@ CREATE TABLE `Translation` (
   `value` TEXT NOT NULL COMMENT 'The actual translation.',
   `description` TEXT NOT NULL COMMENT 'The translated description.',
   `isDuplicatedByRecipe` BIT(1) NOT NULL COMMENT 'Whether this translation is duplicated by the recipe.',
+  `isDuplicatedByMachine` BIT(1) NOT NULL COMMENT 'Whether this translation is duplicated by the machine.',
   PRIMARY KEY (`id`),
   INDEX `idx_modId` (`modCombinationId`),
   INDEX `idx_locale_type_name` (`locale`, `type`, `name`),
