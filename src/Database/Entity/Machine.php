@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="FactorioItemBrowser\Api\Server\Database\Repository\MachineRepository")
  * @ORM\Table(name="Machine")
  */
 class Machine

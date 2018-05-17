@@ -18,10 +18,11 @@ return [
     'dependencies' => [
         'factories'  => [
             Database\Service\CachedSearchResultService::class => Database\Service\CachedSearchResultServiceFactory::class,
-            Database\Service\CraftingCategoryService::class => Database\Service\AbstractModsAwareServiceFactory::class,
+            Database\Service\CraftingCategoryService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Database\Service\ModService::class => Database\Service\ModServiceFactory::class,
+            Database\Service\MachineService::class => Database\Service\AbstractModsAwareServiceFactory::class,
+            Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
 

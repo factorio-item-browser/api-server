@@ -14,7 +14,7 @@ use FactorioItemBrowser\Api\Server\Database\Repository\CraftingCategoryRepositor
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class CraftingCategoryService extends AbstractModsAwareService
+class CraftingCategoryService extends AbstractDatabaseService
 {
     /**
      * The repository of the crafting categories.

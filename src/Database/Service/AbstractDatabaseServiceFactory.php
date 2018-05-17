@@ -14,7 +14,7 @@ use Zend\ServiceManager\Factory\FactoryInterface;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModServiceFactory implements FactoryInterface
+class AbstractDatabaseServiceFactory implements FactoryInterface
 {
     /**
      * Creates the service instance.

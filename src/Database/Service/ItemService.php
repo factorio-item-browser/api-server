@@ -17,7 +17,7 @@ use FactorioItemBrowser\Api\Server\Database\Repository\ItemRepository;
 class ItemService extends AbstractModsAwareService
 {
     /**
-     * The repository of the recipes.
+     * The repository of the items.
      * @var ItemRepository
      */
     protected $itemRepository;
