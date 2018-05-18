@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Server\Database\Entity\Machine;
+use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
@@ -113,11 +114,12 @@ class RecipeMachinesHandler extends AbstractRequestHandler
             throw new ApiServerException('Recipe not found or not available in the enabled mods.', 404);
         }
 
-        $craftingCategory = reset($recipes)->getCraftingCategory();
+        $recipe = reset($recipes);
+        $craftingCategory = $recipe->getCraftingCategory();
         $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory);
 
         $slicedDatabaseMachines = array_slice(
-            $this->sortMachines($databaseMachines),
+            $this->sortMachines($this->filterMachines($recipe, $databaseMachines)),
             $requestData->getInteger('indexOfFirstResult'),
             $requestData->getInteger('numberOfResults')
         );
@@ -134,6 +136,23 @@ class RecipeMachinesHandler extends AbstractRequestHandler
             'machines' => $clientMachines,
             'totalNumberOfResults' => count($databaseMachines)
         ];
+    }
+
+    /**
+     * Filters the machines to actually support the specified recipe.
+     * @param Recipe $recipe
+     * @param array|Machine[] $machines
+     * @return array|Machine[]
+     */
+    protected function filterMachines(Recipe $recipe, array $machines): array
+    {
+        $numberOfIngredients = $recipe->getIngredients()->count();
+        foreach ($machines as $key => $machine) {
+            if ($machine->getName() !== 'player' && $machine->getNumberOfIngredientSlots() < $numberOfIngredients) {
+                unset($machines[$key]);
+            }
+        }
+        return array_values($machines);
     }
 
     /**
