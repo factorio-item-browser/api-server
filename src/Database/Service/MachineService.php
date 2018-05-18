@@ -88,6 +88,26 @@ class MachineService extends AbstractModsAwareService
     }
 
     /**
+     * Filters the specified machine names to only include the actually available ones.
+     * @param array|string[] $names
+     * @return array|string[]
+     */
+    public function filterAvailableNames(array $names): array
+    {
+        $result = [];
+        if (count($names) > 0) {
+            $recipeData = $this->machineRepository->findIdDataByNames(
+                $names,
+                $this->modService->getEnabledModCombinationIds()
+            );
+            foreach ($recipeData as $data) {
+                $result[$data['name']] = true;
+            }
+        }
+        return array_keys($result);
+    }
+
+    /**
      * Removes any orphaned machines, i.e. machines no longer used by any combination.
      * @return $this
      */

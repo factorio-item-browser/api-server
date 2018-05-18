@@ -8,6 +8,7 @@ use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
+use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 
@@ -24,7 +25,13 @@ class GenericDetailsHandler extends AbstractGenericHandler
      * @var ItemService
      */
     protected $itemService;
-    
+
+    /**
+     * The database service of the machines.
+     * @var MachineService
+     */
+    protected $machineService;
+
     /**
      * The database recipe service.
      * @var RecipeService
@@ -40,15 +47,18 @@ class GenericDetailsHandler extends AbstractGenericHandler
     /**
      * Initializes the request handler.
      * @param ItemService $itemService
+     * @param MachineService $machineService
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
         ItemService $itemService,
+        MachineService $machineService,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
         $this->itemService = $itemService;
+        $this->machineService = $machineService;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -61,13 +71,19 @@ class GenericDetailsHandler extends AbstractGenericHandler
     protected function handleRequest(DataContainer $requestData): array
     {
         $namesByTypes = $this->getEntityNamesByType($requestData);
-
         $entities = [];
+
         $recipeNames = $namesByTypes[EntityType::RECIPE] ?? [];
         foreach ($this->recipeService->filterAvailableNames($recipeNames) as $recipeName) {
             $entities[] = $this->createGenericEntity(EntityType::RECIPE, $recipeName);
         }
         unset($namesByTypes[EntityType::RECIPE]);
+
+        $machineNames = $namesByTypes[EntityType::MACHINE] ?? [];
+        foreach ($this->machineService->filterAvailableNames($machineNames) as $machineName) {
+            $entities[] = $this->createGenericEntity(EntityType::MACHINE, $machineName);
+        }
+        unset($namesByTypes[EntityType::MACHINE]);
 
         foreach ($this->itemService->filterAvailableTypesAndNames($namesByTypes) as $type => $itemNames) {
             foreach ($itemNames as $itemName) {
