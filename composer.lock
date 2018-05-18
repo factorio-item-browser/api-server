@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c24fbf67fc19d5b3f681aaacaebe576b",
+    "content-hash": "8cf9fbb527b1210a1093591eadd32767",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -788,12 +788,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "a92976e02b06b063dd8c448a6eb5c66748aec1b8"
+                "reference": "ab1dd1046f1de01d7552f6328cbaf48e37b1846e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/a92976e02b06b063dd8c448a6eb5c66748aec1b8",
-                "reference": "a92976e02b06b063dd8c448a6eb5c66748aec1b8",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/ab1dd1046f1de01d7552f6328cbaf48e37b1846e",
+                "reference": "ab1dd1046f1de01d7552f6328cbaf48e37b1846e",
                 "shasum": ""
             },
             "require": {
@@ -829,7 +829,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-05-17T16:55:13+00:00"
+            "time": "2018-05-18T13:04:18+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",
@@ -977,24 +977,26 @@
         },
         {
             "name": "mtymek/blast-base-url",
-            "version": "0.2.0",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mtymek/blast-base-url.git",
-                "reference": "e301a4251f48a0fbc0d96aebe958e7e4a1974062"
+                "reference": "43c0cc0eb7ceff65909f8426521b590f3627149a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mtymek/blast-base-url/zipball/e301a4251f48a0fbc0d96aebe958e7e4a1974062",
-                "reference": "e301a4251f48a0fbc0d96aebe958e7e4a1974062",
+                "url": "https://api.github.com/repos/mtymek/blast-base-url/zipball/43c0cc0eb7ceff65909f8426521b590f3627149a",
+                "reference": "43c0cc0eb7ceff65909f8426521b590f3627149a",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.5 || ^7.0",
-                "psr/http-message": "^1.0"
+                "php": "^7.0",
+                "psr/http-message": "^1.0",
+                "psr/http-server-handler": "^1.0",
+                "psr/http-server-middleware": "^1.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.6",
+                "phpunit/phpunit": "^6.0",
                 "squizlabs/php_codesniffer": "^2.3",
                 "zendframework/zend-diactoros": "^1.3",
                 "zendframework/zend-expressive-helpers": "^1.4 || ^2.0",
@@ -1002,6 +1004,12 @@
                 "zendframework/zend-servicemanager": "^2.6"
             },
             "type": "library",
+            "extra": {
+                "zf": {
+                    "component": "Blast\\BaseUrl",
+                    "config-provider": "Blast\\BaseUrl\\ConfigProvider"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Blast\\BaseUrl\\": "src"
@@ -1026,7 +1034,7 @@
                 "psr-7",
                 "psr7"
             ],
-            "time": "2016-06-26T17:10:56+00:00"
+            "time": "2018-05-15T14:41:46+00:00"
         },
         {
             "name": "nikic/fast-route",

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Blast\BaseUrl\BasePathHelper;
-use Blast\BaseUrl\BaseUrlMiddleware;
-use Blast\BaseUrl\BaseUrlMiddlewareFactory;
 use ContainerInteropDoctrine\EntityManagerFactory;
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\ExportData\Service\ExportDataService;
@@ -69,8 +66,6 @@ return [
             Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
 
             // Dependencies of other libraries
-            BasePathHelper::class => InvokableFactory::class,
-            BaseUrlMiddleware::class => BaseUrlMiddlewareFactory::class,
             BodyParamsMiddleware::class => InvokableFactory::class,
             EntityManager::class => EntityManagerFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
