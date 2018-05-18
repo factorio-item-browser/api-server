@@ -37,6 +37,7 @@ return [
             Handler\Mod\ModMetaHandler::class => Handler\Mod\ModMetaHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
+            Handler\Recipe\RecipeMachinesHandler::class => Handler\Recipe\RecipeMachinesHandlerFactory::class,
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
 
             Import\CombinationImporter::class => Import\CombinationImporterFactory::class,

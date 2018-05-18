@@ -125,12 +125,7 @@ class RecipeImporter implements ImporterInterface
             }
         }
 
-        $groupedDatabaseRecipeIds = $this->recipeService->getIdsByNames(array_values($recipeNames));
-        if (count($groupedDatabaseRecipeIds) > 0) {
-            $databaseRecipeIds = call_user_func_array('array_merge', $groupedDatabaseRecipeIds);
-        } else {
-            $databaseRecipeIds = [];
-        }
+        $databaseRecipeIds = $this->recipeService->getIdsByNames(array_values($recipeNames));
 
         $result = [];
         foreach ($this->recipeService->getDetailsByIds($databaseRecipeIds) as $databaseRecipe) {

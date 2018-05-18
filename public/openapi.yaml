@@ -277,7 +277,8 @@ paths:
         Returns the details of all machines able to craft the recipe.
       description:
         This request will return all machines with their details which are able to craft the recipe specified in the
-        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list.
+        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
+        present, the player will be at the very first position of the result.
       operationId: "recipe.machines"
       tags:
         - Recipes
@@ -293,6 +294,8 @@ paths:
           $ref: "#/components/responses/badRequest"
         "401":
           $ref: "#/components/responses/unauthorized"
+        "404":
+          $ref: "#/components/responses/recipeNotFound"
         "500":
           $ref: "#/components/responses/unexpectedError"
 
@@ -1261,7 +1264,22 @@ components:
               meta:
                 statusCode: 404
                 executionTime: 13.37
-                errorMessage: "Recipe not known: invalid-item"
+                errorMessage: "Item not known: invalid-item"
+
+    recipeNotFound:
+      description:
+        The requested recipe is not known to the browser, or not available in the enabled mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 404
+                executionTime: 13.37
+                errorMessage: "Recipe not known: invalid-recipe"
 
     # 500 responses
     unexpectedError:

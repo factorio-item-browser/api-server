@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Server\Database\Entity\CraftingCategory;
 use FactorioItemBrowser\Api\Server\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Server\Database\Repository\MachineRepository;
 
@@ -46,14 +47,41 @@ class MachineService extends AbstractModsAwareService
                 $names,
                 $this->modService->getEnabledModCombinationIds()
             );
+            $result = $this->getDetailsByMachineData($machineData);
+        }
+        return $result;
+    }
 
-            if (count($this->modService->getEnabledModCombinationIds()) > 0) {
-                $machineData = $this->filterData($machineData, ['name']);
-            }
-            $machineIds = [];
-            foreach ($machineData as $data) {
-                $machineIds[] = intval($data['id']);
-            }
+    /**
+     * Returns the machines supporting the specified crafting category.
+     * @param CraftingCategory $craftingCategory
+     * @return array|Machine[]
+     */
+    public function getByCraftingCategory(CraftingCategory $craftingCategory): array
+    {
+        $machineData = $this->machineRepository->findIdDataByCraftingCategories(
+            [$craftingCategory->getName()]
+        );
+        return $this->getDetailsByMachineData($machineData);
+    }
+
+    /**
+     * Returns the actual machine details from the specified machine data.
+     * @param array $machineData
+     * @return array|Machine[]
+     */
+    protected function getDetailsByMachineData(array $machineData): array
+    {
+        if (count($this->modService->getEnabledModCombinationIds()) > 0) {
+            $machineData = $this->filterData($machineData, ['name']);
+        }
+        $machineIds = [];
+        foreach ($machineData as $data) {
+            $machineIds[] = intval($data['id']);
+        }
+
+        $result = [];
+        if (count($machineIds) > 0) {
             $result = $this->machineRepository->findByIds($machineIds);
         }
         return $result;
