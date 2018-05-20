@@ -71,21 +71,17 @@ class IconService extends AbstractModsAwareService
     {
         $result = [];
         if (count($iconFileHashes) > 0) {
-            $icons = $this->iconRepository->findByHashes(
+            $iconIds = [];
+            $iconData = $this->iconRepository->findIdDataByHashes(
                 $iconFileHashes,
                 $this->modService->getEnabledModCombinationIds()
             );
-
-            $namesByTypes = [];
-            foreach ($icons as $icon) {
-                $namesByTypes[$icon->getType()][] = $icon->getName();
+            foreach ($this->filterData($iconData, ['type', 'name']) as $data) {
+                $iconIds[] = intval($data['id']);
             }
-            $usedHashes = $this->getIconFileHashesByTypesAndNames($namesByTypes);
 
-            foreach ($icons as $icon) {
-                if (in_array($icon->getFile()->getHash(), $usedHashes)) {
-                    $result[] = $icon;
-                }
+            if (count($iconIds) > 0) {
+                $result = $this->iconRepository->findByIds($iconIds);
             }
         }
         return $result;
