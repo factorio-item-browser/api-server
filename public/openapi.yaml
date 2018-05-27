@@ -278,7 +278,7 @@ paths:
       description:
         This request will return all machines with their details which are able to craft the recipe specified in the
         request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
-        present, the player will be at the very first position of the result.
+        present, the player will be at the very first position of the results.
       operationId: "recipe.machines"
       tags:
         - Recipes

@@ -149,7 +149,9 @@ class RecipeMachinesHandler extends AbstractRequestHandler
     {
         $numberOfIngredients = $recipe->getIngredients()->count();
         foreach ($machines as $key => $machine) {
-            if ($machine->getName() !== 'player' && $machine->getNumberOfIngredientSlots() < $numberOfIngredients) {
+            if ($machine->getNumberOfIngredientSlots() > 0
+                && $machine->getNumberOfIngredientSlots() < $numberOfIngredients
+            ) {
                 unset($machines[$key]);
             }
         }
