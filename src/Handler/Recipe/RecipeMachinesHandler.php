@@ -117,9 +117,10 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         $recipe = reset($recipes);
         $craftingCategory = $recipe->getCraftingCategory();
         $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory);
+        $filteredDatabaseMachines = $this->filterMachines($recipe, $databaseMachines);
 
         $slicedDatabaseMachines = array_slice(
-            $this->sortMachines($this->filterMachines($recipe, $databaseMachines)),
+            $this->sortMachines($filteredDatabaseMachines),
             $requestData->getInteger('indexOfFirstResult'),
             $requestData->getInteger('numberOfResults')
         );
@@ -134,7 +135,7 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         $this->translationService->translateEntities();
         return [
             'machines' => $clientMachines,
-            'totalNumberOfResults' => count($databaseMachines)
+            'totalNumberOfResults' => count($filteredDatabaseMachines)
         ];
     }
 
