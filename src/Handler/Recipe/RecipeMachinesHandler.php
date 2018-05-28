@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Constant\ItemType;
 use FactorioItemBrowser\Api\Server\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
@@ -147,12 +148,17 @@ class RecipeMachinesHandler extends AbstractRequestHandler
      */
     protected function filterMachines(Recipe $recipe, array $machines): array
     {
-        $numberOfIngredients = $recipe->getIngredients()->count();
         foreach ($machines as $key => $machine) {
-            if ($machine->getNumberOfIngredientSlots() > 0
-                && $machine->getNumberOfIngredientSlots() < $numberOfIngredients
-            ) {
-                unset($machines[$key]);
+            if ($machine->getNumberOfIngredientSlots() > 0) {
+                $numberOfItems = 0;
+                foreach ($recipe->getIngredients() as $ingredient) {
+                    if ($ingredient->getItem()->getType() === ItemType::ITEM) {
+                        ++$numberOfItems;
+                    }
+                }
+                if ($numberOfItems > $machine->getNumberOfIngredientSlots()) {
+                    unset($machines[$key]);
+                }
             }
         }
         return array_values($machines);
