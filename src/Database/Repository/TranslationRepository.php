@@ -99,7 +99,7 @@ class TranslationRepository extends EntityRepository
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder
             ->select($columns)
-            ->andWhere('t.type != :typeMod')
+            ->andWhere('t.type IN (:types)')
             ->addGroupBy('t.type')
             ->addGroupBy('t.name')
             ->setParameter('localePrimary', $locale)
@@ -107,7 +107,7 @@ class TranslationRepository extends EntityRepository
             ->setParameter('priorityPrimary', ResultPriority::PRIMARY_LOCALE_MATCH)
             ->setParameter('prioritySecondary', ResultPriority::SECONDARY_LOCALE_MATCH)
             ->setParameter('priorityAny', ResultPriority::ANY_MATCH)
-            ->setParameter('typeMod', 'mod');
+            ->setParameter('types', [EntityType::ITEM, EntityType::FLUID, EntityType::RECIPE]);
 
         $index = 0;
         foreach ($keywords as $keyword) {

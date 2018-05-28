@@ -142,7 +142,7 @@ class TranslationService extends AbstractModsAwareService
             if ($translation['isDuplicatedByRecipe']) {
                 $keys[] = EntityType::RECIPE . '|' . $translation['name'];
             }
-            if ($translation['isDuplicatedByRecipe']) {
+            if ($translation['isDuplicatedByMachine']) {
                 $keys[] = EntityType::MACHINE . '|' . $translation['name'];
             }
 

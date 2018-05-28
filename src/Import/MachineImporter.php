@@ -162,7 +162,9 @@ class MachineImporter implements ImporterInterface
     protected function addMissingMachines(ExportCombination $exportCombination, array $databaseMachines): array
     {
         foreach ($exportCombination->getData()->getMachines() as $exportMachine) {
-            if (!$databaseMachines[$exportMachine->getName()] instanceof DatabaseMachine) {
+            if (count($exportMachine->getCraftingCategories()) > 0
+                && !$databaseMachines[$exportMachine->getName()] instanceof DatabaseMachine
+            ) {
                 $databaseMachines[$exportMachine->getName()] = $this->persistMachine($exportMachine);
             }
         }
