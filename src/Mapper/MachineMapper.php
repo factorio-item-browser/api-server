@@ -30,7 +30,9 @@ class MachineMapper
         $clientMachine = new ClientMachine();
         $clientMachine->setName($databaseMachine->getName())
                       ->setCraftingSpeed($databaseMachine->getCraftingSpeed())
-                      ->setNumberOfIngredientSlots($databaseMachine->getNumberOfIngredientSlots())
+                      ->setNumberOfItemSlots($databaseMachine->getNumberOfItemSlots())
+                      ->setNumberOfFluidInputSlots($databaseMachine->getNumberOfFluidInputSlots())
+                      ->setNumberOfFluidOutputSlots($databaseMachine->getNumberOfFluidOutputSlots())
                       ->setNumberOfModuleSlots($databaseMachine->getNumberOfModuleSlots())
                       ->setEnergyUsage($databaseMachine->getEnergyUsage());
 

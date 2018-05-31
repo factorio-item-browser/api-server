@@ -788,12 +788,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "ab1dd1046f1de01d7552f6328cbaf48e37b1846e"
+                "reference": "4f6df4122d5548e0395178bc7258eee0d0cef182"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/ab1dd1046f1de01d7552f6328cbaf48e37b1846e",
-                "reference": "ab1dd1046f1de01d7552f6328cbaf48e37b1846e",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/4f6df4122d5548e0395178bc7258eee0d0cef182",
+                "reference": "4f6df4122d5548e0395178bc7258eee0d0cef182",
                 "shasum": ""
             },
             "require": {
@@ -829,7 +829,7 @@
                 "api",
                 "client"
             ],
-            "time": "2018-05-18T13:04:18+00:00"
+            "time": "2018-05-29T18:55:11+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",
@@ -837,12 +837,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/export-data.git",
-                "reference": "2a7a19e6984794dfa14e9246eb658907bfcc5d2b"
+                "reference": "65dd6eaf86a17c3edaee6aaf7831bad6df047a12"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/2a7a19e6984794dfa14e9246eb658907bfcc5d2b",
-                "reference": "2a7a19e6984794dfa14e9246eb658907bfcc5d2b",
+                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/65dd6eaf86a17c3edaee6aaf7831bad6df047a12",
+                "reference": "65dd6eaf86a17c3edaee6aaf7831bad6df047a12",
                 "shasum": ""
             },
             "require": {
@@ -877,7 +877,7 @@
                 "Factorio Item Browser",
                 "export"
             ],
-            "time": "2018-05-17T16:53:51+00:00"
+            "time": "2018-05-28T19:09:54+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -1336,16 +1336,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v4.0.11",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "058f120b8e06ebcd7b211de5ffae07b2db00fbdd"
+                "reference": "2d5d973bf9933d46802b01010bd25c800c87c242"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/058f120b8e06ebcd7b211de5ffae07b2db00fbdd",
-                "reference": "058f120b8e06ebcd7b211de5ffae07b2db00fbdd",
+                "url": "https://api.github.com/repos/symfony/console/zipball/2d5d973bf9933d46802b01010bd25c800c87c242",
+                "reference": "2d5d973bf9933d46802b01010bd25c800c87c242",
                 "shasum": ""
             },
             "require": {
@@ -1373,7 +1373,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -1400,7 +1400,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2018-05-16T09:05:32+00:00"
+            "time": "2018-05-30T07:26:09+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1518,16 +1518,16 @@
         },
         {
             "name": "zendframework/zend-diactoros",
-            "version": "1.7.1",
+            "version": "1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "bf26aff803a11c5cc8eb7c4878a702c403ec67f1"
+                "reference": "741e7a571836f038de731105f4742ca8a164e43a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/bf26aff803a11c5cc8eb7c4878a702c403ec67f1",
-                "reference": "bf26aff803a11c5cc8eb7c4878a702c403ec67f1",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/741e7a571836f038de731105f4742ca8a164e43a",
+                "reference": "741e7a571836f038de731105f4742ca8a164e43a",
                 "shasum": ""
             },
             "require": {
@@ -1547,7 +1547,8 @@
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.7.x-dev",
-                    "dev-develop": "1.8.x-dev"
+                    "dev-develop": "1.8.x-dev",
+                    "dev-release-2.0": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -1566,7 +1567,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2018-02-26T15:44:50+00:00"
+            "time": "2018-05-29T16:53:08+00:00"
         },
         {
             "name": "zendframework/zend-escaper",

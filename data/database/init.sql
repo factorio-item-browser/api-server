@@ -146,10 +146,12 @@ ENGINE=InnoDB;
 CREATE TABLE `Machine` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the machine.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the machine.',
-  `craftingSpeed` INT(10) UNSIGNED NOT NULL COMMENT 'The crafting speed of the machine.',
-  `numberOfIngredientSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of ingredient slots available in the machine.',
+  `craftingSpeed` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'The crafting speed of the machine.',
+  `numberOfItemSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of item slots available in the machine, or 255 for unlimited.',
+  `numberOfFluidInputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid input slots available in the machine.',
+  `numberOfFluidOutputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid output slots available in the machine.',
   `numberOfModuleSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of module slots available in the machine.',
-  `energyUsage` INT(10) UNSIGNED NOT NULL COMMENT 'The energy usage of the machine, in watt.',
+  `energyUsage` BIGINT(20) UNSIGNED NOT NULL COMMENT 'The energy usage of the machine, in watt.',
   PRIMARY KEY (`id`)
 )
 COMMENT='The table holding the crafting machines of the recipes.'

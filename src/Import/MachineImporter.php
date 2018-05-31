@@ -126,7 +126,9 @@ class MachineImporter implements ImporterInterface
         $data = [
             'craftingCategories' => array_values($craftingCategories),
             'craftingSpeed' => $databaseMachine->getCraftingSpeed(),
-            'numberOfIngredientSlots' => $databaseMachine->getNumberOfIngredientSlots(),
+            'numberOfItemSlots' => $databaseMachine->getNumberOfItemSlots(),
+            'numberOfFluidInputSlots' => $databaseMachine->getNumberOfFluidInputSlots(),
+            'numberOfFluidOutputSlots' => $databaseMachine->getNumberOfFluidOutputSlots(),
             'numberOfModuleSlots' => $databaseMachine->getNumberOfModuleSlots(),
             'energyUsage' => $databaseMachine->getEnergyUsage()
         ];
@@ -146,7 +148,9 @@ class MachineImporter implements ImporterInterface
         $data = [
             'craftingCategories' => array_values($craftingCategories),
             'craftingSpeed' => $exportMachine->getCraftingSpeed(),
-            'numberOfIngredientSlots' => $exportMachine->getNumberOfIngredientSlots(),
+            'numberOfItemSlots' => $exportMachine->getNumberOfItemSlots(),
+            'numberOfFluidInputSlots' => $exportMachine->getNumberOfFluidInputSlots(),
+            'numberOfFluidOutputSlots' => $exportMachine->getNumberOfFluidOutputSlots(),
             'numberOfModuleSlots' => $exportMachine->getNumberOfModuleSlots(),
             'energyUsage' => $exportMachine->getEnergyUsage()
         ];
@@ -181,7 +185,9 @@ class MachineImporter implements ImporterInterface
     {
         $databaseMachine = new DatabaseMachine($exportMachine->getName());
         $databaseMachine->setCraftingSpeed($exportMachine->getCraftingSpeed())
-                        ->setNumberOfIngredientSlots($exportMachine->getNumberOfIngredientSlots())
+                        ->setNumberOfItemSlots($exportMachine->getNumberOfItemSlots())
+                        ->setNumberOfFluidInputSlots($exportMachine->getNumberOfFluidInputSlots())
+                        ->setNumberOfFluidOutputSlots($exportMachine->getNumberOfFluidOutputSlots())
                         ->setNumberOfModuleSlots($exportMachine->getNumberOfModuleSlots())
                         ->setEnergyUsage($exportMachine->getEnergyUsage());
 

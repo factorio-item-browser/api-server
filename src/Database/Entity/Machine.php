@@ -20,6 +20,11 @@ use Doctrine\ORM\Mapping as ORM;
 class Machine
 {
     /**
+     * The number of slots used to represent unlimited.
+     */
+    private const UNLIMITED_ITEM_SLOTS = 255;
+
+    /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(name="id", type="integer")
@@ -66,12 +71,28 @@ class Machine
     protected $craftingSpeed = 1;
 
     /**
-     * @ORM\Column(name="numberOfIngredientSlots", type="integer")
+     * @ORM\Column(name="numberOfItemSlots", type="integer")
      *
-     * The number of ingredient slots available in the machine.
+     * The number of item slots available in the machine.
      * @var int
      */
-    protected $numberOfIngredientSlots = 1;
+    protected $numberOfItemSlots = 0;
+
+    /**
+     * @ORM\Column(name="numberOfFluidInputSlots", type="integer")
+     *
+     * The number of fluid input slots available in the machine.
+     * @var int
+     */
+    protected $numberOfFluidInputSlots = 0;
+
+    /**
+     * @ORM\Column(name="numberOfFluidOutputSlots", type="integer")
+     *
+     * The number of fluid output slots available in the machine.
+     * @var int
+     */
+    protected $numberOfFluidOutputSlots = 0;
 
     /**
      * @ORM\Column(name="numberOfModuleSlots", type="integer")
@@ -179,23 +200,63 @@ class Machine
     }
 
     /**
-     * Sets the number of ingredient slots available in the machine.
-     * @param int $numberOfIngredientSlots
+     * Sets the number of item slots available in the machine, or -1 if unlimited.
+     * @param int $numberOfItemSlots
      * @return $this
      */
-    public function setNumberOfIngredientSlots(int $numberOfIngredientSlots)
+    public function setNumberOfItemSlots(int $numberOfItemSlots)
     {
-        $this->numberOfIngredientSlots = $numberOfIngredientSlots;
+        $this->numberOfItemSlots = ($numberOfItemSlots === -1) ? self::UNLIMITED_ITEM_SLOTS : $numberOfItemSlots;
         return $this;
     }
 
     /**
-     * Returns the number of ingredient slots available in the machine.
+     * Returns the number of item slots available in the machine, or -1 if unlimited.
      * @return int
      */
-    public function getNumberOfIngredientSlots(): int
+    public function getNumberOfItemSlots(): int
     {
-        return $this->numberOfIngredientSlots;
+        return ($this->numberOfItemSlots === self::UNLIMITED_ITEM_SLOTS) ? -1 : $this->numberOfItemSlots;
+    }
+
+    /**
+     * Sets the number of fluid input slots available in the machine.
+     * @param int $numberOfFluidInputSlots
+     * @return $this
+     */
+    public function setNumberOfFluidInputSlots(int $numberOfFluidInputSlots)
+    {
+        $this->numberOfFluidInputSlots = $numberOfFluidInputSlots;
+        return $this;
+    }
+
+    /**
+     * Returns the number of fluid input slots available in the machine.
+     * @return int
+     */
+    public function getNumberOfFluidInputSlots(): int
+    {
+        return $this->numberOfFluidInputSlots;
+    }
+
+    /**
+     * Sets the number of fluid output slots available in the machine.
+     * @param int $numberOfFluidOutputSlots
+     * @return $this
+     */
+    public function setNumberOfFluidOutputSlots(int $numberOfFluidOutputSlots)
+    {
+        $this->numberOfFluidOutputSlots = $numberOfFluidOutputSlots;
+        return $this;
+    }
+
+    /**
+     * Returns the number of fluid output slots available in the machine.
+     * @return int
+     */
+    public function getNumberOfFluidOutputSlots(): int
+    {
+        return $this->numberOfFluidOutputSlots;
     }
 
     /**

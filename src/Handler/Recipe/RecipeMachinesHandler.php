@@ -148,19 +148,32 @@ class RecipeMachinesHandler extends AbstractRequestHandler
      */
     protected function filterMachines(Recipe $recipe, array $machines): array
     {
-        foreach ($machines as $key => $machine) {
-            if ($machine->getNumberOfIngredientSlots() > 0) {
-                $numberOfItems = 0;
-                foreach ($recipe->getIngredients() as $ingredient) {
-                    if ($ingredient->getItem()->getType() === ItemType::ITEM) {
-                        ++$numberOfItems;
-                    }
-                }
-                if ($numberOfItems > $machine->getNumberOfIngredientSlots()) {
-                    unset($machines[$key]);
-                }
+        $numberOfItems = 0;
+        $numberOfFluidInputs = 0;
+        $numberOfFluidOutputs = 0;
+
+        foreach ($recipe->getIngredients() as $ingredient) {
+            if ($ingredient->getItem()->getType() === ItemType::ITEM) {
+                ++$numberOfItems;
+            } elseif ($ingredient->getItem()->getType() === ItemType::FLUID) {
+                ++$numberOfFluidInputs;
             }
         }
+        foreach ($recipe->getProducts() as $product) {
+            if ($product->getItem()->getType() === ItemType::FLUID) {
+                ++$numberOfFluidOutputs;
+            }
+        }
+
+        foreach ($machines as $key => $machine) {
+            if (($machine->getNumberOfItemSlots() >= 0 && $machine->getNumberOfItemSlots() < $numberOfItems)
+                || $machine->getNumberOfFluidInputSlots() < $numberOfFluidInputs
+                || $machine->getNumberOfFluidOutputSlots() < $numberOfFluidOutputs
+            ) {
+                unset($machines[$key]);
+            }
+        }
+
         return array_values($machines);
     }
 

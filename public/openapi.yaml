@@ -429,9 +429,15 @@ components:
         craftingSpeed:
           type: "number"
           description: "The crafting speed of the machine."
-        numberOfIngredientSlots:
+        numberOfItemSlots:
           type: "integer"
-          description: "The number of ingredient slots available in the machine."
+          description: "The number of ingredient slots available in the machine, or -1 if unlimited."
+        numberOfFluidInputSlots:
+          type: "integer"
+          description: "The number of fluid input slots available in the machine."
+        numberOfFluidOutputSlots:
+          type: "integer"
+          description: "The number of fluid output slots available in the machine."
         numberOfModuleSlots:
           type: "integer"
           description: "The number of module slots available in the machine."
