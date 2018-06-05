@@ -130,7 +130,8 @@ class MachineImporter implements ImporterInterface
             'numberOfFluidInputSlots' => $databaseMachine->getNumberOfFluidInputSlots(),
             'numberOfFluidOutputSlots' => $databaseMachine->getNumberOfFluidOutputSlots(),
             'numberOfModuleSlots' => $databaseMachine->getNumberOfModuleSlots(),
-            'energyUsage' => $databaseMachine->getEnergyUsage()
+            'energyUsage' => $databaseMachine->getEnergyUsage(),
+            'energyUsageUnit' => $databaseMachine->getEnergyUsageUnit()
         ];
         return hash('crc32b', json_encode($data));
     }
@@ -152,7 +153,8 @@ class MachineImporter implements ImporterInterface
             'numberOfFluidInputSlots' => $exportMachine->getNumberOfFluidInputSlots(),
             'numberOfFluidOutputSlots' => $exportMachine->getNumberOfFluidOutputSlots(),
             'numberOfModuleSlots' => $exportMachine->getNumberOfModuleSlots(),
-            'energyUsage' => $exportMachine->getEnergyUsage()
+            'energyUsage' => $exportMachine->getEnergyUsage(),
+            'energyUsageUnit' => $exportMachine->getEnergyUsageUnit()
         ];
         return hash('crc32b', json_encode($data));
     }
@@ -189,7 +191,8 @@ class MachineImporter implements ImporterInterface
                         ->setNumberOfFluidInputSlots($exportMachine->getNumberOfFluidInputSlots())
                         ->setNumberOfFluidOutputSlots($exportMachine->getNumberOfFluidOutputSlots())
                         ->setNumberOfModuleSlots($exportMachine->getNumberOfModuleSlots())
-                        ->setEnergyUsage($exportMachine->getEnergyUsage());
+                        ->setEnergyUsage($exportMachine->getEnergyUsage())
+                        ->setEnergyUsageUnit($exportMachine->getEnergyUsageUnit());
 
         $craftingCategories = $this->craftingCategoryService->getByNames($exportMachine->getCraftingCategories());
         foreach ($craftingCategories as $craftingCategory) {

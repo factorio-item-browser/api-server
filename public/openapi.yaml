@@ -7,7 +7,7 @@ info:
   contact:
     name: "BluePsyduck"
     email: "bluepsyduck@gmx.com"
-  version: "1.0.1"
+  version: "1.1.0-alpha"
 servers:
   - url: "https://www.factorio-item-browser.com/api"
     description: "Live API server"
@@ -442,8 +442,21 @@ components:
           type: "integer"
           description: "The number of module slots available in the machine."
         energyUsage:
-          type: "integer"
-          description: "The energy usage of the machine, in watt."
+          type: "number"
+          description: "The energy usage of the machine."
+        energyUsageUnit:
+          type: "string"
+          description: "The unit of the energy usage."
+          enum:
+            - W
+            - kW
+            - MW
+            - GW
+            - TW
+            - PW
+            - EW
+            - ZW
+            - YW
 
     Meta:
       type: "object"
@@ -1102,14 +1115,16 @@ components:
                   craftingSpeed: 0.75
                   numberOfIngredientSlots: 4
                   numberOfModuleSlots: 2
-                  energyUsage: 150000
+                  energyUsage: 150
+                  energyUsageUnit: "kW"
                 - name: "assembling-machine-3"
                   label: "Assembling machine 3"
                   description: "Crafts items that require up to 6 ingredients."
                   craftingSpeed: 1.25
                   numberOfIngredientSlots: 6
                   numberOfModuleSlots: 4
-                  energyUsage: 210000
+                  energyUsage: 210
+                  energyUsageUnit: "kW"
               totalNumberOfResults: 2
               meta:
                 statusCode: 200

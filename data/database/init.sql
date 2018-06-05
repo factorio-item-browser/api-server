@@ -151,7 +151,8 @@ CREATE TABLE `Machine` (
   `numberOfFluidInputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid input slots available in the machine.',
   `numberOfFluidOutputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid output slots available in the machine.',
   `numberOfModuleSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of module slots available in the machine.',
-  `energyUsage` BIGINT(20) UNSIGNED NOT NULL COMMENT 'The energy usage of the machine, in watt.',
+  `energyUsage` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'The energy usage of the machine.',
+  `energyUsageUnit` ENUM('W','kW','MW','GW','TW','PW','EW','ZW','YW') NOT NULL COMMENT 'The unit of the energy usage.',
   PRIMARY KEY (`id`)
 )
 COMMENT='The table holding the crafting machines of the recipes.'

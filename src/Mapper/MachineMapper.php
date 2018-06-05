@@ -34,7 +34,8 @@ class MachineMapper
                       ->setNumberOfFluidInputSlots($databaseMachine->getNumberOfFluidInputSlots())
                       ->setNumberOfFluidOutputSlots($databaseMachine->getNumberOfFluidOutputSlots())
                       ->setNumberOfModuleSlots($databaseMachine->getNumberOfModuleSlots())
-                      ->setEnergyUsage($databaseMachine->getEnergyUsage());
+                      ->setEnergyUsage($databaseMachine->getEnergyUsage())
+                      ->setEnergyUsageUnit($databaseMachine->getEnergyUsageUnit());
 
         $translationService->addEntityToTranslate($clientMachine);
         return $clientMachine;

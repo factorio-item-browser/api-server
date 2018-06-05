@@ -105,10 +105,18 @@ class Machine
     /**
      * @ORM\Column(name="energyUsage", type="integer")
      *
-     * The energy usage of the machine, in watt.
+     * The energy usage of the machine.
      * @var int
      */
     protected $energyUsage = 0;
+
+    /**
+     * @ORM\Column(name="energyUsageUnit")
+     *
+     * The unit of the energy usage.
+     * @var string
+     */
+    protected $energyUsageUnit = '';
 
     /**
      * Initializes the entity.
@@ -280,22 +288,42 @@ class Machine
     }
 
     /**
-     * Sets the energy usage of the machine, in watt.
-     * @param int $energyUsage
+     * Sets the energy usage of the machine.
+     * @param float $energyUsage
      * @return $this
      */
-    public function setEnergyUsage(int $energyUsage)
+    public function setEnergyUsage(float $energyUsage)
     {
-        $this->energyUsage = $energyUsage;
+        $this->energyUsage = (int) ($energyUsage * 1000);
         return $this;
     }
 
     /**
-     * Returns the energy usage of the machine, in watt.
-     * @return int
+     * Returns the energy usage of the machine.
+     * @return float
      */
-    public function getEnergyUsage(): int
+    public function getEnergyUsage(): float
     {
-        return $this->energyUsage;
+        return $this->energyUsage / 1000;
+    }
+
+    /**
+     * Sets the unit of the energy usage.
+     * @param string $energyUsageUnit
+     * @return $this
+     */
+    public function setEnergyUsageUnit(string $energyUsageUnit)
+    {
+        $this->energyUsageUnit = $energyUsageUnit;
+        return $this;
+    }
+
+    /**
+     * Returns the unit of the energy usage.
+     * @return string
+     */
+    public function getEnergyUsageUnit(): string
+    {
+        return $this->energyUsageUnit;
     }
 }
