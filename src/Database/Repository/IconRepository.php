@@ -21,7 +21,7 @@ class IconRepository extends EntityRepository
      * @param array|int[] $modCombinationIds
      * @return array
      */
-    public function findHashesByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
+    public function findHashDataByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
     {
         $columns = [
             'IDENTITY(i.file) AS hash',
