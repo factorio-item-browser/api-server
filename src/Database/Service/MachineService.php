@@ -60,7 +60,8 @@ class MachineService extends AbstractModsAwareService
     public function getByCraftingCategory(CraftingCategory $craftingCategory): array
     {
         $machineData = $this->machineRepository->findIdDataByCraftingCategories(
-            [$craftingCategory->getName()]
+            [$craftingCategory->getName()],
+            $this->modService->getEnabledModCombinationIds()
         );
         return $this->getDetailsByMachineData($machineData);
     }
