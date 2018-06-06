@@ -97,11 +97,13 @@ class CachedSearchResultService extends AbstractModsAwareService
         $resultDataArray = [];
         foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
             /* @var AbstractResult $result */
-            $ids = array_merge(
-                [$result instanceof RecipeResult ? 0 : $result->getId()],
-                $result->getRecipeIds()
-            );
-            $resultDataArray[] = implode(',', $ids);
+            if ($result->getId() > 0 || count($result->getRecipeIds()) > 0) {
+                $ids = array_merge(
+                    [$result instanceof RecipeResult ? 0 : $result->getId()],
+                    $result->getRecipeIds()
+                );
+                $resultDataArray[] = implode(',', $ids);
+            }
         }
         $resultData = implode('|', $resultDataArray);
 
