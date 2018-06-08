@@ -6,24 +6,23 @@ namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
+use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use Interop\Container\ContainerInterface;
 
 /**
- * The factory of the recipe importer.
+ * The factory of the machine importer.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeImporterFactory
+class MachineImporterFactory
 {
     /**
-     * Creates the recipe importer.
+     * Creates the machine importer.
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  null|array $options
-     * @return RecipeImporter
+     * @return MachineImporter
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -31,11 +30,9 @@ class RecipeImporterFactory
         $entityManager = $container->get(EntityManager::class);
         /* @var CraftingCategoryService $craftingCategoryService */
         $craftingCategoryService = $container->get(CraftingCategoryService::class);
-        /* @var ItemService $itemService */
-        $itemService = $container->get(ItemService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $container->get(RecipeService::class);
+        /* @var MachineService $machineService */
+        $machineService = $container->get(MachineService::class);
 
-        return new RecipeImporter($entityManager, $craftingCategoryService, $itemService, $recipeService);
+        return new MachineImporter($entityManager, $craftingCategoryService, $machineService);
     }
 }

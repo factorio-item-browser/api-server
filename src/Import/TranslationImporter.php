@@ -10,6 +10,7 @@ use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
 use FactorioItemBrowser\Api\Server\Database\Entity\Translation as DatabaseTranslation;
 use FactorioItemBrowser\ExportData\Entity\Item as ExportItem;
+use FactorioItemBrowser\ExportData\Entity\Machine as ExportMachine;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
 use FactorioItemBrowser\ExportData\Entity\Mod\Combination as ExportCombination;
 use FactorioItemBrowser\ExportData\Entity\Recipe as ExportRecipe;
@@ -93,6 +94,9 @@ class TranslationImporter implements ImporterInterface
         foreach ($exportCombination->getData()->getRecipes() as $exportRecipe) {
             $this->processRecipe($exportRecipe);
         }
+        foreach ($exportCombination->getData()->getMachines() as $exportMachine) {
+            $this->processMachine($exportMachine);
+        }
 
         $this->assignTranslationsToCombination($databaseCombination, $this->databaseTranslations);
         return $this;
@@ -108,12 +112,14 @@ class TranslationImporter implements ImporterInterface
         foreach ($exportItem->getLabels()->getTranslations() as $locale => $label) {
             $translation = $this->getDatabaseTranslation($locale, $exportItem->getType(), $exportItem->getName());
             $translation->setValue($label)
-                        ->setIsDuplicatedByRecipe($exportItem->getProvidesRecipeLocalisation());
+                        ->setIsDuplicatedByRecipe($exportItem->getProvidesRecipeLocalisation())
+                        ->setIsDuplicatedByMachine($exportItem->getProvidesMachineLocalisation());
         }
         foreach ($exportItem->getDescriptions()->getTranslations() as $locale => $description) {
             $translation = $this->getDatabaseTranslation($locale, $exportItem->getType(), $exportItem->getName());
             $translation->setDescription($description)
-                        ->setIsDuplicatedByRecipe($exportItem->getProvidesRecipeLocalisation());
+                        ->setIsDuplicatedByRecipe($exportItem->getProvidesRecipeLocalisation())
+                        ->setIsDuplicatedByMachine($exportItem->getProvidesMachineLocalisation());
         }
         return $this;
     }
@@ -136,6 +142,24 @@ class TranslationImporter implements ImporterInterface
         return $this;
     }
 
+    /**
+     * Processes the specified machine.
+     * @param ExportMachine $exportMachine
+     * @return $this
+     */
+    protected function processMachine(ExportMachine $exportMachine)
+    {
+        foreach ($exportMachine->getLabels()->getTranslations() as $locale => $label) {
+            $translation = $this->getDatabaseTranslation($locale, EntityType::MACHINE, $exportMachine->getName());
+            $translation->setValue($label);
+        }
+        foreach ($exportMachine->getDescriptions()->getTranslations() as $locale => $description) {
+            $translation = $this->getDatabaseTranslation($locale, EntityType::MACHINE, $exportMachine->getName());
+            $translation->setDescription($description);
+        }
+        return $this;
+    }
+    
     /**
      * Returns the specified database translation entity.
      * @param string $locale
@@ -188,7 +212,8 @@ class TranslationImporter implements ImporterInterface
                 $combinationTranslation = $combinationTranslations[$key];
                 $combinationTranslation->setValue($translation->getValue())
                                        ->setDescription($translation->getDescription())
-                                       ->setIsDuplicatedByRecipe($translation->getIsDuplicatedByRecipe());
+                                       ->setIsDuplicatedByRecipe($translation->getIsDuplicatedByRecipe())
+                                       ->setIsDuplicatedByMachine($translation->getIsDuplicatedByMachine());
                 unset($combinationTranslations[$key]);
             } else {
                 $translation->setModCombination($databaseCombination);

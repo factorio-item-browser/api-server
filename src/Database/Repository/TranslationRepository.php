@@ -32,6 +32,7 @@ class TranslationRepository extends EntityRepository
             't.value AS value',
             't.description AS description',
             't.isDuplicatedByRecipe AS isDuplicatedByRecipe',
+            't.isDuplicatedByMachine AS isDuplicatedByMachine',
             'mc.order AS order'
         ];
 
@@ -50,12 +51,22 @@ class TranslationRepository extends EntityRepository
         $index = 0;
         $conditions = [];
         foreach ($namesByTypes as $type => $names) {
-            if ($type === EntityType::RECIPE) {
-                // Special case: Recipes may re-use the translations provided by the item with the same name.
-                $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByRecipe = 1) '
-                    . 'AND t.name IN (:names' . $index . '))';
-            } else {
-                $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+            switch ($type) {
+                case EntityType::RECIPE:
+                    // Special case: Recipes may re-use the translations provided by the item with the same name.
+                    $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByRecipe = 1) '
+                        . 'AND t.name IN (:names' . $index . '))';
+                    break;
+
+                case EntityType::MACHINE:
+                    // Special case: Machines may re-use the translations provided by the item with the same name.
+                    $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByMachine = 1) '
+                        . 'AND t.name IN (:names' . $index . '))';
+                    break;
+
+                default:
+                    $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+                    break;
             }
             $queryBuilder->setParameter('type' . $index, $type)
                          ->setParameter('names' . $index, array_values($names));
@@ -88,7 +99,7 @@ class TranslationRepository extends EntityRepository
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder
             ->select($columns)
-            ->andWhere('t.type != :typeMod')
+            ->andWhere('t.type IN (:types)')
             ->addGroupBy('t.type')
             ->addGroupBy('t.name')
             ->setParameter('localePrimary', $locale)
@@ -96,7 +107,7 @@ class TranslationRepository extends EntityRepository
             ->setParameter('priorityPrimary', ResultPriority::PRIMARY_LOCALE_MATCH)
             ->setParameter('prioritySecondary', ResultPriority::SECONDARY_LOCALE_MATCH)
             ->setParameter('priorityAny', ResultPriority::ANY_MATCH)
-            ->setParameter('typeMod', 'mod');
+            ->setParameter('types', [EntityType::ITEM, EntityType::FLUID, EntityType::RECIPE]);
 
         $index = 0;
         foreach ($keywords as $keyword) {

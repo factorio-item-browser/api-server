@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Handler\Generic;
+namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
@@ -12,24 +11,22 @@ use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the generic details handler.
+ * The factory of the recipe machines handler.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class GenericDetailsHandlerFactory implements FactoryInterface
+class RecipeMachinesHandlerFactory implements FactoryInterface
 {
     /**
-     * Creates the generic details handler.
+     * Creates the recipe machines handler.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return GenericDetailsHandler
+     * @return RecipeMachinesHandler
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var ItemService $itemService */
-        $itemService = $container->get(ItemService::class);
         /* @var MachineService $machineService */
         $machineService = $container->get(MachineService::class);
         /* @var RecipeService $recipeService */
@@ -37,6 +34,6 @@ class GenericDetailsHandlerFactory implements FactoryInterface
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new GenericDetailsHandler($itemService, $machineService, $recipeService, $translationService);
+        return new RecipeMachinesHandler($machineService, $recipeService, $translationService);
     }
 }

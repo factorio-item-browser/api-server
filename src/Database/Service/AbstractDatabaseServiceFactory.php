@@ -14,20 +14,20 @@ use Zend\ServiceManager\Factory\FactoryInterface;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModServiceFactory implements FactoryInterface
+class AbstractDatabaseServiceFactory implements FactoryInterface
 {
     /**
      * Creates the service instance.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ModService
+     * @return AbstractDatabaseService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         /* @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
 
-        return new ModService($entityManager);
+        return new $requestedName($entityManager);
     }
 }

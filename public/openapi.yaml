@@ -7,7 +7,7 @@ info:
   contact:
     name: "BluePsyduck"
     email: "bluepsyduck@gmx.com"
-  version: "1.0.1"
+  version: "1.1.0-alpha"
 servers:
   - url: "https://www.factorio-item-browser.com/api"
     description: "Live API server"
@@ -16,14 +16,14 @@ tags:
     description: "Requests to authorize against the API."
   - name: "Generic"
     description: "Requests providing generic data to entities."
-  - name: "Mods"
-    description: "Requests providing mod related data."
-  - name: "Search"
-    description: "Requests to search for items, recipes etc. using queries."
   - name: "Items"
     description: "Requests providing data to a specific item."
+  - name: "Mods"
+    description: "Requests providing mod related data."
   - name: "Recipes"
     description: "Requests providing data to a specific recipe."
+  - name: "Search"
+    description: "Requests to search for items, recipes etc. using queries."
 
 paths:
   /auth:
@@ -271,6 +271,34 @@ paths:
       security:
         - jwt: []
 
+  /recipe/machines:
+    post:
+      summary:
+        Returns the details of all machines able to craft the recipe.
+      description:
+        This request will return all machines with their details which are able to craft the recipe specified in the
+        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
+        present, the player will be at the very first position of the results.
+      operationId: "recipe.machines"
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/recipeMachines"
+      responses:
+        "200":
+          $ref: "#/components/responses/recipeMachines"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+        "404":
+          $ref: "#/components/responses/recipeNotFound"
+        "500":
+          $ref: "#/components/responses/unexpectedError"
+
   /search/query:
     post:
       summary:
@@ -385,6 +413,50 @@ components:
         amount:
           type: "number"
           description: "The amount of the item as ingredient or product."
+
+    Machine:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "The name of the machine."
+        label:
+          type: "string"
+          description: "The translated label of the machine."
+        description:
+          type: "string"
+          description: "The translated description of the machine, if available."
+        craftingSpeed:
+          type: "number"
+          description: "The crafting speed of the machine."
+        numberOfItemSlots:
+          type: "integer"
+          description: "The number of ingredient slots available in the machine, or -1 if unlimited."
+        numberOfFluidInputSlots:
+          type: "integer"
+          description: "The number of fluid input slots available in the machine."
+        numberOfFluidOutputSlots:
+          type: "integer"
+          description: "The number of fluid output slots available in the machine."
+        numberOfModuleSlots:
+          type: "integer"
+          description: "The number of module slots available in the machine."
+        energyUsage:
+          type: "number"
+          description: "The energy usage of the machine."
+        energyUsageUnit:
+          type: "string"
+          description: "The unit of the energy usage."
+          enum:
+            - W
+            - kW
+            - MW
+            - GW
+            - TW
+            - PW
+            - EW
+            - ZW
+            - YW
 
     Meta:
       type: "object"
@@ -593,6 +665,28 @@ components:
               names:
                 - "electronic-circuit"
                 - "advanced-circuit"
+      required: true
+
+    recipeMachines:
+      content:
+        application/json:
+          schema:
+            properties:
+              name:
+                type: "string"
+                description: "The internal name of the recipe to return the machines of."
+              numberOfResults:
+                type: "integer"
+                description: "The number of results to return."
+              indexOfFirstResult:
+                type: "integer"
+                description: "The 0-based index of the first result to return."
+            required:
+              - name
+            example:
+              name: "engine-unit"
+              numberOfResults: 10
+              indexOfFirstResult: 0
       required: true
 
     searchQuery:
@@ -996,6 +1090,47 @@ components:
                 executionTime: 13.37
                 errorMessage: ""
 
+    recipeMachines:
+      description:
+        The machines able to craft the recipe.
+      content:
+        application/json:
+          schema:
+            properties:
+              machines:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Machine"
+              totalNumberOfResults:
+                type: "integer"
+                description:
+                  The total number of available results.
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              machines:
+                - name: "assembling-machine-2"
+                  label: "Assembling machine 2"
+                  description: "Crafts items that require up to 4 ingredients."
+                  craftingSpeed: 0.75
+                  numberOfIngredientSlots: 4
+                  numberOfModuleSlots: 2
+                  energyUsage: 150
+                  energyUsageUnit: "kW"
+                - name: "assembling-machine-3"
+                  label: "Assembling machine 3"
+                  description: "Crafts items that require up to 6 ingredients."
+                  craftingSpeed: 1.25
+                  numberOfIngredientSlots: 6
+                  numberOfModuleSlots: 4
+                  energyUsage: 210
+                  energyUsageUnit: "kW"
+              totalNumberOfResults: 2
+              meta:
+                statusCode: 200
+                executionTime: 13.37
+                errorMessage: ""
+
     searchQuery:
       description:
         The found items, recipes etc.
@@ -1150,7 +1285,22 @@ components:
               meta:
                 statusCode: 404
                 executionTime: 13.37
-                errorMessage: "Recipe not known: invalid-item"
+                errorMessage: "Item not known: invalid-item"
+
+    recipeNotFound:
+      description:
+        The requested recipe is not known to the browser, or not available in the enabled mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                statusCode: 404
+                executionTime: 13.37
+                errorMessage: "Recipe not known: invalid-recipe"
 
     # 500 responses
     unexpectedError:

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Client\Entity\Meta;
-use FactorioItemBrowser\Api\Server\Response\MessageLogger;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -20,12 +19,6 @@ use Zend\Diactoros\Response\JsonResponse;
  */
 class MetaMiddleware implements MiddlewareInterface
 {
-    /**
-     * The message logger.
-     * @var MessageLogger
-     */
-    protected $messageLogger;
-
     /**
      * The start time of the execution.
      * @var float
