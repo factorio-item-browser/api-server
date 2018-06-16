@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -56,6 +57,14 @@ class ErrorResponseGenerator
                 $this->logger->crit($exception);
             }
         }
-        return new JsonResponse($message, $statusCode, $response->getHeaders());
+
+        $errorData = [
+            'message' => $message,
+        ];
+        if ($exception instanceof ApiServerException && count($exception->getParameters()) > 0) {
+            $errorData['parameters'] = $exception->getParameters();
+        }
+
+        return new JsonResponse(['error' => $errorData], $statusCode, $response->getHeaders());
     }
 }

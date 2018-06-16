@@ -18,11 +18,11 @@ badRequest:
       schema:
         properties:
           error:
-            $ref: "schemas.yaml#/ValidationError"
+            $ref: "schemas.yaml#/Error"
         example:
           error:
             message: "Request validation failed."
-            elements:
+            parameters:
               - name: "foo"
                 message: "Element must not be empty."
 

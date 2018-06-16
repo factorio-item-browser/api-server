@@ -197,23 +197,15 @@ Error:
     message:
       type: "string"
       description: "The message of the error which occurred."
-
-ValidationError:
-  title: "ValidationError"
-  description: "An error which occurred during validating the request."
-  allOf:
-    - $ref: "#/Error"
-    - type: "object"
-      properties:
-        elements:
-          type: "array"
-          description: "The elements which failed the validation."
-          items:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-                description: "The name of the element which failed validation."
-              message:
-                type: "string"
-                description: "The message why the element failed validation."
+    parameters:
+      type: "array"
+      description: "The request parameters which caused the error."
+      items:
+        type: "object"
+        properties:
+          name:
+            type: "string"
+            description: "The name of the parameter which failed validation."
+          message:
+            type: "string"
+            description: "The message why the parameter failed validation."
