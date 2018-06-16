@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Client\Entity\Meta;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response\JsonResponse;
 
 /**
  * The middleware adding the meta node to the response.
@@ -20,6 +18,12 @@ use Zend\Diactoros\Response\JsonResponse;
 class MetaMiddleware implements MiddlewareInterface
 {
     /**
+     * The version of the API currently in use.
+     * @var string
+     */
+    protected $version;
+
+    /**
      * The start time of the execution.
      * @var float
      */
@@ -27,9 +31,11 @@ class MetaMiddleware implements MiddlewareInterface
 
     /**
      * Initializes the meta middleware.
+     * @param string $version
      */
-    public function __construct()
+    public function __construct(string $version)
     {
+        $this->version = $version;
         $this->startTime = microtime(true);
     }
 
@@ -42,23 +48,7 @@ class MetaMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
-        if ($response instanceof JsonResponse) {
-            $meta = new Meta();
-            $meta->setStatusCode($response->getStatusCode())
-                 ->setExecutionTime(round(microtime(true) - $this->startTime, 3));
-
-            $data = $response->getPayload();
-            if (!is_array($data)) {
-                $meta->setErrorMessage((string) $data);
-                $data = [
-                    'meta' => $meta->writeData()
-                ];
-            } else {
-                $data['meta'] = $meta->writeData();
-            }
-
-            $response = new JsonResponse($data, $response->getStatusCode(), $response->getHeaders());
-        }
-        return $response;
+        return $response->withHeader('X-Version', $this->version)
+                        ->withHeader('X-Runtime', round(microtime(true) - $this->startTime, 3));
     }
 }
