@@ -4,30 +4,28 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use Blast\BaseUrl\BasePathHelper;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the documentation redirect middleware.
+ * The factory of the meta middleware.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class DocumentationRedirectMiddlewareFactory implements FactoryInterface
+class MetaMiddlewareFactory implements FactoryInterface
 {
     /**
-     * Creates the database configuration middleware.
+     * Creates the meta middleware.
      * @param  ContainerInterface $container
      * @param  string $requestedName
      * @param  null|array $options
-     * @return DocumentationRedirectMiddleware
+     * @return MetaMiddleware
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var BasePathHelper $basePathHelper */
-        $basePathHelper = $container->get(BasePathHelper::class);
+        $config = $container->get('config');
 
-        return new DocumentationRedirectMiddleware($basePathHelper);
+        return new MetaMiddleware($config['factorio-item-browser']['api-server']['version']);
     }
 }

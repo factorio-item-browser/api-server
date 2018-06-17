@@ -53,7 +53,7 @@ return [
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
             Middleware\DatabaseConfigurationMiddleware::class => Middleware\DatabaseConfigurationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => Middleware\DocumentationRedirectMiddlewareFactory::class,
-            Middleware\MetaMiddleware::class => InvokableFactory::class,
+            Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
 
             Search\Handler\DuplicateRecipeHandler::class => InvokableFactory::class,
             Search\Handler\ItemHandler::class => Search\Handler\ItemHandlerFactory::class,

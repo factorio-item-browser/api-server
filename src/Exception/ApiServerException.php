@@ -14,5 +14,31 @@ use Exception;
  */
 class ApiServerException extends Exception
 {
+    /**
+     * The request parameters which caused the exception.
+     * @var array|string[]
+     */
+    protected $parameters = [];
 
+    /**
+     * Adds a request parameter which caused the exception.
+     * @param string $name
+     * @param string $message
+     */
+    public function addParameter(string $name, string $message)
+    {
+        $this->parameters[] = [
+            'name' => $name,
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Returns the request parameters which caused the exception.
+     * @return array|string[][]
+     */
+    public function getParameters(): array
+    {
+        return $this->parameters;
+    }
 }
