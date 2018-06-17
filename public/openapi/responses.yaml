@@ -43,14 +43,20 @@ genericDetails:
               name: "sulfur"
               label: "Sulfur"
               description: ""
+              recipes: []
+              totalNumberOfRecipes: 0
             - type: "fluid"
               name: "sulfuric-acid"
               label: "Sulfuric acid"
               description: ""
+              recipes: []
+              totalNumberOfRecipes: 0
             - type: "recipe"
               name: "fill-sulfuric-acid-barrel"
               label: "Fill Sulfuric acid barrel"
               description: ""
+              recipes: []
+              totalNumberOfRecipes: 0
 
 genericIcon:
   description:
@@ -92,58 +98,43 @@ itemIngredient:
       schema:
         properties:
           item:
-            $ref: "schemas.yaml#/Item"
-          groupedRecipes:
-            type: "array"
-            description:
-              The recipes using the item as ingredient, grouped by name.
-            items:
-              $ref: "schemas.yaml#/GenericEntityWithRecipes"
-          totalNumberOfResults:
-            type: "integer"
-            description:
-              The total number of available results.
+            description: "The item with the recipes containing it as an ingredient."
+            $ref: "schemas.yaml#/GenericEntity"
         example:
           item:
             type: "item"
             name: "electric-furnace"
             label: "Electric furnace"
             description: ""
-          groupedRecipes:
-            - type: "recipe"
-              name: "electric-furnace"
-              label: "Electric furnace"
-              description: ""
-              recipes:
-                - name: "electric-furnace"
-                  mode: "normal"
-                  label: "Electric furnace"
-                  description: ""
-                  ingredients:
-                    - type: "item"
-                      name: "steel-plate"
-                      label: "Steel plate"
-                      description: ""
-                      amount: 10
-                    - type: "item"
-                      name: "advanced-circuit"
-                      label: "Advanced circuit"
-                      description: ""
-                      amount: 5
-                    - type: "item"
-                      name: "stone-brick"
-                      label: "Stone brick"
-                      description: ""
-                      amount: 10
-                  products:
-                    - type: "item"
-                      name: "electric-furnace"
-                      label: "Electric furnace"
-                      description: ""
-                      amount: 1
-                  craftingTime: 5
-              totalNumberOfRecipes: 2
-          totalNumberOfResults: 1
+            recipes:
+              - name: "electric-furnace"
+                mode: "normal"
+                label: "Electric furnace"
+                description: ""
+                ingredients:
+                  - type: "item"
+                    name: "steel-plate"
+                    label: "Steel plate"
+                    description: ""
+                    amount: 10
+                  - type: "item"
+                    name: "advanced-circuit"
+                    label: "Advanced circuit"
+                    description: ""
+                    amount: 5
+                  - type: "item"
+                    name: "stone-brick"
+                    label: "Stone brick"
+                    description: ""
+                    amount: 10
+                products:
+                  - type: "item"
+                    name: "electric-furnace"
+                    label: "Electric furnace"
+                    description: ""
+                    amount: 1
+                craftingTime: 5
+            totalNumberOfRecipes: 1
 
 itemProduct:
   description:
@@ -158,53 +149,38 @@ itemProduct:
       schema:
         properties:
           item:
-            $ref: "schemas.yaml#/Item"
-          groupedRecipes:
-            type: "array"
-            description:
-              The recipes having the item as product, grouped by name.
-            items:
-              $ref: "schemas.yaml#/GenericEntityWithRecipes"
-          totalNumberOfResults:
-            type: "integer"
-            description:
-              The total number of available results.
+            description: "The item with the recipes containing it as a product."
+            $ref: "schemas.yaml#/GenericEntity"
         example:
           item:
             type: "item"
             name: "electric-furnace"
             label: "Electric furnace"
             description: ""
-          groupedRecipes:
-            - type: "recipe"
-              name: "production-science-pack"
-              label: "Production science pack"
-              description: "Used in labs for research."
-              recipes:
-                - name: "production-science-pack"
-                  mode: "normal"
-                  label: "Production science pack"
-                  description: "Used in labs for research."
-                  ingredients:
-                    - type: "item"
-                      name: "electric-engine-unit"
-                      label: "Electric engine unit"
-                      description: ""
-                      amount: 1
-                    - type: "item"
-                      name: "electric-furnace"
-                      label: "electric-furnace"
-                      description: ""
-                      amount: 1
-                  products:
-                    - type: "item"
-                      name: "production-science-lab"
-                      label: "Production science lab"
-                      description: ""
-                      amount: 2
-                  craftingTime: 14
-              totalNumberOfRecipes: 2
-          totalNumberOfResults: 1
+            recipes:
+              - name: "production-science-pack"
+                mode: "normal"
+                label: "Production science pack"
+                description: "Used in labs for research."
+                ingredients:
+                  - type: "item"
+                    name: "electric-engine-unit"
+                    label: "Electric engine unit"
+                    description: ""
+                    amount: 1
+                  - type: "item"
+                    name: "electric-furnace"
+                    label: "electric-furnace"
+                    description: ""
+                    amount: 1
+                products:
+                  - type: "item"
+                    name: "production-science-lab"
+                    label: "Production science lab"
+                    description: ""
+                    amount: 2
+                craftingTime: 14
+            totalNumberOfRecipes: 1
 
 itemRandom:
   description:
@@ -221,7 +197,7 @@ itemRandom:
           items:
             type: "array"
             items:
-              $ref: "schemas.yaml#/GenericEntityWithRecipes"
+              $ref: "schemas.yaml#/GenericEntity"
         example:
           items:
             - type: "item"
@@ -229,6 +205,7 @@ itemRandom:
               label: "Iron ore"
               description: ""
               recipes: []
+              totalNumberOfRecipes: 0
             - type: "item"
               name: "wooden-chest"
               label: "Wooden chest"
@@ -339,28 +316,30 @@ recipeDetails:
                   description: ""
                   amount: 1
               craftingTime: 0.5
-            - name: "electronic-circuit"
-              mode: "expensive"
-              label: "Electronic circuit"
-              description: ""
-              ingredients:
-                - type: "item"
-                  name: "iron-plate"
-                  label: "Iron plate"
-                  description: ""
-                  amount: 2
-                - type: "item"
-                  name: "copper-cable"
-                  label: "Copper cable"
-                  description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
-                  amount: 10
-              products:
-                - type: "item"
-                  name: "electronic-circuit"
-                  label: "Electronic circuit"
-                  description: ""
-                  amount: 1
-              craftingTime: 0.5
+              expensiveVersion:
+                name: "electronic-circuit"
+                mode: "expensive"
+                label: "Electronic circuit"
+                description: ""
+                ingredients:
+                  - type: "item"
+                    name: "iron-plate"
+                    label: "Iron plate"
+                    description: ""
+                    amount: 2
+                  - type: "item"
+                    name: "copper-cable"
+                    label: "Copper cable"
+                    description: "Can be used to connect and disconnect electric poles and power switches with Left mouse button."
+                    amount: 10
+                products:
+                  - type: "item"
+                    name: "electronic-circuit"
+                    label: "Electronic circuit"
+                    description: ""
+                    amount: 1
+                craftingTime: 0.5
+          totalNumberOfRecipes: 1
 
 recipeMachines:
   description:
@@ -418,7 +397,7 @@ searchQuery:
             type: "array"
             description: "The results returned by the search."
             items:
-              $ref: "schemas.yaml#/GenericEntityWithRecipes"
+              $ref: "schemas.yaml#/GenericEntity"
           totalNumberOfResults:
             type: "integer"
             description: "The total number of results of the search."

@@ -24,22 +24,14 @@ GenericEntity:
     description:
       type: "string"
       description: "The translated description of the entity."
-
-GenericEntityWithRecipes:
-  title: "GenericEntityWithRecipes"
-  description: "A generic entity with basic information, including recipes."
-  allOf:
-    - $ref: "#/GenericEntity"
-    - type: "object"
-      properties:
-        recipes:
-          type: "array"
-          description: "The recipes related to the entity."
-          items:
-            $ref: "#/Recipe"
-        totalNumberOfRecipes:
-          type: "integer"
-          description: "The total number of recipes available for the entity."
+    recipes:
+      type: "array"
+      description: "The recipes related to the entity."
+      items:
+        $ref: "#/Recipe"
+    totalNumberOfRecipes:
+      type: "integer"
+      description: "The total number of recipes available for the entity."
 
 Icon:
   title: "Icon"
@@ -188,6 +180,10 @@ Recipe:
         $ref: "#/Item"
     craftingTime:
       type: "number"
+    expensiveVersion:
+      type: "object"
+      description: "The expensive version of the recipe, if different from the normal one."
+      $ref: "#/Recipe"
 
 Error:
   title: "Error"

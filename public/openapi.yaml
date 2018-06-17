@@ -329,8 +329,6 @@ components:
   schemas:
     GenericEntity:
       $ref: "openapi/schemas.yaml#/GenericEntity"
-    GenericEntityWithRecipes:
-      $ref: "openapi/schemas.yaml#/GenericEntityWithRecipes"
     Icon:
       $ref: "openapi/schemas.yaml#/Icon"
     Item:
@@ -343,8 +341,6 @@ components:
       $ref: "openapi/schemas.yaml#/Recipe"
     Error:
       $ref: "openapi/schemas.yaml#/Error"
-    ValidationError:
-      $ref: "openapi/schemas.yaml#/ValidationError"
 
   securitySchemes:
     jwt:
