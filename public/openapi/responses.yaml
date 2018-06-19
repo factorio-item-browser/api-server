@@ -43,20 +43,14 @@ genericDetails:
               name: "sulfur"
               label: "Sulfur"
               description: ""
-              recipes: []
-              totalNumberOfRecipes: 0
             - type: "fluid"
               name: "sulfuric-acid"
               label: "Sulfuric acid"
               description: ""
-              recipes: []
-              totalNumberOfRecipes: 0
             - type: "recipe"
               name: "fill-sulfuric-acid-barrel"
               label: "Fill Sulfuric acid barrel"
               description: ""
-              recipes: []
-              totalNumberOfRecipes: 0
 
 genericIcon:
   description:
@@ -99,7 +93,7 @@ itemIngredient:
         properties:
           item:
             description: "The item with the recipes containing it as an ingredient."
-            $ref: "schemas.yaml#/GenericEntity"
+            $ref: "schemas.yaml#/GenericEntityWithRecipes"
         example:
           item:
             type: "item"
@@ -150,7 +144,7 @@ itemProduct:
         properties:
           item:
             description: "The item with the recipes containing it as a product."
-            $ref: "schemas.yaml#/GenericEntity"
+            $ref: "schemas.yaml#/GenericEntityWithRecipes"
         example:
           item:
             type: "item"
@@ -197,7 +191,7 @@ itemRandom:
           items:
             type: "array"
             items:
-              $ref: "schemas.yaml#/GenericEntity"
+              $ref: "schemas.yaml#/GenericEntityWithRecipes"
         example:
           items:
             - type: "item"
@@ -291,7 +285,7 @@ recipeDetails:
           recipes:
             type: "array"
             items:
-              $ref: "schemas.yaml#/Recipe"
+              $ref: "schemas.yaml#/RecipeWithExpensiveVersion"
         example:
           recipes:
             - name: "electronic-circuit"
@@ -397,7 +391,7 @@ searchQuery:
             type: "array"
             description: "The results returned by the search."
             items:
-              $ref: "schemas.yaml#/GenericEntity"
+              $ref: "schemas.yaml#/GenericEntityWithRecipes"
           totalNumberOfResults:
             type: "integer"
             description: "The total number of results of the search."
