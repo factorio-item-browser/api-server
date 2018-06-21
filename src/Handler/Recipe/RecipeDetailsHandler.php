@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Entity\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
@@ -22,6 +23,12 @@ use Zend\Validator\NotEmpty;
 class RecipeDetailsHandler extends AbstractRequestHandler
 {
     /**
+     * The recipe mapper.
+     * @var RecipeMapper
+     */
+    protected $recipeMapper;
+
+    /**
      * The database recipe service.
      * @var RecipeService
      */
@@ -35,11 +42,16 @@ class RecipeDetailsHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
+     * @param RecipeMapper $recipeMapper
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
-    public function __construct(RecipeService $recipeService, TranslationService $translationService)
-    {
+    public function __construct(
+        RecipeMapper $recipeMapper,
+        RecipeService $recipeService,
+        TranslationService $translationService
+    ) {
+        $this->recipeMapper = $recipeMapper;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -76,10 +88,7 @@ class RecipeDetailsHandler extends AbstractRequestHandler
 
         $clientRecipes = [];
         foreach ($databaseRecipes as $databaseRecipe) {
-            $clientRecipes[] = RecipeMapper::mapDatabaseRecipeToClientRecipe(
-                $databaseRecipe,
-                $this->translationService
-            );
+            $clientRecipes[] = $this->recipeMapper->mapRecipe($databaseRecipe, new Recipe());
         }
 
         $this->translationService->translateEntities();

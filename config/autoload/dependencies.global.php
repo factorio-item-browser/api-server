@@ -48,6 +48,11 @@ return [
             Import\RecipeImporter::class => Import\RecipeImporterFactory::class,
             Import\TranslationImporter::class => Import\TranslationImporterFactory::class,
 
+            Mapper\ItemMapper::class => Mapper\AbstractMapperFactory::class,
+            Mapper\MachineMapper::class => Mapper\AbstractMapperFactory::class,
+            Mapper\ModMapper::class => Mapper\AbstractMapperFactory::class,
+            Mapper\RecipeMapper::class => Mapper\AbstractMapperFactory::class,
+
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
