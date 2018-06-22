@@ -33,18 +33,19 @@ class DuplicateRecipeHandler implements SearchHandlerInterface
         foreach ($searchResults->getResults() as $result) {
             if ($result instanceof RecipeResult) {
                 $recipes[] = $result;
-            } elseif ($result instanceof ItemResult) {
-                foreach ($result->getRecipeIds() as $recipeId) {
-                    $itemRecipeIds[$recipeId] = true;
+            } elseif ($result instanceof ItemResult && count($result->getGroupedRecipeIds()) > 0) {
+                $recipeIds = call_user_func_array('array_merge', $result->getGroupedRecipeIds());
+                foreach ($recipeIds as $recipeId) {
                     $itemsByRecipeIds[$recipeId][] = $result;
                 }
             }
         }
 
         foreach ($recipes as $recipe) {
-            if (isset($itemsByRecipeIds[$recipe->getId()])) {
+            $recipeId = $recipe->getFirstRecipeId();
+            if (isset($itemsByRecipeIds[$recipeId])) {
                 $searchResults->remove($recipe);
-                foreach ($itemsByRecipeIds[$recipe->getId()] as $item) {
+                foreach ($itemsByRecipeIds[$recipeId] as $item) {
                     $item->setPriority(min($item->getPriority(), $recipe->getPriority()));
                 }
             }

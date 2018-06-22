@@ -97,11 +97,11 @@ class CachedSearchResultService extends AbstractModsAwareService
         $resultDataArray = [];
         foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
             /* @var AbstractResult $result */
-            if ($result->getId() > 0 || count($result->getRecipeIds()) > 0) {
-                $ids = array_merge(
-                    [$result instanceof RecipeResult ? 0 : $result->getId()],
-                    $result->getRecipeIds()
-                );
+            if ($result->getId() > 0 || count($result->getGroupedRecipeIds()) > 0) {
+                $ids = [$result->getId()];
+                foreach ($result->getGroupedRecipeIds() as $groupedRecipeIds) {
+                    $ids[] = implode('+', $groupedRecipeIds);
+                }
                 $resultDataArray[] = implode(',', $ids);
             }
         }
@@ -148,7 +148,9 @@ class CachedSearchResultService extends AbstractModsAwareService
                 } else {
                     $result = new RecipeResult();
                 }
-                $result->setRecipeIds($recipeIds);
+                foreach ($recipeIds as $index => $recipeIdGroup) {
+                    $result->addRecipeIds((string) $index, explode('+', $recipeIdGroup));
+                }
                 $cachedResultCollection->add($result);
             }
         }

@@ -52,11 +52,7 @@ class MissingRecipeIdHandler implements SearchHandlerInterface
 
         $groupedRecipeIds = $this->recipeService->getGroupedIdsByNames($recipeNames);
         foreach ($recipeResults as $recipeResult) {
-            if (isset($groupedRecipeIds[$recipeResult->getName()])) {
-                foreach ($groupedRecipeIds[$recipeResult->getName()] as $recipeId) {
-                    $recipeResult->addRecipeId($recipeId);
-                }
-            }
+            $recipeResult->addRecipeIds($recipeResult->getName(), $groupedRecipeIds[$recipeResult->getName()] ?? []);
         }
 
         return $this;

@@ -133,7 +133,7 @@ class SearchQueryHandler extends AbstractRequestHandler
         $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
 
         $cachedSearchResults = $this->cachedSearchResultService->getSearchResults($searchQuery);
-        if (!$cachedSearchResults instanceof CachedResultCollection) {
+        if (true || !$cachedSearchResults instanceof CachedResultCollection) {
             $searchResults = new ResultCollection();
             $this->searchHandlerManager->handle($searchQuery, $searchResults);
             $searchResults->sort();

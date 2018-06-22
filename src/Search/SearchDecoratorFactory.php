@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Search;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -29,11 +30,13 @@ class SearchDecoratorFactory implements FactoryInterface
     {
         /* @var ItemService $itemService */
         $itemService = $container->get(ItemService::class);
+        /* @var RecipeMapper $recipeMapper */
+        $recipeMapper = $container->get(RecipeMapper::class);
         /* @var RecipeService $recipeService */
         $recipeService = $container->get(RecipeService::class);
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new SearchDecorator($itemService, $recipeService, $translationService);
+        return new SearchDecorator($itemService, $recipeMapper, $recipeService, $translationService);
     }
 }
