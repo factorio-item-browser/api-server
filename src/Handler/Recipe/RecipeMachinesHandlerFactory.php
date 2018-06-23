@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Server\Mapper\MachineMapper;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -27,6 +28,8 @@ class RecipeMachinesHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        /* @var MachineMapper $machineMapper */
+        $machineMapper = $container->get(MachineMapper::class);
         /* @var MachineService $machineService */
         $machineService = $container->get(MachineService::class);
         /* @var RecipeService $recipeService */
@@ -34,6 +37,6 @@ class RecipeMachinesHandlerFactory implements FactoryInterface
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new RecipeMachinesHandler($machineService, $recipeService, $translationService);
+        return new RecipeMachinesHandler($machineMapper, $machineService, $recipeService, $translationService);
     }
 }

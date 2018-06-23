@@ -6,7 +6,6 @@ namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Server\Database\Entity\Machine as DatabaseMachine;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 
 /**
  * The class able to map machines.
@@ -14,20 +13,16 @@ use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class MachineMapper
+class MachineMapper extends AbstractMapper
 {
     /**
      * Maps the database machine to a client machine.
      * @param DatabaseMachine $databaseMachine
-     * @param TranslationService $translationService
+     * @param ClientMachine $clientMachine
      * @return ClientMachine
      */
-    static public function mapDatabaseMachineToClientMachine(
-        DatabaseMachine $databaseMachine,
-        TranslationService $translationService
-    ): ClientMachine
+    public function mapMachine(DatabaseMachine $databaseMachine, ClientMachine $clientMachine): ClientMachine
     {
-        $clientMachine = new ClientMachine();
         $clientMachine->setName($databaseMachine->getName())
                       ->setCraftingSpeed($databaseMachine->getCraftingSpeed())
                       ->setNumberOfItemSlots($databaseMachine->getNumberOfItemSlots())
@@ -37,7 +32,7 @@ class MachineMapper
                       ->setEnergyUsage($databaseMachine->getEnergyUsage())
                       ->setEnergyUsageUnit($databaseMachine->getEnergyUsageUnit());
 
-        $translationService->addEntityToTranslate($clientMachine);
+        $this->translationService->addEntityToTranslate($clientMachine);
         return $clientMachine;
     }
 }

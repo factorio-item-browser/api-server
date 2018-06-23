@@ -2,38 +2,32 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Handler\Mod;
+namespace FactorioItemBrowser\Api\Server\Mapper;
 
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
-use FactorioItemBrowser\Api\Server\Mapper\ModMapper;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The factory of the mod list handler class.
+ * The abstract factory of the mappers.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModListHandlerFactory implements FactoryInterface
+class AbstractMapperFactory implements FactoryInterface
 {
     /**
-     * Creates the mod list handler.
+     * Creates the mapper class.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ModListHandler
+     * @return AbstractMapper
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var ModMapper $modMapper */
-        $modMapper = $container->get(ModMapper::class);
-        /* @var ModService $modService */
-        $modService = $container->get(ModService::class);
         /* @var TranslationService $translationService */
         $translationService = $container->get(TranslationService::class);
 
-        return new ModListHandler($modMapper, $modService, $translationService);
+        return new $requestedName($translationService);
     }
 }

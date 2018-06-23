@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Constant\ItemType;
+use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Server\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
@@ -27,6 +28,12 @@ use Zend\Validator\NotEmpty;
 class RecipeMachinesHandler extends AbstractRequestHandler
 {
     /**
+     * The machine mapper.
+     * @var MachineMapper
+     */
+    protected $machineMapper;
+
+    /**
      * The database service of the machines.
      * @var MachineService
      */
@@ -46,16 +53,19 @@ class RecipeMachinesHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
+     * @param MachineMapper $machineMapper
      * @param MachineService $machineService
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
+        MachineMapper $machineMapper,
         MachineService $machineService,
         RecipeService $recipeService,
         TranslationService $translationService
     )
     {
+        $this->machineMapper = $machineMapper;
         $this->machineService = $machineService;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
@@ -127,10 +137,7 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         );
         $clientMachines = [];
         foreach ($slicedDatabaseMachines as $databaseMachine) {
-            $clientMachines[] = MachineMapper::mapDatabaseMachineToClientMachine(
-                $databaseMachine,
-                $this->translationService
-            );
+            $clientMachines[] = $this->machineMapper->mapMachine($databaseMachine, new ClientMachine());
         }
 
         $this->translationService->translateEntities();

@@ -36,7 +36,7 @@ GenericEntityWithRecipes:
           type: "array"
           description: "The recipes related to the entity."
           items:
-            $ref: "#/Recipe"
+            $ref: "#/RecipeWithExpensiveVersion"
         totalNumberOfRecipes:
           type: "integer"
           description: "The total number of recipes available for the entity."
@@ -188,6 +188,16 @@ Recipe:
         $ref: "#/Item"
     craftingTime:
       type: "number"
+
+RecipeWithExpensiveVersion:
+  title: "RecipeWithExpensiveVersion"
+  description: "A recipe to craft items into other ones, including an expensive version of it, if existing."
+  allOf:
+    - $ref: "#/Recipe"
+    - type: "object"
+      properties:
+        expensiveVersion:
+          $ref: "#/Recipe"
 
 Error:
   title: "Error"

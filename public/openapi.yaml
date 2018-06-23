@@ -341,10 +341,10 @@ components:
       $ref: "openapi/schemas.yaml#/Mod"
     Recipe:
       $ref: "openapi/schemas.yaml#/Recipe"
+    RecipeWithExpensiveVersion:
+      $ref: "openapi/schemas.yaml#/RecipeWithExpensiveVersion"
     Error:
       $ref: "openapi/schemas.yaml#/Error"
-    ValidationError:
-      $ref: "openapi/schemas.yaml#/ValidationError"
 
   securitySchemes:
     jwt:

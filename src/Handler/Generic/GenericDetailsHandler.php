@@ -71,30 +71,66 @@ class GenericDetailsHandler extends AbstractGenericHandler
     protected function handleRequest(DataContainer $requestData): array
     {
         $namesByTypes = $this->getEntityNamesByType($requestData);
-        $entities = [];
 
-        $recipeNames = $namesByTypes[EntityType::RECIPE] ?? [];
-        foreach ($this->recipeService->filterAvailableNames($recipeNames) as $recipeName) {
-            $entities[] = $this->createGenericEntity(EntityType::RECIPE, $recipeName);
-        }
-        unset($namesByTypes[EntityType::RECIPE]);
+        $entities = array_merge(
+            $this->handleRecipes($namesByTypes[EntityType::RECIPE] ?? []),
+            $this->handleMachines($namesByTypes[EntityType::MACHINE] ?? [])
+        );
 
-        $machineNames = $namesByTypes[EntityType::MACHINE] ?? [];
-        foreach ($this->machineService->filterAvailableNames($machineNames) as $machineName) {
-            $entities[] = $this->createGenericEntity(EntityType::MACHINE, $machineName);
-        }
-        unset($namesByTypes[EntityType::MACHINE]);
-
-        foreach ($this->itemService->filterAvailableTypesAndNames($namesByTypes) as $type => $itemNames) {
-            foreach ($itemNames as $itemName) {
-                $entities[] = $this->createGenericEntity($type, $itemName);
-            }
-        }
+        unset($namesByTypes[EntityType::RECIPE], $namesByTypes[EntityType::MACHINE]);
+        $entities = array_merge(
+            $entities,
+            $this->handleItems($namesByTypes)
+        );
 
         $this->translationService->translateEntities();
         return [
             'entities' => $entities
         ];
+    }
+
+    /**
+     * Handles the requested recipes.
+     * @param array|string[] $recipeNames
+     * @return array|GenericEntity[]
+     */
+    protected function handleRecipes(array $recipeNames): array
+    {
+        $result = [];
+        foreach ($this->recipeService->filterAvailableNames($recipeNames) as $recipeName) {
+            $result[] = $this->createGenericEntity(EntityType::RECIPE, $recipeName);
+        }
+        return $result;
+    }
+
+    /**
+     * Handles the requested machines.
+     * @param array|string[] $machineNames
+     * @return array|GenericEntity[]
+     */
+    protected function handleMachines(array $machineNames): array
+    {
+        $result = [];
+        foreach ($this->machineService->filterAvailableNames($machineNames) as $machineName) {
+            $result[] = $this->createGenericEntity(EntityType::MACHINE, $machineName);
+        }
+        return $result;
+    }
+
+    /**
+     * Handles the requested items.
+     * @param array $itemNamesByType
+     * @return array
+     */
+    protected function handleItems(array $itemNamesByType): array
+    {
+        $result = [];
+        foreach ($this->itemService->filterAvailableTypesAndNames($itemNamesByType) as $type => $itemNames) {
+            foreach ($itemNames as $itemName) {
+                $result[] = $this->createGenericEntity($type, $itemName);
+            }
+        }
+        return $result;
     }
 
     /**
@@ -107,7 +143,7 @@ class GenericDetailsHandler extends AbstractGenericHandler
     {
         $entity = new GenericEntity();
         $entity->setType($type)
-            ->setName($name);
+               ->setName($name);
 
         $this->translationService->addEntityToTranslate($entity);
         return $entity;
