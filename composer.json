@@ -16,7 +16,7 @@
     "php": "^7.2",
     "dasprid/container-interop-doctrine": "^1.1",
     "doctrine/orm": "^2.6",
-    "factorio-item-browser/api-client": "dev-bug/inconsistent-numbers-of-recipes",
+    "factorio-item-browser/api-client": "dev-develop",
     "factorio-item-browser/export-data": "dev-develop",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
