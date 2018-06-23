@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Client\Entity\Recipe;
+use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
@@ -82,13 +82,29 @@ class RecipeDetailsHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $recipeNames = $requestData->getArray('names');
-        $recipeIds = $this->recipeService->getIdsByNames($recipeNames);
-        $databaseRecipes = $this->recipeService->getDetailsByIds($recipeIds);
-
         $clientRecipes = [];
-        foreach ($databaseRecipes as $databaseRecipe) {
-            $clientRecipes[] = $this->recipeMapper->mapRecipe($databaseRecipe, new Recipe());
+        $recipeNames = $requestData->getArray('names');
+        $groupedRecipeIds = $this->recipeService->getGroupedIdsByNames($recipeNames);
+        if (count($groupedRecipeIds) > 0) {
+            $allRecipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+            $databaseRecipes = $this->recipeService->getDetailsByIds($allRecipeIds);
+
+            foreach ($groupedRecipeIds as $recipeIds) {
+                $currentRecipe = null;
+                foreach ($recipeIds as $recipeId) {
+                    if (isset($databaseRecipes[$recipeId])) {
+                        $mappedRecipe = new RecipeWithExpensiveVersion();
+                        $this->recipeMapper->mapRecipe($databaseRecipes[$recipeId], $mappedRecipe);
+
+                        if (is_null($currentRecipe)) {
+                            $currentRecipe = $mappedRecipe;
+                        } else {
+                            $this->recipeMapper->combineRecipes($currentRecipe, $mappedRecipe);
+                        }
+                    }
+                }
+                $clientRecipes[] = $currentRecipe;
+            }
         }
 
         $this->translationService->translateEntities();
