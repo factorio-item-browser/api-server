@@ -254,11 +254,12 @@ class RecipeImporter implements ImporterInterface
      */
     protected function persistRecipe(ExportRecipe $exportRecipe): DatabaseRecipe
     {
-        $databaseRecipe = new DatabaseRecipe($exportRecipe->getName(), $exportRecipe->getMode());
-        $databaseRecipe->setCraftingTime($exportRecipe->getCraftingTime())
-                       ->setCraftingCategory(
-                           $this->craftingCategoryService->getByName($exportRecipe->getCraftingCategory())
-                       );
+        $databaseRecipe = new DatabaseRecipe(
+            $exportRecipe->getName(),
+            $exportRecipe->getMode(),
+            $this->craftingCategoryService->getByName($exportRecipe->getCraftingCategory())
+        );
+        $databaseRecipe->setCraftingTime($exportRecipe->getCraftingTime());
         $this->entityManager->persist($databaseRecipe);
 
         foreach ($exportRecipe->getIngredients() as $exportIngredient) {

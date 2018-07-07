@@ -67,7 +67,7 @@ class Recipe
      * @ORM\JoinColumn(name="craftingCategoryId", referencedColumnName="id")
      *
      * The crafting category of the recipe.
-     * @var CraftingCategory|null
+     * @var CraftingCategory
      */
     protected $craftingCategory;
 
@@ -91,11 +91,13 @@ class Recipe
      * Initializes the entity.
      * @param string $name
      * @param string $mode
+     * @param CraftingCategory $craftingCategory
      */
-    public function __construct(string $name, string $mode)
+    public function __construct(string $name, string $mode, CraftingCategory $craftingCategory)
     {
         $this->name = $name;
         $this->mode = $mode;
+        $this->craftingCategory = $craftingCategory;
         $this->modCombinations = new ArrayCollection();
         $this->ingredients = new ArrayCollection();
         $this->products = new ArrayCollection();
@@ -203,9 +205,9 @@ class Recipe
 
     /**
      * Returns the crafting category of the recipe.
-     * @return CraftingCategory|null
+     * @return CraftingCategory
      */
-    public function getCraftingCategory(): ?CraftingCategory
+    public function getCraftingCategory(): CraftingCategory
     {
         return $this->craftingCategory;
     }

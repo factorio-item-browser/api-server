@@ -33,7 +33,7 @@ class CachedSearchResult
      * The result data of the search.
      * @var string
      */
-    protected $resultData;
+    protected $resultData = '';
 
     /**
      * @ORM\Column(name="lastSearchTime", type="datetime")
