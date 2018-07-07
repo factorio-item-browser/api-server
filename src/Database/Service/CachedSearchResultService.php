@@ -92,8 +92,7 @@ class CachedSearchResultService extends AbstractModsAwareService
     public function persistSearchResults(
         SearchQuery $searchQuery,
         ResultCollection $resultCollection
-    ): CachedResultCollection
-    {
+    ): CachedResultCollection {
         $resultDataArray = [];
         foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
             /* @var AbstractResult $result */

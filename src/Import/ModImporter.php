@@ -112,8 +112,7 @@ class ModImporter implements ImporterInterface
     protected function convertDependency(
         ExportDependency $exportDependency,
         DatabaseMod $databaseMod
-    ): ?DatabaseDependency
-    {
+    ): ?DatabaseDependency {
         $databaseDependency = null;
         $requiredMods = $this->modService->getModsWithDependencies([$exportDependency->getRequiredModName()]);
         if (isset($requiredMods[$exportDependency->getRequiredModName()])) {

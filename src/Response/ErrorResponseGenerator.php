@@ -45,8 +45,7 @@ class ErrorResponseGenerator
         Throwable $exception,
         ServerRequestInterface $request,
         ResponseInterface $response
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         $statusCode = $exception->getCode();
         $message = $exception->getMessage();
         if ($statusCode < 400 || $statusCode >= 600) {

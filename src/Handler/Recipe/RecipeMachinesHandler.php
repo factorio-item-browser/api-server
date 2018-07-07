@@ -63,8 +63,7 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         MachineService $machineService,
         RecipeService $recipeService,
         TranslationService $translationService
-    )
-    {
+    ) {
         $this->machineMapper = $machineMapper;
         $this->machineService = $machineService;
         $this->recipeService = $recipeService;

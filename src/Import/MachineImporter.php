@@ -50,8 +50,7 @@ class MachineImporter implements ImporterInterface
         EntityManager $entityManager,
         CraftingCategoryService $craftingCategoryService,
         MachineService $machineService
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->craftingCategoryService = $craftingCategoryService;
         $this->machineService = $machineService;
@@ -144,7 +143,7 @@ class MachineImporter implements ImporterInterface
     protected function hashExportMachine(ExportMachine $exportMachine): string
     {
         $craftingCategories = $exportMachine->getCraftingCategories();
-        sort ($craftingCategories);
+        sort($craftingCategories);
 
         $data = [
             'craftingCategories' => array_values($craftingCategories),
