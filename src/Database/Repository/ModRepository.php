@@ -43,8 +43,7 @@ class ModRepository extends EntityRepository
         $queryBuilder->select('COUNT(DISTINCT m.id) AS numberOfMods');
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder->innerJoin('m.combinations', 'c')
-                         ->andWhere('c.id IN (:modCombinationIds)')
+            $queryBuilder->innerJoin('m.combinations', 'c', 'WITH', 'c.id IN (:modCombinationIds)')
                          ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 

@@ -10,7 +10,7 @@ use FactorioItemBrowser\Api\Server\Database\Entity\Translation;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The PHUnit test of the Translation class.
+ * The PHPUnit test of the Translation class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3

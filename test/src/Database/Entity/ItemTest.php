@@ -9,7 +9,7 @@ use FactorioItemBrowser\Api\Server\Database\Entity\Item;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The PHUnit test of the Item class.
+ * The PHPUnit test of the Item class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3

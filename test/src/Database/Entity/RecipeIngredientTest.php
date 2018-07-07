@@ -11,7 +11,7 @@ use FactorioItemBrowser\Api\Server\Database\Entity\RecipeIngredient;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The PHUnit test of the RecipeIngredient class.
+ * The PHPUnit test of the RecipeIngredient class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
