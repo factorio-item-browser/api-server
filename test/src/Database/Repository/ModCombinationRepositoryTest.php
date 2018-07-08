@@ -6,7 +6,6 @@ namespace FactorioItemBrowserTest\Api\Server\Database\Repository;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\QueryBuilder;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
 use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Server\Database\Repository\ModCombinationRepository;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -28,7 +27,7 @@ class ModCombinationRepositoryTest extends TestCase
     public function testFindByModNames()
     {
         $names = ['abc', 'def'];
-        $queryResult = [new ModCombination(new Mod('abc'))];
+        $queryResult = [$this->createMock(ModCombination::class)];
 
         /* @var AbstractQuery|MockObject $query */
         $query = $this->getMockBuilder(AbstractQuery::class)

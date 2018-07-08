@@ -32,7 +32,7 @@ class CachedSearchResultRepositoryTest extends TestCase
     public function testFindByHash()
     {
         $hash = '12ab34cd';
-        $queryResult = new CachedSearchResult($hash);
+        $queryResult = $this->createMock(CachedSearchResult::class);
 
         /* @var AbstractQuery|MockObject $query */
         $query = $this->getMockBuilder(AbstractQuery::class)

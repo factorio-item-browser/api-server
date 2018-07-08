@@ -30,7 +30,7 @@ class IconFileRepositoryTest extends TestCase
     public function testFindByHashes()
     {
         $hashes = ['12ab34cd', 'ab12cd34'];
-        $queryResult = [new IconFile('12ab34cd')];
+        $queryResult = [$this->createMock(IconFile::class)];
 
         /* @var AbstractQuery|MockObject $query */
         $query = $this->getMockBuilder(AbstractQuery::class)

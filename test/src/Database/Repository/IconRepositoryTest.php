@@ -7,9 +7,6 @@ namespace FactorioItemBrowserTest\Api\Server\Database\Repository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\QueryBuilder;
 use FactorioItemBrowser\Api\Server\Database\Entity\Icon;
-use FactorioItemBrowser\Api\Server\Database\Entity\IconFile;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Server\Database\Repository\IconRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -200,7 +197,7 @@ class IconRepositoryTest extends TestCase
     public function testFindByIds()
     {
         $ids = [42, 1337];
-        $queryResult = [new Icon(new ModCombination(new Mod('abc')), new IconFile('ab12cd34'))];
+        $queryResult = [$this->createMock(Icon::class)];
 
         /* @var AbstractQuery|MockObject $query */
         $query = $this->getMockBuilder(AbstractQuery::class)

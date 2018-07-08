@@ -27,7 +27,7 @@ class CraftingCategoryRepositoryTest extends TestCase
     public function testFindByNames()
     {
         $names = ['abc'];
-        $queryResult = [new CraftingCategory('abc')];
+        $queryResult = [$this->createMock(CraftingCategory::class)];
 
         /* @var AbstractQuery|MockObject $query */
         $query = $this->getMockBuilder(AbstractQuery::class)
