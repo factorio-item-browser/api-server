@@ -69,10 +69,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
             try {
                 $token = JWT::decode(substr($authorization, 7), $this->authorizationKey, ['HS256']);
-                $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds));
+                $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds ?? []));
 
-                $request = $request->withAttribute('agent', $token->agt)
-                                   ->withAttribute('allowImport', $token->imp === 1);
+                $request = $request->withAttribute('agent', $token->agt ?? '')
+                                   ->withAttribute('allowImport', $token->imp ?? 0 === 1);
             } catch (Exception $e) {
                 throw new ApiServerException('Authorization token is invalid.', 401);
             }

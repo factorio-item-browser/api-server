@@ -28,8 +28,10 @@ class AuthorizationMiddlewareTest extends TestCase
      */
     public function provideProcess(): array
     {
+        // With import flag
         $validHeader1 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0NywiYW'
             . 'd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.qfIlOQ_rNfSqmBeTpkI7gboF4PTdO1kVzGuLnFDFudA';
+        // Without import flag
         $validHeader2 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0NywiYW'
             . 'd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN119.uq1IPDEuqkQzOFqsTGDtNK7D6Cd8sb3eMR-j_BkTlPw';
 
