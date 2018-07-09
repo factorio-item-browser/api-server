@@ -25,7 +25,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
      * The routes which are whitelisted from the authorization.
      * @var array
      */
-    protected $whitelistedRoutes = [
+    protected const WHITELISTED_ROUTES = [
         '/auth'
     ];
 
@@ -61,7 +61,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!in_array($request->getRequestTarget(), $this->whitelistedRoutes)) {
+        if (!in_array($request->getRequestTarget(), self::WHITELISTED_ROUTES)) {
             $authorization = $request->getHeaderLine('Authorization');
             if (substr($authorization, 0, 7) !== 'Bearer ') {
                 throw new ApiServerException('Authorization token is missing.', 401);
