@@ -74,13 +74,11 @@ class GenericDetailsHandler extends AbstractGenericHandler
 
         $entities = array_merge(
             $this->handleRecipes($namesByTypes[EntityType::RECIPE] ?? []),
-            $this->handleMachines($namesByTypes[EntityType::MACHINE] ?? [])
-        );
-
-        unset($namesByTypes[EntityType::RECIPE], $namesByTypes[EntityType::MACHINE]);
-        $entities = array_merge(
-            $entities,
-            $this->handleItems($namesByTypes)
+            $this->handleMachines($namesByTypes[EntityType::MACHINE] ?? []),
+            $this->handleItems(array_intersect_key($namesByTypes, [
+                EntityType::ITEM => true,
+                EntityType::FLUID => true
+            ]))
         );
 
         $this->translationService->translateEntities();
