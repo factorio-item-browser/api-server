@@ -1,10 +1,12 @@
 language: php
 
-php:
-  - 7.2
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
 
 install:
-  - composer update --no-interaction
+  - composer install --no-interaction
 
 script:
   - vendor/bin/phpunit --coverage-clover=coverage.xml
