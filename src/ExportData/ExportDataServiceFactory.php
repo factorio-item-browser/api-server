@@ -27,8 +27,18 @@ class ExportDataServiceFactory implements FactoryInterface
     {
         $config = $container->get('config');
 
-        $service = new ExportDataService($config['factorio-item-browser']['export-data']['directory']);
+        $service = $this->createInstance($config['factorio-item-browser']['export-data']['directory']);
         $service->loadMods();
         return $service;
+    }
+
+    /**
+     * Creates the actual instance.
+     * @param string $directory
+     * @return ExportDataService
+     */
+    protected function createInstance(string $directory): ExportDataService
+    {
+        return new ExportDataService($directory);
     }
 }

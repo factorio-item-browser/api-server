@@ -75,8 +75,7 @@ class RecipeImporter implements ImporterInterface
         CraftingCategoryService $craftingCategoryService,
         ItemService $itemService,
         RecipeService $recipeService
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->craftingCategoryService = $craftingCategoryService;
         $this->itemService = $itemService;
@@ -253,12 +252,14 @@ class RecipeImporter implements ImporterInterface
      * @param ExportRecipe $exportRecipe
      * @return DatabaseRecipe
      */
-    protected function persistRecipe(ExportRecipe $exportRecipe): DatabaseRecipe {
-        $databaseRecipe = new DatabaseRecipe($exportRecipe->getName(), $exportRecipe->getMode());
-        $databaseRecipe->setCraftingTime($exportRecipe->getCraftingTime())
-                       ->setCraftingCategory(
-                           $this->craftingCategoryService->getByName($exportRecipe->getCraftingCategory())
-                       );
+    protected function persistRecipe(ExportRecipe $exportRecipe): DatabaseRecipe
+    {
+        $databaseRecipe = new DatabaseRecipe(
+            $exportRecipe->getName(),
+            $exportRecipe->getMode(),
+            $this->craftingCategoryService->getByName($exportRecipe->getCraftingCategory())
+        );
+        $databaseRecipe->setCraftingTime($exportRecipe->getCraftingTime());
         $this->entityManager->persist($databaseRecipe);
 
         foreach ($exportRecipe->getIngredients() as $exportIngredient) {

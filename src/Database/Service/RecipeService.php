@@ -64,7 +64,7 @@ class RecipeService extends AbstractModsAwareService
             if (count($this->modService->getEnabledModCombinationIds()) > 0) {
                 $recipeData = $this->filterData($recipeData, ['name', 'mode']);
             }
-            foreach($recipeData as $data) {
+            foreach ($recipeData as $data) {
                 $result[$data['name']][] = (int) $data['id'];
             }
         }
@@ -95,7 +95,7 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
                 $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }
@@ -126,7 +126,7 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
                 $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }

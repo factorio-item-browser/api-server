@@ -68,7 +68,7 @@ class Machine
      * The crafting speed of the machine.
      * @var int
      */
-    protected $craftingSpeed = 1;
+    protected $craftingSpeed = 1000;
 
     /**
      * @ORM\Column(name="numberOfItemSlots", type="integer")

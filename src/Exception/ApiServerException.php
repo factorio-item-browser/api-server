@@ -24,6 +24,7 @@ class ApiServerException extends Exception
      * Adds a request parameter which caused the exception.
      * @param string $name
      * @param string $message
+     * @return $this
      */
     public function addParameter(string $name, string $message)
     {
@@ -31,6 +32,7 @@ class ApiServerException extends Exception
             'name' => $name,
             'message' => $message
         ];
+        return $this;
     }
 
     /**

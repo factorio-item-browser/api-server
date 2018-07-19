@@ -59,8 +59,7 @@ class IconImporter implements ImporterInterface
         EntityManager $entityManager,
         ExportDataService $exportDataService,
         IconService $iconService
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->exportDataService = $exportDataService;
         $this->iconService = $iconService;
@@ -136,8 +135,7 @@ class IconImporter implements ImporterInterface
     protected function assignIconsToCombination(
         ExportCombination $exportCombination,
         DatabaseCombination $databaseCombination
-    )
-    {
+    ) {
         /* @var DatabaseIcon[] $combinationIcons */
         $combinationIcons = [];
         foreach ($databaseCombination->getIcons() as $combinationIcon) {

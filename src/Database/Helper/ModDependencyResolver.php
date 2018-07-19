@@ -69,10 +69,12 @@ class ModDependencyResolver
     protected function fetchMods(array $modNames)
     {
         $missingModNames = array_diff($modNames, array_keys($this->fetchedMods));
-        $this->fetchedMods = array_merge(
-            $this->fetchedMods,
-            $this->modService->getModsWithDependencies($missingModNames)
-        );
+        if (count($missingModNames) > 0) {
+            $this->fetchedMods = array_merge(
+                $this->fetchedMods,
+                $this->modService->getModsWithDependencies($missingModNames)
+            );
+        }
         return $this;
     }
 

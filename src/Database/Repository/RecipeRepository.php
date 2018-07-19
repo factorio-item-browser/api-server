@@ -33,16 +33,14 @@ class RecipeRepository extends EntityRepository
         ];
 
         $queryBuilder = $this->createQueryBuilder('r');
-        $queryBuilder
-            ->select($columns)
-            ->innerJoin('r.modCombinations', 'mc')
-            ->andWhere('r.name IN (:names)')
-            ->setParameter('names', array_values($names));
+        $queryBuilder->select($columns)
+                     ->innerJoin('r.modCombinations', 'mc')
+                     ->andWhere('r.name IN (:names)')
+                     ->setParameter('names', array_values($names));
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->andWhere('mc.id IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 
         return $queryBuilder->getQuery()->getResult();
@@ -65,19 +63,17 @@ class RecipeRepository extends EntityRepository
         ];
 
         $queryBuilder = $this->createQueryBuilder('r');
-        $queryBuilder
-            ->select($columns)
-            ->innerJoin('r.ingredients', 'ri')
-            ->innerJoin('r.modCombinations', 'mc')
-            ->andWhere('ri.item IN (:itemIds)')
-            ->setParameter('itemIds', array_values($itemIds))
-            ->addOrderBy('r.name', 'ASC')
-            ->addOrderBy('r.mode', 'ASC');
+        $queryBuilder->select($columns)
+                     ->innerJoin('r.ingredients', 'ri')
+                     ->innerJoin('r.modCombinations', 'mc')
+                     ->andWhere('ri.item IN (:itemIds)')
+                     ->setParameter('itemIds', array_values($itemIds))
+                     ->addOrderBy('r.name', 'ASC')
+                     ->addOrderBy('r.mode', 'ASC');
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->andWhere('mc.id IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 
         return $queryBuilder->getQuery()->getResult();
@@ -100,19 +96,17 @@ class RecipeRepository extends EntityRepository
         ];
 
         $queryBuilder = $this->createQueryBuilder('r');
-        $queryBuilder
-            ->select($columns)
-            ->innerJoin('r.products', 'rp')
-            ->innerJoin('r.modCombinations', 'mc')
-            ->andWhere('rp.item IN (:itemIds)')
-            ->setParameter('itemIds', array_values($itemIds))
-            ->addOrderBy('r.name', 'ASC')
-            ->addOrderBy('r.mode', 'ASC');
+        $queryBuilder->select($columns)
+                     ->innerJoin('r.products', 'rp')
+                     ->innerJoin('r.modCombinations', 'mc')
+                     ->andWhere('rp.item IN (:itemIds)')
+                     ->setParameter('itemIds', array_values($itemIds))
+                     ->addOrderBy('r.name', 'ASC')
+                     ->addOrderBy('r.mode', 'ASC');
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->andWhere('mc.id IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 
         return $queryBuilder->getQuery()->getResult();
@@ -126,14 +120,13 @@ class RecipeRepository extends EntityRepository
     public function findByIds(array $ids): array
     {
         $queryBuilder = $this->createQueryBuilder('r');
-        $queryBuilder
-            ->addSelect('ri', 'rii', 'rp', 'rpi')
-            ->leftJoin('r.ingredients', 'ri')
-            ->leftJoin('ri.item', 'rii')
-            ->leftJoin('r.products', 'rp')
-            ->leftJoin('rp.item', 'rpi')
-            ->andWhere('r.id IN (:ids)')
-            ->setParameter('ids', array_values($ids));
+        $queryBuilder->addSelect('ri', 'rii', 'rp', 'rpi')
+                     ->leftJoin('r.ingredients', 'ri')
+                     ->leftJoin('ri.item', 'rii')
+                     ->leftJoin('r.products', 'rp')
+                     ->leftJoin('rp.item', 'rpi')
+                     ->andWhere('r.id IN (:ids)')
+                     ->setParameter('ids', array_values($ids));
 
         return $queryBuilder->getQuery()->getResult();
     }
@@ -161,14 +154,13 @@ class RecipeRepository extends EntityRepository
         $index = 0;
         foreach ($keywords as $keyword) {
             $queryBuilder->andWhere('r.name LIKE :keyword' . $index)
-                ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
+                         ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
             ++$index;
         }
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->andWhere('mc.id IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 
         return $queryBuilder->getQuery()->getResult();
@@ -194,14 +186,14 @@ class RecipeRepository extends EntityRepository
             // First delete the ingredients...
             $queryBuilder = $this->createQueryBuilder('r');
             $queryBuilder->delete(RecipeIngredient::class, 'ri')
-                         ->where('ri.recipe IN (:recipeIds)')
+                         ->andWhere('ri.recipe IN (:recipeIds)')
                          ->setParameter('recipeIds', array_values($recipeIds));
             $queryBuilder->getQuery()->execute();
 
             // ... and the products.
             $queryBuilder = $this->createQueryBuilder('r');
             $queryBuilder->delete(RecipeProduct::class, 'rp')
-                         ->where('rp.recipe IN (:recipeIds)')
+                         ->andWhere('rp.recipe IN (:recipeIds)')
                          ->setParameter('recipeIds', array_values($recipeIds));
             $queryBuilder->getQuery()->execute();
 
