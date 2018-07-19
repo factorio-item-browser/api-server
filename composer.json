@@ -45,15 +45,15 @@
     }
   },
   "scripts": {
-    "check": [
-      "@phpunit",
-      "@phpcs"
-    ],
     "phpcbf": "phpcbf -p --colors",
     "phpcs": "phpcs -p --colors",
     "phpunit": "phpunit --colors=always --coverage-html=test/log",
     "post-autoload-dump": [
       "mkdir -p data/cache && chmod 0777 data/cache"
+    ],
+    "test": [
+      "@phpunit",
+      "@phpcs"
     ]
   }
 }
