@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2db1f464d818e7056e767ac0fbf7d28e",
+    "content-hash": "e5526492043544923169e1c78939adbb",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -1026,16 +1026,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-develop",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "f65016060c69353acc7e6276f1252ce9ea283267"
+                "reference": "2c670525c1d7dda5adffb440764bbb4098ce14c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/f65016060c69353acc7e6276f1252ce9ea283267",
-                "reference": "f65016060c69353acc7e6276f1252ce9ea283267",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/2c670525c1d7dda5adffb440764bbb4098ce14c7",
+                "reference": "2c670525c1d7dda5adffb440764bbb4098ce14c7",
                 "shasum": ""
             },
             "require": {
@@ -1072,20 +1072,20 @@
                 "api",
                 "client"
             ],
-            "time": "2018-07-17T18:45:59+00:00"
+            "time": "2018-07-21T08:43:29+00:00"
         },
         {
             "name": "factorio-item-browser/export-data",
-            "version": "dev-develop",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/export-data.git",
-                "reference": "8f6b6bc1a4baf24283aa2f0d9a102ff42dd946fe"
+                "reference": "b53a72c611154832bd94a63a928572f3c3293077"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/8f6b6bc1a4baf24283aa2f0d9a102ff42dd946fe",
-                "reference": "8f6b6bc1a4baf24283aa2f0d9a102ff42dd946fe",
+                "url": "https://api.github.com/repos/factorio-item-browser/export-data/zipball/b53a72c611154832bd94a63a928572f3c3293077",
+                "reference": "b53a72c611154832bd94a63a928572f3c3293077",
                 "shasum": ""
             },
             "require": {
@@ -1121,7 +1121,7 @@
                 "Factorio Item Browser",
                 "export"
             ],
-            "time": "2018-07-16T16:53:02+00:00"
+            "time": "2018-07-21T07:57:14+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -1762,16 +1762,16 @@
         },
         {
             "name": "zendframework/zend-diactoros",
-            "version": "1.8.1",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-diactoros.git",
-                "reference": "63d920d1c9ebc009d860c3666593a66298727dd6"
+                "reference": "273c18bf6aaab20be9667a3aa4e7702e1e4e7ced"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/63d920d1c9ebc009d860c3666593a66298727dd6",
-                "reference": "63d920d1c9ebc009d860c3666593a66298727dd6",
+                "url": "https://api.github.com/repos/zendframework/zend-diactoros/zipball/273c18bf6aaab20be9667a3aa4e7702e1e4e7ced",
+                "reference": "273c18bf6aaab20be9667a3aa4e7702e1e4e7ced",
                 "shasum": ""
             },
             "require": {
@@ -1821,7 +1821,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2018-07-09T21:17:27+00:00"
+            "time": "2018-07-19T18:38:31+00:00"
         },
         {
             "name": "zendframework/zend-escaper",
@@ -4102,10 +4102,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-client": 20,
-        "factorio-item-browser/export-data": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

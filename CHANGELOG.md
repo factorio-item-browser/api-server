@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0 - 2018-07-21
+
+### Added
+
+- Request `recipe/machines` providing all machines able to craft the specified recipe.
+- `X-Version` and `X-Runtime` to all response headers.
+
+### Fixed
+
+- Conflicting icons between mods.
+- Inconsistent numbers of recipes.
+
+### Changed
+
+- Expensive recipes are now returned attached to their normal version instead of a separate recipe. 
+  This changes the responses of `/item/ingredient`, `/item/product`, `/item/random`, `/recipe/details` and 
+  `/search/query` requests. 
+- Changed format of error responses.
+
+### Removed
+
+- Removed `meta` node from all responses.
+
 ## 1.0.1 - 2018-04-14
 
 ### Fixed
