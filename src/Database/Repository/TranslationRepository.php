@@ -32,6 +32,7 @@ class TranslationRepository extends EntityRepository
             't.value AS value',
             't.description AS description',
             't.isDuplicatedByRecipe AS isDuplicatedByRecipe',
+            't.isDuplicatedByMachine AS isDuplicatedByMachine',
             'mc.order AS order'
         ];
 
@@ -41,27 +42,37 @@ class TranslationRepository extends EntityRepository
                      ->andWhere('t.locale IN (:locales)')
                      ->setParameter('locales', [$locale, 'en']);
 
-        if (count($modCombinationIds) > 0) {
-            $queryBuilder->andWhere('(t.modCombination IN (:modCombinationIds) OR t.type = :typeMod)')
-                         ->setParameter('modCombinationIds', array_values($modCombinationIds))
-                         ->setParameter('typeMod', 'mod');
-        }
-
         $index = 0;
         $conditions = [];
         foreach ($namesByTypes as $type => $names) {
-            if ($type === EntityType::RECIPE) {
-                // Special case: Recipes may re-use the translations provided by the item with the same name.
-                $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByRecipe = 1) '
-                    . 'AND t.name IN (:names' . $index . '))';
-            } else {
-                $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+            switch ($type) {
+                case EntityType::RECIPE:
+                    // Special case: Recipes may re-use the translations provided by the item with the same name.
+                    $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByRecipe = 1) '
+                        . 'AND t.name IN (:names' . $index . '))';
+                    break;
+
+                case EntityType::MACHINE:
+                    // Special case: Machines may re-use the translations provided by the item with the same name.
+                    $conditions[] = '((t.type = :type' . $index . ' OR t.isDuplicatedByMachine = 1) '
+                        . 'AND t.name IN (:names' . $index . '))';
+                    break;
+
+                default:
+                    $conditions[] = '(t.type = :type' . $index . ' AND t.name IN (:names' . $index . '))';
+                    break;
             }
             $queryBuilder->setParameter('type' . $index, $type)
                          ->setParameter('names' . $index, array_values($names));
             ++$index;
         }
         $queryBuilder->andWhere('(' . implode(' OR ', $conditions) . ')');
+
+        if (count($modCombinationIds) > 0) {
+            $queryBuilder->andWhere('(t.modCombination IN (:modCombinationIds) OR t.type = :typeMod)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds))
+                         ->setParameter('typeMod', 'mod');
+        }
 
         return $queryBuilder->getQuery()->getResult();
     }
@@ -86,29 +97,27 @@ class TranslationRepository extends EntityRepository
         ];
 
         $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder
-            ->select($columns)
-            ->andWhere('t.type != :typeMod')
-            ->addGroupBy('t.type')
-            ->addGroupBy('t.name')
-            ->setParameter('localePrimary', $locale)
-            ->setParameter('localeSecondary', 'en')
-            ->setParameter('priorityPrimary', ResultPriority::PRIMARY_LOCALE_MATCH)
-            ->setParameter('prioritySecondary', ResultPriority::SECONDARY_LOCALE_MATCH)
-            ->setParameter('priorityAny', ResultPriority::ANY_MATCH)
-            ->setParameter('typeMod', 'mod');
+        $queryBuilder->select($columns)
+                     ->andWhere('t.type IN (:types)')
+                     ->addGroupBy('t.type')
+                     ->addGroupBy('t.name')
+                     ->setParameter('localePrimary', $locale)
+                     ->setParameter('localeSecondary', 'en')
+                     ->setParameter('priorityPrimary', ResultPriority::PRIMARY_LOCALE_MATCH)
+                     ->setParameter('prioritySecondary', ResultPriority::SECONDARY_LOCALE_MATCH)
+                     ->setParameter('priorityAny', ResultPriority::ANY_MATCH)
+                     ->setParameter('types', [EntityType::ITEM, EntityType::FLUID, EntityType::RECIPE]);
 
         $index = 0;
         foreach ($keywords as $keyword) {
-            $queryBuilder->andWhere($concat . 'LIKE :keyword' . $index)
+            $queryBuilder->andWhere($concat . ' LIKE :keyword' . $index)
                          ->setParameter('keyword' . $index, '%' . addcslashes($keyword, '\\%_') . '%');
             ++$index;
         }
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->innerJoin('t.modCombination', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->innerJoin('t.modCombination', 'mc', 'WITH', 'mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
 
         return $queryBuilder->getQuery()->getResult();

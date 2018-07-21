@@ -59,8 +59,7 @@ class IconImporter implements ImporterInterface
         EntityManager $entityManager,
         ExportDataService $exportDataService,
         IconService $iconService
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->exportDataService = $exportDataService;
         $this->iconService = $iconService;
@@ -136,8 +135,7 @@ class IconImporter implements ImporterInterface
     protected function assignIconsToCombination(
         ExportCombination $exportCombination,
         DatabaseCombination $databaseCombination
-    )
-    {
+    ) {
         /* @var DatabaseIcon[] $combinationIcons */
         $combinationIcons = [];
         foreach ($databaseCombination->getIcons() as $combinationIcon) {
@@ -183,6 +181,25 @@ class IconImporter implements ImporterInterface
             }
         }
 
+        // Process machine icons
+        foreach ($exportCombination->getData()->getMachines() as $exportMachine) {
+            if (strlen($exportMachine->getIconHash()) > 0) {
+                $hash = $exportMachine->getIconHash();
+                $key = EntityType::MACHINE . '|' . $exportMachine->getName();
+                if (isset($combinationIcons[$key])) {
+                    $combinationIcon = $combinationIcons[$key];
+                    $combinationIcon->setFile($this->getIconFile($hash));
+                    unset($combinationIcons[$key]);
+                } else {
+                    $combinationIcon = new DatabaseIcon($databaseCombination, $this->getIconFile($hash));
+                    $combinationIcon->setType(EntityType::MACHINE)
+                                    ->setName($exportMachine->getName());
+                    $databaseCombination->getIcons()->add($combinationIcon);
+                    $this->entityManager->persist($combinationIcon);
+                }
+            }
+        }
+        
         foreach ($combinationIcons as $combinationIcon) {
             $databaseCombination->getIcons()->removeElement($combinationIcon);
         }

@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Blast\BaseUrl\BasePathHelper;
 use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
  * The factory of the documentation redirect middleware.
@@ -13,7 +14,7 @@ use Interop\Container\ContainerInterface;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class DocumentationRedirectMiddlewareFactory
+class DocumentationRedirectMiddlewareFactory implements FactoryInterface
 {
     /**
      * Creates the database configuration middleware.

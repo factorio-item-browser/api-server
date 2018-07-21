@@ -1,0 +1,23 @@
+# The file containing the parameters of the OpenAPI specification.
+#
+# @author BluePsyduck <bluepsyduck@gmx.com>
+# @license http://opensource.org/licenses/GPL-3.0 GPL v3
+
+Authorization:
+  name: "Authorization"
+  in: "header"
+  description:
+    The token received from the auth request.
+  schema:
+    type: "string"
+  example: "Bearer {TOKEN}"
+  required: true
+
+Accept-Language:
+  name: "Accept-Language"
+  in: "header"
+  description:
+    The language code to use for translating labels and descriptions.
+  schema:
+    type: "string"
+  example: "en"

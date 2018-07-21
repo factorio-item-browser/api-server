@@ -1,0 +1,221 @@
+# The file containing the schemas of the OpenAPI specification.
+#
+# @author BluePsyduck <bluepsyduck@gmx.com>
+# @license http://opensource.org/licenses/GPL-3.0 GPL v3
+
+GenericEntity:
+  title: "GenericEntity"
+  type: "object"
+  description: "A generic entity with basic information."
+  properties:
+    type:
+      type: "string"
+      description: "The type of the entity"
+      enum:
+        - fluid
+        - item
+        - recipe
+    name:
+      type: "string"
+      description: "The internal name of the entity."
+    label:
+      type: "string"
+      description: "The translated label of the entity."
+    description:
+      type: "string"
+      description: "The translated description of the entity."
+
+GenericEntityWithRecipes:
+  title: "GenericEntityWithRecipes"
+  description: "A generic entity with basic information, including recipes."
+  allOf:
+    - $ref: "#/GenericEntity"
+    - type: "object"
+      properties:
+        recipes:
+          type: "array"
+          description: "The recipes related to the entity."
+          items:
+            $ref: "#/RecipeWithExpensiveVersion"
+        totalNumberOfRecipes:
+          type: "integer"
+          description: "The total number of recipes available for the entity."
+
+Icon:
+  title: "Icon"
+  type: "object"
+  description: "An icon of an item or recipe."
+  properties:
+    entities:
+      type: "array"
+      description: "The entities using the icon file with the current enabled mods."
+      items:
+        type: "object"
+        properties:
+          type:
+            type: "string"
+            description: "The type of the entity using this icon."
+          name:
+            type: "string"
+            description: "The name of the entity using this icon."
+    content:
+      type: "string"
+      description: "The base64 encoded contents of the icon file."
+
+Item:
+  title: "Item"
+  type: "object"
+  description: "An actual item or fluid."
+  properties:
+    type:
+      type: "string"
+      description: "The type of the item."
+      enum:
+        - fluid
+        - item
+    name:
+      type: "string"
+      description: "The name of the item."
+    label:
+      type: "string"
+      description: "The translated label of the item."
+    description:
+      type: "string"
+      description: "The translated description of the item, if available."
+    amount:
+      type: "number"
+      description: "The amount of the item as ingredient or product."
+
+Machine:
+  title: "Machine"
+  type: "object"
+  description: "A machine required to craft recipes."
+  properties:
+    name:
+      type: "string"
+      description: "The name of the machine."
+    label:
+      type: "string"
+      description: "The translated label of the machine."
+    description:
+      type: "string"
+      description: "The translated description of the machine, if available."
+    craftingSpeed:
+      type: "number"
+      description: "The crafting speed of the machine."
+    numberOfItemSlots:
+      type: "integer"
+      description: "The number of ingredient slots available in the machine, or -1 if unlimited."
+    numberOfFluidInputSlots:
+      type: "integer"
+      description: "The number of fluid input slots available in the machine."
+    numberOfFluidOutputSlots:
+      type: "integer"
+      description: "The number of fluid output slots available in the machine."
+    numberOfModuleSlots:
+      type: "integer"
+      description: "The number of module slots available in the machine."
+    energyUsage:
+      type: "number"
+      description: "The energy usage of the machine."
+    energyUsageUnit:
+      type: "string"
+      description: "The unit of the energy usage."
+      enum:
+        - W
+        - kW
+        - MW
+        - GW
+        - TW
+        - PW
+        - EW
+        - ZW
+        - YW
+
+Mod:
+  title: "Mod"
+  type: "object"
+  description: "A mod supported by the API."
+  properties:
+    name:
+      type: "string"
+      description: "The internal name of the mod."
+    label:
+      type: "string"
+      description: "The translated label of the mod."
+    description:
+      type: "string"
+      description: "The translated description of the mod."
+    author:
+      type: "string"
+      description: "The author of the mod."
+    version:
+      type: "string"
+      description: "The version of the mod available in the browser."
+    isEnabled:
+      type: "boolean"
+      description: "Whether the mod is currently enabled for the specified authorization token."
+
+Recipe:
+  title: "Recipe"
+  type: "object"
+  description: "A recipe to craft items into other ones."
+  properties:
+    name:
+      type: "string"
+      description: "The name of the recipe."
+    mode:
+      type: "string"
+      description: "The mode of the recipe."
+      enum:
+        - normal
+        - expensive
+    label:
+      type: "string"
+      description: "The translated label of the recipe."
+    description:
+      type: "string"
+      description: "The translated description of the recipe, if available."
+    ingredients:
+      type: "array"
+      description: "The ingredients of the recipe."
+      items:
+        $ref: "#/Item"
+    products:
+      type: "array"
+      description: "The products of the recipe."
+      items:
+        $ref: "#/Item"
+    craftingTime:
+      type: "number"
+
+RecipeWithExpensiveVersion:
+  title: "RecipeWithExpensiveVersion"
+  description: "A recipe to craft items into other ones, including an expensive version of it, if existing."
+  allOf:
+    - $ref: "#/Recipe"
+    - type: "object"
+      properties:
+        expensiveVersion:
+          $ref: "#/Recipe"
+
+Error:
+  title: "Error"
+  type: "object"
+  description: "An error which occurred during handling the request."
+  properties:
+    message:
+      type: "string"
+      description: "The message of the error which occurred."
+    parameters:
+      type: "array"
+      description: "The request parameters which caused the error."
+      items:
+        type: "object"
+        properties:
+          name:
+            type: "string"
+            description: "The name of the parameter which failed validation."
+          message:
+            type: "string"
+            description: "The message why the parameter failed validation."

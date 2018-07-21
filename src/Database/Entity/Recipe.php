@@ -60,7 +60,16 @@ class Recipe
      * The required time in milliseconds to craft the recipe.
      * @var int
      */
-    protected $craftingTime = 0.;
+    protected $craftingTime = 0;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="CraftingCategory")
+     * @ORM\JoinColumn(name="craftingCategoryId", referencedColumnName="id")
+     *
+     * The crafting category of the recipe.
+     * @var CraftingCategory
+     */
+    protected $craftingCategory;
 
     /**
      * @ORM\OneToMany(targetEntity="RecipeIngredient", mappedBy="recipe")
@@ -82,11 +91,13 @@ class Recipe
      * Initializes the entity.
      * @param string $name
      * @param string $mode
+     * @param CraftingCategory $craftingCategory
      */
-    public function __construct(string $name, string $mode)
+    public function __construct(string $name, string $mode, CraftingCategory $craftingCategory)
     {
         $this->name = $name;
         $this->mode = $mode;
+        $this->craftingCategory = $craftingCategory;
         $this->modCombinations = new ArrayCollection();
         $this->ingredients = new ArrayCollection();
         $this->products = new ArrayCollection();
@@ -179,6 +190,26 @@ class Recipe
     public function getCraftingTime(): float
     {
         return $this->craftingTime / 1000;
+    }
+
+    /**
+     * Sets the crafting category of the recipe.
+     * @param CraftingCategory $craftingCategory
+     * @return $this
+     */
+    public function setCraftingCategory(CraftingCategory $craftingCategory)
+    {
+        $this->craftingCategory = $craftingCategory;
+        return $this;
+    }
+
+    /**
+     * Returns the crafting category of the recipe.
+     * @return CraftingCategory
+     */
+    public function getCraftingCategory(): CraftingCategory
+    {
+        return $this->craftingCategory;
     }
 
     /**

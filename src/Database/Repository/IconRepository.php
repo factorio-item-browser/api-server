@@ -21,7 +21,7 @@ class IconRepository extends EntityRepository
      * @param array|int[] $modCombinationIds
      * @return array
      */
-    public function findHashesByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
+    public function findHashDataByTypesAndNames(array $namesByTypes, array $modCombinationIds = []): array
     {
         $columns = [
             'IDENTITY(i.file) AS hash',
@@ -55,22 +55,44 @@ class IconRepository extends EntityRepository
     }
 
     /**
-     * Finds the icons with the specified hashes.
-     * @param array|int[] $hashes
+     * Finds the ID data of the icons with the specified hashes.
+     * @param array|string[] $hashes
      * @param array|int[] $modCombinationIds
-     * @return array|Icon[]
+     * @return array
      */
-    public function findByHashes(array $hashes, array $modCombinationIds = []): array
+    public function findIdDataByHashes(array $hashes, array $modCombinationIds = []): array
     {
+        $columns = [
+            'i.id AS id',
+            'i.type AS type',
+            'i.name AS name',
+            'mc.order AS order'
+        ];
+
         $queryBuilder = $this->createQueryBuilder('i');
-        $queryBuilder->andWhere('i.file IN (:hashes)')
+        $queryBuilder->select($columns)
+                     ->innerJoin('i.modCombination', 'mc')
+                     ->andWhere('i.file IN (:hashes)')
                      ->setParameter('hashes', array_map('hex2bin', array_values($hashes)));
 
         if (count($modCombinationIds) > 0) {
-            $queryBuilder
-                ->andWhere('i.modCombination IN (:modCombinationIds)')
-                ->setParameter('modCombinationIds', array_values($modCombinationIds));
+            $queryBuilder->andWhere('mc.id IN (:modCombinationIds)')
+                         ->setParameter('modCombinationIds', array_values($modCombinationIds));
         }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Finds the icons by their id.
+     * @param array|int $ids
+     * @return array|Icon[]
+     */
+    public function findByIds(array $ids): array
+    {
+        $queryBuilder = $this->createQueryBuilder('i');
+        $queryBuilder->andWhere('i.id IN (:ids)')
+                     ->setParameter('ids', array_values($ids));
 
         return $queryBuilder->getQuery()->getResult();
     }

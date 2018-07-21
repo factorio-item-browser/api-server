@@ -43,7 +43,7 @@ class ProductRecipeHandler implements SearchHandlerInterface
         /* @var ItemResult[] $itemResults */
         $itemResults = [];
         foreach ($searchResults->getResults() as $result) {
-            if ($result instanceof ItemResult)  {
+            if ($result instanceof ItemResult) {
                 $itemResults[$result->getId()] = $result;
             }
         }
@@ -52,8 +52,8 @@ class ProductRecipeHandler implements SearchHandlerInterface
         foreach ($groupedRecipeIds as $itemId => $recipeIds) {
             if (isset($itemResults[$itemId]) && count($recipeIds) > 0) {
                 $itemResult = $itemResults[$itemId];
-                foreach (call_user_func_array('array_merge', $recipeIds) as $recipeId) {
-                    $itemResult->addRecipeId($recipeId);
+                foreach ($recipeIds as $name => $recipeIdGroup) {
+                    $itemResult->addRecipeIds($name, $recipeIdGroup);
                 }
             }
         }

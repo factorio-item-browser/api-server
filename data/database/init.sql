@@ -71,13 +71,26 @@ ENGINE=InnoDB;
 
 
 -- Recipe related tables
+CREATE TABLE `CraftingCategory` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the crafting category.',
+  `name` VARCHAR(255) NOT NULL COMMENT 'The name of the crafting category.',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uq_name` (`name`)
+)
+COMMENT='The table holding the crafting categories.'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;
+
 CREATE TABLE `Recipe` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the recipe.',
   `name` VARCHAR(255) NOT NULL COMMENT 'The name of the recipe.',
   `mode` ENUM('normal','expensive') NOT NULL COMMENT 'The mode of the recipe.',
   `craftingTime` INT(10) UNSIGNED NOT NULL COMMENT 'The required time in milliseconds to craft the recipe.',
+  `craftingCategoryId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the crafting category of the recipe.',
   PRIMARY KEY (`id`),
-  INDEX `idx_name` (`name`)
+  INDEX `idx_name` (`name`),
+  INDEX `idx_craftingCategoryId` (`craftingCategoryId`),
+  CONSTRAINT `fk_R_craftingCategoryId` FOREIGN KEY (`craftingCategoryId`) REFERENCES `CraftingCategory` (`id`)
 )
 COMMENT='The recipes to craft the items.'
 COLLATE='utf8_general_ci'
@@ -129,6 +142,50 @@ COLLATE='utf8_general_ci'
 ENGINE=InnoDB;
 
 
+-- Machine related tables
+CREATE TABLE `Machine` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'The internal id of the machine.',
+  `name` VARCHAR(255) NOT NULL COMMENT 'The name of the machine.',
+  `craftingSpeed` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'The crafting speed of the machine.',
+  `numberOfItemSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of item slots available in the machine, or 255 for unlimited.',
+  `numberOfFluidInputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid input slots available in the machine.',
+  `numberOfFluidOutputSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of fluid output slots available in the machine.',
+  `numberOfModuleSlots` TINYINT(3) UNSIGNED NOT NULL COMMENT 'The number of module slots available in the machine.',
+  `energyUsage` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'The energy usage of the machine.',
+  `energyUsageUnit` ENUM('W','kW','MW','GW','TW','PW','EW','ZW','YW') NOT NULL COMMENT 'The unit of the energy usage.',
+  PRIMARY KEY (`id`)
+)
+COMMENT='The table holding the crafting machines of the recipes.'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `MachineXCraftingCategory` (
+  `machineId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the referenced machine.',
+  `craftingCategoryId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the referenced crafting category.',
+  PRIMARY KEY (`machineId`, `craftingCategoryId`),
+  INDEX `idx_machineId` (`machineId`),
+  INDEX `idx_craftingCategoryId` (`craftingCategoryId`),
+  CONSTRAINT `fk_MxCC_craftingCategoryId` FOREIGN KEY (`craftingCategoryId`) REFERENCES `CraftingCategory` (`id`),
+  CONSTRAINT `fk_MxCC_machineId` FOREIGN KEY (`machineId`) REFERENCES `Machine` (`id`)
+)
+COMMENT='The reference table between machines and crafting categories.'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;
+
+CREATE TABLE `ModCombinationXMachine` (
+  `modCombinationId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the referenced mod combination.',
+  `machineId` INT(10) UNSIGNED NOT NULL COMMENT 'The id of the referenced machine.',
+  PRIMARY KEY (`modCombinationId`, `machineId`),
+  INDEX `idx_modCombinationId` (`modCombinationId`),
+  INDEX `idx_machineId` (`machineId`),
+  CONSTRAINT `fk_MCxM_machineId` FOREIGN KEY (`machineId`) REFERENCES `Machine` (`id`),
+  CONSTRAINT `fk_MCxM_modCombinationId` FOREIGN KEY (`modCombinationId`) REFERENCES `ModCombination` (`id`)
+)
+COMMENT='The reference table between mod combinations and machines.'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB;
+
+
 -- Icon related tables
 CREATE TABLE `IconFile` (
   `hash` BINARY(4) NOT NULL COMMENT 'The hash of the icon file.',
@@ -167,6 +224,7 @@ CREATE TABLE `Translation` (
   `value` TEXT NOT NULL COMMENT 'The actual translation.',
   `description` TEXT NOT NULL COMMENT 'The translated description.',
   `isDuplicatedByRecipe` BIT(1) NOT NULL COMMENT 'Whether this translation is duplicated by the recipe.',
+  `isDuplicatedByMachine` BIT(1) NOT NULL COMMENT 'Whether this translation is duplicated by the machine.',
   PRIMARY KEY (`id`),
   INDEX `idx_modId` (`modCombinationId`),
   INDEX `idx_locale_type_name` (`locale`, `type`, `name`),

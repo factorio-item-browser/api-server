@@ -56,8 +56,7 @@ class ImportHandler extends AbstractRequestHandler
         ExportDataService $exportDataService,
         ModService $modService,
         ImporterManager $importerManager
-    )
-    {
+    ) {
         $this->exportDataService = $exportDataService;
         $this->modService = $modService;
         $this->importerManager = $importerManager;
@@ -192,8 +191,7 @@ class ImportHandler extends AbstractRequestHandler
         ExportCombination $exportCombination,
         DatabaseMod $databaseMod,
         ?DatabaseCombination $databaseCombination
-    )
-    {
+    ) {
         if (!$databaseCombination instanceof DatabaseCombination) {
             $databaseCombination = new DatabaseCombination($databaseMod);
             $databaseCombination->setName($exportCombination->getName());

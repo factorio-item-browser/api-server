@@ -85,6 +85,14 @@ class Translation
     protected $isDuplicatedByRecipe = false;
 
     /**
+     * @ORM\Column(name="isDuplicatedByMachine", type="boolean")
+     *
+     * Whether this translation is duplicated by the machine.
+     * @var bool
+     */
+    protected $isDuplicatedByMachine = false;
+
+    /**
      * Sets the internal id of the translation.
      * @param int $id
      * @return $this Implementing fluent interface.
@@ -242,5 +250,25 @@ class Translation
     public function getIsDuplicatedByRecipe(): bool
     {
         return $this->isDuplicatedByRecipe;
+    }
+
+    /**
+     * Sets whether this translation is duplicated by the machine.
+     * @param bool $isDuplicatedByMachine
+     * @return $this Implementing fluent interface.
+     */
+    public function setIsDuplicatedByMachine(bool $isDuplicatedByMachine)
+    {
+        $this->isDuplicatedByMachine = $isDuplicatedByMachine;
+        return $this;
+    }
+
+    /**
+     * Returns whether this translation is duplicated by the machine.
+     * @return bool
+     */
+    public function getIsDuplicatedByMachine(): bool
+    {
+        return $this->isDuplicatedByMachine;
     }
 }

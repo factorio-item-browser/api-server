@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
-use FactorioItemBrowser\Api\Client\Entity\Item as ClientItem;
+use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 
 /**
  * The class able to map items.
@@ -14,25 +13,20 @@ use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ItemMapper
+class ItemMapper extends AbstractMapper
 {
     /**
-     * Maps the database item to a client item.
+     * Maps the database item into the specified client item.
      * @param DatabaseItem $databaseItem
-     * @param TranslationService $translationService
-     * @return ClientItem
+     * @param GenericEntity $clientItem
+     * @return GenericEntity
      */
-    static public function mapDatabaseItemToClientItem(
-        DatabaseItem $databaseItem,
-        TranslationService $translationService
-    ): ClientItem
+    public function mapItem(DatabaseItem $databaseItem, GenericEntity $clientItem): GenericEntity
     {
-        $clientItem = new ClientItem();
-        $clientItem
-            ->setType($databaseItem->getType())
-            ->setName($databaseItem->getName());
+        $clientItem->setType($databaseItem->getType())
+                   ->setName($databaseItem->getName());
 
-        $translationService->addEntityToTranslate($clientItem);
+        $this->translationService->addEntityToTranslate($clientItem);
         return $clientItem;
     }
 }

@@ -43,10 +43,9 @@ class RecipeHandler implements SearchHandlerInterface
     {
         foreach ($this->recipeService->getIdDataByKeywords($searchQuery->getKeywords()) as $recipeData) {
             $searchResult = new RecipeResult();
-            $searchResult
-                ->addRecipeId($recipeData['id'])
-                ->setName($recipeData['name'])
-                ->setPriority(ResultPriority::EXACT_MATCH);
+            $searchResult->addRecipeIds($recipeData['name'], [$recipeData['id']])
+                         ->setName($recipeData['name'])
+                         ->setPriority(ResultPriority::EXACT_MATCH);
             $searchResults->add($searchResult);
         }
         return $this;

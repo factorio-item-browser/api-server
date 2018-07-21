@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Search;
 
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
@@ -29,6 +30,12 @@ class SearchDecorator
     protected $itemService;
 
     /**
+     * The recipe mapper.
+     * @var RecipeMapper
+     */
+    protected $recipeMapper;
+
+    /**
      * The database recipe service.
      * @var RecipeService
      */
@@ -43,15 +50,18 @@ class SearchDecorator
     /**
      * Initializes the request handler.
      * @param ItemService $itemService
+     * @param RecipeMapper $recipeMapper
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
         ItemService $itemService,
+        RecipeMapper $recipeMapper,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
         $this->itemService = $itemService;
+        $this->recipeMapper = $recipeMapper;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -65,44 +75,56 @@ class SearchDecorator
     public function decorate(array $searchResults, int $numberOfRecipesPerResult): array
     {
         $itemIds = [];
-        $recipeIds = [];
+        $groupedRecipeIds = [];
 
         foreach ($searchResults as $searchResult) {
-            $recipeIds = array_merge(
-                $recipeIds,
-                array_slice($searchResult->getRecipeIds(), 0, $numberOfRecipesPerResult)
+            $groupedRecipeIds = array_merge(
+                $groupedRecipeIds,
+                array_slice($searchResult->getGroupedRecipeIds(), 0, $numberOfRecipesPerResult)
             );
             if ($searchResult instanceof ItemResult) {
                 $itemIds[] = $searchResult->getId();
             }
         }
 
+        if (count($groupedRecipeIds) > 0) {
+            $allRecipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+        } else {
+            $allRecipeIds = [];
+        }
+
         $items = $this->itemService->getByIds($itemIds);
-        $recipes = $this->recipeService->getDetailsByIds($recipeIds);
+        $recipes = $this->recipeService->getDetailsByIds($allRecipeIds);
 
         $entities = [];
         foreach ($searchResults as $searchResult) {
             $entity = new GenericEntityWithRecipes();
             if ($searchResult instanceof ItemResult && isset($items[$searchResult->getId()])) {
                 $item = $items[$searchResult->getId()];
-                $entity
-                    ->setType($item->getType())
-                    ->setName($item->getName());
-            } elseif ($searchResult instanceof RecipeResult && isset($recipes[$searchResult->getId()])) {
-                 $entity
-                     ->setType(EntityType::RECIPE)
-                     ->setName($recipes[$searchResult->getId()]->getName());
+                $entity->setType($item->getType())
+                       ->setName($item->getName());
+            } elseif ($searchResult instanceof RecipeResult && isset($recipes[$searchResult->getFirstRecipeId()])) {
+                 $entity->setType(EntityType::RECIPE)
+                        ->setName($recipes[$searchResult->getFirstRecipeId()]->getName());
             }
 
-            foreach (array_slice($searchResult->getRecipeIds(), 0, $numberOfRecipesPerResult) as $recipeId) {
-                if (isset($recipes[$recipeId])) {
-                    $entity->addRecipe(RecipeMapper::mapDatabaseRecipeToClientRecipe(
-                        $recipes[$recipeId],
-                        $this->translationService
-                    ));
+            foreach (array_slice($searchResult->getGroupedRecipeIds(), 0, $numberOfRecipesPerResult) as $recipeIds) {
+                $currentRecipe = null;
+                foreach ($recipeIds as $recipeId) {
+                    if (isset($recipes[$recipeId])) {
+                        $mappedRecipe = new RecipeWithExpensiveVersion();
+                        $this->recipeMapper->mapRecipe($recipes[$recipeId], $mappedRecipe);
+
+                        if (is_null($currentRecipe)) {
+                            $currentRecipe = $mappedRecipe;
+                        } else {
+                            $this->recipeMapper->combineRecipes($currentRecipe, $mappedRecipe);
+                        }
+                    }
                 }
+                $entity->addRecipe($currentRecipe);
             }
-            $entity->setTotalNumberOfRecipes(count($searchResult->getRecipeIds()));
+            $entity->setTotalNumberOfRecipes(count($searchResult->getGroupedRecipeIds()));
 
             $this->translationService->addEntityToTranslate($entity);
             $entities[] = $entity;

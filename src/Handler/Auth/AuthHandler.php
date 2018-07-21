@@ -22,6 +22,11 @@ use Zend\Validator\NotEmpty;
 class AuthHandler extends AbstractRequestHandler
 {
     /**
+     * The lifetime of a token.
+     */
+    const TOKEN_LIFETIME = 86400;
+
+    /**
      * The key used for creating the authorization token.
      * @var string
      */
@@ -101,18 +106,35 @@ class AuthHandler extends AbstractRequestHandler
 
         $enabledModNames = ($agentConfig['isDemo'] ?? false) ? ['base'] : $requestData->getArray('enabledModNames');
         $this->modService->setEnabledCombinationsByModNames($enabledModNames);
+
+        return [
+            'authorizationToken' => $this->createToken(
+                $agent,
+                $this->modService->getEnabledModCombinationIds(),
+                $agentConfig['allowImport'] ?? false
+            )
+        ];
+    }
+
+    /**
+     * Creates and returns a new token.
+     * @param string $agent
+     * @param array $enabledModCombinationIds
+     * @param bool $allowImport
+     * @return string
+     */
+    protected function createToken(string $agent, array $enabledModCombinationIds, bool $allowImport): string
+    {
         $token = [
             'iat' => time(),
-            'exp' => time() + 86400,
-            'agt' => $requestData->getString('agent'),
-            'mds' => $this->modService->getEnabledModCombinationIds()
+            'exp' => time() + self::TOKEN_LIFETIME,
+            'agt' => $agent,
+            'mds' => $enabledModCombinationIds
         ];
-        if ($agentConfig['allowImport'] ?? false) {
+        if ($allowImport ?? false) {
             $token['imp'] = 1;
         }
 
-        return [
-            'authorizationToken' => JWT::encode($token, $this->authorizationKey)
-        ];
+        return JWT::encode($token, $this->authorizationKey);
     }
 }

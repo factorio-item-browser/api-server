@@ -51,15 +51,35 @@ class IconService extends AbstractModsAwareService
     {
         $hashes = [];
         if (count($namesByTypes) > 0) {
-            $iconData = $this->iconRepository->findHashesByTypesAndNames(
+            $iconData = $this->iconRepository->findHashDataByTypesAndNames(
                 $namesByTypes,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach ($this->filterData($iconData, ['type', 'name']) as $data) {
+            foreach ($iconData as $data) {
                 $hashes[bin2hex($data['hash'])] = true;
             }
         }
         return array_keys($hashes);
+    }
+
+    /**
+     * Returns all types and names of icons which are using any of the specified hashes.
+     * @param array|string[] $iconFileHashes
+     * @return array|string[][]
+     */
+    public function getAllTypesAndNamesByHashes(array $iconFileHashes): array
+    {
+        $result = [];
+        if (count($iconFileHashes) > 0) {
+            $iconData = $this->iconRepository->findIdDataByHashes(
+                $iconFileHashes,
+                $this->modService->getEnabledModCombinationIds()
+            );
+            foreach ($iconData as $data) {
+                $result[$data['type']][] = $data['name'];
+            }
+        }
+        return $result;
     }
 
     /**
@@ -71,21 +91,17 @@ class IconService extends AbstractModsAwareService
     {
         $result = [];
         if (count($iconFileHashes) > 0) {
-            $icons = $this->iconRepository->findByHashes(
+            $iconIds = [];
+            $iconData = $this->iconRepository->findIdDataByHashes(
                 $iconFileHashes,
                 $this->modService->getEnabledModCombinationIds()
             );
-
-            $namesByTypes = [];
-            foreach ($icons as $icon) {
-                $namesByTypes[$icon->getType()][] = $icon->getName();
+            foreach ($this->filterData($iconData, ['type', 'name']) as $data) {
+                $iconIds[] = intval($data['id']);
             }
-            $usedHashes = $this->getIconFileHashesByTypesAndNames($namesByTypes);
 
-            foreach ($icons as $icon) {
-                if (in_array($icon->getFile()->getHash(), $usedHashes)) {
-                    $result[] = $icon;
-                }
+            if (count($iconIds) > 0) {
+                $result = $this->iconRepository->findByIds($iconIds);
             }
         }
         return $result;

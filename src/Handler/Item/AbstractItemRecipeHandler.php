@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
@@ -28,10 +28,22 @@ use Zend\Validator\NotEmpty;
 abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
 {
     /**
+     * The item mapper.
+     * @var ItemMapper
+     */
+    protected $itemMapper;
+
+    /**
      * The database item service.
      * @var ItemService
      */
     protected $itemService;
+
+    /**
+     * The recipe mapper.
+     * @var RecipeMapper
+     */
+    protected $recipeMapper;
 
     /**
      * The database recipe service.
@@ -47,16 +59,22 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
+     * @param ItemMapper $itemMapper
      * @param ItemService $itemService
+     * @param RecipeMapper $recipeMapper
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
+        ItemMapper $itemMapper,
         ItemService $itemService,
+        RecipeMapper $recipeMapper,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
+        $this->itemMapper = $itemMapper;
         $this->itemService = $itemService;
+        $this->recipeMapper = $recipeMapper;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -123,41 +141,35 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
         if (!$databaseItem instanceof DatabaseItem) {
             throw new ApiServerException('Item not found or not available in the enabled mods.', 404);
         }
-        $clientItem = ItemMapper::mapDatabaseItemToClientItem($databaseItem, $this->translationService);
-        $this->translationService->addEntityToTranslate($clientItem);
+        $clientItem = new GenericEntityWithRecipes();
+        $this->itemMapper->mapItem($databaseItem, $clientItem);
 
         $groupedRecipeIds = $this->fetchGroupedRecipeIds($databaseItem);
+        $totalNumberOfRecipes = count($groupedRecipeIds);
         $recipeIds = $this->limitGroupedRecipeIds(
             $groupedRecipeIds,
             max($requestData->getInteger('numberOfResults'), 0),
             max($requestData->getInteger('indexOfFirstResult'), 0)
         );
 
-        /* @var GenericEntityWithRecipes[] $groupedRecipes */
-        $groupedRecipes = [];
+        $clientRecipes = [];
         foreach ($this->recipeService->getDetailsByIds($recipeIds) as $databaseRecipe) {
-            if (!isset($groupedRecipes[$databaseRecipe->getName()])) {
-                $groupedRecipe = new GenericEntityWithRecipes();
-                $groupedRecipe
-                    ->setType(EntityType::RECIPE)
-                    ->setName($databaseRecipe->getName());
+            $mappedRecipe = new RecipeWithExpensiveVersion();
+            $this->recipeMapper->mapRecipe($databaseRecipe, $mappedRecipe);
 
-                $this->translationService->addEntityToTranslate($groupedRecipe);
-                $groupedRecipes[$databaseRecipe->getName()] = $groupedRecipe;
+            if (isset($clientRecipes[$databaseRecipe->getName()])) {
+                $this->recipeMapper->combineRecipes($clientRecipes[$databaseRecipe->getName()], $mappedRecipe);
+            } else {
+                $clientRecipes[$databaseRecipe->getName()] = $mappedRecipe;
             }
-
-            $groupedRecipe = $groupedRecipes[$databaseRecipe->getName()];
-            $groupedRecipe->addRecipe(
-                RecipeMapper::mapDatabaseRecipeToClientRecipe($databaseRecipe, $this->translationService)
-            );
-            $groupedRecipe->setTotalNumberOfRecipes($groupedRecipe->getTotalNumberOfRecipes() + 1);
         }
+
+        $clientItem->setRecipes($clientRecipes)
+                   ->setTotalNumberOfRecipes($totalNumberOfRecipes);
 
         $this->translationService->translateEntities();
         return [
-            'item' => $clientItem,
-            'groupedRecipes' => array_values($groupedRecipes),
-            'totalNumberOfResults' => count($groupedRecipeIds)
+            'item' => $clientItem
         ];
     }
 

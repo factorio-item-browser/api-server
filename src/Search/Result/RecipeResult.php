@@ -20,7 +20,7 @@ class RecipeResult extends AbstractResult
      */
     public function getId(): int
     {
-        return (int) key($this->recipeIds);
+        return 0;
     }
 
     /**

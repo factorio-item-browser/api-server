@@ -92,16 +92,17 @@ class CachedSearchResultService extends AbstractModsAwareService
     public function persistSearchResults(
         SearchQuery $searchQuery,
         ResultCollection $resultCollection
-    ): CachedResultCollection
-    {
+    ): CachedResultCollection {
         $resultDataArray = [];
         foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
             /* @var AbstractResult $result */
-            $ids = array_merge(
-                [$result instanceof RecipeResult ? 0 : $result->getId()],
-                $result->getRecipeIds()
-            );
-            $resultDataArray[] = implode(',', $ids);
+            if ($result->getId() > 0 || count($result->getGroupedRecipeIds()) > 0) {
+                $ids = [$result->getId()];
+                foreach ($result->getGroupedRecipeIds() as $groupedRecipeIds) {
+                    $ids[] = implode('+', $groupedRecipeIds);
+                }
+                $resultDataArray[] = implode(',', $ids);
+            }
         }
         $resultData = implode('|', $resultDataArray);
 
@@ -146,7 +147,9 @@ class CachedSearchResultService extends AbstractModsAwareService
                 } else {
                     $result = new RecipeResult();
                 }
-                $result->setRecipeIds($recipeIds);
+                foreach ($recipeIds as $index => $recipeIdGroup) {
+                    $result->addRecipeIds((string) $index, explode('+', $recipeIdGroup));
+                }
                 $cachedResultCollection->add($result);
             }
         }

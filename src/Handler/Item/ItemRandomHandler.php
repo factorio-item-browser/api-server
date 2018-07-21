@@ -6,11 +6,13 @@ namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
 use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
@@ -25,10 +27,22 @@ use Zend\Validator\NotEmpty;
 class ItemRandomHandler extends AbstractRequestHandler
 {
     /**
+     * The item mapper.
+     * @var ItemMapper
+     */
+    protected $itemMapper;
+
+    /**
      * The database item service.
      * @var ItemService
      */
     protected $itemService;
+
+    /**
+     * The recipe mapper.
+     * @var RecipeMapper
+     */
+    protected $recipeMapper;
 
     /**
      * The database recipe service.
@@ -44,16 +58,22 @@ class ItemRandomHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
+     * @param ItemMapper $itemMapper
      * @param ItemService $itemService
+     * @param RecipeMapper $recipeMapper
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
+        ItemMapper $itemMapper,
         ItemService $itemService,
+        RecipeMapper $recipeMapper,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
+        $this->itemMapper = $itemMapper;
         $this->itemService = $itemService;
+        $this->recipeMapper = $recipeMapper;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -102,29 +122,34 @@ class ItemRandomHandler extends AbstractRequestHandler
         $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
 
         $items = $this->itemService->getRandom($requestData->getInteger('numberOfResults'));
-        $recipeIdsByItems = $this->fetchRecipeIds(array_keys($items));
-        $recipes = $this->fetchRecipeDetails($recipeIdsByItems, $numberOfRecipesPerResult);
+        $groupedRecipeIds = $this->recipeService->getIdsWithProducts(array_keys($items));
+        $recipes = $this->fetchRecipeDetails($groupedRecipeIds, $numberOfRecipesPerResult);
 
         $clientItems = [];
-        foreach ($items as $item) {
+        foreach ($items as $itemId => $item) {
             $clientItem = new GenericEntityWithRecipes();
-            $clientItem
-                ->setType($item->getType())
-                ->setName($item->getName());
+            $this->itemMapper->mapItem($item, $clientItem);
+            $clientItem->setTotalNumberOfRecipes(count($groupedRecipeIds[$itemId] ?? []));
 
-            if (isset($recipeIdsByItems[$item->getId()])) {
-                foreach (array_slice($recipeIdsByItems[$item->getId()], 0, $numberOfRecipesPerResult) as $recipeId) {
+            foreach ($groupedRecipeIds[$itemId] ?? [] as $recipeIdGroup) {
+                $currentRecipe = null;
+                foreach ($recipeIdGroup as $recipeId) {
                     if (isset($recipes[$recipeId])) {
-                        $clientItem->addRecipe(RecipeMapper::mapDatabaseRecipeToClientRecipe(
-                            $recipes[$recipeId],
-                            $this->translationService
-                        ));
+                        $mappedRecipe = new RecipeWithExpensiveVersion();
+                        $this->recipeMapper->mapRecipe($recipes[$recipeId], $mappedRecipe);
+
+                        if (is_null($currentRecipe)) {
+                            $currentRecipe = $mappedRecipe;
+                        } else {
+                            $this->recipeMapper->combineRecipes($currentRecipe, $mappedRecipe);
+                        }
                     }
                 }
-                $clientItem->setTotalNumberOfRecipes(count($recipeIdsByItems[$item->getId()]));
+                if ($currentRecipe instanceof RecipeWithExpensiveVersion) {
+                    $clientItem->addRecipe($currentRecipe);
+                }
             }
 
-            $this->translationService->addEntityToTranslate($clientItem);
             $clientItems[] = $clientItem;
         }
 
@@ -134,41 +159,22 @@ class ItemRandomHandler extends AbstractRequestHandler
         ];
     }
 
-
-    /**
-     * Fetches the recipe ids of the specified items.
-     * @param array|int[] $itemIds
-     * @return array|int[][]
-     */
-    protected function fetchRecipeIds(array $itemIds): array
-    {
-        $result = [];
-        $groupedRecipeIds = $this->recipeService->getIdsWithProducts($itemIds);
-        foreach ($groupedRecipeIds as $itemId => $itemRecipeIds) {
-            foreach ($itemRecipeIds as $recipeIds) {
-                $result[$itemId] = array_merge(
-                    $result[$itemId] ?? [],
-                    $recipeIds
-                );
-            }
-        }
-        return $result;
-    }
-
     /**
      * Fetches the recipe details of the specified recipe ids.
-     * @param array|int[][] $recipeIdsByItems
+     * @param array|int[][][] $groupedRecipeIds
      * @param int $numberOfRecipesPerResult
      * @return array|Recipe[]
      */
-    protected function fetchRecipeDetails(array $recipeIdsByItems, int $numberOfRecipesPerResult): array
+    protected function fetchRecipeDetails(array $groupedRecipeIds, int $numberOfRecipesPerResult): array
     {
         $allRecipeIds = [];
-        foreach ($recipeIdsByItems as $itemId => $recipeIds) {
-            $allRecipeIds = array_merge(
-                $allRecipeIds,
-                array_slice($recipeIds, 0, $numberOfRecipesPerResult)
-            );
+        foreach ($groupedRecipeIds as $itemId => $recipeIdsGroup) {
+            foreach (array_slice($recipeIdsGroup, 0, $numberOfRecipesPerResult) as $recipeIds) {
+                $allRecipeIds = array_merge(
+                    $allRecipeIds,
+                    $recipeIds
+                );
+            }
         }
         return $this->recipeService->getDetailsByIds($allRecipeIds);
     }

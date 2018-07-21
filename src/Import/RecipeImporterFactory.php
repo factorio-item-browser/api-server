@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use Interop\Container\ContainerInterface;
@@ -28,11 +29,13 @@ class RecipeImporterFactory
     {
         /* @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
+        /* @var CraftingCategoryService $craftingCategoryService */
+        $craftingCategoryService = $container->get(CraftingCategoryService::class);
         /* @var ItemService $itemService */
         $itemService = $container->get(ItemService::class);
         /* @var RecipeService $recipeService */
         $recipeService = $container->get(RecipeService::class);
 
-        return new RecipeImporter($entityManager, $itemService, $recipeService);
+        return new RecipeImporter($entityManager, $craftingCategoryService, $itemService, $recipeService);
     }
 }

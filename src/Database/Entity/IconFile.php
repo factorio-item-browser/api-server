@@ -32,9 +32,9 @@ class IconFile
      * @ORM\Column(name="image", type="blob")
      *
      * The actual image data.
-     * @var resource
+     * @var string|resource
      */
-    protected $image;
+    protected $image = '';
 
     /**
      * @ORM\OneToMany(targetEntity="Icon", mappedBy="file")
@@ -76,10 +76,10 @@ class IconFile
 
     /**
      * Sets the actual image data.
-     * @param resource|string $image
+     * @param string $image
      * @return $this Implementing fluent interface.
      */
-    public function setImage($image)
+    public function setImage(string $image)
     {
         $this->image = $image;
         return $this;

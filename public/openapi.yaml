@@ -1,0 +1,354 @@
+openapi: "3.0.1"
+info:
+  title: "Factorio Item Browser API"
+  description:
+    This API provides access to the mod data of the Factorio Item Browser, including item details, recipe details as
+    well as any translation available from the mods.
+  contact:
+    name: "BluePsyduck"
+    email: "bluepsyduck@gmx.com"
+  version: "1.1.0"
+servers:
+  - url: "https://www.factorio-item-browser.com/api"
+    description: "Live API server"
+tags:
+  - name: "Authorization"
+    description: "Requests to authorize against the API."
+  - name: "Generic"
+    description: "Requests providing generic data to entities."
+  - name: "Items"
+    description: "Requests providing data to a specific item."
+  - name: "Mods"
+    description: "Requests providing mod related data."
+  - name: "Recipes"
+    description: "Requests providing data to a specific recipe."
+  - name: "Search"
+    description: "Requests to search for items, recipes etc. using queries."
+
+paths:
+  /auth:
+    post:
+      summary:
+        Authorizes the access to the API by specifying the used mods.
+      description:
+        This request is used to create an authorization token to be used in all other requests. Part of the
+        authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
+        should be enabled for the token. The token will normally last for 24 hours, but may invalidate at any point
+        when the database changed and the mod names must be re-evaluated. Whenever you encounter a 401 error in the
+        other requests, re-authorize to get a new token.<br />
+        <br />
+        To get a first look into the API, you may use the "demo" agent with the access key "factorio-item-browser".
+        This agent is restricted to base mod only, though.
+      operationId: "auth"
+      tags:
+        - Authorization
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/auth"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/auth"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "403":
+          $ref: "openapi/errorResponses.yaml#/accessDenied"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+
+  /generic/details:
+    post:
+      summary:
+        Provides basic data to items and recipes.
+      description:
+        This request provides very basic information to items and recipes, like the translated labels and description.
+        It will NOT provide any additional data like ingredients and products of recipes.
+      operationId: "generic.details"
+      tags:
+        - Generic
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/genericEntities"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/genericDetails"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /generic/icon:
+    post:
+      summary:
+        Provides the icon file contents to specific items and recipes.
+      description:
+        This request will return the icon file in base64 encoding. The icons are always provided in PNG format. Make
+        sure to cache the returned icons, and remember to clear the cache when the mods are changed.
+        The response may contain types and names of entities not explicitely requested, but which have the same icon as
+        one of the requested one.
+      operationId: "generic.icon"
+      tags:
+        - Generic
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/genericEntities"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/genericIcon"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /item/ingredient:
+    post:
+      summary:
+        Provides all recipes in which a specific item as an ingredient of.
+      description:
+        This request will return all recipes with a specific item as one of its ingredients. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: "item.ingredient"
+      tags:
+        - Items
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/itemRecipes"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/itemIngredient"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "404":
+          $ref: "openapi/errorResponses.yaml#/itemNotFound"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /item/product:
+    post:
+      summary:
+        Provides all recipes which produce a specific item.
+      description:
+        This request will return all recipes with a specific item as one of its products. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: "item.product"
+      tags:
+        - Items
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/itemRecipes"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/itemProduct"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "404":
+          $ref: "openapi/errorResponses.yaml#/itemNotFound"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /item/random:
+    post:
+      summary:
+        Provides random items of the currently enabled mods.
+      operationId: "item.random"
+      tags:
+        - Items
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/itemRandom"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/itemRandom"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /mod/list:
+    post:
+      summary:
+        Lists the mods available in the browser.
+      description:
+        This request will list all mods known to the browser, including whether they are enabled for the current token
+        or not.
+      operationId: "mod.list"
+      tags:
+        - Mods
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/modList"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /mod/meta:
+    post:
+      summary:
+        Provides some meta information about the currently enabled mods.
+      description:
+        This request will provide some meta information of the mods like the number of available and enabled mods. This
+        request is to avoid requesting the full list of mods to get these information.
+      operationId: "mod.meta"
+      tags:
+        - Mods
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/modMeta"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /recipe/details:
+    post:
+      summary:
+        Returns the details of specific recipes, including the ingredients and products.
+      description:
+        This request will return all details to specific recipes. If the recipe has a normal and an expensive version,
+        then both are returned. The order of the returned recipes must be assumed to be random.
+      operationId: "recipe.details"
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/recipeDetails"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/recipeDetails"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /recipe/machines:
+    post:
+      summary:
+        Returns the details of all machines able to craft the recipe.
+      description:
+        This request will return all machines with their details which are able to craft the recipe specified in the
+        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
+        present, the player will be at the very first position of the results.
+      operationId: "recipe.machines"
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/recipeMachines"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/recipeMachines"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "404":
+          $ref: "openapi/errorResponses.yaml#/recipeNotFound"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+
+  /search/query:
+    post:
+      summary:
+        Searches for items, recipes etc. using a query string.
+      operationId: "search.query"
+      tags:
+        - Search
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+        - $ref: "openapi/parameters.yaml#/Accept-Language"
+      requestBody:
+        $ref: "openapi/requestBodies.yaml#/searchQuery"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/searchQuery"
+        "400":
+          $ref: "openapi/errorResponses.yaml#/badRequest"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+components:
+  schemas:
+    GenericEntity:
+      $ref: "openapi/schemas.yaml#/GenericEntity"
+    GenericEntityWithRecipes:
+      $ref: "openapi/schemas.yaml#/GenericEntityWithRecipes"
+    Icon:
+      $ref: "openapi/schemas.yaml#/Icon"
+    Item:
+      $ref: "openapi/schemas.yaml#/Item"
+    Machine:
+      $ref: "openapi/schemas.yaml#/Machine"
+    Mod:
+      $ref: "openapi/schemas.yaml#/Mod"
+    Recipe:
+      $ref: "openapi/schemas.yaml#/Recipe"
+    RecipeWithExpensiveVersion:
+      $ref: "openapi/schemas.yaml#/RecipeWithExpensiveVersion"
+    Error:
+      $ref: "openapi/schemas.yaml#/Error"
+
+  securitySchemes:
+    jwt:
+      description: "JWT Token for the Factorio Item Browser API. Use the /auth request to receive a token."
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"

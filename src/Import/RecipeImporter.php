@@ -11,6 +11,7 @@ use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCom
 use FactorioItemBrowser\Api\Server\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Server\Database\Entity\RecipeIngredient as DatabaseRecipeIngredient;
 use FactorioItemBrowser\Api\Server\Database\Entity\RecipeProduct as DatabaseRecipeProduct;
+use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
@@ -31,6 +32,12 @@ class RecipeImporter implements ImporterInterface
      * @var EntityManager
      */
     protected $entityManager;
+
+    /**
+     * The database service of the crafting categories.
+     * @var CraftingCategoryService
+     */
+    protected $craftingCategoryService;
 
     /**
      * The database service of the items.
@@ -59,12 +66,18 @@ class RecipeImporter implements ImporterInterface
     /**
      * Initializes the importer.
      * @param EntityManager $entityManager
+     * @param CraftingCategoryService $craftingCategoryService
      * @param ItemService $itemService
      * @param RecipeService $recipeService
      */
-    public function __construct(EntityManager $entityManager, ItemService $itemService, RecipeService $recipeService)
-    {
+    public function __construct(
+        EntityManager $entityManager,
+        CraftingCategoryService $craftingCategoryService,
+        ItemService $itemService,
+        RecipeService $recipeService
+    ) {
         $this->entityManager = $entityManager;
+        $this->craftingCategoryService = $craftingCategoryService;
         $this->itemService = $itemService;
         $this->recipeService = $recipeService;
     }
@@ -111,12 +124,7 @@ class RecipeImporter implements ImporterInterface
             }
         }
 
-        $groupedDatabaseRecipeIds = $this->recipeService->getIdsByNames(array_values($recipeNames));
-        if (count($groupedDatabaseRecipeIds) > 0) {
-            $databaseRecipeIds = call_user_func_array('array_merge', $groupedDatabaseRecipeIds);
-        } else {
-            $databaseRecipeIds = [];
-        }
+        $databaseRecipeIds = $this->recipeService->getIdsByNames(array_values($recipeNames));
 
         $result = [];
         foreach ($this->recipeService->getDetailsByIds($databaseRecipeIds) as $databaseRecipe) {
@@ -168,6 +176,7 @@ class RecipeImporter implements ImporterInterface
             'name' => $exportRecipe->getName(),
             'mode' => $exportRecipe->getMode(),
             'craftingTime' => $exportRecipe->getCraftingTime(),
+            'craftingCategory' => $exportRecipe->getCraftingCategory(),
             'ingredients' => $ingredients,
             'products' => $products
         ];
@@ -207,6 +216,7 @@ class RecipeImporter implements ImporterInterface
             'name' => $databaseRecipe->getName(),
             'mode' => $databaseRecipe->getMode(),
             'craftingTime' => $databaseRecipe->getCraftingTime(),
+            'craftingCategory' => $databaseRecipe->getCraftingCategory()->getName(),
             'ingredients' => $ingredients,
             'products' => $products
         ];
@@ -242,8 +252,13 @@ class RecipeImporter implements ImporterInterface
      * @param ExportRecipe $exportRecipe
      * @return DatabaseRecipe
      */
-    protected function persistRecipe(ExportRecipe $exportRecipe): DatabaseRecipe {
-        $databaseRecipe = new DatabaseRecipe($exportRecipe->getName(), $exportRecipe->getMode());
+    protected function persistRecipe(ExportRecipe $exportRecipe): DatabaseRecipe
+    {
+        $databaseRecipe = new DatabaseRecipe(
+            $exportRecipe->getName(),
+            $exportRecipe->getMode(),
+            $this->craftingCategoryService->getByName($exportRecipe->getCraftingCategory())
+        );
         $databaseRecipe->setCraftingTime($exportRecipe->getCraftingTime());
         $this->entityManager->persist($databaseRecipe);
 

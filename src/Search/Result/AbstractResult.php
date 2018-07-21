@@ -25,10 +25,10 @@ abstract class AbstractResult
     protected $priority = ResultPriority::ANY_MATCH;
 
     /**
-     * The IDs of the recipes attached to the search result.
-     * @var array
+     * The grouped recipe ids.
+     * @var array|int[][]
      */
-    protected $recipeIds = [];
+    protected $groupedRecipeIds = [];
 
     /**
      * Returns the ID of the entity.
@@ -83,45 +83,40 @@ abstract class AbstractResult
     }
 
     /**
-     * Sets the IDs of the recipes attached to the search result.
+     * Adds a group of recipe ids.
+     * @param string $groupName
      * @param array|int[] $recipeIds
      * @return $this
      */
-    public function setRecipeIds(array $recipeIds)
+    public function addRecipeIds(string $groupName, array $recipeIds)
     {
-        $recipeIds = array_filter(array_map('intval', $recipeIds));
-        $this->recipeIds = array_combine($recipeIds, array_fill(0, count($recipeIds), true));
+        foreach ($recipeIds as $recipeId) {
+            $this->groupedRecipeIds[$groupName][$recipeId] = true;
+        }
         return $this;
     }
 
     /**
-     * Adds the ID of a recipe attached to the search result.
-     * @param int $recipeId
-     * @return $this
+     * Returns the grouped recipe ids.
+     * @return array|int[][]
      */
-    public function addRecipeId(int $recipeId)
+    public function getGroupedRecipeIds(): array
     {
-        $this->recipeIds[$recipeId] = true;
-        return $this;
+        return array_map('array_keys', $this->groupedRecipeIds);
     }
 
     /**
-     * Returns the IDs of the recipes attached to the search result.
-     * @return array|int[]
+     * Returns the first recipe id of the result.
+     * @return int
      */
-    public function getRecipeIds()
+    public function getFirstRecipeId(): int
     {
-        return array_keys($this->recipeIds);
-    }
-
-    /**
-     * Returns whether the specified ID of a recipe is attached to the search result.
-     * @param int $recipeId
-     * @return bool
-     */
-    public function hasRecipeId(int $recipeId)
-    {
-        return isset($this->recipeIds[$recipeId]);
+        $result = 0;
+        if (count($this->groupedRecipeIds) > 0) {
+            $firstRecipeIdGroup = reset($this->groupedRecipeIds);
+            $result = key($firstRecipeIdGroup) ?: 0;
+        }
+        return $result;
     }
 
     /**
@@ -132,8 +127,8 @@ abstract class AbstractResult
     public function merge(AbstractResult $result)
     {
         $this->priority = min($this->priority, $result->getPriority());
-        foreach ($result->getRecipeIds() as $recipeId) {
-            $this->addRecipeId($recipeId);
+        foreach ($result->getGroupedRecipeIds() as $groupName => $recipeIds) {
+            $this->addRecipeIds($groupName, $recipeIds);
         }
         return $this;
     }

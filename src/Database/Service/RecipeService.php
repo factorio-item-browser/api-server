@@ -34,11 +34,25 @@ class RecipeService extends AbstractModsAwareService
     }
 
     /**
+     * Returns the IDs of the recipes with the specified names, of all modes.
+     * @param array|string[] $names
+     * @return array|int[]
+     */
+    public function getIdsByNames(array $names): array
+    {
+        $result = $this->getGroupedIdsByNames($names);
+        if (count($result) > 0) {
+            $result = call_user_func_array('array_merge', $result);
+        }
+        return $result;
+    }
+
+    /**
      * Returns the IDs of the recipes with the specified names, of all modes and grouped by the names.
      * @param array|string[] $names
      * @return array|int[][]
      */
-    public function getIdsByNames(array $names): array
+    public function getGroupedIdsByNames(array $names): array
     {
         $result = [];
         if (count($names) > 0) {
@@ -50,7 +64,7 @@ class RecipeService extends AbstractModsAwareService
             if (count($this->modService->getEnabledModCombinationIds()) > 0) {
                 $recipeData = $this->filterData($recipeData, ['name', 'mode']);
             }
-            foreach($recipeData as $data) {
+            foreach ($recipeData as $data) {
                 $result[$data['name']][] = (int) $data['id'];
             }
         }
@@ -81,7 +95,7 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
                 $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }
@@ -112,7 +126,7 @@ class RecipeService extends AbstractModsAwareService
                 $itemIds,
                 $this->modService->getEnabledModCombinationIds()
             );
-            foreach($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
+            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
                 $result[(int) $data['itemId']][$data['name']][] = $data['id'];
             }
         }

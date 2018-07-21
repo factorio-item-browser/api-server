@@ -11,6 +11,8 @@ return [
     'doctrine' => [
         'configuration' => [
             'orm_default' => [
+                'metadata_cache' => 'filesystem',
+                'query_cache' => 'filesystem',
                 'numeric_functions' => [
                     'Rand' => Database\Functions\RandFunction::class,
                 ]
@@ -26,7 +28,7 @@ return [
 
             'fib-api-server' => [
                 'class' => AnnotationDriver::class,
-                'cache' => 'array',
+                'cache' => 'filesystem',
                 'paths' => [
                     __DIR__ . '/../../src/Database/Entity',
                 ]

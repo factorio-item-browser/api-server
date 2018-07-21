@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
 use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
@@ -20,6 +21,12 @@ use Zend\InputFilter\InputFilter;
 class ModListHandler extends AbstractRequestHandler
 {
     /**
+     * The mod mapper.
+     * @var ModMapper
+     */
+    protected $modMapper;
+
+    /**
      * The database mod service.
      * @var ModService
      */
@@ -33,11 +40,13 @@ class ModListHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
+     * @param ModMapper $modMapper
      * @param ModService $modService
      * @param TranslationService $translationService
      */
-    public function __construct(ModService $modService, TranslationService $translationService)
+    public function __construct(ModMapper $modMapper, ModService $modService, TranslationService $translationService)
     {
+        $this->modMapper = $modMapper;
         $this->modService = $modService;
         $this->translationService = $translationService;
     }
@@ -61,12 +70,12 @@ class ModListHandler extends AbstractRequestHandler
         $enabledModNames = $this->modService->getEnabledModNames();
         $mods = [];
         foreach ($this->modService->getAllMods() as $databaseMod) {
-            $clientMod = ModMapper::mapDatabaseItemToClientItem($databaseMod, $this->translationService);
+            $clientMod = $this->modMapper->mapMod($databaseMod, new ClientMod());
             $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
             $mods[] = $clientMod;
         }
-        $this->translationService->translateEntities();
 
+        $this->translationService->translateEntities();
         return [
             'mods' => $mods
         ];

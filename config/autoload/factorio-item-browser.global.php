@@ -18,7 +18,8 @@ return [
                         'isDemo' => true
                     ]
                 ]
-            ]
+            ],
+            'version' => '1.1.0'
         ],
         'export-data' => [
             'directory' => __DIR__ . '/../../data/export'

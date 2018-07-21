@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Database\Service;
+namespace FactorioItemBrowser\Api\Server\Mapper;
 
-use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The abstract factory for the database service classes.
+ * The abstract factory of the mappers.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModServiceFactory implements FactoryInterface
+class AbstractMapperFactory implements FactoryInterface
 {
     /**
-     * Creates the service instance.
+     * Creates the mapper class.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return ModService
+     * @return AbstractMapper
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var EntityManager $entityManager */
-        $entityManager = $container->get(EntityManager::class);
+        /* @var TranslationService $translationService */
+        $translationService = $container->get(TranslationService::class);
 
-        return new ModService($entityManager);
+        return new $requestedName($translationService);
     }
 }
