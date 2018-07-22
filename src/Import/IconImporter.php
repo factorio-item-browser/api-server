@@ -99,7 +99,7 @@ class IconImporter implements ImporterInterface
     {
         $hashes = [];
         foreach ($exportCombination->getData()->getIcons() as $exportIcon) {
-            $hashes[] = $exportIcon->getIconHash();
+            $hashes[] = $exportIcon->getHash();
         }
 
         return $this->iconService->getIconFilesByHashes($hashes);
@@ -113,14 +113,14 @@ class IconImporter implements ImporterInterface
     protected function updateIconFiles(ExportCombination $exportCombination, array $databaseIconFiles): array
     {
         foreach ($exportCombination->getData()->getIcons() as $exportIcon) {
-            $hash = $exportIcon->getIconHash();
+            $hash = $exportIcon->getHash();
             if (!isset($databaseIconFiles[$hash])) {
                 $databaseIconFile = new DatabaseIconFile($hash);
                 $databaseIconFiles[$hash] = $databaseIconFile;
                 $this->entityManager->persist($databaseIconFile);
             }
 
-            $iconContents = $this->exportDataService->loadIcon($exportIcon->getIconHash());
+            $iconContents = $this->exportDataService->loadIcon($exportIcon->getHash());
             $databaseIconFiles[$hash]->setImage($iconContents);
         }
         return $databaseIconFiles;
