@@ -45,7 +45,7 @@ class IconService extends AbstractModsAwareService
     /**
      * Returns the icon file hashes used by the specified entities.
      * @param array|string[][] $namesByTypes
-     * @return array|int[]
+     * @return array|string[]
      */
     public function getIconFileHashesByTypesAndNames(array $namesByTypes)
     {
@@ -84,7 +84,7 @@ class IconService extends AbstractModsAwareService
 
     /**
      * Returns the icons using the specified hashes.
-     * @param array $iconFileHashes
+     * @param array|string[] $iconFileHashes
      * @return array|Icon[]
      */
     public function getIconsByHashes(array $iconFileHashes): array
@@ -109,7 +109,7 @@ class IconService extends AbstractModsAwareService
 
     /**
      * Returns the icon files with the specified hashes.
-     * @param array|int[] $iconFileHashes
+     * @param array|string[] $iconFileHashes
      * @return array|IconFile[]
      */
     public function getIconFilesByHashes(array $iconFileHashes): array

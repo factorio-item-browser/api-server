@@ -1,0 +1,17 @@
+parameters:
+  level: max
+  paths:
+    - src
+    - test/src
+
+  excludes_analyse:
+    - src/Import
+
+  ignoreErrors:
+    - '#Method [a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\) should return stdClass but returns object.#'
+    - '#Property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9_]+ \([a-zA-Z0-9\\_]+\) does not accept Doctrine\\ORM\\EntityRepository<[a-zA-Z0-9\\_]+>.#'
+
+includes:
+  - vendor/phpstan/phpstan-doctrine/extension.neon
+  - vendor/phpstan/phpstan-phpunit/extension.neon
+  - vendor/phpstan/phpstan-phpunit/rules.neon

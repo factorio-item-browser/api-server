@@ -43,11 +43,10 @@ class ItemHandler implements SearchHandlerInterface
     {
         foreach ($this->itemService->getByKeywords($searchQuery->getKeywords()) as $item) {
             $searchResult = new ItemResult();
-            $searchResult
-                ->setId($item->getId())
-                ->setType($item->getType())
-                ->setName($item->getName())
-                ->setPriority(ResultPriority::EXACT_MATCH);
+            $searchResult->setId((int) $item->getId())
+                         ->setType($item->getType())
+                         ->setName($item->getName())
+                         ->setPriority(ResultPriority::EXACT_MATCH);
             $searchResults->add($searchResult);
         }
         return $this;

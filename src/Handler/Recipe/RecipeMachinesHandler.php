@@ -120,11 +120,11 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         $recipeIds = $this->recipeService->getIdsByNames([$requestData->getString('name')]);
         $recipes = $this->recipeService->getDetailsByIds($recipeIds);
 
-        if (count($recipes) === 0) {
+        $recipe = reset($recipes);
+        if (!$recipe instanceof Recipe) {
             throw new ApiServerException('Recipe not found or not available in the enabled mods.', 404);
         }
 
-        $recipe = reset($recipes);
         $craftingCategory = $recipe->getCraftingCategory();
         $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory);
         $filteredDatabaseMachines = $this->filterMachines($recipe, $databaseMachines);

@@ -34,7 +34,7 @@ class ModCombination
      * @ORM\JoinColumn(name="modId", referencedColumnName="id")
      *
      * The main mod.
-     * @var Mod|null
+     * @var Mod
      */
     protected $mod;
 
@@ -162,9 +162,9 @@ class ModCombination
 
     /**
      * Returns the main mod.
-     * @return Mod|null
+     * @return Mod
      */
-    public function getMod(): ?Mod
+    public function getMod(): Mod
     {
         return $this->mod;
     }

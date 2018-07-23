@@ -36,7 +36,7 @@ class RecipeTest extends TestCase
         $craftingCategory = new CraftingCategory('ghi');
 
         $recipe = new Recipe($name, $mode, $craftingCategory);
-        $this->assertSame(null, $recipe->getId());
+        $this->assertNull($recipe->getId());
         $this->assertInstanceOf(ArrayCollection::class, $recipe->getModCombinations());
         $this->assertSame($name, $recipe->getName());
         $this->assertSame($mode, $recipe->getMode());

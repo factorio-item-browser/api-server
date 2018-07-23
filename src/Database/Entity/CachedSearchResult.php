@@ -60,7 +60,7 @@ class CachedSearchResult
      */
     public function setHash(string $hash)
     {
-        $this->hash = hex2bin($hash);
+        $this->hash = (string) hex2bin($hash);
         return $this;
     }
 

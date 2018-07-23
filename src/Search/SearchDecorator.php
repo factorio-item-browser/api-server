@@ -122,7 +122,10 @@ class SearchDecorator
                         }
                     }
                 }
-                $entity->addRecipe($currentRecipe);
+
+                if ($currentRecipe instanceof RecipeWithExpensiveVersion) {
+                    $entity->addRecipe($currentRecipe);
+                }
             }
             $entity->setTotalNumberOfRecipes(count($searchResult->getGroupedRecipeIds()));
 

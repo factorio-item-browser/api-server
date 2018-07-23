@@ -26,15 +26,15 @@ class TranslationTest extends TestCase
     {
         $translation = new Translation();
 
-        $this->assertSame(null, $translation->getId());
-//        $this->assertSame(null, $translation->getModCombination()); @todo Fix missing relation
+        $this->assertNull($translation->getId());
+//        $this->assertNull($translation->getModCombination()); @todo Fix missing relation
         $this->assertSame('', $translation->getLocale());
         $this->assertSame('', $translation->getType());
         $this->assertSame('', $translation->getName());
         $this->assertSame('', $translation->getValue());
         $this->assertSame('', $translation->getDescription());
-        $this->assertSame(false, $translation->getIsDuplicatedByRecipe());
-        $this->assertSame(false, $translation->getIsDuplicatedByMachine());
+        $this->assertFalse($translation->getIsDuplicatedByRecipe());
+        $this->assertFalse($translation->getIsDuplicatedByMachine());
     }
 
     /**
@@ -146,7 +146,7 @@ class TranslationTest extends TestCase
 
         $isDuplicatedByRecipe = true;
         $this->assertSame($translation, $translation->setIsDuplicatedByRecipe($isDuplicatedByRecipe));
-        $this->assertSame($isDuplicatedByRecipe, $translation->getIsDuplicatedByRecipe());
+        $this->assertTrue($translation->getIsDuplicatedByRecipe());
     }
 
     /**
@@ -160,6 +160,6 @@ class TranslationTest extends TestCase
 
         $isDuplicatedByMachine = true;
         $this->assertSame($translation, $translation->setIsDuplicatedByMachine($isDuplicatedByMachine));
-        $this->assertSame($isDuplicatedByMachine, $translation->getIsDuplicatedByMachine());
+        $this->assertTrue($translation->getIsDuplicatedByMachine());
     }
 }

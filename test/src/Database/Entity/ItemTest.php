@@ -26,7 +26,7 @@ class ItemTest extends TestCase
     {
         $item = new Item('abc', 'def');
 
-        $this->assertSame(null, $item->getId());
+        $this->assertNull($item->getId());
         $this->assertSame('abc', $item->getType());
         $this->assertSame('def', $item->getName());
         $this->assertInstanceOf(ArrayCollection::class, $item->getModCombinations());

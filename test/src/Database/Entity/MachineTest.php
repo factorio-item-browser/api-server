@@ -28,7 +28,7 @@ class MachineTest extends TestCase
         $name = 'abc';
         $machine = new Machine($name);
 
-        $this->assertSame(null, $machine->getId());
+        $this->assertNull($machine->getId());
         $this->assertSame($name, $machine->getName());
         $this->assertInstanceOf(ArrayCollection::class, $machine->getModCombinations());
         $this->assertInstanceOf(ArrayCollection::class, $machine->getCraftingCategories());

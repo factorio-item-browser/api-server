@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use Zend\ServiceManager\ServiceManager;
 
@@ -25,10 +26,13 @@ class DatabaseConfigurationMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        if (!$container instanceof ServiceManager) {
+            throw new ServiceNotCreatedException('Service can only be created using the Zend ServiceManager.');
+        }
+
         $config = $container->get('config');
         $configurationAliases = $config['factorio-item-browser']['api-server']['databaseConnection']['aliases'];
 
-        /* @var ServiceManager $container */
         return new DatabaseConfigurationMiddleware($container, $configurationAliases);
     }
 }

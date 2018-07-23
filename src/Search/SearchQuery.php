@@ -78,7 +78,7 @@ class SearchQuery
      */
     public function getHash(): int
     {
-        return crc32(json_encode([
+        return crc32((string) json_encode([
             'keywords' => $this->keywords
         ]));
     }

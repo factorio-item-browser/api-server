@@ -17,7 +17,7 @@ class IconFileRepository extends EntityRepository
 {
     /**
      * Finds the icon files with the specified hashes.
-     * @param array|int[] $hashes
+     * @param array|string[] $hashes
      * @return array|IconFile[]
      */
     public function findByHashes(array $hashes): array

@@ -16,7 +16,7 @@ class ApiServerException extends Exception
 {
     /**
      * The request parameters which caused the exception.
-     * @var array|string[]
+     * @var array|string[][]
      */
     protected $parameters = [];
 

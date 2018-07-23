@@ -53,7 +53,7 @@ class ErrorResponseGenerator
             $message = 'An unexpected error occurred.';
 
             if ($this->logger instanceof LoggerInterface) {
-                $this->logger->crit($exception);
+                $this->logger->crit((string) $exception);
             }
         }
 

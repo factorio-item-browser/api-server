@@ -26,7 +26,7 @@ class CraftingCategoryTest extends TestCase
     {
         $craftingCategory = new CraftingCategory('abc');
 
-        $this->assertSame(null, $craftingCategory->getId());
+        $this->assertNull($craftingCategory->getId());
         $this->assertSame('abc', $craftingCategory->getName());
         $this->assertInstanceOf(ArrayCollection::class, $craftingCategory->getMachines());
     }
