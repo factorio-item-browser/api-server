@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "76170398928a47a7a524f5533375279b",
+    "content-hash": "384e71a68ac5f9b0c51da2c18f2fb839",
     "packages": [
         {
             "name": "bluepsyduck/common",
@@ -4286,6 +4286,48 @@
                 "xunit"
             ],
             "time": "2018-07-15T05:20:50+00:00"
+        },
+        {
+            "name": "rregeer/phpunit-coverage-check",
+            "version": "0.1.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/richardregeer/phpunit-coverage-check.git",
+                "reference": "7bd2e70ac724ee2a7e06f4c1a80f8115b1cafd59"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/richardregeer/phpunit-coverage-check/zipball/7bd2e70ac724ee2a7e06f4c1a80f8115b1cafd59",
+                "reference": "7bd2e70ac724ee2a7e06f4c1a80f8115b1cafd59",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "bin": [
+                "bin/coverage-check"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Richard Regeer",
+                    "email": "rich2309@gmail.com"
+                }
+            ],
+            "description": "Check the code coverage using the clover report of phpunit",
+            "keywords": [
+                "ci",
+                "code coverage",
+                "php",
+                "phpunit",
+                "testing",
+                "unittest"
+            ],
+            "time": "2018-03-29T09:29:50+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",

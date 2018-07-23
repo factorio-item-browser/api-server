@@ -41,7 +41,7 @@ class MetaMiddlewareTest extends TestCase
                  ->method('withHeader')
                  ->withConsecutive(
                      ['X-Version', $version],
-                     ['X-Runtime', $this->isType('float')]
+                     ['X-Runtime', $this->isType('string')]
                  )
                  ->willReturnSelf();
 
