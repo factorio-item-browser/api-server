@@ -58,6 +58,7 @@
       "mkdir -p data/cache && chmod 0777 data/cache"
     ],
     "test": [
+      "@composer validate --strict",
       "@phpunit",
       "@phpcs",
       "@phpstan"
