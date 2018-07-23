@@ -55,6 +55,7 @@ class IconFileTest extends TestCase
     public function provideSetAndGetImage(): array
     {
         $stream = fopen('php://memory', 'r+');
+        $this->assertNotFalse($stream);
         fwrite($stream, 'abc');
         fseek($stream, 0);
 

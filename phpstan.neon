@@ -2,7 +2,7 @@ parameters:
   level: max
   paths:
     - src
-#    - test/src
+    - test/src
 
   excludes_analyse:
     - src/Import
@@ -13,5 +13,5 @@ parameters:
 
 includes:
   - vendor/phpstan/phpstan-doctrine/extension.neon
-#  - vendor/phpstan/phpstan-phpunit/extension.neon
-#  - vendor/phpstan/phpstan-phpunit/rules.neon
+  - vendor/phpstan/phpstan-phpunit/extension.neon
+  - vendor/phpstan/phpstan-phpunit/rules.neon

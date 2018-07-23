@@ -28,7 +28,7 @@ class ModTest extends TestCase
         $name = 'abc';
         $mod = new Mod($name);
 
-        $this->assertSame(null, $mod->getId());
+        $this->assertNull($mod->getId());
         $this->assertSame($name, $mod->getName());
         $this->assertSame('', $mod->getAuthor());
         $this->assertSame('', $mod->getCurrentVersion());

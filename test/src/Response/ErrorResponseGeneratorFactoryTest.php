@@ -38,7 +38,7 @@ class ErrorResponseGeneratorFactoryTest extends TestCase
     /**
      * Tests the invoking.
      * @param bool $resultHas
-     * @param $logger
+     * @param mixed $logger
      * @covers ::__invoke
      * @dataProvider provideInvoke
      */

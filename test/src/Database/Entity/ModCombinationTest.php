@@ -32,7 +32,7 @@ class ModCombinationTest extends TestCase
         $mod = new Mod('abc');
         $modCombination = new ModCombination($mod);
 
-        $this->assertSame(null, $modCombination->getId());
+        $this->assertNull($modCombination->getId());
         $this->assertSame($mod, $modCombination->getMod());
         $this->assertSame([], $modCombination->getOptionalModIds());
         $this->assertSame('', $modCombination->getName());

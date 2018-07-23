@@ -29,7 +29,7 @@ class IconTest extends TestCase
         $file = new IconFile('12ab34cd');
 
         $icon = new Icon($modCombination, $file);
-        $this->assertSame(null, $icon->getId());
+        $this->assertNull($icon->getId());
         $this->assertSame($modCombination, $icon->getModCombination());
         $this->assertSame($file, $icon->getFile());
         $this->assertSame('', $icon->getType());
