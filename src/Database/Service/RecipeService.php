@@ -85,7 +85,7 @@ class RecipeService extends AbstractModsAwareService
     /**
      * Returns the ids with one of the specified items as ingredient, grouped by recipe.
      * @param array|int[] $itemIds
-     * @return array|int[][]
+     * @return array|int[][][]
      */
     public function getIdsWithIngredients(array $itemIds): array
     {
@@ -168,7 +168,7 @@ class RecipeService extends AbstractModsAwareService
                 $result[$data['name']] = true;
             }
         }
-        return array_keys($result);
+        return array_map('strval', array_keys($result));
     }
 
     /**

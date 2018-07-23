@@ -19,7 +19,7 @@ class TranslationRepository extends EntityRepository
     /**
      * Finds all translations with the specified types and names.
      * @param string $locale
-     * @param array|string[] $namesByTypes The names to search, grouped by their types.
+     * @param array|string[][] $namesByTypes The names to search, grouped by their types.
      * @param array|int[] $modCombinationIds The IDs of the mod combinations, or empty to use all translations.
      * @return array|string[][]
      */

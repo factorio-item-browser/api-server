@@ -121,7 +121,7 @@ class CachedSearchResultService extends AbstractModsAwareService
      */
     protected function buildSearchHash(SearchQuery $searchQuery): string
     {
-        return hash('crc32b', json_encode([
+        return hash('crc32b', (string) json_encode([
             'queryHash' => $searchQuery->getHash(),
             'enabledMods' => $this->modService->getEnabledModCombinationIds(),
             'locale' => $this->translationService->getCurrentLocale()
@@ -148,7 +148,7 @@ class CachedSearchResultService extends AbstractModsAwareService
                     $result = new RecipeResult();
                 }
                 foreach ($recipeIds as $index => $recipeIdGroup) {
-                    $result->addRecipeIds((string) $index, explode('+', $recipeIdGroup));
+                    $result->addRecipeIds((string) $index, array_map('intval', explode('+', $recipeIdGroup)));
                 }
                 $cachedResultCollection->add($result);
             }

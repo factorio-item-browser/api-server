@@ -65,7 +65,7 @@ class GenericIconHandler extends AbstractGenericHandler
 
     /**
      * Prepares the client icons for the specified hashes.
-     * @param array|int[] $iconFileHashes
+     * @param array|string[] $iconFileHashes
      * @return array|ClientIcon[]
      */
     protected function prepareClientIcons(array $iconFileHashes): array

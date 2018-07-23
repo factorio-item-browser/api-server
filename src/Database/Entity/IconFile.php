@@ -61,7 +61,7 @@ class IconFile
      */
     public function setHash(string $hash)
     {
-        $this->hash = hex2bin($hash);
+        $this->hash = (string) hex2bin($hash);
         return $this;
     }
 
@@ -92,7 +92,7 @@ class IconFile
     public function getImage(): string
     {
         if (is_resource($this->image)) {
-            $this->image = stream_get_contents($this->image);
+            $this->image = (string) stream_get_contents($this->image);
         }
         return $this->image;
     }

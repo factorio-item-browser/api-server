@@ -45,7 +45,7 @@ class IconService extends AbstractModsAwareService
     /**
      * Returns the icon file hashes used by the specified entities.
      * @param array|string[][] $namesByTypes
-     * @return array|int[]
+     * @return array|string[]
      */
     public function getIconFileHashesByTypesAndNames(array $namesByTypes)
     {

@@ -23,7 +23,7 @@ class ModDependency
      * @ORM\JoinColumn(name="modId", referencedColumnName="id")
      *
      * The mod with the dependency.
-     * @var Mod|null
+     * @var Mod
      */
     protected $mod;
 
@@ -33,7 +33,7 @@ class ModDependency
      * @ORM\JoinColumn(name="requiredModId", referencedColumnName="id")
      *
      * The required mod.
-     * @var Mod|null
+     * @var Mod
      */
     protected $requiredMod;
 
@@ -77,9 +77,9 @@ class ModDependency
 
     /**
      * Returns the mod with the dependency.
-     * @return Mod|null
+     * @return Mod
      */
-    public function getMod(): ?Mod
+    public function getMod(): Mod
     {
         return $this->mod;
     }
@@ -97,9 +97,9 @@ class ModDependency
 
     /**
      * Returns the required mod.
-     * @return Mod|null
+     * @return Mod
      */
-    public function getRequiredMod(): ?Mod
+    public function getRequiredMod(): Mod
     {
         return $this->requiredMod;
     }

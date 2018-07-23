@@ -85,7 +85,7 @@ class IconRepository extends EntityRepository
 
     /**
      * Finds the icons by their id.
-     * @param array|int $ids
+     * @param array|int[] $ids
      * @return array|Icon[]
      */
     public function findByIds(array $ids): array

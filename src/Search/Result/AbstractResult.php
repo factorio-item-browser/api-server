@@ -114,7 +114,9 @@ abstract class AbstractResult
         $result = 0;
         if (count($this->groupedRecipeIds) > 0) {
             $firstRecipeIdGroup = reset($this->groupedRecipeIds);
-            $result = key($firstRecipeIdGroup) ?: 0;
+            if (is_array($firstRecipeIdGroup)) {
+                $result = (int) key($firstRecipeIdGroup);
+            }
         }
         return $result;
     }

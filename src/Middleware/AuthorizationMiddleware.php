@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use stdClass;
 
 /**
  * The middleware to check the authorization token.
@@ -68,15 +69,25 @@ class AuthorizationMiddleware implements MiddlewareInterface
             }
 
             try {
-                $token = JWT::decode(substr($authorization, 7), $this->authorizationKey, ['HS256']);
+                $token = $this->decryptToken(substr($authorization, 7));
                 $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds ?? []));
 
                 $request = $request->withAttribute('agent', $token->agt ?? '')
-                                   ->withAttribute('allowImport', $token->imp ?? 0 === 1);
+                                   ->withAttribute('allowImport', ($token->imp ?? 0) === 1);
             } catch (Exception $e) {
                 throw new ApiServerException('Authorization token is invalid.', 401);
             }
         }
         return $handler->handle($request);
+    }
+
+    /**
+     * Decrypts the specified token string.
+     * @param string $tokenString
+     * @return stdClass
+     */
+    protected function decryptToken(string $tokenString): stdClass
+    {
+        return JWT::decode($tokenString, $this->authorizationKey, ['HS256']);
     }
 }

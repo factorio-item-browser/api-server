@@ -49,6 +49,6 @@ class MetaMiddleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
         return $response->withHeader('X-Version', $this->version)
-                        ->withHeader('X-Runtime', round(microtime(true) - $this->startTime, 3));
+                        ->withHeader('X-Runtime', (string) (round(microtime(true) - $this->startTime, 3)));
     }
 }

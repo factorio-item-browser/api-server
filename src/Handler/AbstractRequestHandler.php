@@ -29,7 +29,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $inputFilter = $this->createInputFilter();
-        $inputFilter->setData($request->getParsedBody());
+        $inputFilter->setData((array) $request->getParsedBody());
         if (!$inputFilter->isValid()) {
             throw new ValidationException($inputFilter->getMessages());
         }

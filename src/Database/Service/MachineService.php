@@ -105,7 +105,7 @@ class MachineService extends AbstractModsAwareService
                 $result[$data['name']] = true;
             }
         }
-        return array_keys($result);
+        return array_map('strval', array_keys($result));
     }
 
     /**
