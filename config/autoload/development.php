@@ -54,12 +54,6 @@ return [
                     ]
                 ]
             ],
-            'databaseConnection' => [
-                'aliases' => [
-                    'default' => 'docker',
-                    'import' => 'docker'
-                ]
-            ]
         ]
     ]
 ];

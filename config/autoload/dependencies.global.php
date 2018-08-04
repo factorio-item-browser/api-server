@@ -54,7 +54,6 @@ return [
             Middleware\AcceptLanguageMiddleware::class => Middleware\AcceptLanguageMiddlewareFactory::class,
             Middleware\AuthorizationMiddleware::class => Middleware\AuthorizationMiddlewareFactory::class,
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
-            Middleware\DatabaseConfigurationMiddleware::class => Middleware\DatabaseConfigurationMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => Middleware\DocumentationRedirectMiddlewareFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
 
