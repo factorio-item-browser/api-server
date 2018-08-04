@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination as DatabaseCombination;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
 use FactorioItemBrowser\ExportData\Entity\Mod\Combination as ExportCombination;
 

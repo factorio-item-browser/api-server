@@ -9,7 +9,7 @@ use FactorioItemBrowser\Api\Client\Constant\RecipeMode;
 use FactorioItemBrowser\Api\Client\Entity\Item as ClientItem;
 use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
-use FactorioItemBrowser\Api\Server\Database\Entity\Recipe as DatabaseRecipe;
+use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 
 /**
  * The class able to map recipes.

@@ -44,15 +44,14 @@ class TranslationHandler implements SearchHandlerInterface
     {
         $resultData = $this->translationService->getTypesAndNamesByKeywords($searchQuery->getKeywords());
         foreach ($resultData as $data) {
-            if ($data['type'] === EntityType::RECIPE) {
+            if ($data->getType() === EntityType::RECIPE) {
                 $searchResult = new RecipeResult();
             } else {
                 $searchResult = new ItemResult();
-                $searchResult->setType($data['type']);
+                $searchResult->setType($data->getType());
             }
-            $searchResult
-                ->setName($data['name'])
-                ->setPriority((int) $data['priority']);
+            $searchResult->setName($data->getName())
+                         ->setPriority($data->getPriority());
 
             $searchResults->add($searchResult);
         }

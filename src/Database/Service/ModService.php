@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination;
+use FactorioItemBrowser\Api\Database\Repository\ModCombinationRepository;
+use FactorioItemBrowser\Api\Database\Repository\ModRepository;
 use FactorioItemBrowser\Api\Server\Database\Helper\ModCombinationResolver;
 use FactorioItemBrowser\Api\Server\Database\Helper\ModDependencyResolver;
-use FactorioItemBrowser\Api\Server\Database\Repository\ModCombinationRepository;
-use FactorioItemBrowser\Api\Server\Database\Repository\ModRepository;
 
 /**
  * The service class for the Mod database table.
@@ -111,10 +111,8 @@ class ModService extends AbstractDatabaseService
     public function getModsWithDependencies(array $modNames): array
     {
         $result = [];
-        if (count($modNames) > 0) {
-            foreach ($this->modRepository->findByNamesWithDependencies($modNames) as $mod) {
-                $result[$mod->getName()] = $mod;
-            }
+        foreach ($this->modRepository->findByNamesWithDependencies($modNames) as $mod) {
+            $result[$mod->getName()] = $mod;
         }
         return $result;
     }
@@ -127,10 +125,8 @@ class ModService extends AbstractDatabaseService
     public function getModCombinationsByModNames(array $modNames): array
     {
         $result = [];
-        if (count($modNames) > 0) {
-            foreach ($this->modCombinationRepository->findByModNames($modNames) as $modCombination) {
-                $result[$modCombination->getId()] = $modCombination;
-            }
+        foreach ($this->modCombinationRepository->findByModNames($modNames) as $modCombination) {
+            $result[$modCombination->getId()] = $modCombination;
         }
         return $result;
     }

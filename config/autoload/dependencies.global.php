@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use ContainerInteropDoctrine\EntityManagerFactory;
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\ExportData\Service\ExportDataService;
 use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
 use Zend\Expressive\Middleware\ErrorResponseGenerator;
@@ -72,7 +70,6 @@ return [
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => InvokableFactory::class,
-            EntityManager::class => EntityManagerFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
             ExportDataService::class => ExportData\ExportDataServiceFactory::class,
         ]

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 
 /**
  * The class able to map mods.

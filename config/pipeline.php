@@ -20,7 +20,7 @@ use Zend\Stratigility\Middleware\ErrorHandler;
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->pipe(Middleware\MetaMiddleware::class);
     $app->pipe(ErrorHandler::class);
-    $app->pipe(Middleware\DatabaseConfigurationMiddleware::class);
+//    $app->pipe(Middleware\DatabaseConfigurationMiddleware::class);
     $app->pipe(Middleware\CleanupMiddleware::class);
 
     $app->pipe(BaseUrlMiddleware::class);

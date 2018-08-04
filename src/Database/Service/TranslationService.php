@@ -7,8 +7,10 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Server\Database\Entity\Translation;
-use FactorioItemBrowser\Api\Server\Database\Repository\TranslationRepository;
+use FactorioItemBrowser\Api\Database\Data\TranslationData;
+use FactorioItemBrowser\Api\Database\Data\TranslationPriorityData;
+use FactorioItemBrowser\Api\Database\Entity\Translation;
+use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 
 /**
  * The service class of the translation database table.
@@ -94,33 +96,31 @@ class TranslationService extends AbstractModsAwareService
             $entities[$type . '|' . $name][] = $entity;
         }
 
-        if (!empty($namesByTypes)) {
-            $translations = $this->translationRepository->findByTypesAndNames(
-                $this->currentLocale,
-                $namesByTypes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            $translations = $this->sortTranslationData($translations);
-            $this->matchTranslationDataToEntities($entities, $translations);
-        }
+        $translations = $this->translationRepository->findDataByTypesAndNames(
+            $this->currentLocale,
+            $namesByTypes,
+            $this->modService->getEnabledModCombinationIds()
+        );
+        $translations = $this->sortTranslationData($translations);
+        $this->matchTranslationDataToEntities($entities, $translations);
         return $this;
     }
 
     /**
      * Sorts the translation data so that translation with higher priority come later in the array.
-     * @param array $translationData
-     * @return array
+     * @param array|TranslationData[] $translationData
+     * @return array|TranslationData[]
      */
     protected function sortTranslationData(array $translationData): array
     {
-        usort($translationData, function (array $left, array $right): int {
-            $result = ($left['locale'] !== 'en') <=> ($right['locale'] !== 'en');
+        usort($translationData, function (TranslationData $left, TranslationData $right): int {
+            $result = ($left->getLocale() !== 'en') <=> ($right->getLocale() !== 'en');
             if ($result === 0) {
-                $result = $left['type'] <=> $right['type'];
+                $result = $left->getType() <=> $right->getType();
                 if ($result === 0) {
-                    $result = $left['order'] <=> $right['order'];
+                    $result = $left->getOrder() <=> $right->getOrder();
                     if ($result === 0) {
-                        $result = $left['name'] <=> $right['name'];
+                        $result = $left->getName() <=> $right->getName();
                     }
                 }
             }
@@ -132,27 +132,27 @@ class TranslationService extends AbstractModsAwareService
     /**
      * Matches the translation data to the entities.
      * @param array|GenericEntity[][] $entities
-     * @param array $translationData
+     * @param array|TranslationData[] $translationData
      * @return $this
      */
     protected function matchTranslationDataToEntities(array $entities, array $translationData)
     {
         foreach ($translationData as $translation) {
-            $keys = [$translation['type'] . '|' . $translation['name']];
-            if ($translation['isDuplicatedByRecipe']) {
-                $keys[] = EntityType::RECIPE . '|' . $translation['name'];
+            $keys = [$translation->getType() . '|' . $translation->getName()];
+            if ($translation->getIsDuplicatedByRecipe()) {
+                $keys[] = EntityType::RECIPE . '|' . $translation->getName();
             }
-            if ($translation['isDuplicatedByMachine']) {
-                $keys[] = EntityType::MACHINE . '|' . $translation['name'];
+            if ($translation->getIsDuplicatedByMachine()) {
+                $keys[] = EntityType::MACHINE . '|' . $translation->getName();
             }
 
             foreach ($keys as $key) {
                 foreach ($entities[$key] ?? [] as $entity) {
-                    if (strlen($translation['value']) > 0) {
-                        $entity->setLabel($translation['value']);
+                    if (strlen($translation->getValue()) > 0) {
+                        $entity->setLabel($translation->getValue());
                     }
-                    if (strlen($translation['description']) > 0) {
-                        $entity->setDescription($translation['description']);
+                    if (strlen($translation->getDescription()) > 0) {
+                        $entity->setDescription($translation->getDescription());
                     }
                 }
             }
@@ -163,18 +163,14 @@ class TranslationService extends AbstractModsAwareService
     /**
      * Returns the types and names of translations matching the specified keywords.
      * @param array|string[] $keywords
-     * @return array
+     * @return array|TranslationPriorityData[]
      */
     public function getTypesAndNamesByKeywords(array $keywords): array
     {
-        $result = [];
-        if (count($keywords) > 0) {
-            $result = $this->translationRepository->findTypesAndNamesByKeywords(
-                $this->currentLocale,
-                $keywords,
-                $this->modService->getEnabledModCombinationIds()
-            );
-        }
-        return $result;
+        return $this->translationRepository->findDataByKeywords(
+            $this->currentLocale,
+            $keywords,
+            $this->modService->getEnabledModCombinationIds()
+        );
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Database\Helper;
 
-use FactorioItemBrowser\Api\Server\Database\Constant\ModDependencyType;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModDependency;
+use FactorioItemBrowser\Api\Database\Constant\ModDependencyType;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
+use FactorioItemBrowser\Api\Database\Entity\ModDependency;
 use FactorioItemBrowser\Api\Server\Database\Helper\ModDependencyResolver;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use PHPUnit\Framework\MockObject\MockObject;

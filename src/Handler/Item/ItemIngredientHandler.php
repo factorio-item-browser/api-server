@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
-use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 
 /**
  * The handler of the /item/ingredient request.
@@ -21,6 +21,6 @@ class ItemIngredientHandler extends AbstractItemRecipeHandler
      */
     protected function fetchGroupedRecipeIds(DatabaseItem $item): array
     {
-        return $this->recipeService->getIdsWithIngredient((int) $item->getId());
+        return $this->recipeService->getIdsWithIngredient($item->getId());
     }
 }

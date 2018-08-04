@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Recipe;
-use FactorioItemBrowser\Api\Server\Database\Repository\RecipeRepository;
+use FactorioItemBrowser\Api\Database\Data\RecipeData;
+use FactorioItemBrowser\Api\Database\Entity\Recipe;
+use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 
 /**
  * The service class of the recipe database table.
@@ -54,18 +55,20 @@ class RecipeService extends AbstractModsAwareService
      */
     public function getGroupedIdsByNames(array $names): array
     {
-        $result = [];
-        if (count($names) > 0) {
-            $recipeData = $this->recipeRepository->findIdDataByNames(
-                $names,
-                $this->modService->getEnabledModCombinationIds()
-            );
 
-            if (count($this->modService->getEnabledModCombinationIds()) > 0) {
-                $recipeData = $this->filterData($recipeData, ['name', 'mode']);
-            }
-            foreach ($recipeData as $data) {
-                $result[$data['name']][] = (int) $data['id'];
+        $recipeData = $this->recipeRepository->findDataByNames(
+            $names,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
+        if (count($this->modService->getEnabledModCombinationIds()) > 0) {
+            $recipeData = $this->filterData($recipeData);
+        }
+
+        $result = [];
+        foreach ($recipeData as $data) {
+            if ($data instanceof RecipeData) {
+                $result[$data->getName()][] = $data->getId();
             }
         }
         return $result;
@@ -89,14 +92,15 @@ class RecipeService extends AbstractModsAwareService
      */
     public function getIdsWithIngredients(array $itemIds): array
     {
+        $recipeData = $this->recipeRepository->findDataByIngredientItemIds(
+            $itemIds,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($itemIds) > 0) {
-            $recipeData = $this->recipeRepository->findIdDataWithIngredientItemId(
-                $itemIds,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
-                $result[(int) $data['itemId']][$data['name']][] = $data['id'];
+        foreach ($this->filterData($recipeData) as $data) {
+            if ($data instanceof RecipeData) {
+                $result[$data->getItemId()][$data->getName()][] = $data->getId();
             }
         }
         return $result;
@@ -120,14 +124,15 @@ class RecipeService extends AbstractModsAwareService
      */
     public function getIdsWithProducts(array $itemIds): array
     {
+        $recipeData = $this->recipeRepository->findDataByProductItemIds(
+            $itemIds,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($itemIds) > 0) {
-            $recipeData = $this->recipeRepository->findIdDataWithProductItemId(
-                $itemIds,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($this->filterData($recipeData, ['itemId', 'name', 'mode']) as $data) {
-                $result[(int) $data['itemId']][$data['name']][] = $data['id'];
+        foreach ($this->filterData($recipeData) as $data) {
+            if ($data instanceof RecipeData) {
+                $result[$data->getItemId()][$data->getName()][] = $data->getId();
             }
         }
         return $result;
@@ -141,12 +146,8 @@ class RecipeService extends AbstractModsAwareService
     public function getDetailsByIds(array $ids): array
     {
         $result = [];
-        if (count($ids) > 0) {
-            $result = array_combine($ids, array_fill(0, count($ids), null));
-
-            foreach ($this->recipeRepository->findByIds($ids) as $recipe) {
-                $result[$recipe->getId()] = $recipe;
-            }
+        foreach ($this->recipeRepository->findByIds($ids) as $recipe) {
+            $result[$recipe->getId()] = $recipe;
         }
         return $result;
     }
@@ -158,33 +159,35 @@ class RecipeService extends AbstractModsAwareService
      */
     public function filterAvailableNames(array $names): array
     {
+        $recipeData = $this->recipeRepository->findDataByNames(
+            $names,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($names) > 0) {
-            $recipeData = $this->recipeRepository->findIdDataByNames(
-                $names,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($recipeData as $data) {
-                $result[$data['name']] = true;
-            }
+        foreach ($recipeData as $data) {
+            $result[$data->getName()] = true;
         }
-        return array_map('strval', array_keys($result));
+        return array_keys($result);
     }
 
     /**
      * Returns the items matching the specified keywords.
      * @param array|string[] $keywords
-     * @return array
+     * @return array|RecipeData[]
      */
-    public function getIdDataByKeywords(array $keywords): array
+    public function getDataByKeywords(array $keywords): array
     {
+        $recipeData = $this->recipeRepository->findDataByKeywords(
+            $keywords,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $results = [];
-        if (count($keywords) > 0) {
-            $results = $this->recipeRepository->findIdDataByKeywords(
-                $keywords,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            $results = $this->filterData($results, ['name', 'mode']);
+        foreach ($this->filterData($recipeData) as $data) {
+            if ($data instanceof RecipeData) {
+                $results[] = $data;
+            }
         }
         return $results;
     }

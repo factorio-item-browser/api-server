@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Item;
-use FactorioItemBrowser\Api\Server\Database\Repository\ItemRepository;
+use FactorioItemBrowser\Api\Database\Entity\Item;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 
 /**
  * The service class of the item database table.
@@ -40,14 +40,10 @@ class ItemService extends AbstractModsAwareService
      */
     public function getByTypesAndNames(array $namesByTypes): array
     {
-        $result = [];
-        if (count($namesByTypes) > 0) {
-            $result = $this->itemRepository->findByTypesAndNames(
-                $namesByTypes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-        }
-        return $result;
+        return $this->itemRepository->findByTypesAndNames(
+            $namesByTypes,
+            $this->modService->getEnabledModCombinationIds()
+        );
     }
 
     /**
@@ -73,10 +69,8 @@ class ItemService extends AbstractModsAwareService
     public function getByIds(array $itemIds): array
     {
         $result = [];
-        if (count($itemIds) > 0) {
-            foreach ($this->itemRepository->findByIds($itemIds) as $item) {
-                $result[$item->getId()] = $item;
-            }
+        foreach ($this->itemRepository->findByIds($itemIds) as $item) {
+            $result[$item->getId()] = $item;
         }
         return $result;
     }
@@ -88,14 +82,10 @@ class ItemService extends AbstractModsAwareService
      */
     public function getByKeywords(array $keywords): array
     {
-        $result = [];
-        if (count($keywords) > 0) {
-            $result = $this->itemRepository->findByKeywords(
-                $keywords,
-                $this->modService->getEnabledModCombinationIds()
-            );
-        }
-        return $result;
+        return $this->itemRepository->findByKeywords(
+            $keywords,
+            $this->modService->getEnabledModCombinationIds()
+        );
     }
 
     /**
@@ -105,15 +95,14 @@ class ItemService extends AbstractModsAwareService
      */
     public function filterAvailableTypesAndNames(array $namesByTypes): array
     {
+        $items = $this->itemRepository->findByTypesAndNames(
+            $namesByTypes,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($namesByTypes) > 0) {
-            $items = $this->itemRepository->findByTypesAndNames(
-                $namesByTypes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($items as $item) {
-                $result[$item->getType()][] = $item->getName();
-            }
+        foreach ($items as $item) {
+            $result[$item->getType()][] = $item->getName();
         }
         return $result;
     }
@@ -125,8 +114,9 @@ class ItemService extends AbstractModsAwareService
      */
     public function getRandom(int $numberOfItems): array
     {
-        $result = [];
         $items = $this->itemRepository->findRandom($numberOfItems, $this->modService->getEnabledModCombinationIds());
+
+        $result = [];
         foreach ($items as $item) {
             $result[$item->getId()] = $item;
         }

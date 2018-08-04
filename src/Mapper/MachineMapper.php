@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
-use FactorioItemBrowser\Api\Server\Database\Entity\Machine as DatabaseMachine;
+use FactorioItemBrowser\Api\Database\Entity\Machine as DatabaseMachine;
 
 /**
  * The class able to map machines.

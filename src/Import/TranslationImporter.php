@@ -6,9 +6,11 @@ namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
-use FactorioItemBrowser\Api\Server\Database\Entity\Translation as DatabaseTranslation;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination;
+use FactorioItemBrowser\Api\Database\Entity\Translation as DatabaseTranslation;
 use FactorioItemBrowser\ExportData\Entity\Item as ExportItem;
 use FactorioItemBrowser\ExportData\Entity\Machine as ExportMachine;
 use FactorioItemBrowser\ExportData\Entity\Mod as ExportMod;
@@ -185,10 +187,7 @@ class TranslationImporter implements ImporterInterface
      */
     protected function createDatabaseTranslation(string $locale, string $type, string $name): DatabaseTranslation
     {
-        $translation = new DatabaseTranslation();
-        $translation->setLocale($locale)
-                    ->setType($type)
-                    ->setName($name);
+        $translation = new DatabaseTranslation(new ModCombination(new Mod('foo')), $locale, $type, $name);
         return $translation;
     }
 

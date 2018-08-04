@@ -50,7 +50,7 @@ class MissingItemIdHandler implements SearchHandlerInterface
         $items = $this->itemService->getByTypesAndNames($namesByTypes);
         foreach ($items as $item) {
             $result = new ItemResult();
-            $result->setId((int) $item->getId())
+            $result->setId($item->getId())
                    ->setType($item->getType())
                    ->setName($item->getName());
             $searchResults->add($result);

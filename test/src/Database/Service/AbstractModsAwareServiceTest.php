@@ -6,6 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Database\Service;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
 use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Database\Data\DataInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\AbstractModsAwareService;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -53,46 +54,43 @@ class AbstractModsAwareServiceTest extends TestCase
      */
     public function testFilterData()
     {
-        $data = [
-            [
-                'foo' => 'abc',
-                'bar' => 'def',
-                'ghi' => 'jkl',
-                'baz' => 42
-            ],
-            [
-                'foo' => 'abc',
-                'bar' => 'def',
-                'ghi' => 'mno',
-                'baz' => 21
-            ],
-            [
-                'foo' => 'pqr',
-                'bar' => 'stu',
-                'vwx' => 'yz',
-                'baz' => 42
-            ],
-        ];
-        $keyColumns = ['foo', 'bar'];
-        $orderColumn = 'baz';
-        $expectedResult = [
-            [
-                'foo' => 'abc',
-                'bar' => 'def',
-                'ghi' => 'jkl',
-                'baz' => 42
-            ],
-            [
-                'foo' => 'pqr',
-                'bar' => 'stu',
-                'vwx' => 'yz',
-                'baz' => 42
-            ],
-        ];
+        /* @var DataInterface|MockObject $data1 */
+        $data1 = $this->getMockBuilder(DataInterface::class)
+                      ->setMethods(['getOrder', 'getKeys'])
+                      ->getMockForAbstractClass();
+        $data1->expects($this->any())
+              ->method('getOrder')
+              ->willReturn(42);
+        $data1->expects($this->any())
+              ->method('getKeys')
+              ->willReturn(['abc', 'def']);
+        /* @var DataInterface|MockObject $data2 */
+        $data2 = $this->getMockBuilder(DataInterface::class)
+                      ->setMethods(['getOrder', 'getKeys'])
+                      ->getMockForAbstractClass();
+        $data2->expects($this->any())
+              ->method('getOrder')
+              ->willReturn(21);
+        $data2->expects($this->any())
+              ->method('getKeys')
+              ->willReturn(['abc', 'def']);
+        /* @var DataInterface|MockObject $data3 */
+        $data3 = $this->getMockBuilder(DataInterface::class)
+                      ->setMethods(['getOrder', 'getKeys'])
+                      ->getMockForAbstractClass();
+        $data3->expects($this->any())
+              ->method('getOrder')
+              ->willReturn(42);
+        $data3->expects($this->any())
+              ->method('getKeys')
+              ->willReturn(['ghi', 'jkl']);
+
+        $data = [$data1, $data2, $data3];
+        $expectedResult = [$data1, $data3];
 
         /* @var AbstractModsAwareService $service */
         $service = $this->createMock(AbstractModsAwareService::class);
-        $result = $this->invokeMethod($service, 'filterData', $data, $keyColumns, $orderColumn);
+        $result = $this->invokeMethod($service, 'filterData', $data);
         $this->assertSame($expectedResult, $result);
     }
 }

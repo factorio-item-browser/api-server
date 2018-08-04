@@ -6,8 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use DateTime;
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\CachedSearchResult;
-use FactorioItemBrowser\Api\Server\Database\Repository\CachedSearchResultRepository;
+use FactorioItemBrowser\Api\Database\Entity\CachedSearchResult;
+use FactorioItemBrowser\Api\Database\Repository\CachedSearchResultRepository;
 use FactorioItemBrowser\Api\Server\Search\Result\AbstractResult;
 use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
 use FactorioItemBrowser\Api\Server\Search\Result\ItemResult;
@@ -26,7 +26,12 @@ class CachedSearchResultService extends AbstractModsAwareService
     /**
      * The maximal number of search results to allow.
      */
-    const MAX_SEARCH_RESULTS = 1000;
+    protected const MAX_SEARCH_RESULTS = 1000;
+
+    /**
+     * The maximal age of the search results in the cache, in seconds.
+     */
+    protected const MAX_AGE_SECONDS = 3600;
 
     /**
      * The database translation service.
@@ -74,7 +79,11 @@ class CachedSearchResultService extends AbstractModsAwareService
     public function getSearchResults(SearchQuery $searchQuery): ?CachedResultCollection
     {
         $result = null;
-        $cachedSearchResult = $this->cachedSearchResultRepository->findByHash($this->buildSearchHash($searchQuery));
+        $cachedSearchResults = $this->cachedSearchResultRepository->findByHashes(
+            [$this->buildSearchHash($searchQuery)],
+            $this->getMaxAge()
+        );
+        $cachedSearchResult = array_shift($cachedSearchResults);
         if ($cachedSearchResult instanceof CachedSearchResult) {
             $result = $this->createResultCollectionFromData($cachedSearchResult->getResultData());
             $cachedSearchResult->setLastSearchTime(new DateTime());
@@ -162,7 +171,7 @@ class CachedSearchResultService extends AbstractModsAwareService
      */
     public function cleanup()
     {
-        $this->cachedSearchResultRepository->cleanup();
+        $this->cachedSearchResultRepository->cleanup($this->getMaxAge());
         return $this;
     }
 
@@ -174,5 +183,14 @@ class CachedSearchResultService extends AbstractModsAwareService
     {
         $this->cachedSearchResultRepository->clear();
         return $this;
+    }
+
+    /**
+     * Returns the maximal age to use for the cache.
+     * @return DateTime
+     */
+    protected function getMaxAge(): DateTime
+    {
+        return new DateTime('-' . self::MAX_AGE_SECONDS . ' seconds');
     }
 }

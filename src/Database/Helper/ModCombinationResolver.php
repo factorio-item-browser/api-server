@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Helper;
 
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 
 /**

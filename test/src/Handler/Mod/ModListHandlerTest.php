@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowserTest\Api\Server\Handler\Meta;
+namespace FactorioItemBrowserTest\Api\Server\Handler\Mod;
 
 use BluePsyduck\Common\Data\DataContainer;
 use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\Mod\ModListHandler;

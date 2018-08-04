@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\CraftingCategory;
-use FactorioItemBrowser\Api\Server\Database\Entity\Machine;
-use FactorioItemBrowser\Api\Server\Database\Repository\MachineRepository;
+use FactorioItemBrowser\Api\Database\Data\MachineData;
+use FactorioItemBrowser\Api\Database\Entity\CraftingCategory;
+use FactorioItemBrowser\Api\Database\Entity\Machine;
+use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 
 /**
  * The service class of the machine database table.
@@ -41,15 +42,12 @@ class MachineService extends AbstractModsAwareService
      */
     public function getByNames(array $names): array
     {
-        $result = [];
-        if (count($names) > 0) {
-            $machineData = $this->machineRepository->findIdDataByNames(
-                $names,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            $result = $this->getDetailsByMachineData($machineData);
-        }
-        return $result;
+        $machineData = $this->machineRepository->findDataByNames(
+            $names,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
+        return $this->getDetailsByMachineData($machineData);
     }
 
     /**
@@ -59,33 +57,32 @@ class MachineService extends AbstractModsAwareService
      */
     public function getByCraftingCategory(CraftingCategory $craftingCategory): array
     {
-        $machineData = $this->machineRepository->findIdDataByCraftingCategories(
+        $machineData = $this->machineRepository->findDataByCraftingCategories(
             [$craftingCategory->getName()],
             $this->modService->getEnabledModCombinationIds()
         );
+
         return $this->getDetailsByMachineData($machineData);
     }
 
     /**
      * Returns the actual machine details from the specified machine data.
-     * @param array $machineData
+     * @param array|MachineData[] $machineData
      * @return array|Machine[]
      */
     protected function getDetailsByMachineData(array $machineData): array
     {
         if (count($this->modService->getEnabledModCombinationIds()) > 0) {
-            $machineData = $this->filterData($machineData, ['name']);
-        }
-        $machineIds = [];
-        foreach ($machineData as $data) {
-            $machineIds[] = intval($data['id']);
+            $machineData = $this->filterData($machineData);
         }
 
-        $result = [];
-        if (count($machineIds) > 0) {
-            $result = $this->machineRepository->findByIds($machineIds);
+        $machineIds = [];
+        foreach ($machineData as $data) {
+            if ($data instanceof MachineData) {
+                $machineIds[] = $data->getId();
+            }
         }
-        return $result;
+        return $this->machineRepository->findByIds($machineIds);
     }
 
     /**
@@ -95,17 +92,16 @@ class MachineService extends AbstractModsAwareService
      */
     public function filterAvailableNames(array $names): array
     {
+        $recipeData = $this->machineRepository->findDataByNames(
+            $names,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($names) > 0) {
-            $recipeData = $this->machineRepository->findIdDataByNames(
-                $names,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($recipeData as $data) {
-                $result[$data['name']] = true;
-            }
+        foreach ($recipeData as $data) {
+            $result[$data->getName()] = true;
         }
-        return array_map('strval', array_keys($result));
+        return array_keys($result);
     }
 
     /**

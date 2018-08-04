@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowserTest\Api\Server\Handler\Meta;
+namespace FactorioItemBrowserTest\Api\Server\Handler\Mod;
 
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Handler\Mod\ModMetaHandler;

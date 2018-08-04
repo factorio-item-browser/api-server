@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Icon;
-use FactorioItemBrowser\Api\Server\Database\Entity\IconFile;
-use FactorioItemBrowser\Api\Server\Database\Repository\IconFileRepository;
-use FactorioItemBrowser\Api\Server\Database\Repository\IconRepository;
+use FactorioItemBrowser\Api\Database\Data\IconData;
+use FactorioItemBrowser\Api\Database\Entity\Icon;
+use FactorioItemBrowser\Api\Database\Entity\IconFile;
+use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
+use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 
 /**
  * The service class of the icon database table.
@@ -49,15 +50,14 @@ class IconService extends AbstractModsAwareService
      */
     public function getIconFileHashesByTypesAndNames(array $namesByTypes)
     {
+        $iconData = $this->iconRepository->findDataByTypesAndNames(
+            $namesByTypes,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $hashes = [];
-        if (count($namesByTypes) > 0) {
-            $iconData = $this->iconRepository->findHashDataByTypesAndNames(
-                $namesByTypes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($iconData as $data) {
-                $hashes[bin2hex($data['hash'])] = true;
-            }
+        foreach ($iconData as $data) {
+            $hashes[$data->getHash()] = true;
         }
         return array_keys($hashes);
     }
@@ -69,15 +69,14 @@ class IconService extends AbstractModsAwareService
      */
     public function getAllTypesAndNamesByHashes(array $iconFileHashes): array
     {
+        $iconData = $this->iconRepository->findDataByHashes(
+            $iconFileHashes,
+            $this->modService->getEnabledModCombinationIds()
+        );
+
         $result = [];
-        if (count($iconFileHashes) > 0) {
-            $iconData = $this->iconRepository->findIdDataByHashes(
-                $iconFileHashes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($iconData as $data) {
-                $result[$data['type']][] = $data['name'];
-            }
+        foreach ($iconData as $data) {
+            $result[$data->getType()][] = $data->getName();
         }
         return $result;
     }
@@ -89,22 +88,19 @@ class IconService extends AbstractModsAwareService
      */
     public function getIconsByHashes(array $iconFileHashes): array
     {
-        $result = [];
-        if (count($iconFileHashes) > 0) {
-            $iconIds = [];
-            $iconData = $this->iconRepository->findIdDataByHashes(
-                $iconFileHashes,
-                $this->modService->getEnabledModCombinationIds()
-            );
-            foreach ($this->filterData($iconData, ['type', 'name']) as $data) {
-                $iconIds[] = intval($data['id']);
-            }
+        $iconData = $this->iconRepository->findDataByHashes(
+            $iconFileHashes,
+            $this->modService->getEnabledModCombinationIds()
+        );
 
-            if (count($iconIds) > 0) {
-                $result = $this->iconRepository->findByIds($iconIds);
+        $iconIds = [];
+        foreach ($this->filterData($iconData) as $data) {
+            if ($data instanceof IconData) {
+                $iconIds[] = $data->getId();
             }
         }
-        return $result;
+
+        return $this->iconRepository->findByIds($iconIds);
     }
 
     /**
@@ -115,10 +111,8 @@ class IconService extends AbstractModsAwareService
     public function getIconFilesByHashes(array $iconFileHashes): array
     {
         $result = [];
-        if (count($iconFileHashes) > 0) {
-            foreach ($this->iconFileRepository->findByHashes($iconFileHashes) as $iconFile) {
-                $result[$iconFile->getHash()] = $iconFile;
-            }
+        foreach ($this->iconFileRepository->findByHashes($iconFileHashes) as $iconFile) {
+            $result[$iconFile->getHash()] = $iconFile;
         }
         return $result;
     }

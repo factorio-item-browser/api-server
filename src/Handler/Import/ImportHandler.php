@@ -6,8 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Handler\Import;
 
 use BluePsyduck\Common\Data\DataContainer;
 use Exception;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination as DatabaseCombination;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;

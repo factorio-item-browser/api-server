@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
-use FactorioItemBrowser\Api\Server\Database\Entity\Recipe as DatabaseRecipe;
-use FactorioItemBrowser\Api\Server\Database\Entity\RecipeIngredient as DatabaseRecipeIngredient;
-use FactorioItemBrowser\Api\Server\Database\Entity\RecipeProduct as DatabaseRecipeProduct;
+use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
+use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient as DatabaseRecipeIngredient;
+use FactorioItemBrowser\Api\Database\Entity\RecipeProduct as DatabaseRecipeProduct;
 use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;

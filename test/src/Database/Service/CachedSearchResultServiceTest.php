@@ -6,8 +6,8 @@ namespace FactorioItemBrowserTest\Api\Server\Database\Service;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\CachedSearchResult;
-use FactorioItemBrowser\Api\Server\Database\Repository\CachedSearchResultRepository;
+use FactorioItemBrowser\Api\Database\Entity\CachedSearchResult;
+use FactorioItemBrowser\Api\Database\Repository\CachedSearchResultRepository;
 use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\CraftingCategory;
-use FactorioItemBrowser\Api\Server\Database\Repository\CraftingCategoryRepository;
+use FactorioItemBrowser\Api\Database\Entity\CraftingCategory;
+use FactorioItemBrowser\Api\Database\Repository\CraftingCategoryRepository;
 
 /**
  * The service class of the crafting category database table.
@@ -69,10 +69,8 @@ class CraftingCategoryService extends AbstractDatabaseService
     protected function fetchMissingCraftingCategories(array $names)
     {
         $missingNames = array_diff($names, array_keys($this->cachedCraftingCategories));
-        if (count($missingNames) > 0) {
-            foreach ($this->craftingCategoryRepository->findByNames($names) as $craftingCategory) {
-                $this->cachedCraftingCategories[$craftingCategory->getName()] = $craftingCategory;
-            }
+        foreach ($this->craftingCategoryRepository->findByNames($missingNames) as $craftingCategory) {
+            $this->cachedCraftingCategories[$craftingCategory->getName()] = $craftingCategory;
         }
         return $this;
     }

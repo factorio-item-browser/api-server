@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 
 /**
  * The class able to map items.

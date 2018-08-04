@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Import;
 
 use Doctrine\ORM\EntityManager;
-use FactorioItemBrowser\Api\Server\Database\Entity\Machine as DatabaseMachine;
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination as DatabaseCombination;
+use FactorioItemBrowser\Api\Database\Entity\Machine as DatabaseMachine;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination as DatabaseCombination;
 use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
 use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
 use FactorioItemBrowser\ExportData\Entity\Machine as ExportMachine;

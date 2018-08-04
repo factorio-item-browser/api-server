@@ -16,8 +16,14 @@ return [
     ConfigAggregator::ENABLE_CACHE => false,
     'debug' => true,
     'doctrine' => [
+        'configuration' => [
+            'orm_default' => [
+                'metadata_cache' => 'filesystem',
+                'query_cache' => 'filesystem',
+            ]
+        ],
         'connection' => [
-            'docker' => [
+            'orm_default' => [
                 'driverClass' => PDOMySqlDriver::class,
                 'params' => [
                     'host'     => 'mysql',
@@ -29,6 +35,11 @@ return [
                         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
                     ]
                 ]
+            ]
+        ],
+        'driver' => [
+            'fib-api-database' => [
+                'cache' => 'filesystem',
             ]
         ],
     ],

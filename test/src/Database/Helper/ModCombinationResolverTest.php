@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Database\Helper;
 
-use FactorioItemBrowser\Api\Server\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Server\Database\Entity\ModCombination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
+use FactorioItemBrowser\Api\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Server\Database\Helper\ModCombinationResolver;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use PHPUnit\Framework\MockObject\MockObject;
