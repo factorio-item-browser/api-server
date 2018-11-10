@@ -19,7 +19,6 @@ return [
                 'agents' => [
                     'demo' => [
                         'accessKey' => 'factorio-item-browser',
-                        'allowImport' => false,
                         'isDemo' => true
                     ]
                 ]

@@ -18,8 +18,7 @@ return [
                 'key' => 'factorio-item-browser',
                 'agents' => [
                     'debug' => [
-                        'accessKey' => 'factorio-item-browser',
-                        'allowImport' => true
+                        'accessKey' => 'factorio-item-browser'
                     ]
                 ]
             ],

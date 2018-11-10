@@ -18,7 +18,6 @@
     "ext-PDO": "*",
     "factorio-item-browser/api-client": "^1.1",
     "factorio-item-browser/api-database": "^1.0",
-    "factorio-item-browser/export-data": "^1.2",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
     "zendframework/zend-config-aggregator": "^1.0",

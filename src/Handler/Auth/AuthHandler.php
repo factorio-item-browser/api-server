@@ -110,8 +110,7 @@ class AuthHandler extends AbstractRequestHandler
         return [
             'authorizationToken' => $this->createToken(
                 $agent,
-                $this->modService->getEnabledModCombinationIds(),
-                $agentConfig['allowImport'] ?? false
+                $this->modService->getEnabledModCombinationIds()
             )
         ];
     }
@@ -120,10 +119,9 @@ class AuthHandler extends AbstractRequestHandler
      * Creates and returns a new token.
      * @param string $agent
      * @param array $enabledModCombinationIds
-     * @param bool $allowImport
      * @return string
      */
-    protected function createToken(string $agent, array $enabledModCombinationIds, bool $allowImport): string
+    protected function createToken(string $agent, array $enabledModCombinationIds): string
     {
         $token = [
             'iat' => time(),
@@ -131,9 +129,6 @@ class AuthHandler extends AbstractRequestHandler
             'agt' => $agent,
             'mds' => $enabledModCombinationIds
         ];
-        if ($allowImport ?? false) {
-            $token['imp'] = 1;
-        }
 
         return JWT::encode($token, $this->authorizationKey);
     }

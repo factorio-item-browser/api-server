@@ -72,8 +72,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
                 $token = $this->decryptToken(substr($authorization, 7));
                 $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds ?? []));
 
-                $request = $request->withAttribute('agent', $token->agt ?? '')
-                                   ->withAttribute('allowImport', ($token->imp ?? 0) === 1);
+                $request = $request->withAttribute('agent', $token->agt ?? '');
             } catch (Exception $e) {
                 throw new ApiServerException('Authorization token is invalid.', 401);
             }

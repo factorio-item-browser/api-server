@@ -77,10 +77,6 @@ class AuthHandlerTest extends TestCase
             'default' => [
                 'accessKey' => 'abc'
             ],
-            'import' => [
-                'accessKey' => 'def',
-                'allowImport' => true
-            ],
             'demo' => [
                 'accessKey' => 'ghi',
                 'isDemo' => true
@@ -97,20 +93,7 @@ class AuthHandlerTest extends TestCase
                 ]),
                 false,
                 ['jkl', 'mno'],
-                'default',
-                false
-            ],
-            [
-                $agents,
-                new DataContainer([
-                    'agent' => 'import',
-                    'accessKey' => 'def',
-                    'enabledModNames' => ['jkl', 'mno']
-                ]),
-                false,
-                ['jkl', 'mno'],
-                'import',
-                true
+                'default'
             ],
             [
                 $agents,
@@ -121,8 +104,7 @@ class AuthHandlerTest extends TestCase
                 ]),
                 false,
                 ['base'],
-                'demo',
-                false
+                'demo'
             ],
 
             [ // Error: Wrong accessKey
@@ -134,8 +116,7 @@ class AuthHandlerTest extends TestCase
                 ]),
                 true,
                 [],
-                '',
-                false
+                ''
             ],
             [ // Error: Missing accessKey
                 $agents,
@@ -145,8 +126,7 @@ class AuthHandlerTest extends TestCase
                 ]),
                 true,
                 [],
-                '',
-                false
+                ''
             ],
             [ // Error: Unknown agent
                 $agents,
@@ -157,8 +137,7 @@ class AuthHandlerTest extends TestCase
                 ]),
                 true,
                 [],
-                '',
-                false
+                ''
             ],
         ];
     }
@@ -170,7 +149,6 @@ class AuthHandlerTest extends TestCase
      * @param bool $expectException
      * @param array $expectedEnabledModNames
      * @param string $expectedAgent
-     * @param bool $expectedAllowImportFlag
      * @covers ::handleRequest
      * @dataProvider provideHandleRequest
      */
@@ -179,8 +157,7 @@ class AuthHandlerTest extends TestCase
         DataContainer $requestData,
         bool $expectException,
         array $expectedEnabledModNames,
-        string $expectedAgent,
-        bool $expectedAllowImportFlag
+        string $expectedAgent
     ) {
         if ($expectException) {
             $this->expectException(ApiServerException::class);
@@ -211,7 +188,7 @@ class AuthHandlerTest extends TestCase
                         ->getMock();
         $handler->expects($expectException ? $this->never() : $this->once())
                 ->method('createToken')
-                ->with($expectedAgent, $modCombinationIds, $expectedAllowImportFlag)
+                ->with($expectedAgent, $modCombinationIds)
                 ->willReturn('bar');
 
         $result = $this->invokeMethod($handler, 'handleRequest', $requestData);

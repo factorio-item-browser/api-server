@@ -28,14 +28,9 @@ class AuthorizationMiddlewareTest extends TestCase
      */
     public function provideProcess(): array
     {
-        // With import flag
-        $validHeader1 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0NywiYW'
-            . 'd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.qfIlOQ_rNfSqmBeTpkI7gboF4PTdO1kVzGuLnFDFudA';
-        // Without import flag
-        $validHeader2 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0NywiYW'
-            . 'd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN119.uq1IPDEuqkQzOFqsTGDtNK7D6Cd8sb3eMR-j_BkTlPw';
+        $validHeader = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0Nywi'
+            . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN119.uq1IPDEuqkQzOFqsTGDtNK7D6Cd8sb3eMR-j_BkTlPw';
 
-        // Expired token
         $invalidHeader1 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MTIzNDU2Nzg5MCwi'
             . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.2_ziraMpcLhYMCLpX5OQm75V6KQdnAmqJbNwgYz4VJM';
         // Invalid signature
@@ -43,12 +38,11 @@ class AuthorizationMiddlewareTest extends TestCase
             . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.qfIlOQ_rNfSqmBeTpkI7gbof4PTdO1kVzGuLnFDFudA';
 
         return [
-            ['/auth', null, '', null, null, null],
-            ['/wuppdi', $validHeader1, '', [42, 1337], 'abc', true],
-            ['/wuppdi', $validHeader2, '', [42, 1337], 'abc', false],
-            ['/wuppdi', $invalidHeader1, 'Authorization token is invalid.', null, null, null],
-            ['/wuppdi', $invalidHeader2, 'Authorization token is invalid.', null, null, null],
-            ['/wuppdi', 'FAIL', 'Authorization token is missing.', null, null, null],
+            ['/auth', null, '', null, null],
+            ['/wuppdi', $validHeader, '', [42, 1337], 'abc'],
+            ['/wuppdi', $invalidHeader1, 'Authorization token is invalid.', null, null],
+            ['/wuppdi', $invalidHeader2, 'Authorization token is invalid.', null, null],
+            ['/wuppdi', 'FAIL', 'Authorization token is missing.', null, null],
         ];
     }
 
@@ -59,7 +53,6 @@ class AuthorizationMiddlewareTest extends TestCase
      * @param string $expectedExceptionMessage
      * @param array|null $expectedModCombinationIds
      * @param null|string $expectedAgent
-     * @param null|string $expectedAllowImportFlag
      * @covers ::__construct
      * @covers ::process
      * @dataProvider provideProcess
@@ -69,8 +62,7 @@ class AuthorizationMiddlewareTest extends TestCase
         ?string $authorizationHeader,
         string $expectedExceptionMessage,
         ?array $expectedModCombinationIds,
-        ?string $expectedAgent,
-        ?string $expectedAllowImportFlag
+        ?string $expectedAgent
     ) {
         if (strlen($expectedExceptionMessage) > 0) {
             $this->expectException(ApiServerException::class);
@@ -101,12 +93,9 @@ class AuthorizationMiddlewareTest extends TestCase
                 ->method('getHeaderLine')
                 ->with('Authorization')
                 ->willReturn($authorizationHeader);
-        $request->expects($expectedAgent === null ? $this->never() : $this->exactly(2))
+        $request->expects($expectedAgent === null ? $this->never() : $this->once())
                 ->method('withAttribute')
-                ->withConsecutive(
-                    ['agent', $expectedAgent],
-                    ['allowImport', $expectedAllowImportFlag]
-                )
+                ->with('agent', $expectedAgent)
                 ->willReturnSelf();
 
         /* @var Response $response */

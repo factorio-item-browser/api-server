@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use FactorioItemBrowser\ExportData\Service\ExportDataService;
 use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
 use Zend\Expressive\Middleware\ErrorResponseGenerator;
 use Zend\ServiceManager\Factory\InvokableFactory;
@@ -34,24 +33,12 @@ return [
             Handler\Item\ItemIngredientHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemProductHandler::class => Handler\Item\AbstractItemRecipeHandlerFactory::class,
             Handler\Item\ItemRandomHandler::class => Handler\Item\ItemRandomHandlerFactory::class,
-            Handler\Import\ImportHandler::class => Handler\Import\ImportHandlerFactory::class,
             Handler\Mod\ModListHandler::class => Handler\Mod\ModListHandlerFactory::class,
             Handler\Mod\ModMetaHandler::class => Handler\Mod\ModMetaHandlerFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => Handler\Recipe\RecipeDetailsHandlerFactory::class,
             Handler\Recipe\RecipeMachinesHandler::class => Handler\Recipe\RecipeMachinesHandlerFactory::class,
             Handler\Search\SearchQueryHandler::class => Handler\Search\SearchQueryHandlerFactory::class,
-
-            Import\CombinationImporter::class => Import\CombinationImporterFactory::class,
-            Import\CraftingCategoryImporter::class => Import\CraftingCategoryImporterFactory::class,
-            Import\IconImporter::class => Import\IconImporterFactory::class,
-            Import\ImporterManager::class => Import\ImporterManagerFactory::class,
-            Import\ItemImporter::class => Import\ItemImporterFactory::class,
-            Import\MachineImporter::class => Import\MachineImporterFactory::class,
-            Import\ModImporter::class => Import\ModImporterFactory::class,
-            Import\OrderImporter::class => Import\OrderImporterFactory::class,
-            Import\RecipeImporter::class => Import\RecipeImporterFactory::class,
-            Import\TranslationImporter::class => Import\TranslationImporterFactory::class,
 
             Mapper\ItemMapper::class => Mapper\AbstractMapperFactory::class,
             Mapper\MachineMapper::class => Mapper\AbstractMapperFactory::class,
@@ -77,7 +64,6 @@ return [
             // Dependencies of other libraries
             BodyParamsMiddleware::class => InvokableFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
-            ExportDataService::class => ExportData\ExportDataServiceFactory::class,
         ]
     ],
 ];
