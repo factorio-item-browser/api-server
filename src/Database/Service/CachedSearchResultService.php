@@ -176,16 +176,6 @@ class CachedSearchResultService extends AbstractModsAwareService
     }
 
     /**
-     * Clears the database table, emptying the cache.
-     * @return $this
-     */
-    public function clear()
-    {
-        $this->cachedSearchResultRepository->clear();
-        return $this;
-    }
-
-    /**
      * Returns the maximal age to use for the cache.
      * @return DateTime
      */

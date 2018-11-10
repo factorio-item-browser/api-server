@@ -102,36 +102,4 @@ class CachedSearchResultServiceTest extends TestCase
 
         $this->assertSame($service, $service->cleanup());
     }
-
-    /**
-     * Tests the clear method.
-     * @covers ::clear
-     */
-    public function testClear()
-    {
-        /* @var ModService $modService */
-        $modService = $this->createMock(ModService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
-
-        /* @var CachedSearchResultRepository|MockObject $cachedSearchResultRepository */
-        $cachedSearchResultRepository = $this->getMockBuilder(CachedSearchResultRepository::class)
-                                             ->setMethods(['clear'])
-                                             ->disableOriginalConstructor()
-                                             ->getMock();
-        $cachedSearchResultRepository->expects($this->once())
-                                     ->method('clear');
-        /* @var EntityManager|MockObject $entityManager */
-        $entityManager = $this->getMockBuilder(EntityManager::class)
-                              ->setMethods(['getRepository'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        $entityManager->expects($this->once())
-                      ->method('getRepository')
-                      ->with(CachedSearchResult::class)
-                      ->willReturn($cachedSearchResultRepository);
-
-        $service = new CachedSearchResultService($entityManager, $modService, $translationService);
-        $this->assertSame($service, $service->clear());
-    }
 }

@@ -36,21 +36,6 @@ class MachineService extends AbstractModsAwareService
     }
 
     /**
-     * Returns the machines with the specified names.
-     * @param array|string[] $names
-     * @return array|Machine[]
-     */
-    public function getByNames(array $names): array
-    {
-        $machineData = $this->machineRepository->findDataByNames(
-            $names,
-            $this->modService->getEnabledModCombinationIds()
-        );
-
-        return $this->getDetailsByMachineData($machineData);
-    }
-
-    /**
      * Returns the machines supporting the specified crafting category.
      * @param CraftingCategory $craftingCategory
      * @return array|Machine[]
@@ -102,15 +87,5 @@ class MachineService extends AbstractModsAwareService
             $result[$data->getName()] = true;
         }
         return array_keys($result);
-    }
-
-    /**
-     * Removes any orphaned machines, i.e. machines no longer used by any combination.
-     * @return $this
-     */
-    public function removeOrphans()
-    {
-        $this->machineRepository->removeOrphans();
-        return $this;
     }
 }

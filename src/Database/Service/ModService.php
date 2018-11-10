@@ -95,15 +95,6 @@ class ModService extends AbstractDatabaseService
     }
 
     /**
-     * Calculates the hash representing the currently enabled combination ids.
-     * @return string
-     */
-    public function calculateCombinationHash()
-    {
-        return hash('crc32b', implode(',', $this->enabledModCombinationIds));
-    }
-
-    /**
      * Returns the mods with the specified names with their dependencies already fetched.
      * @param array|string[] $modNames
      * @return array|Mod[] The found mods. Keys are the mod names.
@@ -141,20 +132,6 @@ class ModService extends AbstractDatabaseService
         foreach ($this->modRepository->findAll() as $mod) {
             /* @var Mod $mod */
             $result[$mod->getName()] = $mod;
-        }
-        return $result;
-    }
-
-    /**
-     * Returns all known combinations.
-     * @return array|ModCombination[]
-     */
-    public function getAllCombinations(): array
-    {
-        $result = [];
-        foreach ($this->modCombinationRepository->findAll() as $combination) {
-            /* @var ModCombination $combination */
-            $result[$combination->getName()] = $combination;
         }
         return $result;
     }

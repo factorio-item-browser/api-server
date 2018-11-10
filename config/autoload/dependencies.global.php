@@ -19,7 +19,6 @@ return [
     'dependencies' => [
         'factories'  => [
             Database\Service\CachedSearchResultService::class => Database\Service\CachedSearchResultServiceFactory::class,
-            Database\Service\CraftingCategoryService::class => Database\Service\AbstractDatabaseServiceFactory::class,
             Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
             Database\Service\MachineService::class => Database\Service\AbstractModsAwareServiceFactory::class,

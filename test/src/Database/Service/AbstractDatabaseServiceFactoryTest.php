@@ -6,7 +6,6 @@ namespace FactorioItemBrowserTest\Api\Server\Database\Service;
 
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Server\Database\Service\AbstractDatabaseServiceFactory;
-use FactorioItemBrowser\Api\Server\Database\Service\CraftingCategoryService;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -28,7 +27,6 @@ class AbstractDatabaseServiceFactoryTest extends TestCase
     public function provideInvoke(): array
     {
         return [
-            [CraftingCategoryService::class],
             [ModService::class],
         ];
     }

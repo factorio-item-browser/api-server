@@ -122,14 +122,4 @@ class ItemService extends AbstractModsAwareService
         }
         return $result;
     }
-
-    /**
-     * Removes any orphaned items, i.e. items no longer used by any combination.
-     * @return $this
-     */
-    public function removeOrphans()
-    {
-        $this->itemRepository->removeOrphans();
-        return $this;
-    }
 }

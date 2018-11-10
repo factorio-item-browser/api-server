@@ -191,14 +191,4 @@ class RecipeService extends AbstractModsAwareService
         }
         return $results;
     }
-
-    /**
-     * Removes any orphaned recipes, i.e. recipes no longer used by any combination.
-     * @return $this
-     */
-    public function removeOrphans()
-    {
-        $this->recipeRepository->removeOrphans();
-        return $this;
-    }
 }

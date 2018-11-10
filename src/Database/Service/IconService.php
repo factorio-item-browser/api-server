@@ -116,14 +116,4 @@ class IconService extends AbstractModsAwareService
         }
         return $result;
     }
-
-    /**
-     * Removes any orphaned icon files, i.e. icon files no longer used by any icon.
-     * @return $this
-     */
-    public function removeOrphans()
-    {
-        $this->iconFileRepository->removeOrphans();
-        return $this;
-    }
 }
