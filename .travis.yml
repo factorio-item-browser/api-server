@@ -13,7 +13,7 @@ install:
   - composer install --prefer-dist --no-interaction
 
 script:
-  - composer validate
+  - composer validate --strict
   - vendor/bin/phpunit --coverage-clover=coverage.xml
   - vendor/bin/phpcs -np --colors
   - vendor/bin/phpstan analyse --no-interaction

@@ -1,6 +1,9 @@
 <?php
+
+declare(strict_types=1);
+
 /**
- * The configuration of the zend log.
+ * The configuration of the Zend log.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3

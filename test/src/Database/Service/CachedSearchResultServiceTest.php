@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Database\Service;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use DateTime;
 use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Entity\CachedSearchResult;
 use FactorioItemBrowser\Api\Database\Repository\CachedSearchResultRepository;
@@ -65,6 +66,7 @@ class CachedSearchResultServiceTest extends TestCase
      */
     public function testCleanup()
     {
+        $maxAge = new DateTime('2038-01-19 03:14:07');
         /* @var ModService $modService */
         $modService = $this->createMock(ModService::class);
         /* @var TranslationService $translationService */
@@ -76,7 +78,9 @@ class CachedSearchResultServiceTest extends TestCase
                                              ->disableOriginalConstructor()
                                              ->getMock();
         $cachedSearchResultRepository->expects($this->once())
-                                     ->method('cleanup');
+                                     ->method('cleanup')
+                                     ->with($maxAge);
+
         /* @var EntityManager|MockObject $entityManager */
         $entityManager = $this->getMockBuilder(EntityManager::class)
                               ->setMethods(['getRepository'])
@@ -87,7 +91,15 @@ class CachedSearchResultServiceTest extends TestCase
                       ->with(CachedSearchResult::class)
                       ->willReturn($cachedSearchResultRepository);
 
-        $service = new CachedSearchResultService($entityManager, $modService, $translationService);
+        /* @var CachedSearchResultService|MockObject $service */
+        $service = $this->getMockBuilder(CachedSearchResultService::class)
+                        ->setMethods(['getMaxAge'])
+                        ->setConstructorArgs([$entityManager, $modService, $translationService])
+                        ->getMock();
+        $service->expects($this->once())
+                ->method('getMaxAge')
+                ->willReturn($maxAge);
+
         $this->assertSame($service, $service->cleanup());
     }
 

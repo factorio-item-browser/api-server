@@ -1,6 +1,9 @@
 <?php
+
+declare(strict_types=1);
+
 /**
- * The configuration file only used during development.
+ * The configuration of doctrine.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
@@ -28,9 +31,9 @@ return [
                 'params' => [
                     'host'     => 'mysql',
                     'port'     => '3306',
-                    'user'     => 'factorio-item-browser',
-                    'password' => 'factorio-item-browser',
-                    'dbname'   => 'factorio-item-browser',
+                    'user'     => 'docker',
+                    'password' => 'docker',
+                    'dbname'   => 'docker',
                     'driverOptions' => [
                         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
                     ]
@@ -43,17 +46,4 @@ return [
             ]
         ],
     ],
-    'factorio-item-browser' => [
-        'api-server' => [
-            'authorization' => [
-                'key' => 'factorio-item-browser',
-                'agents' => [
-                    'debug' => [
-                        'accessKey' => 'factorio-item-browser',
-                        'allowImport' => true
-                    ]
-                ]
-            ],
-        ]
-    ]
 ];

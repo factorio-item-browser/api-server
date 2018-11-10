@@ -17,17 +17,12 @@ return [
             'authorization' => [
                 'key' => 'factorio-item-browser',
                 'agents' => [
-                    'demo' => [
+                    'debug' => [
                         'accessKey' => 'factorio-item-browser',
-                        'allowImport' => false,
-                        'isDemo' => true
+                        'allowImport' => true
                     ]
                 ]
             ],
-            'version' => '1.1.0'
-        ],
-        'export-data' => [
-            'directory' => __DIR__ . '/../../data/export'
         ]
     ]
 ];
