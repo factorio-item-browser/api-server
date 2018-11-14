@@ -29,7 +29,7 @@ return [
             'orm_default' => [
                 'driverClass' => PDOMySqlDriver::class,
                 'params' => [
-                    'host'     => 'mysql',
+                    'host'     => 'fib-as-mysql',
                     'port'     => '3306',
                     'user'     => 'docker',
                     'password' => 'docker',
