@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Entity\Item;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 
@@ -23,14 +22,15 @@ class ItemService extends AbstractModsAwareService
     protected $itemRepository;
 
     /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
+     * ItemService constructor.
+     * @param ItemRepository $itemRepository
+     * @param ModService $modService
      */
-    protected function initializeRepositories(EntityManager $entityManager)
+    public function __construct(ItemRepository $itemRepository, ModService $modService)
     {
-        $this->itemRepository = $entityManager->getRepository(Item::class);
-        return $this;
+        parent::__construct($modService);
+
+        $this->itemRepository = $itemRepository;
     }
 
     /**

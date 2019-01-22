@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
 use FactorioItemBrowser\Api\Database\Data\TranslationPriorityData;
-use FactorioItemBrowser\Api\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 
 /**
@@ -39,14 +37,15 @@ class TranslationService extends AbstractModsAwareService
     protected $entitiesToTranslate = [];
 
     /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
+     * TranslationService constructor.
+     * @param ModService $modService
+     * @param TranslationRepository $translationRepository
      */
-    protected function initializeRepositories(EntityManager $entityManager)
+    public function __construct(ModService $modService, TranslationRepository $translationRepository)
     {
-        $this->translationRepository = $entityManager->getRepository(Translation::class);
-        return $this;
+        parent::__construct($modService);
+
+        $this->translationRepository = $translationRepository;
     }
 
     /**

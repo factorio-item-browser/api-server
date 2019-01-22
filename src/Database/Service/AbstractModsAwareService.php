@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Data\DataInterface;
 use FactorioItemBrowser\Api\Database\Helper\DataHelper;
 
@@ -14,7 +13,7 @@ use FactorioItemBrowser\Api\Database\Helper\DataHelper;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-abstract class AbstractModsAwareService extends AbstractDatabaseService
+abstract class AbstractModsAwareService
 {
     /**
      * The mod database service.
@@ -24,12 +23,10 @@ abstract class AbstractModsAwareService extends AbstractDatabaseService
 
     /**
      * Initializes the service.
-     * @param EntityManager $entityManager
      * @param ModService $modService
      */
-    public function __construct(EntityManager $entityManager, ModService $modService)
+    public function __construct(ModService $modService)
     {
-        parent::__construct($entityManager);
         $this->modService = $modService;
     }
 

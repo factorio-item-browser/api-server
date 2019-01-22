@@ -19,12 +19,12 @@ return [
     'dependencies' => [
         'factories'  => [
             Database\Service\CachedSearchResultService::class => Database\Service\CachedSearchResultServiceFactory::class,
-            Database\Service\IconService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Database\Service\ItemService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Database\Service\MachineService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Database\Service\ModService::class => Database\Service\AbstractDatabaseServiceFactory::class,
-            Database\Service\RecipeService::class => Database\Service\AbstractModsAwareServiceFactory::class,
-            Database\Service\TranslationService::class => Database\Service\AbstractModsAwareServiceFactory::class,
+            Database\Service\IconService::class => Database\Service\IconServiceFactory::class,
+            Database\Service\ItemService::class => Database\Service\ItemServiceFactory::class,
+            Database\Service\MachineService::class => Database\Service\MachineServiceFactory::class,
+            Database\Service\ModService::class => Database\Service\ModServiceFactory::class,
+            Database\Service\RecipeService::class => Database\Service\RecipeServiceFactory::class,
+            Database\Service\TranslationService::class => Database\Service\TranslationServiceFactory::class,
 
             Handler\Auth\AuthHandler::class => Handler\Auth\AuthHandlerFactory::class,
             Handler\Generic\GenericDetailsHandler::class => Handler\Generic\GenericDetailsHandlerFactory::class,

@@ -4,30 +4,32 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
+use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- * The abstract factory for the database service classes.
+ * The factory of the recipe service.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class AbstractDatabaseServiceFactory implements FactoryInterface
+class RecipeServiceFactory implements FactoryInterface
 {
     /**
      * Creates the service instance.
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param null|array $options
-     * @return AbstractDatabaseService
+     * @return RecipeService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var EntityManager $entityManager */
-        $entityManager = $container->get(EntityManager::class);
+        /* @var ModService $modService */
+        $modService = $container->get(ModService::class);
+        /* @var RecipeRepository $recipeRepository */
+        $recipeRepository = $container->get(RecipeRepository::class);
 
-        return new $requestedName($entityManager);
+        return new RecipeService($modService, $recipeRepository);
     }
 }

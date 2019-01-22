@@ -18,7 +18,7 @@ use FactorioItemBrowser\Api\Server\Database\Helper\ModDependencyResolver;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModService extends AbstractDatabaseService
+class ModService
 {
     /**
      * The repository of the mods.
@@ -37,6 +37,17 @@ class ModService extends AbstractDatabaseService
      * @var array|int[]
      */
     protected $enabledModCombinationIds = [];
+
+    /**
+     * ModService constructor.
+     * @param ModRepository $modRepository
+     * @param ModCombinationRepository $modCombinationRepository
+     */
+    public function __construct(ModRepository $modRepository, ModCombinationRepository $modCombinationRepository)
+    {
+        $this->modRepository = $modRepository;
+        $this->modCombinationRepository = $modCombinationRepository;
+    }
 
     /**
      * Initializes the repositories needed by the service.

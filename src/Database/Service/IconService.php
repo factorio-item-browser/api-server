@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Data\IconData;
 use FactorioItemBrowser\Api\Database\Entity\Icon;
 use FactorioItemBrowser\Api\Database\Entity\IconFile;
@@ -20,27 +19,32 @@ use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 class IconService extends AbstractModsAwareService
 {
     /**
-     * The repository of the icons.
-     * @var IconRepository
-     */
-    protected $iconRepository;
-
-    /**
      * The repository of the icon files.
      * @var IconFileRepository
      */
     protected $iconFileRepository;
 
     /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
+     * The repository of the icons.
+     * @var IconRepository
      */
-    protected function initializeRepositories(EntityManager $entityManager)
-    {
-        $this->iconRepository = $entityManager->getRepository(Icon::class);
-        $this->iconFileRepository = $entityManager->getRepository(IconFile::class);
-        return $this;
+    protected $iconRepository;
+
+    /**
+     * IconService constructor.
+     * @param IconFileRepository $iconFileRepository
+     * @param IconRepository $iconRepository
+     * @param ModService $modService
+     */
+    public function __construct(
+        IconFileRepository $iconFileRepository,
+        IconRepository $iconRepository,
+        ModService $modService
+    ) {
+        parent::__construct($modService);
+
+        $this->iconFileRepository = $iconFileRepository;
+        $this->iconRepository = $iconRepository;
     }
 
     /**
@@ -48,7 +52,7 @@ class IconService extends AbstractModsAwareService
      * @param array|string[][] $namesByTypes
      * @return array|string[]
      */
-    public function getIconFileHashesByTypesAndNames(array $namesByTypes)
+    public function getIconFileHashesByTypesAndNames(array $namesByTypes): array
     {
         $iconData = $this->iconRepository->findDataByTypesAndNames(
             $namesByTypes,

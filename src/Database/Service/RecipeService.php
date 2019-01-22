@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
@@ -24,14 +23,15 @@ class RecipeService extends AbstractModsAwareService
     protected $recipeRepository;
 
     /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
+     * RecipeService constructor.
+     * @param ModService $modService
+     * @param RecipeRepository $recipeRepository
      */
-    protected function initializeRepositories(EntityManager $entityManager)
+    public function __construct(ModService $modService, RecipeRepository $recipeRepository)
     {
-        $this->recipeRepository = $entityManager->getRepository(Recipe::class);
-        return $this;
+        parent::__construct($modService);
+
+        $this->recipeRepository = $recipeRepository;
     }
 
     /**

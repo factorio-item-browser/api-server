@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Data\MachineData;
 use FactorioItemBrowser\Api\Database\Entity\CraftingCategory;
 use FactorioItemBrowser\Api\Database\Entity\Machine;
@@ -25,14 +24,15 @@ class MachineService extends AbstractModsAwareService
     protected $machineRepository;
 
     /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
+     * MachineService constructor.
+     * @param MachineRepository $machineRepository
+     * @param ModService $modService
      */
-    protected function initializeRepositories(EntityManager $entityManager)
+    public function __construct(MachineRepository $machineRepository, ModService $modService)
     {
-        $this->machineRepository = $entityManager->getRepository(Machine::class);
-        return $this;
+        parent::__construct($modService);
+
+        $this->machineRepository = $machineRepository;
     }
 
     /**

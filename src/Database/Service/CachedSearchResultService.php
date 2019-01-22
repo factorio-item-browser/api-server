@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use DateTime;
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Entity\CachedSearchResult;
 use FactorioItemBrowser\Api\Database\Repository\CachedSearchResultRepository;
 use FactorioItemBrowser\Api\Server\Search\Result\AbstractResult;
@@ -47,28 +46,19 @@ class CachedSearchResultService extends AbstractModsAwareService
 
     /**
      * Initializes the service.
-     * @param EntityManager $entityManager
+     * @param CachedSearchResultRepository $cachedSearchResultRepository
      * @param ModService $modService
      * @param TranslationService $translationService
      */
     public function __construct(
-        EntityManager $entityManager,
+        CachedSearchResultRepository $cachedSearchResultRepository,
         ModService $modService,
         TranslationService $translationService
     ) {
-        parent::__construct($entityManager, $modService);
-        $this->translationService = $translationService;
-    }
+        parent::__construct($modService);
 
-    /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
-     */
-    protected function initializeRepositories(EntityManager $entityManager)
-    {
-        $this->cachedSearchResultRepository = $entityManager->getRepository(CachedSearchResult::class);
-        return $this;
+        $this->cachedSearchResultRepository = $cachedSearchResultRepository;
+        $this->translationService = $translationService;
     }
 
     /**
@@ -87,7 +77,7 @@ class CachedSearchResultService extends AbstractModsAwareService
         if ($cachedSearchResult instanceof CachedSearchResult) {
             $result = $this->createResultCollectionFromData($cachedSearchResult->getResultData());
             $cachedSearchResult->setLastSearchTime(new DateTime());
-            $this->entityManager->flush($cachedSearchResult);
+            $this->cachedSearchResultRepository->persist($cachedSearchResult);
         }
         return $result;
     }
@@ -117,8 +107,7 @@ class CachedSearchResultService extends AbstractModsAwareService
 
         $cachedSearchResult = new CachedSearchResult($this->buildSearchHash($searchQuery));
         $cachedSearchResult->setResultData($resultData);
-        $cachedSearchResult = $this->entityManager->merge($cachedSearchResult);
-        $this->entityManager->flush($cachedSearchResult);
+        $this->cachedSearchResultRepository->persist($cachedSearchResult);
 
         return $this->createResultCollectionFromData($resultData);
     }
@@ -130,11 +119,11 @@ class CachedSearchResultService extends AbstractModsAwareService
      */
     protected function buildSearchHash(SearchQuery $searchQuery): string
     {
-        return hash('crc32b', (string) json_encode([
+        return substr(hash('md5', (string) json_encode([
             'queryHash' => $searchQuery->getHash(),
             'enabledMods' => $this->modService->getEnabledModCombinationIds(),
-            'locale' => $this->translationService->getCurrentLocale()
-        ]));
+            'locale' => $this->translationService->getCurrentLocale(),
+        ])), 0, 16);
     }
 
     /**
@@ -167,12 +156,10 @@ class CachedSearchResultService extends AbstractModsAwareService
 
     /**
      * Cleans up the database table.
-     * @return $this
      */
-    public function cleanup()
+    public function cleanup(): void
     {
         $this->cachedSearchResultRepository->cleanup($this->getMaxAge());
-        return $this;
     }
 
     /**

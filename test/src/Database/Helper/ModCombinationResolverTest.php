@@ -34,12 +34,12 @@ class ModCombinationResolverTest extends TestCase
         $mod2 = new Mod('def');
         $mod2->setId(1337);
 
-        $modCombination1 = new ModCombination($mod1);
+        $modCombination1 = new ModCombination($mod1, 'abc');
         $modCombination1->setId(27);
-        $modCombination2 = new ModCombination($mod2);
+        $modCombination2 = new ModCombination($mod2, 'def');
         $modCombination2->setId(35)
                         ->setOptionalModIds([42]);
-        $modCombination3 = new ModCombination($mod2);
+        $modCombination3 = new ModCombination($mod2, 'ghi');
         $modCombination3->setId(42)
                         ->setOptionalModIds([21]);
 
