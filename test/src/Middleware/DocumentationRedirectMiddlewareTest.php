@@ -43,7 +43,7 @@ class DocumentationRedirectMiddlewareTest extends TestCase
      * @covers ::process
      * @dataProvider provideProcess
      */
-    public function testProcess(string $requestMethod, bool $expectRedirect)
+    public function testProcess(string $requestMethod, bool $expectRedirect): void
     {
         /* @var ServerRequest|MockObject $request */
         $request = $this->getMockBuilder(ServerRequest::class)

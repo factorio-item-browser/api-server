@@ -30,7 +30,7 @@ class ItemProductHandlerTest extends TestCase
      * Tests the fetchGroupedRecipeIds method.
      * @covers ::fetchGroupedRecipeIds
      */
-    public function testFetchGroupedRecipeIds()
+    public function testFetchGroupedRecipeIds(): void
     {
         $item = new Item('abc', 'def');
         $item->setId(42);

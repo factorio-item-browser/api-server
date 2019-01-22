@@ -89,7 +89,7 @@ class GenericIconHandler extends AbstractGenericHandler
             $result = false;
             foreach ($icon->getEntities() as $entity) {
                 if (isset($namesByTypes[$entity->getType()])
-                    && in_array($entity->getName(), $namesByTypes[$entity->getType()])
+                    && in_array($entity->getName(), $namesByTypes[$entity->getType()], true)
                 ) {
                     $result = true;
                     break;

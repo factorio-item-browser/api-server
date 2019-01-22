@@ -25,7 +25,7 @@ class MetaMiddlewareTest extends TestCase
      * @covers ::__construct
      * @covers ::process
      */
-    public function testProcess()
+    public function testProcess(): void
     {
         $version = '1.2.3';
 

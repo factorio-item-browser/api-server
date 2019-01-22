@@ -88,7 +88,7 @@ class SearchDecorator
         }
 
         if (count($groupedRecipeIds) > 0) {
-            $allRecipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
+            $allRecipeIds = call_user_func_array('array_merge', array_values($groupedRecipeIds));
         } else {
             $allRecipeIds = [];
         }

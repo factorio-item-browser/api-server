@@ -23,9 +23,15 @@ class MetaMiddlewareFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
-        $config['factorio-item-browser']['api-server']['version'] = '1.2.3';
+        $config = [
+            'factorio-item-browser' => [
+                'api-server' => [
+                    'version' => '1.2.3',
+                ],
+            ],
+        ];
 
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -37,7 +43,6 @@ class MetaMiddlewareFactoryTest extends TestCase
                   ->willReturn($config);
 
         $factory = new MetaMiddlewareFactory();
-        $result = $factory($container, MetaMiddleware::class);
-        $this->assertInstanceOf(MetaMiddleware::class, $result);
+        $factory($container, MetaMiddleware::class);
     }
 }

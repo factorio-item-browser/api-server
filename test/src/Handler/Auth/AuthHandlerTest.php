@@ -29,7 +29,7 @@ class AuthHandlerTest extends TestCase
      * Tests the constructing.
      * @covers ::__construct
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
         $authorizationKey = 'abc';
         $agents = ['def' => 'ghi'];
@@ -46,7 +46,7 @@ class AuthHandlerTest extends TestCase
      * Tests the createInputFilter method.
      * @covers ::createInputFilter
      */
-    public function testCreateInputFilter()
+    public function testCreateInputFilter(): void
     {
         $expectedFilters = [
             'agent',
@@ -158,7 +158,7 @@ class AuthHandlerTest extends TestCase
         bool $expectException,
         array $expectedEnabledModNames,
         string $expectedAgent
-    ) {
+    ): void {
         if ($expectException) {
             $this->expectException(ApiServerException::class);
             $this->expectExceptionCode(403);
@@ -199,7 +199,7 @@ class AuthHandlerTest extends TestCase
      * Tests the createToken method.
      * @covers ::createToken
      */
-    public function testCreateToken()
+    public function testCreateToken(): void
     {
         $agent = 'abc';
         $enabledModCombinationIds = [42, 1337];

@@ -28,7 +28,7 @@ class AbstractGenericHandlerTest extends TestCase
      * Tests the createInputFilter method.
      * @covers ::createInputFilter
      */
-    public function testCreateInputFilter()
+    public function testCreateInputFilter(): void
     {
         $expectedEntitiesFilters = [
             'type',
@@ -57,7 +57,7 @@ class AbstractGenericHandlerTest extends TestCase
      * Tests the getEntityNamesByType method.
      * @covers ::getEntityNamesByType
      */
-    public function testGetEntityNamesByType()
+    public function testGetEntityNamesByType(): void
     {
         $requestData = new DataContainer([
             'entities' => [

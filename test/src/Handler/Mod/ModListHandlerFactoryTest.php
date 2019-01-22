@@ -26,7 +26,7 @@ class ModListHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -46,7 +46,6 @@ class ModListHandlerFactoryTest extends TestCase
                   );
 
         $factory = new ModListHandlerFactory();
-        $result = $factory($container, ModListHandler::class);
-        $this->assertInstanceOf(ModListHandler::class, $result);
+        $factory($container, ModListHandler::class);
     }
 }

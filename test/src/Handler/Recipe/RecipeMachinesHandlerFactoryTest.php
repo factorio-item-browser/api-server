@@ -27,7 +27,7 @@ class RecipeMachinesHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -49,7 +49,6 @@ class RecipeMachinesHandlerFactoryTest extends TestCase
                   );
 
         $factory = new RecipeMachinesHandlerFactory();
-        $result = $factory($container, RecipeMachinesHandler::class);
-        $this->assertInstanceOf(RecipeMachinesHandler::class, $result);
+        $factory($container, RecipeMachinesHandler::class);
     }
 }

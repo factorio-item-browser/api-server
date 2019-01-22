@@ -24,7 +24,7 @@ class CleanupMiddlewareFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -36,7 +36,6 @@ class CleanupMiddlewareFactoryTest extends TestCase
                   ->willReturn($this->createMock(CachedSearchResultService::class));
 
         $factory = new CleanupMiddlewareFactory();
-        $result = $factory($container, CleanupMiddleware::class);
-        $this->assertInstanceOf(CleanupMiddleware::class, $result);
+        $factory($container, CleanupMiddleware::class);
     }
 }

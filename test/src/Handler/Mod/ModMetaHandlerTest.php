@@ -27,7 +27,7 @@ class ModMetaHandlerTest extends TestCase
      * Tests the createInputFilter method.
      * @covers ::createInputFilter
      */
-    public function testCreateInputFilter()
+    public function testCreateInputFilter(): void
     {
         /* @var ModService $modService */
         $modService = $this->createMock(ModService::class);
@@ -42,7 +42,7 @@ class ModMetaHandlerTest extends TestCase
      * @covers ::__construct
      * @covers ::handleRequest
      */
-    public function testHandleRequest()
+    public function testHandleRequest(): void
     {
         $requestData = new DataContainer([]);
         $expectedResult = [

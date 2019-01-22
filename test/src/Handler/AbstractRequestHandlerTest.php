@@ -45,7 +45,7 @@ class AbstractRequestHandlerTest extends TestCase
      * @covers ::handle
      * @dataProvider provideProcess
      */
-    public function testHandle(bool $isValid, bool $expectException)
+    public function testHandle(bool $isValid, bool $expectException): void
     {
         if ($expectException) {
             $this->expectException(ApiServerException::class);
@@ -115,7 +115,7 @@ class AbstractRequestHandlerTest extends TestCase
      * Tests the convertDataToArray method.
      * @covers ::convertDataToArray
      */
-    public function testConvertDataToArray()
+    public function testConvertDataToArray(): void
     {
         /* @var EntityInterface|MockObject $entity */
         $entity = $this->getMockBuilder(EntityInterface::class)

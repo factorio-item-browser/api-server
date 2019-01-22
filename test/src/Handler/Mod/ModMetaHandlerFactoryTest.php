@@ -24,7 +24,7 @@ class ModMetaHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -36,7 +36,6 @@ class ModMetaHandlerFactoryTest extends TestCase
                   ->willReturn($this->createMock(ModService::class));
 
         $factory = new ModMetaHandlerFactory();
-        $result = $factory($container, ModMetaHandler::class);
-        $this->assertInstanceOf(ModMetaHandler::class, $result);
+        $factory($container, ModMetaHandler::class);
     }
 }

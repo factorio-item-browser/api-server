@@ -41,7 +41,7 @@ class AcceptLanguageMiddlewareTest extends TestCase
      * @covers ::process
      * @dataProvider provideProcess
      */
-    public function testProcess(string $headerLine, ?string $expectedLocale)
+    public function testProcess(string $headerLine, ?string $expectedLocale): void
     {
         /* @var ServerRequest|MockObject $request */
         $request = $this->getMockBuilder(ServerRequest::class)

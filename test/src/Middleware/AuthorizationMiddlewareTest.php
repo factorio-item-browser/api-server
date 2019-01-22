@@ -63,7 +63,7 @@ class AuthorizationMiddlewareTest extends TestCase
         string $expectedExceptionMessage,
         ?array $expectedModCombinationIds,
         ?string $expectedAgent
-    ) {
+    ): void {
         if (strlen($expectedExceptionMessage) > 0) {
             $this->expectException(ApiServerException::class);
             $this->expectExceptionCode(401);

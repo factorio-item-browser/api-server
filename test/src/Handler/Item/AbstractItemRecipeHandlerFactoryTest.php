@@ -43,7 +43,7 @@ class AbstractItemRecipeHandlerFactoryTest extends TestCase
      * @covers ::__invoke
      * @dataProvider provideInvoke
      */
-    public function testInvoke(string $className)
+    public function testInvoke(string $className): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -67,7 +67,6 @@ class AbstractItemRecipeHandlerFactoryTest extends TestCase
                   );
 
         $factory = new AbstractItemRecipeHandlerFactory();
-        $result = $factory($container, $className);
-        $this->assertInstanceOf($className, $result);
+        $factory($container, $className);
     }
 }

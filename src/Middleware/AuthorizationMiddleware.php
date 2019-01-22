@@ -62,7 +62,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!in_array($request->getRequestTarget(), self::WHITELISTED_ROUTES)) {
+        if (!in_array($request->getRequestTarget(), self::WHITELISTED_ROUTES, true)) {
             $authorization = $request->getHeaderLine('Authorization');
             if (substr($authorization, 0, 7) !== 'Bearer ') {
                 throw new ApiServerException('Authorization token is missing.', 401);

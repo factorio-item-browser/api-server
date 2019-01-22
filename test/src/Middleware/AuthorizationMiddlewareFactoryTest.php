@@ -24,9 +24,17 @@ class AuthorizationMiddlewareFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
-        $config['factorio-item-browser']['api-server']['authorization']['key'] = 'abc';
+        $config = [
+            'factorio-item-browser' => [
+                'api-server' => [
+                    'authorization' => [
+                        'key' => 'abc',
+                    ],
+                ],
+            ],
+        ];
 
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -44,7 +52,6 @@ class AuthorizationMiddlewareFactoryTest extends TestCase
                   );
 
         $factory = new AuthorizationMiddlewareFactory();
-        $result = $factory($container, AuthorizationMiddleware::class);
-        $this->assertInstanceOf(AuthorizationMiddleware::class, $result);
+        $factory($container, AuthorizationMiddleware::class);
     }
 }

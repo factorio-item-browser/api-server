@@ -27,7 +27,7 @@ class GenericDetailsHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -49,7 +49,6 @@ class GenericDetailsHandlerFactoryTest extends TestCase
                   );
 
         $factory = new GenericDetailsHandlerFactory();
-        $result = $factory($container, GenericDetailsHandler::class);
-        $this->assertInstanceOf(GenericDetailsHandler::class, $result);
+        $factory($container, GenericDetailsHandler::class);
     }
 }

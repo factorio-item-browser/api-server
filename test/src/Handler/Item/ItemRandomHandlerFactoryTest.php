@@ -28,7 +28,7 @@ class ItemRandomHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -52,7 +52,6 @@ class ItemRandomHandlerFactoryTest extends TestCase
                   );
 
         $factory = new ItemRandomHandlerFactory();
-        $result = $factory($container, ItemRandomHandler::class);
-        $this->assertInstanceOf(ItemRandomHandler::class, $result);
+        $factory($container, ItemRandomHandler::class);
     }
 }

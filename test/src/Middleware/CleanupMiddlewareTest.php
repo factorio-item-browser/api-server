@@ -44,7 +44,7 @@ class CleanupMiddlewareTest extends TestCase
      * @covers ::process
      * @dataProvider provideProcess
      */
-    public function testProcess(int $randomNumber, bool $expectCleanup)
+    public function testProcess(int $randomNumber, bool $expectCleanup): void
     {
         /* @var CachedSearchResultService|MockObject $cachedSearchResultService */
         $cachedSearchResultService = $this->getMockBuilder(CachedSearchResultService::class)
@@ -85,13 +85,13 @@ class CleanupMiddlewareTest extends TestCase
      * Tests the getRandomNumber method.
      * @covers ::getRandomNumber
      */
-    public function testGetRandomNumber()
+    public function testGetRandomNumber(): void
     {
         /* @var CachedSearchResultService $cachedSearchResultService */
         $cachedSearchResultService = $this->createMock(CachedSearchResultService::class);
 
         $middleware = new CleanupMiddleware($cachedSearchResultService);
         $result = $this->invokeMethod($middleware, 'getRandomNumber', 1000);
-        $this->assertInternalType('int', $result);
+        $this->assertIsInt($result);
     }
 }

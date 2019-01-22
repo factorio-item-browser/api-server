@@ -24,7 +24,7 @@ class GenericIconHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -36,7 +36,6 @@ class GenericIconHandlerFactoryTest extends TestCase
                   ->willReturn($this->createMock(IconService::class));
 
         $factory = new GenericIconHandlerFactory();
-        $result = $factory($container, GenericIconHandler::class);
-        $this->assertInstanceOf(GenericIconHandler::class, $result);
+        $factory($container, GenericIconHandler::class);
     }
 }

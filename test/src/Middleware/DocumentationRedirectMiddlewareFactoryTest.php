@@ -24,7 +24,7 @@ class DocumentationRedirectMiddlewareFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -36,7 +36,6 @@ class DocumentationRedirectMiddlewareFactoryTest extends TestCase
                   ->willReturn($this->createMock(BasePathHelper::class));
 
         $factory = new DocumentationRedirectMiddlewareFactory();
-        $result = $factory($container, DocumentationRedirectMiddleware::class);
-        $this->assertInstanceOf(DocumentationRedirectMiddleware::class, $result);
+        $factory($container, DocumentationRedirectMiddleware::class);
     }
 }

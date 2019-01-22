@@ -27,7 +27,7 @@ class ModDependencyResolverTest extends TestCase
      * @covers ::resolve
      * @covers ::<protected>
      */
-    public function testResolve()
+    public function testResolve(): void
     {
         $modNames = ['abc', 'def'];
 

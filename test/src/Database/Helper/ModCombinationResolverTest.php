@@ -26,7 +26,7 @@ class ModCombinationResolverTest extends TestCase
      * @covers ::resolve
      * @covers ::<protected>
      */
-    public function testResolve()
+    public function testResolve(): void
     {
         $modNames = ['abc', 'def'];
         $mod1 = new Mod('abc');

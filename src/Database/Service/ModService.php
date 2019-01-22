@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use Doctrine\ORM\EntityManager;
 use FactorioItemBrowser\Api\Database\Entity\Mod;
-use FactorioItemBrowser\Api\Database\Entity\ModCombination;
 use FactorioItemBrowser\Api\Database\Repository\ModCombinationRepository;
 use FactorioItemBrowser\Api\Database\Repository\ModRepository;
 use FactorioItemBrowser\Api\Server\Database\Helper\ModCombinationResolver;
@@ -47,18 +45,6 @@ class ModService
     {
         $this->modRepository = $modRepository;
         $this->modCombinationRepository = $modCombinationRepository;
-    }
-
-    /**
-     * Initializes the repositories needed by the service.
-     * @param EntityManager $entityManager
-     * @return $this
-     */
-    protected function initializeRepositories(EntityManager $entityManager)
-    {
-        $this->modRepository = $entityManager->getRepository(Mod::class);
-        $this->modCombinationRepository = $entityManager->getRepository(ModCombination::class);
-        return $this;
     }
 
     /**

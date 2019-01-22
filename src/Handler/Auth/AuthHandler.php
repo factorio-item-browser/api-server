@@ -100,7 +100,7 @@ class AuthHandler extends AbstractRequestHandler
         $agent = $requestData->getString('agent');
         $accessKey = $requestData->getString('accessKey');
         $agentConfig = $this->agents[$agent] ?? [];
-        if (empty($agentConfig) || !isset($agentConfig['accessKey']) || $agentConfig['accessKey'] !== $accessKey) {
+        if (!is_array($agentConfig) || !isset($agentConfig['accessKey']) || $agentConfig['accessKey'] !== $accessKey) {
             throw new ApiServerException('Invalid agent or access key.', 403);
         }
 

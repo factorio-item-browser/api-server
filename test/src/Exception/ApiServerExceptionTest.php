@@ -21,7 +21,7 @@ class ApiServerExceptionTest extends TestCase
      * @covers ::addParameter
      * @covers ::getParameters
      */
-    public function testAddAndGetParameters()
+    public function testAddAndGetParameters(): void
     {
         $exception = new ApiServerException();
         $this->assertSame([], $exception->getParameters());

@@ -71,7 +71,7 @@ class ModListHandler extends AbstractRequestHandler
         $mods = [];
         foreach ($this->modService->getAllMods() as $databaseMod) {
             $clientMod = $this->modMapper->mapMod($databaseMod, new ClientMod());
-            $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames));
+            $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames, true));
             $mods[] = $clientMod;
         }
 

@@ -100,7 +100,7 @@ class ErrorResponseGeneratorTest extends TestCase
         $expectedLog,
         array $expectedPayload,
         int $expectedStatusCode
-    ) {
+    ): void {
         /* @var ServerRequest $request */
         $request = $this->createMock(ServerRequest::class);
 

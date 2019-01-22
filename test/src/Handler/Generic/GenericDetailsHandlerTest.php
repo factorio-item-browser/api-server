@@ -31,7 +31,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the constructing.
      * @covers ::__construct
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
         /* @var ItemService $itemService */
         $itemService = $this->createMock(ItemService::class);
@@ -53,7 +53,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the handleRequest method.
      * @covers ::handleRequest
      */
-    public function testHandleRequest()
+    public function testHandleRequest(): void
     {
         $entity1 = new GenericEntity();
         $entity2 = new GenericEntity();
@@ -125,7 +125,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the handleRecipes method.
      * @covers ::handleRecipes
      */
-    public function testHandleRecipes()
+    public function testHandleRecipes(): void
     {
         $recipeNames = ['abc', 'def', 'ghi'];
         $availableRecipeNames = ['def', 'ghi'];
@@ -174,7 +174,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the handleMachines method.
      * @covers ::handleMachines
      */
-    public function testHandleMachines()
+    public function testHandleMachines(): void
     {
         $machineNames = ['abc', 'def', 'ghi'];
         $availableMachineNames = ['def', 'ghi'];
@@ -223,7 +223,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the handleItems method.
      * @covers ::handleItems
      */
-    public function testHandleItems()
+    public function testHandleItems(): void
     {
         $itemNamesByType = ['abc', 'def', 'ghi'];
         $availableItemNamesByTypes = ['abc' => ['def', 'ghi'], 'jkl' => ['mno']];
@@ -275,7 +275,7 @@ class GenericDetailsHandlerTest extends TestCase
      * Tests the createGenericEntity method.
      * @covers ::createGenericEntity
      */
-    public function testCreateGenericEntity()
+    public function testCreateGenericEntity(): void
     {
         $type = 'abc';
         $name = 'def';

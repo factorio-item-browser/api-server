@@ -27,7 +27,7 @@ class SearchQueryHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -49,7 +49,6 @@ class SearchQueryHandlerFactoryTest extends TestCase
                   );
 
         $factory = new SearchQueryHandlerFactory();
-        $result = $factory($container, SearchQueryHandler::class);
-        $this->assertInstanceOf(SearchQueryHandler::class, $result);
+        $factory($container, SearchQueryHandler::class);
     }
 }

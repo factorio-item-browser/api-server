@@ -24,11 +24,17 @@ class AuthHandlerFactoryTest extends TestCase
      * Tests the invoking.
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
-        $config['factorio-item-browser']['api-server']['authorization'] = [
-            'key' => 'abc',
-            'agents' => ['def' => 'ghi']
+        $config = [
+            'factorio-item-browser' => [
+                'api-server' => [
+                    'authorization' => [
+                        'key' => 'abc',
+                        'agents' => ['def' => 'ghi'],
+                    ],
+                ],
+            ],
         ];
 
         /* @var ContainerInterface|MockObject $container */
@@ -47,7 +53,6 @@ class AuthHandlerFactoryTest extends TestCase
                   );
 
         $factory = new AuthHandlerFactory();
-        $result = $factory($container, AuthHandler::class);
-        $this->assertInstanceOf(AuthHandler::class, $result);
+        $factory($container, AuthHandler::class);
     }
 }

@@ -22,7 +22,7 @@ class NotFoundHandlerTest extends TestCase
      * Tests the handle method.
      * @covers ::handle
      */
-    public function testHandle()
+    public function testHandle(): void
     {
         $this->expectException(ApiServerException::class);
         $this->expectExceptionCode(404);

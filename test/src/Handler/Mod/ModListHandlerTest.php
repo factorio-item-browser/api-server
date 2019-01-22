@@ -31,7 +31,7 @@ class ModListHandlerTest extends TestCase
      * Tests the createInputFilter method.
      * @covers ::createInputFilter
      */
-    public function testCreateInputFilter()
+    public function testCreateInputFilter(): void
     {
         /* @var ModMapper $modMapper */
         $modMapper = $this->createMock(ModMapper::class);
@@ -50,7 +50,7 @@ class ModListHandlerTest extends TestCase
      * @covers ::__construct
      * @covers ::handleRequest
      */
-    public function testHandleRequest()
+    public function testHandleRequest(): void
     {
         $requestData = new DataContainer([]);
         $enabledModNames = ['abc'];

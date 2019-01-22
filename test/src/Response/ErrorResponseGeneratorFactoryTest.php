@@ -42,7 +42,7 @@ class ErrorResponseGeneratorFactoryTest extends TestCase
      * @covers ::__invoke
      * @dataProvider provideInvoke
      */
-    public function testInvoke(bool $resultHas, $logger)
+    public function testInvoke(bool $resultHas, $logger): void
     {
         /* @var ContainerInterface|MockObject $container */
         $container = $this->getMockBuilder(ContainerInterface::class)
@@ -60,7 +60,6 @@ class ErrorResponseGeneratorFactoryTest extends TestCase
 
         $factory = new ErrorResponseGeneratorFactory();
         $result = $factory($container, ErrorResponseGenerator::class);
-        $this->assertInstanceOf(ErrorResponseGenerator::class, $result);
         $this->assertSame($logger, $this->extractProperty($result, 'logger'));
     }
 }

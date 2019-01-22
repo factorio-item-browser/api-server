@@ -22,7 +22,7 @@ class ValidationExceptionTest extends TestCase
      * @covers ::__construct
      * @covers ::processValidatorMessages
      */
-    public function testProcessValidatorMessages()
+    public function testProcessValidatorMessages(): void
     {
         $previous = new Exception('foo');
         $validatorMessages = [
