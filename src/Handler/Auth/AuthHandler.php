@@ -6,9 +6,11 @@ namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
@@ -23,16 +25,16 @@ use Zend\Validator\NotEmpty;
 class AuthHandler extends AbstractRequestHandler
 {
     /**
+     * The agent service.
+     * @var AgentService
+     */
+    protected $agentService;
+
+    /**
      * The authorization service.
      * @var AuthorizationService
      */
     protected $authorizationService;
-
-    /**
-     * The agents of the API.
-     * @var array
-     */
-    protected $agents;
 
     /**
      * The database mod service.
@@ -42,14 +44,17 @@ class AuthHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
+     * @param AgentService $agentService
      * @param AuthorizationService $authorizationService
-     * @param array $agents
      * @param ModService $modService
      */
-    public function __construct(AuthorizationService $authorizationService, array $agents, ModService $modService)
-    {
+    public function __construct(
+        AgentService $agentService,
+        AuthorizationService $authorizationService,
+        ModService $modService
+    ) {
         $this->authorizationService = $authorizationService;
-        $this->agents = $agents;
+        $this->agentService = $agentService;
         $this->modService = $modService;
     }
 
@@ -65,24 +70,25 @@ class AuthHandler extends AbstractRequestHandler
                 'name' => 'agent',
                 'required' => true,
                 'validators' => [
-                    new NotEmpty()
-                ]
+                    new NotEmpty(),
+                ],
             ])
             ->add([
                 'name' => 'accessKey',
                 'required' => true,
                 'validators' => [
-                    new NotEmpty()
-                ]
+                    new NotEmpty(),
+                ],
             ])
             ->add([
                 'type' => ArrayInput::class,
                 'name' => 'enabledModNames',
                 'required' => true,
                 'validators' => [
-                    new NotEmpty()
-                ]
+                    new NotEmpty(),
+                ],
             ]);
+
         return $inputFilter;
     }
 
@@ -94,22 +100,44 @@ class AuthHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $agent = $requestData->getString('agent');
-        $accessKey = $requestData->getString('accessKey');
-        $agentConfig = $this->agents[$agent] ?? [];
-        if (!is_array($agentConfig) || !isset($agentConfig['accessKey']) || $agentConfig['accessKey'] !== $accessKey) {
-            throw new ApiServerException('Invalid agent or access key.', 403);
-        }
-
-        $enabledModNames = ($agentConfig['isDemo'] ?? false) ? ['base'] : $requestData->getArray('enabledModNames');
-        $this->modService->setEnabledCombinationsByModNames($enabledModNames);
-
-        $token = new AuthorizationToken();
-        $token->setAgent($agent)
-              ->setEnabledModCombinationIds($this->modService->getEnabledModCombinationIds());
+        $agent = $this->getAgentFromRequestData($requestData);
+        $enabledModCombinationIds = $this->getEnabledModCombinationIdsFromRequestData($agent, $requestData);
+        $token = $this->authorizationService->createToken($agent, $enabledModCombinationIds);
 
         return [
-            'authorizationToken' => $this->authorizationService->serializeToken($token)
+            'authorizationToken' => $this->authorizationService->serializeToken($token),
         ];
+    }
+
+    /**
+     * Returns the agent from the request data.
+     * @param DataContainer $requestData
+     * @return Agent
+     * @throws ApiServerException
+     */
+    protected function getAgentFromRequestData(DataContainer $requestData): Agent
+    {
+        $result = $this->agentService->getByAccessKey(
+            $requestData->getString('agent'),
+            $requestData->getString('accessKey')
+        );
+        if ($result === null) {
+            throw new UnknownAgentException();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the enabled mod combination ids from the specified request.
+     * @param Agent $agent
+     * @param DataContainer $requestData
+     * @return array|int[]
+     */
+    protected function getEnabledModCombinationIdsFromRequestData(Agent $agent, DataContainer $requestData): array
+    {
+        $enabledModNames = $agent->getIsDemo() ? ['base'] : $requestData->getArray('enabledModNames');
+        $this->modService->setEnabledCombinationsByModNames($enabledModNames);
+        return $this->modService->getEnabledModCombinationIds();
     }
 }

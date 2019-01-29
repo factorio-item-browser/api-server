@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use Exception;
+use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
 use Firebase\JWT\JWT;
@@ -44,6 +45,20 @@ class AuthorizationService
     }
 
     /**
+     * Creates an authorization token with the specified values.
+     * @param Agent $agent
+     * @param array $enabledModCombinationIds
+     * @return AuthorizationToken
+     */
+    public function createToken(Agent $agent, array $enabledModCombinationIds): AuthorizationToken
+    {
+        $result = new AuthorizationToken();
+        $result->setAgentName($agent->getName())
+               ->setEnabledModCombinationIds($enabledModCombinationIds);
+        return $result;
+    }
+
+    /**
      * Encrypts the specified token.
      * @param AuthorizationToken $token
      * @return string
@@ -66,7 +81,7 @@ class AuthorizationService
     {
         return [
             'exp' => time() + self::AUTH_TOKEN_LIFETIME,
-            'agt' => $token->getAgent(),
+            'agt' => $token->getAgentName(),
             'mds' => $token->getEnabledModCombinationIds(),
         ];
     }
@@ -82,7 +97,7 @@ class AuthorizationService
         $rawToken = $this->decodeSerializedToken($serializedToken);
 
         $result = new AuthorizationToken();
-        $result->setAgent((string) ($rawToken->agt ?? ''))
+        $result->setAgentName((string) ($rawToken->agt ?? ''))
                ->setEnabledModCombinationIds(array_map('intval', $rawToken->mds ?? []));
 
         return $result;

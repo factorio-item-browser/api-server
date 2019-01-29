@@ -13,10 +13,10 @@ namespace FactorioItemBrowser\Api\Server\Entity;
 class AuthorizationToken
 {
     /**
-     * The agent for which the token was issued.
+     * The name of the agent for which the token was issued.
      * @var string
      */
-    protected $agent = '';
+    protected $agentName = '';
 
     /**
      * The ids of the enabled mod combinations of the token.
@@ -25,23 +25,23 @@ class AuthorizationToken
     protected $enabledModCombinationIds = [];
 
     /**
-     * Sets the agent for which the token was issued.
-     * @param string $agent
+     * Sets the name of the agent for which the token was issued.
+     * @param string $agentName
      * @return $this
      */
-    public function setAgent(string $agent): self
+    public function setAgentName(string $agentName): self
     {
-        $this->agent = $agent;
+        $this->agentName = $agentName;
         return $this;
     }
 
     /**
-     * Returns the agent for which the token was issued.
+     * Returns the name of the agent for which the token was issued.
      * @return string
      */
-    public function getAgent(): string
+    public function getAgentName(): string
     {
-        return $this->agent;
+        return $this->agentName;
     }
 
     /**

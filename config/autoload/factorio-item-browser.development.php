@@ -16,12 +16,12 @@ return [
         'api-server' => [
             'authorization' => [
                 'key' => 'factorio-item-browser',
-                'agents' => [
-                    'debug' => [
-                        'accessKey' => 'factorio-item-browser'
-                    ]
-                ]
             ],
-        ]
-    ]
+            'agents' => [
+                'debug' => [
+                    'access-key' => 'factorio-item-browser',
+                ],
+            ],
+        ],
+    ],
 ];

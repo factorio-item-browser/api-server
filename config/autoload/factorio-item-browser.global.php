@@ -16,17 +16,17 @@ return [
         'api-server' => [
             'authorization' => [
                 'key' => 'factorio-item-browser',
-                'agents' => [
-                    'demo' => [
-                        'accessKey' => 'factorio-item-browser',
-                        'isDemo' => true
-                    ]
-                ]
+            ],
+            'agents' => [
+                'demo' => [
+                    'access-key' => 'factorio-item-browser',
+                    'demo' => true,
+                ],
             ],
             'version' => '1.1.0'
         ],
         'export-data' => [
-            'directory' => __DIR__ . '/../../data/export'
-        ]
-    ]
+            'directory' => __DIR__ . '/../../data/export',
+        ],
+    ],
 ];

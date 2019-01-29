@@ -80,7 +80,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $token = $this->authorizationService->deserializeToken($serializedToken);
 
         $this->modService->setEnabledModCombinationIds($token->getEnabledModCombinationIds());
-        $request = $request->withAttribute('agent', $token->getAgent());
+        $request = $request->withAttribute('agent', $token->getAgentName());
         return $request;
     }
 

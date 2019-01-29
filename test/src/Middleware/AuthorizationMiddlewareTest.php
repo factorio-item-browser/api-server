@@ -92,9 +92,12 @@ class AuthorizationMiddlewareTest extends TestCase
     public function testReadAuthorizationFromRequest(): void
     {
         $header = 'abc';
-        $agent = 'def';
+        $agentName = 'def';
         $enabledModCombinationIds = [42, 1337];
         $serializedToken = 'ghi';
+        $token = new AuthorizationToken();
+        $token->setAgentName($agentName)
+              ->setEnabledModCombinationIds($enabledModCombinationIds);
 
         /* @var ServerRequestInterface|MockObject $modifiedRequest */
         $modifiedRequest = $this->createMock(ServerRequestInterface::class);
@@ -107,17 +110,8 @@ class AuthorizationMiddlewareTest extends TestCase
                 ->willReturn($header);
         $request->expects($this->once())
                 ->method('withAttribute')
-                ->with($this->identicalTo('agent'), $this->identicalTo($agent))
+                ->with($this->identicalTo('agent'), $this->identicalTo($agentName))
                 ->willReturn($modifiedRequest);
-
-        /* @var AuthorizationToken|MockObject $token */
-        $token = $this->createMock(AuthorizationToken::class);
-        $token->expects($this->once())
-              ->method('getEnabledModCombinationIds')
-              ->willReturn($enabledModCombinationIds);
-        $token->expects($this->once())
-              ->method('getAgent')
-              ->willReturn($agent);
 
         /* @var AuthorizationService|MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);

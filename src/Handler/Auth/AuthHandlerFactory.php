@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -26,14 +27,13 @@ class AuthHandlerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $container->get('config');
-        $authorizationConfig = $config['factorio-item-browser']['api-server']['authorization'];
-
+        /* @var AgentService $agentService */
+        $agentService = $container->get(AgentService::class);
         /* @var AuthorizationService $authorizationService */
         $authorizationService = $container->get(AuthorizationService::class);
         /* @var ModService $modService */
         $modService = $container->get(ModService::class);
 
-        return new AuthHandler($authorizationService, $authorizationConfig['agents'], $modService);
+        return new AuthHandler($agentService, $authorizationService, $modService);
     }
 }

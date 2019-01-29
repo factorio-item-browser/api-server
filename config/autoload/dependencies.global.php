@@ -60,6 +60,7 @@ return [
             Search\Handler\TranslationHandler::class => Search\Handler\TranslationHandlerFactory::class,
             Search\SearchDecorator::class => Search\SearchDecoratorFactory::class,
 
+            Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => Service\AuthorizationServiceFactory::class,
 
             // Dependencies of other libraries

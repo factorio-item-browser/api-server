@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
@@ -39,13 +40,33 @@ class AuthorizationServiceTest extends TestCase
     }
 
     /**
+     * Tests the createToken method.
+     * @covers ::createToken
+     */
+    public function testCreateToken(): void
+    {
+        $agent = new Agent();
+        $agent->setName('abc');
+        $enabledModCombinationIds = [42, 1337];
+
+        $expectedResult = new AuthorizationToken();
+        $expectedResult->setAgentName('abc')
+                       ->setEnabledModCombinationIds([42, 1337]);
+
+        $service = new AuthorizationService('foo');
+        $result = $service->createToken($agent, $enabledModCombinationIds);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
      * Tests the serializeToken method.
      * @covers ::serializeToken
      */
     public function testSerializeToken(): void
     {
         $authorizationKey = 'abc';
-        $token = (new AuthorizationToken())->setAgent('def');
+        $token = (new AuthorizationToken())->setAgentName('def');
         $tokenData = [
             'exp' => 2147483647,
             'agt' => 'def',
@@ -79,7 +100,7 @@ class AuthorizationServiceTest extends TestCase
         $enabledModCombinationIds = [42, 1337];
 
         $token = new AuthorizationToken();
-        $token->setAgent($agent)
+        $token->setAgentName($agent)
               ->setEnabledModCombinationIds($enabledModCombinationIds);
 
         $service = new AuthorizationService('foo');
@@ -103,7 +124,7 @@ class AuthorizationServiceTest extends TestCase
         $token1 = (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => [42, 1337]];
         $token2 = (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => ['42', '1337']];
         $expectedToken = new AuthorizationToken();
-        $expectedToken->setAgent('def')
+        $expectedToken->setAgentName('def')
                       ->setEnabledModCombinationIds([42, 1337]);
 
         return [
