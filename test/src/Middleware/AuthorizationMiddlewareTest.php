@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
+use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
 use FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddleware;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the AuthorizationMiddleware class.
@@ -22,95 +27,163 @@ use Zend\Diactoros\ServerRequest;
  */
 class AuthorizationMiddlewareTest extends TestCase
 {
+    use ReflectionTrait;
+
     /**
      * Provides the data for the process test.
      * @return array
      */
     public function provideProcess(): array
     {
-        $validHeader = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0Nywi'
-            . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN119.uq1IPDEuqkQzOFqsTGDtNK7D6Cd8sb3eMR-j_BkTlPw';
-
-        $invalidHeader1 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MTIzNDU2Nzg5MCwi'
-            . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.2_ziraMpcLhYMCLpX5OQm75V6KQdnAmqJbNwgYz4VJM';
-        // Invalid signature
-        $invalidHeader2 = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MjE0NzQ4MzY0Nywi'
-            . 'YWd0IjoiYWJjIiwibWRzIjpbNDIsMTMzN10sImltcCI6MX0.qfIlOQ_rNfSqmBeTpkI7gbof4PTdO1kVzGuLnFDFudA';
-
         return [
-            ['/auth', null, '', null, null],
-            ['/wuppdi', $validHeader, '', [42, 1337], 'abc'],
-            ['/wuppdi', $invalidHeader1, 'Authorization token is invalid.', null, null],
-            ['/wuppdi', $invalidHeader2, 'Authorization token is invalid.', null, null],
-            ['/wuppdi', 'FAIL', 'Authorization token is missing.', null, null],
+            ['/abc', true, false],
+            ['/auth', false, true],
         ];
     }
 
     /**
      * Tests the process method.
      * @param string $requestTarget
-     * @param null|string $authorizationHeader
-     * @param string $expectedExceptionMessage
-     * @param array|null $expectedModCombinationIds
-     * @param null|string $expectedAgent
-     * @covers ::__construct
+     * @param bool $expectRead
+     * @param bool $expectInitialRequest
+     * @throws ApiServerException
      * @covers ::process
      * @dataProvider provideProcess
      */
-    public function testProcess(
-        string $requestTarget,
-        ?string $authorizationHeader,
-        string $expectedExceptionMessage,
-        ?array $expectedModCombinationIds,
-        ?string $expectedAgent
-    ): void {
-        if (strlen($expectedExceptionMessage) > 0) {
-            $this->expectException(ApiServerException::class);
-            $this->expectExceptionCode(401);
-            $this->expectExceptionMessage($expectedExceptionMessage);
-        }
-
-        $authorizationKey = 'foo';
-
-        /* @var ModService|MockObject $modService */
-        $modService = $this->getMockBuilder(ModService::class)
-                           ->setMethods(['setEnabledModCombinationIds'])
-                           ->disableOriginalConstructor()
-                           ->getMock();
-        $modService->expects($expectedModCombinationIds === null ? $this->never() : $this->once())
-                   ->method('setEnabledModCombinationIds')
-                   ->with($expectedModCombinationIds);
-
-        /* @var ServerRequest|MockObject $request */
-        $request = $this->getMockBuilder(ServerRequest::class)
-                        ->setMethods(['getRequestTarget', 'getHeaderLine', 'withAttribute'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
+    public function testProcess(string $requestTarget, bool $expectRead, bool $expectInitialRequest): void
+    {
+        /* @var ServerRequestInterface|MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getRequestTarget')
                 ->willReturn($requestTarget);
-        $request->expects($authorizationHeader === null ? $this->never() : $this->once())
-                ->method('getHeaderLine')
-                ->with('Authorization')
-                ->willReturn($authorizationHeader);
-        $request->expects($expectedAgent === null ? $this->never() : $this->once())
-                ->method('withAttribute')
-                ->with('agent', $expectedAgent)
-                ->willReturnSelf();
 
-        /* @var Response $response */
-        $response = $this->createMock(Response::class);
+        /* @var ServerRequestInterface|MockObject $modifiedRequest */
+        $modifiedRequest = $this->createMock(ServerRequestInterface::class);
+        /* @var ResponseInterface|MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
+
         /* @var RequestHandlerInterface|MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
-                        ->setMethods(['handle'])
-                        ->getMockForAbstractClass();
-        $handler->expects(strlen($expectedExceptionMessage) === 0 ? $this->once() : $this->never())
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())
                 ->method('handle')
-                ->with($request)
+                ->with($this->identicalTo($expectInitialRequest ? $request : $modifiedRequest))
                 ->willReturn($response);
 
-        $middleware = new AuthorizationMiddleware($authorizationKey, $modService);
+        /* @var AuthorizationMiddleware|MockObject $middleware */
+        $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
+                           ->setMethods(['readAuthorizationFromRequest'])
+                           ->disableOriginalConstructor()
+                           ->getMock();
+        $middleware->expects($expectRead ? $this->once() : $this->never())
+                   ->method('readAuthorizationFromRequest')
+                   ->with($this->identicalTo($request))
+                   ->willReturn($modifiedRequest);
+
         $result = $middleware->process($request, $handler);
         $this->assertSame($response, $result);
+    }
+
+    /**
+     * Tests the readAuthorizationFromRequest method.
+     * @throws ReflectionException
+     * @covers ::readAuthorizationFromRequest
+     */
+    public function testReadAuthorizationFromRequest(): void
+    {
+        $header = 'abc';
+        $agent = 'def';
+        $enabledModCombinationIds = [42, 1337];
+        $serializedToken = 'ghi';
+
+        /* @var ServerRequestInterface|MockObject $modifiedRequest */
+        $modifiedRequest = $this->createMock(ServerRequestInterface::class);
+
+        /* @var ServerRequestInterface|MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getHeaderLine')
+                ->with($this->identicalTo('Authorization'))
+                ->willReturn($header);
+        $request->expects($this->once())
+                ->method('withAttribute')
+                ->with($this->identicalTo('agent'), $this->identicalTo($agent))
+                ->willReturn($modifiedRequest);
+
+        /* @var AuthorizationToken|MockObject $token */
+        $token = $this->createMock(AuthorizationToken::class);
+        $token->expects($this->once())
+              ->method('getEnabledModCombinationIds')
+              ->willReturn($enabledModCombinationIds);
+        $token->expects($this->once())
+              ->method('getAgent')
+              ->willReturn($agent);
+
+        /* @var AuthorizationService|MockObject $authorizationService */
+        $authorizationService = $this->createMock(AuthorizationService::class);
+        $authorizationService->expects($this->once())
+                             ->method('deserializeToken')
+                             ->with($serializedToken)
+                             ->willReturn($token);
+
+        /* @var ModService|MockObject $modService */
+        $modService = $this->createMock(ModService::class);
+        $modService->expects($this->once())
+                   ->method('setEnabledModCombinationIds')
+                   ->with($this->identicalTo($enabledModCombinationIds));
+
+        /* @var AuthorizationMiddleware|MockObject $middleware */
+        $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
+                           ->setMethods(['extractSerializedTokenFromHeader'])
+                           ->setConstructorArgs([$authorizationService, $modService])
+                           ->getMock();
+        $middleware->expects($this->once())
+                   ->method('extractSerializedTokenFromHeader')
+                   ->with($this->identicalTo($header))
+                   ->willReturn($serializedToken);
+
+        $result = $this->invokeMethod($middleware, 'readAuthorizationFromRequest', $request);
+        $this->assertSame($modifiedRequest, $result);
+    }
+
+    /**
+     * Provides the data for the extractSerializedTokenFromHeader test.
+     * @return array
+     */
+    public function provideExtractSerializedTokenFromHeader(): array
+    {
+        return [
+            ['Bearer abc', false, 'abc'],
+            ['abc', true, null],
+        ];
+    }
+
+    /**
+     * Tests the extractSerializedTokenFromHeader method.
+     * @param string $header
+     * @param bool $expectException
+     * @param string|null $expectedResult
+     * @throws ReflectionException
+     * @covers ::extractSerializedTokenFromHeader
+     * @dataProvider provideExtractSerializedTokenFromHeader
+     */
+    public function testExtractSerializedTokenFromHeader(
+        string $header,
+        bool $expectException,
+        ?string $expectedResult
+    ): void {
+        if ($expectException) {
+            $this->expectException(MissingAuthorizationTokenException::class);
+        }
+
+        /* @var AuthorizationService|MockObject $authorizationService */
+        $authorizationService = $this->createMock(AuthorizationService::class);
+        /* @var ModService|MockObject $modService */
+        $modService = $this->createMock(ModService::class);
+
+        $middleware = new AuthorizationMiddleware($authorizationService, $modService);
+        $result = $this->invokeMethod($middleware, 'extractSerializedTokenFromHeader', $header);
+
+        $this->assertSame($expectedResult, $result);
     }
 }

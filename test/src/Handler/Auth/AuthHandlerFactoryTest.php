@@ -7,6 +7,7 @@ namespace FactorioItemBrowserTest\Api\Server\Handler\Auth;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Handler\Auth\AuthHandler;
 use FactorioItemBrowser\Api\Server\Handler\Auth\AuthHandlerFactory;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,6 @@ class AuthHandlerFactoryTest extends TestCase
             'factorio-item-browser' => [
                 'api-server' => [
                     'authorization' => [
-                        'key' => 'abc',
                         'agents' => ['def' => 'ghi'],
                     ],
                 ],
@@ -41,14 +41,16 @@ class AuthHandlerFactoryTest extends TestCase
         $container = $this->getMockBuilder(ContainerInterface::class)
                           ->setMethods(['get'])
                           ->getMockForAbstractClass();
-        $container->expects($this->exactly(2))
+        $container->expects($this->exactly(3))
                   ->method('get')
                   ->withConsecutive(
                       ['config'],
+                      [AuthorizationService::class],
                       [ModService::class]
                   )
                   ->willReturnOnConsecutiveCalls(
                       $config,
+                      $this->createMock(AuthorizationService::class),
                       $this->createMock(ModService::class)
                   );
 

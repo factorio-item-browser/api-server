@@ -6,9 +6,10 @@ namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use BluePsyduck\Common\Data\DataContainer;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use Firebase\JWT\JWT;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -22,15 +23,10 @@ use Zend\Validator\NotEmpty;
 class AuthHandler extends AbstractRequestHandler
 {
     /**
-     * The lifetime of a token.
+     * The authorization service.
+     * @var AuthorizationService
      */
-    const TOKEN_LIFETIME = 86400;
-
-    /**
-     * The key used for creating the authorization token.
-     * @var string
-     */
-    protected $authorizationKey;
+    protected $authorizationService;
 
     /**
      * The agents of the API.
@@ -46,13 +42,13 @@ class AuthHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
-     * @param string $authorizationKey
+     * @param AuthorizationService $authorizationService
      * @param array $agents
      * @param ModService $modService
      */
-    public function __construct(string $authorizationKey, array $agents, ModService $modService)
+    public function __construct(AuthorizationService $authorizationService, array $agents, ModService $modService)
     {
-        $this->authorizationKey = $authorizationKey;
+        $this->authorizationService = $authorizationService;
         $this->agents = $agents;
         $this->modService = $modService;
     }
@@ -94,6 +90,7 @@ class AuthHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws ApiServerException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
@@ -107,29 +104,12 @@ class AuthHandler extends AbstractRequestHandler
         $enabledModNames = ($agentConfig['isDemo'] ?? false) ? ['base'] : $requestData->getArray('enabledModNames');
         $this->modService->setEnabledCombinationsByModNames($enabledModNames);
 
+        $token = new AuthorizationToken();
+        $token->setAgent($agent)
+              ->setEnabledModCombinationIds($this->modService->getEnabledModCombinationIds());
+
         return [
-            'authorizationToken' => $this->createToken(
-                $agent,
-                $this->modService->getEnabledModCombinationIds()
-            )
+            'authorizationToken' => $this->authorizationService->serializeToken($token)
         ];
-    }
-
-    /**
-     * Creates and returns a new token.
-     * @param string $agent
-     * @param array $enabledModCombinationIds
-     * @return string
-     */
-    protected function createToken(string $agent, array $enabledModCombinationIds): string
-    {
-        $token = [
-            'iat' => time(),
-            'exp' => time() + self::TOKEN_LIFETIME,
-            'agt' => $agent,
-            'mds' => $enabledModCombinationIds
-        ];
-
-        return JWT::encode($token, $this->authorizationKey);
     }
 }

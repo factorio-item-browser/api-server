@@ -1086,12 +1086,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "2f6067e508594227e0f5ad4b3d446bee0fea09eb"
+                "reference": "3acd370215dae9142045b65c0d98feb9c716352f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/2f6067e508594227e0f5ad4b3d446bee0fea09eb",
-                "reference": "2f6067e508594227e0f5ad4b3d446bee0fea09eb",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/3acd370215dae9142045b65c0d98feb9c716352f",
+                "reference": "3acd370215dae9142045b65c0d98feb9c716352f",
                 "shasum": ""
             },
             "require": {
@@ -1143,7 +1143,7 @@
                 "api",
                 "database"
             ],
-            "time": "2019-01-22T20:04:58+00:00"
+            "time": "2019-01-27T19:56:16+00:00"
         },
         {
             "name": "factorio-item-browser/common",
@@ -4643,16 +4643,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "4.0.1",
+            "version": "4.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "febd209a219cea7b56ad799b30ebbea34b71eb8f"
+                "reference": "4a43e9af57b4afa663077b9bc85255dbc6e8a2bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/febd209a219cea7b56ad799b30ebbea34b71eb8f",
-                "reference": "febd209a219cea7b56ad799b30ebbea34b71eb8f",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/4a43e9af57b4afa663077b9bc85255dbc6e8a2bd",
+                "reference": "4a43e9af57b4afa663077b9bc85255dbc6e8a2bd",
                 "shasum": ""
             },
             "require": {
@@ -4689,7 +4689,7 @@
                 "environment",
                 "hhvm"
             ],
-            "time": "2018-11-25T09:31:21+00:00"
+            "time": "2019-01-28T15:26:03+00:00"
         },
         {
             "name": "sebastian/exporter",

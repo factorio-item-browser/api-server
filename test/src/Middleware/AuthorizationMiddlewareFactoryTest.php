@@ -7,6 +7,7 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddleware;
 use FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddlewareFactory;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -26,28 +27,16 @@ class AuthorizationMiddlewareFactoryTest extends TestCase
      */
     public function testInvoke(): void
     {
-        $config = [
-            'factorio-item-browser' => [
-                'api-server' => [
-                    'authorization' => [
-                        'key' => 'abc',
-                    ],
-                ],
-            ],
-        ];
-
         /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->exactly(2))
                   ->method('get')
                   ->withConsecutive(
-                      ['config'],
+                      [AuthorizationService::class],
                       [ModService::class]
                   )
                   ->willReturnOnConsecutiveCalls(
-                      $config,
+                      $this->createMock(AuthorizationService::class),
                       $this->createMock(ModService::class)
                   );
 

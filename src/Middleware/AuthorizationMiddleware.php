@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use Exception;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use Firebase\JWT\JWT;
+use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use stdClass;
 
 /**
  * The middleware to check the authorization token.
@@ -31,10 +30,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
     ];
 
     /**
-     * The key used for creating the authorization token.
-     * @var string
+     * The authorization service.
+     * @var AuthorizationService
      */
-    protected $authorizationKey;
+    protected $authorizationService;
 
     /**
      * The mod service.
@@ -44,12 +43,12 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
     /**
      * Initializes the authorization middleware class.
-     * @param string $authorizationKey
+     * @param AuthorizationService $authorizationService
      * @param ModService $modService
      */
-    public function __construct(string $authorizationKey, ModService $modService)
+    public function __construct(AuthorizationService $authorizationService, ModService $modService)
     {
-        $this->authorizationKey = $authorizationKey;
+        $this->authorizationService = $authorizationService;
         $this->modService = $modService;
     }
 
@@ -59,34 +58,44 @@ class AuthorizationMiddleware implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
+     * @throws ApiServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!in_array($request->getRequestTarget(), self::WHITELISTED_ROUTES, true)) {
-            $authorization = $request->getHeaderLine('Authorization');
-            if (substr($authorization, 0, 7) !== 'Bearer ') {
-                throw new ApiServerException('Authorization token is missing.', 401);
-            }
-
-            try {
-                $token = $this->decryptToken(substr($authorization, 7));
-                $this->modService->setEnabledModCombinationIds(array_map('intval', $token->mds ?? []));
-
-                $request = $request->withAttribute('agent', $token->agt ?? '');
-            } catch (Exception $e) {
-                throw new ApiServerException('Authorization token is invalid.', 401);
-            }
+            $request = $this->readAuthorizationFromRequest($request);
         }
         return $handler->handle($request);
     }
 
     /**
-     * Decrypts the specified token string.
-     * @param string $tokenString
-     * @return stdClass
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     * @throws MissingAuthorizationTokenException
+     * @throws ApiServerException
      */
-    protected function decryptToken(string $tokenString): stdClass
+    protected function readAuthorizationFromRequest(ServerRequestInterface $request): ServerRequestInterface
     {
-        return JWT::decode($tokenString, $this->authorizationKey, ['HS256']);
+        $serializedToken = $this->extractSerializedTokenFromHeader($request->getHeaderLine('Authorization'));
+        $token = $this->authorizationService->deserializeToken($serializedToken);
+
+        $this->modService->setEnabledModCombinationIds($token->getEnabledModCombinationIds());
+        $request = $request->withAttribute('agent', $token->getAgent());
+        return $request;
+    }
+
+    /**
+     * Extracts the serialized token from the specified Bearer header.
+     * @param string $header
+     * @return string
+     * @throws MissingAuthorizationTokenException
+     */
+    protected function extractSerializedTokenFromHeader(string $header): string
+    {
+        if (substr($header, 0, 7) !== 'Bearer ') {
+            throw new MissingAuthorizationTokenException();
+        }
+
+        return substr($header, 7);
     }
 }

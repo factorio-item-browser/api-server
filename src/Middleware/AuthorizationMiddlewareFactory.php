@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -25,12 +26,11 @@ class AuthorizationMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $container->get('config');
-        $authorizationConfig = $config['factorio-item-browser']['api-server']['authorization'];
-
+        /* @var AuthorizationService $authorizationService */
+        $authorizationService = $container->get(AuthorizationService::class);
         /* @var ModService $modService */
         $modService = $container->get(ModService::class);
 
-        return new AuthorizationMiddleware($authorizationConfig['key'], $modService);
+        return new AuthorizationMiddleware($authorizationService, $modService);
     }
 }
