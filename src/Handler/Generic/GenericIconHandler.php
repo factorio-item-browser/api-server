@@ -40,27 +40,29 @@ class GenericIconHandler extends AbstractGenericHandler
     protected function handleRequest(DataContainer $requestData): array
     {
         $namesByTypes = $this->getEntityNamesByType($requestData);
-        $iconFileHashes = $this->iconService->getIconFileHashesByTypesAndNames($namesByTypes);
-        $allNamesByTypes = $this->iconService->getAllTypesAndNamesByHashes($iconFileHashes);
-        $iconFileHashes = $this->iconService->getIconFileHashesByTypesAndNames($allNamesByTypes);
+        $iconFileHashes = $this->getIconFileHashesByTypesAndNames($namesByTypes);
 
         $clientIcons = $this->prepareClientIcons($iconFileHashes);
-        foreach ($this->iconService->getIconsByHashes($iconFileHashes) as $databaseIcon) {
-            $hash = $databaseIcon->getFile()->getHash();
-            if (isset($clientIcons[$hash])) {
-                $clientIconEntity = new ClientIconEntity();
-                $clientIconEntity->setType($databaseIcon->getType())
-                                 ->setName($databaseIcon->getName());
-                $clientIcons[$hash]->addEntity($clientIconEntity);
-            }
-        }
+        $this->fetchEntitiesToIcons($clientIcons);
 
-        $clientIcons = $this->filterUnrequestedIcons($clientIcons, $namesByTypes);
-        $clientIcons = $this->hydrateContentToIcons($clientIcons);
+        $filteredClientIcons = $this->filterRequestedIcons($clientIcons, $namesByTypes);
+        $this->hydrateContentToIcons($filteredClientIcons);
 
         return [
-            'icons' => array_values($clientIcons),
+            'icons' => array_values($filteredClientIcons),
         ];
+    }
+
+    /**
+     * Returns the icon hashes from the specified types and names.
+     * @param array|string[][] $namesByTypes
+     * @return array|string[]
+     */
+    protected function getIconFileHashesByTypesAndNames(array $namesByTypes): array
+    {
+        $iconFileHashes = $this->iconService->getIconFileHashesByTypesAndNames($namesByTypes);
+        $allNamesByTypes = $this->iconService->getAllTypesAndNamesByHashes($iconFileHashes);
+        return $this->iconService->getIconFileHashesByTypesAndNames($allNamesByTypes);
     }
 
     /**
@@ -78,39 +80,81 @@ class GenericIconHandler extends AbstractGenericHandler
     }
 
     /**
-     * Filters icons from the array which have not been requested.
+     * Fetches the entities of the specified icons.
+     * @param array|ClientIcon[] $clientIcons
+     */
+    protected function fetchEntitiesToIcons(array $clientIcons): void
+    {
+        $databaseIcons = $this->iconService->getIconsByHashes(array_keys($clientIcons));
+        foreach ($databaseIcons as $databaseIcon) {
+            $iconFileHash = $databaseIcon->getFile()->getHash();
+            if (isset($clientIcons[$iconFileHash])) {
+                $clientIcons[$iconFileHash]->addEntity(
+                    $this->createClientIconEntity($databaseIcon->getType(), $databaseIcon->getName())
+                );
+            }
+        }
+    }
+
+    /**
+     * Creates a client icon entity.
+     * @param string $type
+     * @param string $name
+     * @return ClientIconEntity
+     */
+    protected function createClientIconEntity(string $type, string $name): ClientIconEntity
+    {
+        $result= new ClientIconEntity();
+        $result->setType($type)
+               ->setName($name);
+        return $result;
+    }
+
+    /**
+     * Filters icons from the array which actually have been requested.
      * @param array|ClientIcon[] $clientIcons
      * @param array|string[][] $namesByTypes
      * @return array|ClientIcon[]
      */
-    protected function filterUnrequestedIcons(array $clientIcons, array $namesByTypes): array
+    protected function filterRequestedIcons(array $clientIcons, array $namesByTypes): array
     {
-        return array_filter($clientIcons, function (ClientIcon $icon) use ($namesByTypes): bool {
-            $result = false;
-            foreach ($icon->getEntities() as $entity) {
-                if (isset($namesByTypes[$entity->getType()])
-                    && in_array($entity->getName(), $namesByTypes[$entity->getType()], true)
-                ) {
-                    $result = true;
-                    break;
-                }
-            }
-            return $result;
+        return array_filter($clientIcons, function (ClientIcon $clientIcon) use ($namesByTypes): bool {
+            return $this->wasIconRequested($clientIcon, $namesByTypes);
         });
+    }
+
+    /**
+     * Checks whether the icon was initially requested.
+     * @param ClientIcon $clientIcon
+     * @param array|string[][] $namesByTypes
+     * @return bool
+     */
+    protected function wasIconRequested(ClientIcon $clientIcon, array $namesByTypes): bool
+    {
+        $result = false;
+        foreach ($clientIcon->getEntities() as $entity) {
+            if (isset($namesByTypes[$entity->getType()])
+                && in_array($entity->getName(), $namesByTypes[$entity->getType()], true)
+            ) {
+                $result = true;
+                break;
+            }
+        }
+        return $result;
     }
 
     /**
      * Hydrates the contents into the icons.
      * @param array|ClientIcon[] $clientIcons
-     * @return array|ClientIcon[]
      */
-    protected function hydrateContentToIcons(array $clientIcons): array
+    protected function hydrateContentToIcons(array $clientIcons): void
     {
-        foreach ($this->iconService->getIconFilesByHashes(array_keys($clientIcons)) as $iconFile) {
-            if (isset($clientIcons[$iconFile->getHash()])) {
-                $clientIcons[$iconFile->getHash()]->setContent(base64_encode($iconFile->getImage()));
+        $iconFiles = $this->iconService->getIconFilesByHashes(array_keys($clientIcons));
+        foreach ($iconFiles as $iconFile) {
+            $iconFileHash = $iconFile->getHash();
+            if (isset($clientIcons[$iconFileHash])) {
+                $clientIcons[$iconFileHash]->setContent(base64_encode($iconFile->getImage()));
             }
         }
-        return $clientIcons;
     }
 }

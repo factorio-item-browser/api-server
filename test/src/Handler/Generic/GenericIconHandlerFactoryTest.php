@@ -26,13 +26,11 @@ class GenericIconHandlerFactoryTest extends TestCase
      */
     public function testInvoke(): void
     {
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
-                  ->with(IconService::class)
+                  ->with($this->identicalTo(IconService::class))
                   ->willReturn($this->createMock(IconService::class));
 
         $factory = new GenericIconHandlerFactory();

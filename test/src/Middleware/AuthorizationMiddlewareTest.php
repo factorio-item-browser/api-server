@@ -30,6 +30,24 @@ class AuthorizationMiddlewareTest extends TestCase
     use ReflectionTrait;
 
     /**
+     * Tests the constructing.
+     * @throws ReflectionException
+     * @covers ::__construct
+     */
+    public function testConstruct(): void
+    {
+        /* @var AuthorizationService&MockObject $authorizationService */
+        $authorizationService = $this->createMock(AuthorizationService::class);
+        /* @var ModService&MockObject $modService */
+        $modService = $this->createMock(ModService::class);
+
+        $middleware = new AuthorizationMiddleware($authorizationService, $modService);
+
+        $this->assertSame($authorizationService, $this->extractProperty($middleware, 'authorizationService'));
+        $this->assertSame($modService, $this->extractProperty($middleware, 'modService'));
+    }
+
+    /**
      * Provides the data for the process test.
      * @return array
      */
