@@ -24,7 +24,7 @@ class MissingAuthorizationTokenExceptionTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /* @var Throwable|MockObject $previous */
+        /* @var Throwable&MockObject $previous */
         $previous = $this->createMock(Throwable::class);
 
         $exception = new MissingAuthorizationTokenException($previous);

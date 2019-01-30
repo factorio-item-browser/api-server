@@ -35,7 +35,7 @@ class AuthorizationServiceFactoryTest extends TestCase
             ],
         ];
 
-        /* @var ContainerInterface|MockObject $container */
+        /* @var ContainerInterface&MockObject $container */
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')

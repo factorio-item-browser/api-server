@@ -74,7 +74,7 @@ class AuthorizationServiceTest extends TestCase
         ];
         $expectedResult = trim((string) file_get_contents(__DIR__ . '/../../asset/token/valid.txt'));
 
-        /* @var AuthorizationService|MockObject $service */
+        /* @var AuthorizationService&MockObject $service */
         $service = $this->getMockBuilder(AuthorizationService::class)
                         ->setMethods(['getTokenData'])
                         ->setConstructorArgs([$authorizationKey])
@@ -145,7 +145,7 @@ class AuthorizationServiceTest extends TestCase
     {
         $serializedToken = 'abc';
 
-        /* @var AuthorizationService|MockObject $service */
+        /* @var AuthorizationService&MockObject $service */
         $service = $this->getMockBuilder(AuthorizationService::class)
                         ->setMethods(['decodeSerializedToken'])
                         ->disableOriginalConstructor()

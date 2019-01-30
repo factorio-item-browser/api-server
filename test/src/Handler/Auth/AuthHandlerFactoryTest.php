@@ -28,7 +28,7 @@ class AuthHandlerFactoryTest extends TestCase
      */
     public function testInvoke(): void
     {
-        /* @var ContainerInterface|MockObject $container */
+        /* @var ContainerInterface&MockObject $container */
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->exactly(3))
                   ->method('get')

@@ -8,9 +8,9 @@ use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Middleware\AcceptLanguageMiddleware;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
 
 /**
  * The PHPUnit test of the AcceptLanguageMiddleware class.
@@ -43,39 +43,32 @@ class AcceptLanguageMiddlewareTest extends TestCase
      */
     public function testProcess(string $headerLine, ?string $expectedLocale): void
     {
-        /* @var ServerRequest|MockObject $request */
-        $request = $this->getMockBuilder(ServerRequest::class)
-                        ->setMethods(['getHeaderLine'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getHeaderLine')
-                ->with('Accept-Language')
+                ->with($this->identicalTo('Accept-Language'))
                 ->willReturn($headerLine);
 
-        /* @var TranslationService|MockObject $translationService */
-        $translationService = $this->getMockBuilder(TranslationService::class)
-                                   ->setMethods(['setCurrentLocale'])
-                                   ->disableOriginalConstructor()
-                                   ->getMock();
+        /* @var TranslationService&MockObject $translationService */
+        $translationService = $this->createMock(TranslationService::class);
         $translationService->expects($expectedLocale === null ? $this->never() : $this->once())
                            ->method('setCurrentLocale')
-                           ->with($expectedLocale);
+                           ->with($this->identicalTo($expectedLocale));
 
-        /* @var Response $response */
-        $response = $this->createMock(Response::class);
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
 
-        /* @var RequestHandlerInterface|MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
-                        ->setMethods(['handle'])
-                        ->getMockForAbstractClass();
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
-                ->with($request)
+                ->with($this->identicalTo($request))
                 ->willReturn($response);
 
         $middleware = new AcceptLanguageMiddleware($translationService);
         $result = $middleware->process($request, $handler);
+
         $this->assertSame($response, $result);
     }
 }

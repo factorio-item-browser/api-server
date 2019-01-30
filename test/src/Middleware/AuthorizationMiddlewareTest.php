@@ -52,25 +52,25 @@ class AuthorizationMiddlewareTest extends TestCase
      */
     public function testProcess(string $requestTarget, bool $expectRead, bool $expectInitialRequest): void
     {
-        /* @var ServerRequestInterface|MockObject $request */
+        /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getRequestTarget')
                 ->willReturn($requestTarget);
 
-        /* @var ServerRequestInterface|MockObject $modifiedRequest */
+        /* @var ServerRequestInterface&MockObject $modifiedRequest */
         $modifiedRequest = $this->createMock(ServerRequestInterface::class);
-        /* @var ResponseInterface|MockObject $response */
+        /* @var ResponseInterface&MockObject $response */
         $response = $this->createMock(ResponseInterface::class);
 
-        /* @var RequestHandlerInterface|MockObject $handler */
+        /* @var RequestHandlerInterface&MockObject $handler */
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
                 ->with($this->identicalTo($expectInitialRequest ? $request : $modifiedRequest))
                 ->willReturn($response);
 
-        /* @var AuthorizationMiddleware|MockObject $middleware */
+        /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
                            ->setMethods(['readAuthorizationFromRequest'])
                            ->disableOriginalConstructor()
@@ -99,10 +99,10 @@ class AuthorizationMiddlewareTest extends TestCase
         $token->setAgentName($agentName)
               ->setEnabledModCombinationIds($enabledModCombinationIds);
 
-        /* @var ServerRequestInterface|MockObject $modifiedRequest */
+        /* @var ServerRequestInterface&MockObject $modifiedRequest */
         $modifiedRequest = $this->createMock(ServerRequestInterface::class);
 
-        /* @var ServerRequestInterface|MockObject $request */
+        /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getHeaderLine')
@@ -113,20 +113,20 @@ class AuthorizationMiddlewareTest extends TestCase
                 ->with($this->identicalTo('agent'), $this->identicalTo($agentName))
                 ->willReturn($modifiedRequest);
 
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
         $authorizationService->expects($this->once())
                              ->method('deserializeToken')
                              ->with($serializedToken)
                              ->willReturn($token);
 
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
         $modService->expects($this->once())
                    ->method('setEnabledModCombinationIds')
                    ->with($this->identicalTo($enabledModCombinationIds));
 
-        /* @var AuthorizationMiddleware|MockObject $middleware */
+        /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
                            ->setMethods(['extractSerializedTokenFromHeader'])
                            ->setConstructorArgs([$authorizationService, $modService])
@@ -170,9 +170,9 @@ class AuthorizationMiddlewareTest extends TestCase
             $this->expectException(MissingAuthorizationTokenException::class);
         }
 
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
 
         $middleware = new AuthorizationMiddleware($authorizationService, $modService);

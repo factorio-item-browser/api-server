@@ -33,13 +33,11 @@ class MetaMiddlewareFactoryTest extends TestCase
             ],
         ];
 
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
-                  ->with('config')
+                  ->with($this->identicalTo('config'))
                   ->willReturn($config);
 
         $factory = new MetaMiddlewareFactory();

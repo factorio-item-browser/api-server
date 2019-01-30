@@ -41,14 +41,14 @@ class AgentServiceFactoryTest extends TestCase
             ],
         ];
 
-        /* @var ContainerInterface|MockObject $container */
+        /* @var ContainerInterface&MockObject $container */
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
                   ->with($this->identicalTo('config'))
                   ->willReturn($config);
 
-        /* @var AgentServiceFactory|MockObject $factory */
+        /* @var AgentServiceFactory&MockObject $factory */
         $factory = $this->getMockBuilder(AgentServiceFactory::class)
                         ->setMethods(['createAgent'])
                         ->getMock();

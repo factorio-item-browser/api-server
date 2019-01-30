@@ -37,11 +37,11 @@ class AuthHandlerTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /* @var AgentService|MockObject $agentService */
+        /* @var AgentService&MockObject $agentService */
         $agentService = $this->createMock(AgentService::class);
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
 
         $handler = new AuthHandler($agentService, $authorizationService, $modService);
@@ -64,9 +64,9 @@ class AuthHandlerTest extends TestCase
             'enabledModNames'
         ];
 
-        /* @var AgentService|MockObject $agentService */
+        /* @var AgentService&MockObject $agentService */
         $agentService = $this->createMock(AgentService::class);
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
         /* @var ModService $modService */
         $modService = $this->createMock(ModService::class);
@@ -91,14 +91,14 @@ class AuthHandlerTest extends TestCase
         $serializedToken = 'abc';
         $expectedResult = ['authorizationToken' => $serializedToken];
         
-        /* @var DataContainer|MockObject $requestData */
+        /* @var DataContainer&MockObject $requestData */
         $requestData = $this->createMock(DataContainer::class);
-        /* @var Agent|MockObject $agent */
+        /* @var Agent&MockObject $agent */
         $agent = $this->createMock(Agent::class);
-        /* @var AuthorizationToken|MockObject $token */
+        /* @var AuthorizationToken&MockObject $token */
         $token = $this->createMock(AuthorizationToken::class);
         
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
         $authorizationService->expects($this->once())
                              ->method('createToken')
@@ -109,12 +109,12 @@ class AuthHandlerTest extends TestCase
                              ->with($this->identicalTo($token))
                              ->willReturn($serializedToken);
         
-        /* @var AgentService|MockObject $agentService */
+        /* @var AgentService&MockObject $agentService */
         $agentService = $this->createMock(AgentService::class);
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
         
-        /* @var AuthHandler|MockObject $handler */
+        /* @var AuthHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AuthHandler::class)
                         ->setMethods(['getAgentFromRequestData', 'getEnabledModCombinationIdsFromRequestData'])
                         ->setConstructorArgs([$agentService, $authorizationService, $modService])
@@ -164,7 +164,7 @@ class AuthHandlerTest extends TestCase
             'accessKey' => $accessKey,
         ]);
 
-        /* @var AgentService|MockObject $agentService */
+        /* @var AgentService&MockObject $agentService */
         $agentService = $this->createMock(AgentService::class);
         $agentService->expects($this->once())
                      ->method('getByAccessKey')
@@ -175,9 +175,9 @@ class AuthHandlerTest extends TestCase
             $this->expectException(UnknownAgentException::class);
         }
 
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
 
         $handler = new AuthHandler($agentService, $authorizationService, $modService);
@@ -217,7 +217,7 @@ class AuthHandlerTest extends TestCase
         $requestData = new DataContainer(['enabledModNames' => $enabledModNames]);
         $enabledModCombinationIds = [42, 1337];
 
-        /* @var ModService|MockObject $modService */
+        /* @var ModService&MockObject $modService */
         $modService = $this->createMock(ModService::class);
         $modService->expects($this->once())
                    ->method('setEnabledCombinationsByModNames')
@@ -226,9 +226,9 @@ class AuthHandlerTest extends TestCase
                    ->method('getEnabledModCombinationIds')
                    ->willReturn($enabledModCombinationIds);
 
-        /* @var AgentService|MockObject $agentService */
+        /* @var AgentService&MockObject $agentService */
         $agentService = $this->createMock(AgentService::class);
-        /* @var AuthorizationService|MockObject $authorizationService */
+        /* @var AuthorizationService&MockObject $authorizationService */
         $authorizationService = $this->createMock(AuthorizationService::class);
 
         $handler = new AuthHandler($agentService, $authorizationService, $modService);

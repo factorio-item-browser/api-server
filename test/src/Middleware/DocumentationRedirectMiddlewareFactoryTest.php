@@ -26,13 +26,11 @@ class DocumentationRedirectMiddlewareFactoryTest extends TestCase
      */
     public function testInvoke(): void
     {
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
-                  ->with(BasePathHelper::class)
+                  ->with($this->identicalTo(BasePathHelper::class))
                   ->willReturn($this->createMock(BasePathHelper::class));
 
         $factory = new DocumentationRedirectMiddlewareFactory();

@@ -26,13 +26,11 @@ class AcceptLanguageMiddlewareFactoryTest extends TestCase
      */
     public function testInvoke(): void
     {
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
-                  ->with(TranslationService::class)
+                  ->with($this->identicalTo(TranslationService::class))
                   ->willReturn($this->createMock(TranslationService::class));
 
         $factory = new AcceptLanguageMiddlewareFactory();

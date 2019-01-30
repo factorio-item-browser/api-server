@@ -7,9 +7,9 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 use FactorioItemBrowser\Api\Server\Middleware\MetaMiddleware;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
 
 /**
  * The PHPUnit test of the MetaMiddleware class.
@@ -29,34 +29,29 @@ class MetaMiddlewareTest extends TestCase
     {
         $version = '1.2.3';
 
-        /* @var ServerRequest $request */
-        $request = $this->createMock(ServerRequest::class);
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
 
-        /* @var Response|MockObject $response */
-        $response = $this->getMockBuilder(Response::class)
-                         ->setMethods(['withHeader'])
-                         ->disableOriginalConstructor()
-                         ->getMock();
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
         $response->expects($this->exactly(2))
                  ->method('withHeader')
                  ->withConsecutive(
-                     ['X-Version', $version],
-                     ['X-Runtime', $this->isType('string')]
+                     [$this->identicalTo('X-Version'), $this->identicalTo($version)],
+                     [$this->identicalTo('X-Runtime'), $this->isType('string')]
                  )
                  ->willReturnSelf();
 
-
-        /* @var RequestHandlerInterface|MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
-                        ->setMethods(['handle'])
-                        ->getMockForAbstractClass();
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
-                ->with($request)
+                ->with($this->identicalTo($request))
                 ->willReturn($response);
 
         $middleware = new MetaMiddleware($version);
         $result = $middleware->process($request, $handler);
+
         $this->assertSame($response, $result);
     }
 }

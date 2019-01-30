@@ -20,7 +20,7 @@ use FactorioItemBrowser\Api\Server\Search\SearchQuery;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class CachedSearchResultService extends AbstractModsAwareService
+class CachedSearchResultService extends AbstractModsAwareService implements CleanableServiceInterface
 {
     /**
      * The maximal number of search results to allow.
