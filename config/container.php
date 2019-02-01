@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use Blast\ReflectionFactory\ReflectionFactory;
+use Zend\ConfigAggregator\ConfigAggregator;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 
@@ -23,5 +25,9 @@ $container = new ServiceManager();
 
 // Inject config
 $container->setService('config', $config);
+
+if ($config[ConfigAggregator::ENABLE_CACHE] ?? false) {
+    ReflectionFactory::enableCache(__DIR__ . '/../data/cache/reflection-factory-cache.php');
+}
 
 return $container;

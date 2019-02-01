@@ -20,6 +20,7 @@
     "factorio-item-browser/api-database": "dev-refactor-doctrine",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
+    "mtymek/blast-reflection-factory": "^1.0",
     "zendframework/zend-config-aggregator": "^1.0",
     "zendframework/zend-diactoros": "^1.7",
     "zendframework/zend-expressive": "^3.0",
@@ -49,6 +50,11 @@
     }
   },
   "scripts": {
+    "build-cache": [
+      "rm -rf data/cache/*",
+      "bin/build-cache.php",
+      "chown -R www-data:www-data data/cache/*"
+    ],
     "coverage-check": "coverage-check test/log/clover.xml 100",
     "phpcbf": "phpcbf -p --colors",
     "phpcs": "phpcs -p --colors",
