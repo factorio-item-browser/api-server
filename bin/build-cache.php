@@ -10,6 +10,8 @@ declare(strict_types=1);
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
 
+namespace FactorioItemBrowser\Api\Server;
+
 use Psr\Container\ContainerInterface;
 
 chdir(dirname(__DIR__));

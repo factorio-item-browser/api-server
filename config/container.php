@@ -17,7 +17,7 @@ use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 
 // Load configuration
-$config = require __DIR__ . '/config.php';
+$config = require(__DIR__ . '/config.php');
 
 // Build container
 $container = new ServiceManager();
