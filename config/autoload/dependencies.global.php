@@ -40,6 +40,7 @@ return [
             Handler\Recipe\RecipeMachinesHandler::class => ReflectionFactory::class,
             Handler\Search\SearchQueryHandler::class => ReflectionFactory::class,
 
+            Mapper\CombiningRecipeMapper::class => ReflectionFactory::class,
             Mapper\ItemMapper::class => ReflectionFactory::class,
             Mapper\MachineMapper::class => ReflectionFactory::class,
             Mapper\ModMapper::class => ReflectionFactory::class,

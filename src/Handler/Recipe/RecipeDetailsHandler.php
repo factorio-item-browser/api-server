@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use Zend\InputFilter\ArrayInput;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -23,10 +24,10 @@ use Zend\Validator\NotEmpty;
 class RecipeDetailsHandler extends AbstractRequestHandler
 {
     /**
-     * The recipe mapper.
-     * @var RecipeMapper
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $recipeMapper;
+    protected $mapperManager;
 
     /**
      * The database recipe service.
@@ -42,16 +43,16 @@ class RecipeDetailsHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
-     * @param RecipeMapper $recipeMapper
+     * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
-        RecipeMapper $recipeMapper,
+        MapperManagerInterface $mapperManager,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
-        $this->recipeMapper = $recipeMapper;
+        $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -79,6 +80,7 @@ class RecipeDetailsHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws MapperException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
@@ -94,12 +96,12 @@ class RecipeDetailsHandler extends AbstractRequestHandler
                 foreach ($recipeIds as $recipeId) {
                     if (isset($databaseRecipes[$recipeId])) {
                         $mappedRecipe = new RecipeWithExpensiveVersion();
-                        $this->recipeMapper->mapRecipe($databaseRecipes[$recipeId], $mappedRecipe);
+                        $this->mapperManager->map($databaseRecipes[$recipeId], $mappedRecipe);
 
                         if (is_null($currentRecipe)) {
                             $currentRecipe = $mappedRecipe;
                         } else {
-                            $this->recipeMapper->combineRecipes($currentRecipe, $mappedRecipe);
+                            $this->mapperManager->map($currentRecipe, $mappedRecipe);
                         }
                     }
                 }

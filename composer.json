@@ -16,6 +16,7 @@
     "php": "^7.2",
     "ext-json": "*",
     "ext-PDO": "*",
+    "bluepsyduck/mapper-manager": "^1.0",
     "factorio-item-browser/api-client": "^1.1",
     "factorio-item-browser/api-database": "dev-refactor-doctrine",
     "firebase/php-jwt": "^5.0",

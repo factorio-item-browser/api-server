@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Database\Entity\Item;
 use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\Item\ItemProductHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the ItemProductHandler class.
@@ -29,6 +29,7 @@ class ItemProductHandlerTest extends TestCase
     /**
      * Tests the fetchGroupedRecipeIds method.
      * @covers ::fetchGroupedRecipeIds
+     * @throws ReflectionException
      */
     public function testFetchGroupedRecipeIds(): void
     {
@@ -36,33 +37,28 @@ class ItemProductHandlerTest extends TestCase
         $item->setId(42);
         $items = [$item];
 
-        /* @var RecipeService|MockObject $recipeService */
-        $recipeService = $this->getMockBuilder(RecipeService::class)
-                              ->setMethods(['getIdsWithProduct'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
+        /* @var RecipeService&MockObject $recipeService */
+        $recipeService = $this->createMock(RecipeService::class);
         $recipeService->expects($this->once())
                       ->method('getIdsWithProduct')
                       ->with(42)
                       ->willReturn($items);
 
-        /* @var ItemMapper $itemMapper */
-        $itemMapper = $this->createMock(ItemMapper::class);
-        /* @var ItemService $itemService */
+        /* @var ItemService&MockObject $itemService */
         $itemService = $this->createMock(ItemService::class);
-        /* @var RecipeMapper $recipeMapper */
-        $recipeMapper = $this->createMock(RecipeMapper::class);
-        /* @var TranslationService $translationService */
+        /* @var MapperManagerInterface&MockObject $mapperManager */
+        $mapperManager = $this->createMock(MapperManagerInterface::class);
+        /* @var TranslationService&MockObject $translationService */
         $translationService = $this->createMock(TranslationService::class);
 
         $handler = new ItemProductHandler(
-            $itemMapper,
             $itemService,
-            $recipeMapper,
+            $mapperManager,
             $recipeService,
             $translationService
         );
         $result = $this->invokeMethod($handler, 'fetchGroupedRecipeIds', $item);
+
         $this->assertSame($items, $result);
     }
 }

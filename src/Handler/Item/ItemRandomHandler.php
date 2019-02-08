@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
@@ -12,8 +14,6 @@ use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -27,22 +27,16 @@ use Zend\Validator\NotEmpty;
 class ItemRandomHandler extends AbstractRequestHandler
 {
     /**
-     * The item mapper.
-     * @var ItemMapper
-     */
-    protected $itemMapper;
-
-    /**
      * The database item service.
      * @var ItemService
      */
     protected $itemService;
 
     /**
-     * The recipe mapper.
-     * @var RecipeMapper
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $recipeMapper;
+    protected $mapperManager;
 
     /**
      * The database recipe service.
@@ -58,22 +52,19 @@ class ItemRandomHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
-     * @param ItemMapper $itemMapper
      * @param ItemService $itemService
-     * @param RecipeMapper $recipeMapper
+     * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
-        ItemMapper $itemMapper,
         ItemService $itemService,
-        RecipeMapper $recipeMapper,
+        MapperManagerInterface $mapperManager,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
-        $this->itemMapper = $itemMapper;
         $this->itemService = $itemService;
-        $this->recipeMapper = $recipeMapper;
+        $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -116,6 +107,7 @@ class ItemRandomHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws MapperException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
@@ -128,7 +120,7 @@ class ItemRandomHandler extends AbstractRequestHandler
         $clientItems = [];
         foreach ($items as $itemId => $item) {
             $clientItem = new GenericEntityWithRecipes();
-            $this->itemMapper->mapItem($item, $clientItem);
+            $this->mapperManager->map($item, $clientItem);
             $clientItem->setTotalNumberOfRecipes(count($groupedRecipeIds[$itemId] ?? []));
 
             foreach ($groupedRecipeIds[$itemId] ?? [] as $recipeIdGroup) {
@@ -136,12 +128,12 @@ class ItemRandomHandler extends AbstractRequestHandler
                 foreach ($recipeIdGroup as $recipeId) {
                     if (isset($recipes[$recipeId])) {
                         $mappedRecipe = new RecipeWithExpensiveVersion();
-                        $this->recipeMapper->mapRecipe($recipes[$recipeId], $mappedRecipe);
+                        $this->mapperManager->map($recipes[$recipeId], $mappedRecipe);
 
                         if (is_null($currentRecipe)) {
                             $currentRecipe = $mappedRecipe;
                         } else {
-                            $this->recipeMapper->combineRecipes($currentRecipe, $mappedRecipe);
+                            $this->mapperManager->map($currentRecipe, $mappedRecipe);
                         }
                     }
                 }

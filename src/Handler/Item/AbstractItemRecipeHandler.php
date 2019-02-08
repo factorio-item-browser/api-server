@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
@@ -13,8 +15,6 @@ use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -28,22 +28,16 @@ use Zend\Validator\NotEmpty;
 abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
 {
     /**
-     * The item mapper.
-     * @var ItemMapper
-     */
-    protected $itemMapper;
-
-    /**
      * The database item service.
      * @var ItemService
      */
     protected $itemService;
 
     /**
-     * The recipe mapper.
-     * @var RecipeMapper
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $recipeMapper;
+    protected $mapperManager;
 
     /**
      * The database recipe service.
@@ -59,22 +53,19 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
-     * @param ItemMapper $itemMapper
      * @param ItemService $itemService
-     * @param RecipeMapper $recipeMapper
+     * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
-        ItemMapper $itemMapper,
         ItemService $itemService,
-        RecipeMapper $recipeMapper,
+        MapperManagerInterface $mapperManager,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
-        $this->itemMapper = $itemMapper;
         $this->itemService = $itemService;
-        $this->recipeMapper = $recipeMapper;
+        $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -131,6 +122,8 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws ApiServerException
+     * @throws MapperException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
@@ -142,7 +135,7 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
             throw new ApiServerException('Item not found or not available in the enabled mods.', 404);
         }
         $clientItem = new GenericEntityWithRecipes();
-        $this->itemMapper->mapItem($databaseItem, $clientItem);
+        $this->mapperManager->map($databaseItem, $clientItem);
 
         $groupedRecipeIds = $this->fetchGroupedRecipeIds($databaseItem);
         $totalNumberOfRecipes = count($groupedRecipeIds);
@@ -155,10 +148,10 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
         $clientRecipes = [];
         foreach ($this->recipeService->getDetailsByIds($recipeIds) as $databaseRecipe) {
             $mappedRecipe = new RecipeWithExpensiveVersion();
-            $this->recipeMapper->mapRecipe($databaseRecipe, $mappedRecipe);
+            $this->mapperManager->map($databaseRecipe, $mappedRecipe);
 
             if (isset($clientRecipes[$databaseRecipe->getName()])) {
-                $this->recipeMapper->combineRecipes($clientRecipes[$databaseRecipe->getName()], $mappedRecipe);
+                $this->mapperManager->map($clientRecipes[$databaseRecipe->getName()], $mappedRecipe);
             } else {
                 $clientRecipes[$databaseRecipe->getName()] = $mappedRecipe;
             }

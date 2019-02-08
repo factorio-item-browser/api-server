@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
 use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ModMapper;
 use Zend\InputFilter\InputFilter;
 
 /**
@@ -21,10 +22,10 @@ use Zend\InputFilter\InputFilter;
 class ModListHandler extends AbstractRequestHandler
 {
     /**
-     * The mod mapper.
-     * @var ModMapper
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $modMapper;
+    protected $mapperManager;
 
     /**
      * The database mod service.
@@ -40,13 +41,16 @@ class ModListHandler extends AbstractRequestHandler
 
     /**
      * Initializes the auth handler.
-     * @param ModMapper $modMapper
+     * @param MapperManagerInterface $mapperManager
      * @param ModService $modService
      * @param TranslationService $translationService
      */
-    public function __construct(ModMapper $modMapper, ModService $modService, TranslationService $translationService)
-    {
-        $this->modMapper = $modMapper;
+    public function __construct(
+        MapperManagerInterface $mapperManager,
+        ModService $modService,
+        TranslationService $translationService
+    ) {
+        $this->mapperManager = $mapperManager;
         $this->modService = $modService;
         $this->translationService = $translationService;
     }
@@ -64,20 +68,23 @@ class ModListHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws MapperException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
         $enabledModNames = $this->modService->getEnabledModNames();
-        $mods = [];
+        $clientMods = [];
         foreach ($this->modService->getAllMods() as $databaseMod) {
-            $clientMod = $this->modMapper->mapMod($databaseMod, new ClientMod());
+            $clientMod = new ClientMod();
+            $this->mapperManager->map($databaseMod, $clientMod);
             $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames, true));
-            $mods[] = $clientMod;
+
+            $clientMods[] = $clientMod;
         }
 
         $this->translationService->translateEntities();
         return [
-            'mods' => $mods
+            'mods' => $clientMods
         ];
     }
 }

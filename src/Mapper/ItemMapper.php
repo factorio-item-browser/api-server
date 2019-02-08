@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
+use BluePsyduck\MapperManager\Mapper\DynamicMapperInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 
@@ -13,20 +14,29 @@ use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ItemMapper extends AbstractMapper
+class ItemMapper extends TranslationServiceAwareMapper implements DynamicMapperInterface
 {
     /**
-     * Maps the database item into the specified client item.
+     * Returns whether the mapper supports the combination of source and destination object.
+     * @param object $source
+     * @param object $destination
+     * @return bool
+     */
+    public function supports($source, $destination): bool
+    {
+        return $source instanceof DatabaseItem && $destination instanceof GenericEntity;
+    }
+
+    /**
+     * Maps the source object to the destination one.
      * @param DatabaseItem $databaseItem
      * @param GenericEntity $clientItem
-     * @return GenericEntity
      */
-    public function mapItem(DatabaseItem $databaseItem, GenericEntity $clientItem): GenericEntity
+    public function map($databaseItem, $clientItem): void
     {
         $clientItem->setType($databaseItem->getType())
                    ->setName($databaseItem->getName());
 
-        $this->translationService->addEntityToTranslate($clientItem);
-        return $clientItem;
+        $this->addToTranslationService($clientItem);
     }
 }

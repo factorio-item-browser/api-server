@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
 use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Constant\ItemType;
 use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Database\Entity\Machine;
@@ -14,7 +16,6 @@ use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\MachineMapper;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -28,10 +29,10 @@ use Zend\Validator\NotEmpty;
 class RecipeMachinesHandler extends AbstractRequestHandler
 {
     /**
-     * The machine mapper.
-     * @var MachineMapper
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $machineMapper;
+    protected $mapperManager;
 
     /**
      * The database service of the machines.
@@ -53,19 +54,19 @@ class RecipeMachinesHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
-     * @param MachineMapper $machineMapper
      * @param MachineService $machineService
+     * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
      * @param TranslationService $translationService
      */
     public function __construct(
-        MachineMapper $machineMapper,
         MachineService $machineService,
+        MapperManagerInterface $mapperManager,
         RecipeService $recipeService,
         TranslationService $translationService
     ) {
-        $this->machineMapper = $machineMapper;
         $this->machineService = $machineService;
+        $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
         $this->translationService = $translationService;
     }
@@ -114,6 +115,8 @@ class RecipeMachinesHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
+     * @throws ApiServerException
+     * @throws MapperException
      */
     protected function handleRequest(DataContainer $requestData): array
     {
@@ -136,7 +139,9 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         );
         $clientMachines = [];
         foreach ($slicedDatabaseMachines as $databaseMachine) {
-            $clientMachines[] = $this->machineMapper->mapMachine($databaseMachine, new ClientMachine());
+            $clientMachine = new ClientMachine();
+            $this->mapperManager->map($databaseMachine, $clientMachine);
+            $clientMachines[] = $clientMachine;
         }
 
         $this->translationService->translateEntities();
