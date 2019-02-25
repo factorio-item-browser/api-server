@@ -17,10 +17,11 @@ return [
     ConfigKey::MAIN => [
         ConfigKey::MAPPERS => [
             Mapper\CombiningRecipeMapper::class,
-            Mapper\ItemMapper::class,
-            Mapper\MachineMapper::class,
-            Mapper\ModMapper::class,
-            Mapper\RecipeMapper::class,
+            Mapper\DatabaseItemToGenericEntityMapper::class,
+            Mapper\DatabaseMachineToClientMachineMapper::class,
+            Mapper\DatabaseModToClientModMapper::class,
+            Mapper\DatabaseRecipeToClientRecipeMapper::class,
+            Mapper\DatabaseRecipeToGenericEntityMapper::class,
         ],
     ],
 ];

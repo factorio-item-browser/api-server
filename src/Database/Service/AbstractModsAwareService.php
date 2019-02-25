@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use FactorioItemBrowser\Api\Database\Data\DataInterface;
-use FactorioItemBrowser\Api\Database\Helper\DataHelper;
+use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 
 /**
  * The abstract service being aware of the mod service.
@@ -37,7 +37,7 @@ abstract class AbstractModsAwareService
      */
     protected function filterData(array $data): array
     {
-        $dataHelper = new DataHelper();
+        $dataHelper = new DataFilter();
         return $dataHelper->filter($data);
     }
 }

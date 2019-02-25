@@ -9,12 +9,12 @@ use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 
 /**
- * The class able to map mods.
+ * The class able to map database mods to client ones.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
+class DatabaseModToClientModMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
 {
     /**
      * Returns the source class supported by this mapper.

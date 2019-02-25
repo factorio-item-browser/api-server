@@ -19,6 +19,7 @@
     "bluepsyduck/mapper-manager": "^1.0",
     "factorio-item-browser/api-client": "^1.1",
     "factorio-item-browser/api-database": "dev-refactor-doctrine",
+    "factorio-item-browser/api-search": "dev-master",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
     "mtymek/blast-reflection-factory": "^1.0",

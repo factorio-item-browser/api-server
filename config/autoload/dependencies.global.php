@@ -41,10 +41,11 @@ return [
             Handler\Search\SearchQueryHandler::class => ReflectionFactory::class,
 
             Mapper\CombiningRecipeMapper::class => ReflectionFactory::class,
-            Mapper\ItemMapper::class => ReflectionFactory::class,
-            Mapper\MachineMapper::class => ReflectionFactory::class,
-            Mapper\ModMapper::class => ReflectionFactory::class,
-            Mapper\RecipeMapper::class => ReflectionFactory::class,
+            Mapper\DatabaseItemToGenericEntityMapper::class => ReflectionFactory::class,
+            Mapper\DatabaseMachineToClientMachineMapper::class => ReflectionFactory::class,
+            Mapper\DatabaseModToClientModMapper::class => ReflectionFactory::class,
+            Mapper\DatabaseRecipeToClientRecipeMapper::class => ReflectionFactory::class,
+            Mapper\DatabaseRecipeToGenericEntityMapper::class => ReflectionFactory::class,
 
             Middleware\AcceptLanguageMiddleware::class => ReflectionFactory::class,
             Middleware\AuthorizationMiddleware::class => ReflectionFactory::class,
@@ -52,18 +53,12 @@ return [
             Middleware\DocumentationRedirectMiddleware::class => ReflectionFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
 
-            Search\Handler\DuplicateRecipeHandler::class => InvokableFactory::class,
-            Search\Handler\ItemHandler::class => ReflectionFactory::class,
-            Search\Handler\MissingItemIdHandler::class => ReflectionFactory::class,
-            Search\Handler\MissingRecipeIdHandler::class => ReflectionFactory::class,
-            Search\Handler\ProductRecipeHandler::class => ReflectionFactory::class,
-            Search\Handler\RecipeHandler::class => ReflectionFactory::class,
-            Search\Handler\SearchHandlerManager::class => Search\Handler\SearchHandlerManagerFactory::class,
-            Search\Handler\TranslationHandler::class => ReflectionFactory::class,
-            Search\SearchDecorator::class => ReflectionFactory::class,
+            SearchDecorator\ItemDecorator::class => ReflectionFactory::class,
+            SearchDecorator\RecipeDecorator::class => ReflectionFactory::class,
 
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => Service\AuthorizationServiceFactory::class,
+            Service\SearchDecoratorService::class => Service\SearchDecoratorServiceFactory::class,
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => InvokableFactory::class,

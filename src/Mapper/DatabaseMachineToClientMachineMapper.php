@@ -9,12 +9,12 @@ use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Database\Entity\Machine as DatabaseMachine;
 
 /**
- * The class able to map machines.
+ * The class able to map database machines to client ones.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class MachineMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
+class DatabaseMachineToClientMachineMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
 {
     /**
      * Returns the source class supported by this mapper.

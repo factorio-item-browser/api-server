@@ -8,6 +8,7 @@ parameters:
     - '#Dynamic call to static method PHPUnit\\Framework\\.*#'
     - '#Method FactorioItemBrowser\\Api\\Server\\Service\\AuthorizationService::decodeSerializedToken\(\) should return stdClass but returns object\.#'
     - '#.* should be contravariant with parameter .* \(object\) of method BluePsyduck\\MapperManager\\Mapper\\MapperInterface\:\:map\(\)#'
+    - '#.* should be contravariant with parameter .* \(FactorioItemBrowser\\Api\\Search\\Entity\\Result\\ResultInterface\) of method FactorioItemBrowser\\Api\\Server\\SearchDecorator\\SearchDecoratorInterface\:\:.*\(\)#'
 
 includes:
   - vendor/phpstan/phpstan-phpunit/extension.neon

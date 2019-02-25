@@ -17,7 +17,7 @@ use FactorioItemBrowser\Api\Database\Entity\RecipeProduct as DatabaseProduct;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeMapper extends TranslationServiceAwareMapper implements DynamicMapperInterface
+class DatabaseRecipeToClientRecipeMapper extends TranslationServiceAwareMapper implements DynamicMapperInterface
 {
     /**
      * Returns whether the mapper supports the combination of source and destination object.

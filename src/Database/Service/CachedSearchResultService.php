@@ -5,14 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
 use DateTime;
-use FactorioItemBrowser\Api\Database\Entity\CachedSearchResult;
 use FactorioItemBrowser\Api\Database\Repository\CachedSearchResultRepository;
-use FactorioItemBrowser\Api\Server\Search\Result\AbstractResult;
-use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
-use FactorioItemBrowser\Api\Server\Search\Result\ItemResult;
-use FactorioItemBrowser\Api\Server\Search\Result\RecipeResult;
-use FactorioItemBrowser\Api\Server\Search\Result\ResultCollection;
-use FactorioItemBrowser\Api\Server\Search\SearchQuery;
 
 /**
  * The service class of the cached search result database table.
@@ -33,12 +26,6 @@ class CachedSearchResultService extends AbstractModsAwareService implements Clea
     protected const MAX_AGE_SECONDS = 3600;
 
     /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * The repository of the cached search results.
      * @var CachedSearchResultRepository
      */
@@ -48,110 +35,14 @@ class CachedSearchResultService extends AbstractModsAwareService implements Clea
      * Initializes the service.
      * @param CachedSearchResultRepository $cachedSearchResultRepository
      * @param ModService $modService
-     * @param TranslationService $translationService
      */
     public function __construct(
         CachedSearchResultRepository $cachedSearchResultRepository,
-        ModService $modService,
-        TranslationService $translationService
+        ModService $modService
     ) {
         parent::__construct($modService);
 
         $this->cachedSearchResultRepository = $cachedSearchResultRepository;
-        $this->translationService = $translationService;
-    }
-
-    /**
-     * Returns the cached search results, if available.
-     * @param SearchQuery $searchQuery
-     * @return CachedResultCollection|null
-     */
-    public function getSearchResults(SearchQuery $searchQuery): ?CachedResultCollection
-    {
-        $result = null;
-        $cachedSearchResults = $this->cachedSearchResultRepository->findByHashes(
-            [$this->buildSearchHash($searchQuery)],
-            $this->getMaxAge()
-        );
-        $cachedSearchResult = array_shift($cachedSearchResults);
-        if ($cachedSearchResult instanceof CachedSearchResult) {
-            $result = $this->createResultCollectionFromData($cachedSearchResult->getResultData());
-            $cachedSearchResult->setLastSearchTime(new DateTime());
-            $this->cachedSearchResultRepository->persist($cachedSearchResult);
-        }
-        return $result;
-    }
-
-    /**
-     * Persists the search results into the cache.
-     * @param SearchQuery $searchQuery
-     * @param ResultCollection $resultCollection
-     * @return CachedResultCollection
-     */
-    public function persistSearchResults(
-        SearchQuery $searchQuery,
-        ResultCollection $resultCollection
-    ): CachedResultCollection {
-        $resultDataArray = [];
-        foreach (array_slice($resultCollection->getResults(), 0, self::MAX_SEARCH_RESULTS) as $result) {
-            /* @var AbstractResult $result */
-            if ($result->getId() > 0 || count($result->getGroupedRecipeIds()) > 0) {
-                $ids = [$result->getId()];
-                foreach ($result->getGroupedRecipeIds() as $groupedRecipeIds) {
-                    $ids[] = implode('+', $groupedRecipeIds);
-                }
-                $resultDataArray[] = implode(',', $ids);
-            }
-        }
-        $resultData = implode('|', $resultDataArray);
-
-        $cachedSearchResult = new CachedSearchResult($this->buildSearchHash($searchQuery));
-        $cachedSearchResult->setResultData($resultData);
-        $this->cachedSearchResultRepository->persist($cachedSearchResult);
-
-        return $this->createResultCollectionFromData($resultData);
-    }
-
-    /**
-     * Calculates and returns the hash to use for the search results.
-     * @param SearchQuery $searchQuery
-     * @return string
-     */
-    protected function buildSearchHash(SearchQuery $searchQuery): string
-    {
-        return substr(hash('md5', (string) json_encode([
-            'queryHash' => $searchQuery->getHash(),
-            'enabledMods' => $this->modService->getEnabledModCombinationIds(),
-            'locale' => $this->translationService->getCurrentLocale(),
-        ])), 0, 16);
-    }
-
-    /**
-     * Creates a cached result collection from the specified result data.
-     * @param string $resultData
-     * @return CachedResultCollection
-     */
-    protected function createResultCollectionFromData(string $resultData): CachedResultCollection
-    {
-        $cachedResultCollection = new CachedResultCollection();
-
-        foreach (explode('|', $resultData) as $recipeIdData) {
-            if (strlen($recipeIdData) > 0) {
-                $recipeIds = explode(',', $recipeIdData);
-                $itemId = (int) array_shift($recipeIds);
-                if ($itemId > 0) {
-                    $result = new ItemResult();
-                    $result->setId($itemId);
-                } else {
-                    $result = new RecipeResult();
-                }
-                foreach ($recipeIds as $index => $recipeIdGroup) {
-                    $result->addRecipeIds((string) $index, array_map('intval', explode('+', $recipeIdGroup)));
-                }
-                $cachedResultCollection->add($result);
-            }
-        }
-        return $cachedResultCollection;
     }
 
     /**

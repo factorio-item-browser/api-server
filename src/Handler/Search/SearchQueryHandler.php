@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
 use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
+use FactorioItemBrowser\Api\Search\SearchManagerInterface;
+use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
-use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
-use FactorioItemBrowser\Api\Server\Search\Result\ResultCollection;
-use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
-use FactorioItemBrowser\Api\Server\Search\SearchQueryParser;
+use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
 use Zend\Filter\ToInt;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\NotEmpty;
@@ -26,22 +23,22 @@ use Zend\Validator\NotEmpty;
 class SearchQueryHandler extends AbstractRequestHandler
 {
     /**
-     * The search handler manager.
-     * @var SearchHandlerManager
+     * The mod service.
+     * @var ModService
      */
-    protected $searchHandlerManager;
+    protected $modService;
 
     /**
-     * The search decorator.
-     * @var SearchDecorator
+     * The search decorator service.
+     * @var SearchDecoratorService
      */
-    protected $searchDecorator;
+    protected $searchDecoratorService;
 
     /**
-     * The database cached search result service.
-     * @var CachedSearchResultService
+     * The search manager.
+     * @var SearchManagerInterface
      */
-    protected $cachedSearchResultService;
+    protected $searchManager;
 
     /**
      * The database translation service.
@@ -51,20 +48,20 @@ class SearchQueryHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
-     * @param SearchHandlerManager $searchHandlerManager
-     * @param SearchDecorator $searchDecorator
-     * @param CachedSearchResultService $cachedSearchResultService
+     * @param ModService $modService
+     * @param SearchDecoratorService $searchDecoratorService
+     * @param SearchManagerInterface $searchManager
      * @param TranslationService $translationService
      */
     public function __construct(
-        SearchHandlerManager $searchHandlerManager,
-        SearchDecorator $searchDecorator,
-        CachedSearchResultService $cachedSearchResultService,
+        ModService $modService,
+        SearchDecoratorService $searchDecoratorService,
+        SearchManagerInterface $searchManager,
         TranslationService $translationService
     ) {
-        $this->searchHandlerManager = $searchHandlerManager;
-        $this->searchDecorator = $searchDecorator;
-        $this->cachedSearchResultService = $cachedSearchResultService;
+        $this->modService = $modService;
+        $this->searchDecoratorService = $searchDecoratorService;
+        $this->searchManager = $searchManager;
         $this->translationService = $translationService;
     }
 
@@ -127,29 +124,27 @@ class SearchQueryHandler extends AbstractRequestHandler
      */
     protected function handleRequest(DataContainer $requestData): array
     {
-        $searchQuery = (new SearchQueryParser())->parse($requestData->getString('query'));
+        $queryString = $requestData->getString('query');
         $numberOfResults = $requestData->getInteger('numberOfResults');
         $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
         $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
 
-        $cachedSearchResults = $this->cachedSearchResultService->getSearchResults($searchQuery);
-        if (!$cachedSearchResults instanceof CachedResultCollection) {
-            $searchResults = new ResultCollection();
-            $this->searchHandlerManager->handle($searchQuery, $searchResults);
-            $searchResults->sort();
+        $searchQuery = $this->searchManager->parseQuery(
+            $queryString,
+            $this->modService->getEnabledModCombinationIds(),
+            $this->translationService->getCurrentLocale()
+        );
+        $searchResults = $this->searchManager->search($searchQuery);
 
-            $cachedSearchResults = $this->cachedSearchResultService->persistSearchResults($searchQuery, $searchResults);
-        }
-
-        $results = $this->searchDecorator->decorate(
-            $cachedSearchResults->getResults($numberOfResults, $indexOfFirstResult),
+        $results = $this->searchDecoratorService->decorate(
+            $searchResults->getResults($indexOfFirstResult, $numberOfResults),
             $numberOfRecipesPerResult
         );
 
         $this->translationService->translateEntities();
         return [
             'results' => $results,
-            'totalNumberOfResults' => $cachedSearchResults->count()
+            'totalNumberOfResults' => $searchResults->count()
         ];
     }
 }
