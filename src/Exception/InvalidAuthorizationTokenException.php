@@ -15,11 +15,17 @@ use Throwable;
 class InvalidAuthorizationTokenException extends ApiServerException
 {
     /**
+     * The message template of the exception.
+     */
+    protected const MESSAGE = 'The authorization token is invalid.';
+
+
+    /**
      * Initializes the exception.
      * @param Throwable|null $previous
      */
     public function __construct(?Throwable $previous = null)
     {
-        parent::__construct('Authorization token is invalid.', 401, $previous);
+        parent::__construct(self::MESSAGE, 401, $previous);
     }
 }

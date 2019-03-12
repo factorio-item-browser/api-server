@@ -25,6 +25,7 @@ $aggregator = new ConfigAggregator([
 
     \Blast\BaseUrl\ConfigProvider::class,
     \BluePsyduck\MapperManager\ConfigProvider::class,
+    \FactorioItemBrowser\Api\Client\ConfigProvider::class,
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,
     \FactorioItemBrowser\Api\Search\ConfigProvider::class,
     \Zend\Expressive\Helper\ConfigProvider::class,

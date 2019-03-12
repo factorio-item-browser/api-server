@@ -38,7 +38,8 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(ImplicitOptionsMiddleware::class);
     $app->pipe(Middleware\AuthorizationMiddleware::class);
     $app->pipe(Middleware\AcceptLanguageMiddleware::class);
-    $app->pipe(BodyParamsMiddleware::class);
+    $app->pipe(Middleware\RequestDeserializerMiddleware::class);
+    $app->pipe(Middleware\ResponseSerializerMiddleware::class);
 
     $app->pipe(DispatchMiddleware::class);
     $app->pipe(Handler\NotFoundHandler::class);

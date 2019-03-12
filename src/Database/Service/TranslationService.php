@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Database\Service;
 
-use FactorioItemBrowser\Api\Client\Constant\EntityType;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
-use FactorioItemBrowser\Api\Database\Data\TranslationPriorityData;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
+use FactorioItemBrowser\Common\Constant\EntityType;
 
 /**
  * The service class of the translation database table.
@@ -157,19 +156,5 @@ class TranslationService extends AbstractModsAwareService
             }
         }
         return $this;
-    }
-
-    /**
-     * Returns the types and names of translations matching the specified keywords.
-     * @param array|string[] $keywords
-     * @return array|TranslationPriorityData[]
-     */
-    public function getTypesAndNamesByKeywords(array $keywords): array
-    {
-        return $this->translationRepository->findDataByKeywords(
-            $this->currentLocale,
-            $keywords,
-            $this->modService->getEnabledModCombinationIds()
-        );
     }
 }

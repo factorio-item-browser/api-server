@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
-use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Request\Mod\ModMetaRequest;
+use FactorioItemBrowser\Api\Client\Request\RequestInterface;
+use FactorioItemBrowser\Api\Client\Response\Mod\ModMetaResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use Zend\InputFilter\InputFilter;
 
 /**
  * The handler of the /mod/meta request.
@@ -32,26 +34,25 @@ class ModMetaHandler extends AbstractRequestHandler
         $this->modService = $modService;
     }
 
-
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        return new InputFilter();
+        return ModMetaRequest::class;
     }
 
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param RequestInterface $request
+     * @return ResponseInterface
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest(RequestInterface $request): ResponseInterface
     {
-        return [
-            'numberOfAvailableMods' => $this->modService->getNumberOfAvailableMods(),
-            'numberOfEnabledMods' => $this->modService->getNumberOfEnabledMods()
-        ];
+        $response = new ModMetaResponse();
+        $response->setNumberOfAvailableMods($this->modService->getNumberOfAvailableMods())
+                 ->setNumberOfEnabledMods($this->modService->getNumberOfEnabledMods());
+        return $response;
     }
 }

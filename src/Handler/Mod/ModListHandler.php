@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
-use BluePsyduck\Common\Data\DataContainer;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
+use FactorioItemBrowser\Api\Client\Request\Mod\ModListRequest;
+use FactorioItemBrowser\Api\Client\Request\RequestInterface;
+use FactorioItemBrowser\Api\Client\Response\Mod\ModListResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use Zend\InputFilter\InputFilter;
 
 /**
  * The handler of the /mod/list request.
@@ -34,57 +36,57 @@ class ModListHandler extends AbstractRequestHandler
     protected $modService;
 
     /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * Initializes the auth handler.
      * @param MapperManagerInterface $mapperManager
      * @param ModService $modService
-     * @param TranslationService $translationService
      */
     public function __construct(
         MapperManagerInterface $mapperManager,
-        ModService $modService,
-        TranslationService $translationService
+        ModService $modService
     ) {
         $this->mapperManager = $mapperManager;
         $this->modService = $modService;
-        $this->translationService = $translationService;
     }
 
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        return new InputFilter();
+        return ModListRequest::class;
     }
-
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param RequestInterface $request
+     * @return ResponseInterface
      * @throws MapperException
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest(RequestInterface $request): ResponseInterface
     {
-        $enabledModNames = $this->modService->getEnabledModNames();
-        $clientMods = [];
-        foreach ($this->modService->getAllMods() as $databaseMod) {
-            $clientMod = new ClientMod();
-            $this->mapperManager->map($databaseMod, $clientMod);
-            $clientMod->setIsEnabled(in_array($databaseMod->getName(), $enabledModNames, true));
+        $response = new ModListResponse();
 
-            $clientMods[] = $clientMod;
+        $enabledModNames = $this->modService->getEnabledModNames();
+        foreach ($this->modService->getAllMods() as $databaseMod) {
+            $isEnabled = in_array($databaseMod->getName(), $enabledModNames, true);
+            $response->addMod($this->createClientMod($databaseMod, $isEnabled));
         }
 
-        $this->translationService->translateEntities();
-        return [
-            'mods' => $clientMods
-        ];
+        return $response;
+    }
+
+    /**
+     * Creates the client mod entity from the database mod.
+     * @param DatabaseMod $databaseMod
+     * @param bool $isEnabled
+     * @return ClientMod
+     * @throws MapperException
+     */
+    protected function createClientMod(DatabaseMod $databaseMod, bool $isEnabled): ClientMod
+    {
+        $result = new ClientMod();
+        $this->mapperManager->map($databaseMod, $result);
+        $result->setIsEnabled($isEnabled);
+        return $result;
     }
 }

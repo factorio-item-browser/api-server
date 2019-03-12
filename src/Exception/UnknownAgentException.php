@@ -15,11 +15,16 @@ use Throwable;
 class UnknownAgentException extends ApiServerException
 {
     /**
+     * The message template of the exception.
+     */
+    protected const MESSAGE = 'Agent is not known or invalid access key.';
+
+    /**
      * Initializes the exception.
      * @param Throwable|null $previous
      */
     public function __construct(?Throwable $previous = null)
     {
-        parent::__construct('Agent not known or invalid access key.', 403, $previous);
+        parent::__construct(self::MESSAGE, 403, $previous);
     }
 }

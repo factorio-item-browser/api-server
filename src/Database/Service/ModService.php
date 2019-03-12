@@ -127,7 +127,6 @@ class ModService
     {
         $result = [];
         foreach ($this->modRepository->findAll() as $mod) {
-            /* @var Mod $mod */
             $result[$mod->getName()] = $mod;
         }
         return $result;

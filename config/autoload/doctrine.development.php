@@ -16,8 +16,6 @@ use PDO;
 use Zend\ConfigAggregator\ConfigAggregator;
 
 return [
-    ConfigAggregator::ENABLE_CACHE => false,
-    'debug' => true,
     'doctrine' => [
         'configuration' => [
             'orm_default' => [
@@ -41,7 +39,7 @@ return [
             ]
         ],
         'driver' => [
-            'fib-api-database' => [
+            'orm_default' => [
                 'cache' => 'filesystem',
             ]
         ],

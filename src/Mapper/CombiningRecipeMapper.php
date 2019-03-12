@@ -39,6 +39,7 @@ class CombiningRecipeMapper implements DynamicMapperInterface
         if ($newRecipe->getMode() === RecipeMode::EXPENSIVE) {
             $existingRecipe->setExpensiveVersion($newRecipe);
         } else {
+            // @todo Map recipes together
             $expensiveData = $existingRecipe->writeData();
             $existingRecipe->readData(new DataContainer($newRecipe->writeData()));
             $newRecipe->readData(new DataContainer($expensiveData));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -26,10 +27,11 @@ class AgentServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
+        $projectConfig = $config[ConfigKey::PROJECT][ConfigKey::API_SERVER];
 
         $agents = [];
-        foreach ($config['factorio-item-browser']['api-server']['agents'] ?? [] as $name => $agentConfig) {
-            $agents[] = $this->createAgent($name, $agentConfig);
+        foreach ($projectConfig[ConfigKey::AGENTS] ?? [] as $agentConfig) {
+            $agents[] = $this->createAgent($agentConfig);
         }
 
         return new AgentService($agents);
@@ -37,17 +39,15 @@ class AgentServiceFactory implements FactoryInterface
 
     /**
      * Creates an agent from the specified config.
-     * @param string $name
      * @param array $agentConfig
      * @return Agent
      */
-    protected function createAgent(string $name, array $agentConfig): Agent
+    protected function createAgent(array $agentConfig): Agent
     {
         $result = new Agent();
-        $result->setName($name)
-               ->setAccessKey($agentConfig['access-key'] ?? '')
-               ->setIsDemo(($agentConfig['demo'] ?? false) === true);
-
+        $result->setName($agentConfig[ConfigKey::AGENT_NAME] ?? '')
+               ->setAccessKey($agentConfig[ConfigKey::AGENT_ACCESS_KEY] ?? '')
+               ->setIsDemo(($agentConfig[ConfigKey::AGENT_DEMO] ?? false) === true);
         return $result;
     }
 }

@@ -52,6 +52,8 @@ return [
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => ReflectionFactory::class,
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
+            Middleware\RequestDeserializerMiddleware::class => Middleware\RequestDeserializerMiddlewareFactory::class,
+            Middleware\ResponseSerializerMiddleware::class => Middleware\ResponseSerializerMiddlewareFactory::class,
 
             SearchDecorator\ItemDecorator::class => ReflectionFactory::class,
             SearchDecorator\RecipeDecorator::class => ReflectionFactory::class,

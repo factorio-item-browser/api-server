@@ -60,9 +60,6 @@ class ErrorResponseGenerator
         $errorData = [
             'message' => $message,
         ];
-        if ($exception instanceof ApiServerException && count($exception->getParameters()) > 0) {
-            $errorData['parameters'] = $exception->getParameters();
-        }
 
         return new JsonResponse(['error' => $errorData], $statusCode, $response->getHeaders());
     }
