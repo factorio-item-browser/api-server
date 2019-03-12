@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use FactorioItemBrowser\Api\Server\SearchDecorator\ItemDecorator;
-use FactorioItemBrowser\Api\Server\SearchDecorator\RecipeDecorator;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\SearchDecorator\SearchDecoratorInterface;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
- *
+ * The factory of the search decorator service.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
 class SearchDecoratorServiceFactory implements FactoryInterface
 {
-    protected const ALIASES = [
-        ItemDecorator::class,
-        RecipeDecorator::class,
-    ];
-
     /**
      * Creates the service.
      * @param  ContainerInterface $container
@@ -30,9 +24,17 @@ class SearchDecoratorServiceFactory implements FactoryInterface
      * @param  null|array $options
      * @return SearchDecoratorService
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
-    {
-        return new SearchDecoratorService($this->createSearchDecorators($container, self::ALIASES));
+    public function __invoke(
+        ContainerInterface $container,
+        $requestedName,
+        array $options = null
+    ): SearchDecoratorService {
+        $config = $container->get('config');
+        $projectConfig = $config[ConfigKey::PROJECT][ConfigKey::API_SERVER];
+
+        return new SearchDecoratorService(
+            $this->createSearchDecorators($container, $projectConfig[ConfigKey::SEARCH_DECORATORS])
+        );
     }
 
     /**

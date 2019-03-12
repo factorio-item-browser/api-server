@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
-use BluePsyduck\Common\Data\DataContainer;
 use BluePsyduck\MapperManager\Mapper\DynamicMapperInterface;
 use FactorioItemBrowser\Api\Client\Entity\Recipe;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
@@ -39,10 +38,24 @@ class CombiningRecipeMapper implements DynamicMapperInterface
         if ($newRecipe->getMode() === RecipeMode::EXPENSIVE) {
             $existingRecipe->setExpensiveVersion($newRecipe);
         } else {
-            // @todo Map recipes together
-            $expensiveData = $existingRecipe->writeData();
-            $existingRecipe->readData(new DataContainer($newRecipe->writeData()));
-            $newRecipe->readData(new DataContainer($expensiveData));
+            $tempRecipe = clone($existingRecipe);
+            $this->mapRecipe($newRecipe, $existingRecipe);
+            $this->mapRecipe($tempRecipe, $newRecipe);
+            $existingRecipe->setExpensiveVersion($newRecipe);
         }
+    }
+
+    /**
+     * Maps the recipe from one instance to another.
+     * @param Recipe $source
+     * @param Recipe $destination
+     */
+    protected function mapRecipe(Recipe $source, Recipe $destination): void
+    {
+        $destination->setName($source->getName())
+                    ->setMode($source->getMode())
+                    ->setCraftingTime($source->getCraftingTime())
+                    ->setIngredients($source->getIngredients())
+                    ->setProducts($source->getProducts());
     }
 }

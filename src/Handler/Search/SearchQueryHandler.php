@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
-use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Request\RequestInterface;
+use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
 use FactorioItemBrowser\Api\Search\SearchManagerInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
-use Zend\Filter\ToInt;
-use Zend\InputFilter\InputFilter;
-use Zend\Validator\NotEmpty;
 
 /**
  * The handler of the /search/query request.
@@ -64,87 +64,42 @@ class SearchQueryHandler extends AbstractRequestHandler
         $this->searchManager = $searchManager;
         $this->translationService = $translationService;
     }
-
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        $inputFilter = new InputFilter();
-        $inputFilter
-            ->add([
-                'name' => 'query',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfResults',
-                'required' => true,
-                'fallback_value' => 10,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'indexOfFirstResult',
-                'required' => true,
-                'fallback_value' => 0,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfRecipesPerResult',
-                'required' => true,
-                'fallback_value' => 3,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ]);
-
-        return $inputFilter;
+        return SearchQueryRequest::class;
     }
-
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param RequestInterface $request
+     * @return ResponseInterface
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest(RequestInterface $request): ResponseInterface
     {
-        $queryString = $requestData->getString('query');
-        $numberOfResults = $requestData->getInteger('numberOfResults');
-        $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
-        $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
+        /** @var SearchQueryRequest $request */
 
         $searchQuery = $this->searchManager->parseQuery(
-            $queryString,
+            $request->getQuery(),
             $this->modService->getEnabledModCombinationIds(),
             $this->translationService->getCurrentLocale()
         );
         $searchResults = $this->searchManager->search($searchQuery);
-
-        $results = $this->searchDecoratorService->decorate(
-            $searchResults->getResults($indexOfFirstResult, $numberOfResults),
-            $numberOfRecipesPerResult
+        $currentSearchResults = $searchResults->getResults(
+            $request->getIndexOfFirstResult(),
+            $request->getNumberOfResults()
+        );
+        $decoratedSearchResults = $this->searchDecoratorService->decorate(
+            $currentSearchResults,
+            $request->getNumberOfRecipesPerResult()
         );
 
-        $this->translationService->translateEntities();
-        return [
-            'results' => $results,
-            'totalNumberOfResults' => $searchResults->count()
-        ];
+        $response = new SearchQueryResponse();
+        $response->setResults($decoratedSearchResults)
+                 ->setTotalNumberOfResults($searchResults->count());
+        return $response;
+
     }
 }

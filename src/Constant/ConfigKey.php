@@ -58,6 +58,11 @@ interface ConfigKey
     public const MAP_ROUTE_TO_REQUEST = 'map-route-to-request';
 
     /**
+     * The key holding the search decorators to use.
+     */
+    public const SEARCH_DECORATORS = 'search-decorators';
+
+    /**
      * The key holding the version of the API server.
      */
     public const VERSION = 'version';

@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
 
 /**
  * The middleware serializing the response.
@@ -50,7 +48,6 @@ class ResponseSerializerMiddleware implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws ApiServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

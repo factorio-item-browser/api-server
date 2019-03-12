@@ -6,7 +6,6 @@ namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\EntityInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
@@ -118,10 +117,10 @@ class ItemDecorator implements SearchDecoratorInterface
     /**
      * Actually decorates the search result.
      * @param ItemResult $itemResult
-     * @return EntityInterface|null
+     * @return GenericEntityWithRecipes|null
      * @throws MapperException
      */
-    public function decorate($itemResult): ?EntityInterface
+    public function decorate($itemResult): ?GenericEntityWithRecipes
     {
         $item = $this->items[$itemResult->getId()];
         $result = new GenericEntityWithRecipes();

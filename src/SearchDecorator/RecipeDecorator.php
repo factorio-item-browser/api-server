@@ -6,7 +6,6 @@ namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\EntityInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
@@ -83,7 +82,7 @@ class RecipeDecorator implements SearchDecoratorInterface
     public function announce($recipeResult): void
     {
         $this->recipeIds[] = $recipeResult->getNormalRecipeId();
-        $this->recipeIds[] = $recipeResult->getNormalRecipeId();
+        $this->recipeIds[] = $recipeResult->getExpensiveRecipeId();
     }
 
     /**
@@ -98,10 +97,10 @@ class RecipeDecorator implements SearchDecoratorInterface
     /**
      * Actually decorates the search result.
      * @param RecipeResult $recipeResult
-     * @return EntityInterface|null
+     * @return GenericEntityWithRecipes|null
      * @throws MapperException
      */
-    public function decorate($recipeResult): ?EntityInterface
+    public function decorate($recipeResult): ?GenericEntityWithRecipes
     {
         $result = null;
         $recipeId = $this->getRecipeIdFromResult($recipeResult);

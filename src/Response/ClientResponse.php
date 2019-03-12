@@ -33,9 +33,7 @@ class ClientResponse extends Response
      */
     public function __construct(ResponseInterface $response, $status = 200, array $headers = [])
     {
-        $headers = $this->injectContentType('application/json', $headers);
-
-        parent::__construct('php://memory', $status, $headers);
+        parent::__construct('php://memory', $status, $this->injectContentType('application/json', $headers));
 
         $this->response = $response;
     }

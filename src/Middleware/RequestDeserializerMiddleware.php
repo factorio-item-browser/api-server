@@ -7,7 +7,6 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\InternalServerException;
 use FactorioItemBrowser\Api\Server\Exception\MalformedRequestException;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface;

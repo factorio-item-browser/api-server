@@ -38,6 +38,10 @@ return [
                 RouteName::RECIPE_MACHINES => Request\Recipe\RecipeMachinesRequest::class,
                 RouteName::SEARCH_QUERY => Request\Search\SearchQueryRequest::class,
             ],
+            ConfigKey::SEARCH_DECORATORS => [
+                SearchDecorator\ItemDecorator::class,
+                SearchDecorator\RecipeDecorator::class,
+            ],
             ConfigKey::VERSION => '1.2.0',
         ],
     ],
