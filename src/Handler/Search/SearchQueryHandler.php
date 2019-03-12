@@ -64,6 +64,7 @@ class SearchQueryHandler extends AbstractRequestHandler
         $this->searchManager = $searchManager;
         $this->translationService = $translationService;
     }
+
     /**
      * Returns the request class the handler is expecting.
      * @return string
@@ -72,6 +73,7 @@ class SearchQueryHandler extends AbstractRequestHandler
     {
         return SearchQueryRequest::class;
     }
+
     /**
      * Creates the response data from the validated request data.
      * @param RequestInterface $request
@@ -100,6 +102,5 @@ class SearchQueryHandler extends AbstractRequestHandler
         $response->setResults($decoratedSearchResults)
                  ->setTotalNumberOfResults($searchResults->count());
         return $response;
-
     }
 }
