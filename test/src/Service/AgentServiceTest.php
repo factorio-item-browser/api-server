@@ -40,6 +40,46 @@ class AgentServiceTest extends TestCase
     }
 
     /**
+     * Provides the data for the getByName test.
+     * @return array
+     */
+    public function provideGetByName(): array
+    {
+        $agent1 = new Agent();
+        $agent1->setName('abc')
+               ->setAccessKey('def');
+        $agent2 = new Agent();
+        $agent2->setName('ghi')
+               ->setAccessKey('jkl');
+
+        $agents = [
+            'abc' => $agent1,
+            'ghi' => $agent2,
+        ];
+
+        return [
+            [$agents, 'abc', $agent1],
+            [$agents, 'foo', null],
+        ];
+    }
+
+    /**
+     * Tests the getByName method.
+     * @param array|Agent[] $agents
+     * @param string $name
+     * @param Agent|null $expectedResult
+     * @covers ::getByName
+     * @dataProvider provideGetByName
+     */
+    public function testGetByName(array $agents, string $name, ?Agent $expectedResult): void
+    {
+        $service = new AgentService($agents);
+        $result = $service->getByName($name);
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    /**
      * Provides the data for the getByAccessKey test.
      * @return array
      */

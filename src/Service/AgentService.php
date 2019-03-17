@@ -33,6 +33,16 @@ class AgentService
     }
 
     /**
+     * Returns the agent with the name.
+     * @param string $name
+     * @return Agent|null
+     */
+    public function getByName(string $name): ?Agent
+    {
+        return $this->agentsByName[$name] ?? null;
+    }
+
+    /**
      * Returns the agent with the access key, if it actually matches.
      * @param string $name
      * @param string $accessKey

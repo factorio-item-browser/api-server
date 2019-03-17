@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AgentServiceFactory;
@@ -26,14 +27,15 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Tests the invoking.
+     * @throws ReflectionException
      * @covers ::__invoke
      */
     public function testInvoke(): void
     {
         $config = [
-            'factorio-item-browser' => [
-                'api-server' => [
-                    'agents' => [
+            ConfigKey::PROJECT => [
+                ConfigKey::API_SERVER => [
+                    ConfigKey::AGENTS => [
                         'abc' => ['def' => 'ghi'],
                         'jkl' => ['mno' => 'pqr'],
                     ],
@@ -55,8 +57,8 @@ class AgentServiceFactoryTest extends TestCase
         $factory->expects($this->exactly(2))
                 ->method('createAgent')
                 ->withConsecutive(
-                    [$this->identicalTo('abc'), $this->identicalTo(['def' => 'ghi'])],
-                    [$this->identicalTo('jkl'), $this->identicalTo(['mno' => 'pqr'])]
+                    [$this->identicalTo(['def' => 'ghi'])],
+                    [$this->identicalTo(['mno' => 'pqr'])]
                 )
                 ->willReturnOnConsecutiveCalls(
                     $this->createMock(Agent::class),
@@ -72,35 +74,46 @@ class AgentServiceFactoryTest extends TestCase
      */
     public function provideCreateAgent(): array
     {
+        $agentConfig1 = [
+            ConfigKey::AGENT_NAME => 'abc',
+            ConfigKey::AGENT_ACCESS_KEY => 'def',
+            ConfigKey::AGENT_DEMO => true,
+        ];
+
         $agent1 = new Agent();
         $agent1->setName('abc')
                ->setAccessKey('def')
                ->setIsDemo(true);
 
         $agent2 = new Agent();
-        $agent2->setName('abc')
+        $agent2->setName('')
                ->setAccessKey('')
                ->setIsDemo(false);
 
         return [
-            ['abc', ['access-key' => 'def', 'demo' => true], $agent1],
-            ['abc', [], $agent2],
+            [ // Actual config
+                $agentConfig1,
+                $agent1,
+            ],
+            [ // Empty config
+                [],
+                $agent2,
+            ],
         ];
     }
 
     /**
      * Tests the createAgent method.
-     * @param string $name
      * @param array $agentConfig
      * @param Agent $expectedResult
      * @throws ReflectionException
      * @covers ::createAgent
      * @dataProvider provideCreateAgent
      */
-    public function testCreateAgent(string $name, array $agentConfig, Agent $expectedResult): void
+    public function testCreateAgent(array $agentConfig, Agent $expectedResult): void
     {
         $factory = new AgentServiceFactory();
-        $result = $this->invokeMethod($factory, 'createAgent', $name, $agentConfig);
+        $result = $this->invokeMethod($factory, 'createAgent', $agentConfig);
 
         $this->assertEquals($expectedResult, $result);
     }
