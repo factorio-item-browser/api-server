@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 
 use BluePsyduck\Common\Data\DataContainer;
+use FactorioItemBrowser\Api\Client\Entity\Entity as ClientEntity;
 use FactorioItemBrowser\Api\Client\Entity\Icon as ClientIcon;
-use FactorioItemBrowser\Api\Client\Entity\IconEntity as ClientIconEntity;
+use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
+use FactorioItemBrowser\Api\Client\Request\RequestInterface as ClientRequestInterface;
+use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\IconService;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 
 /**
  * The handler of the /generic/icon request.
@@ -32,12 +37,42 @@ class GenericIconHandler extends AbstractGenericHandler
         $this->iconService = $iconService;
     }
 
+        /**
+     * Returns the request class the handler is expecting.
+     * @return string
+     */
+    protected function getExpectedRequestClass(): string
+    {
+        return GenericIconRequest::class;
+    }
+
+    /**
+     * Creates the response data from the validated request data.
+     * @param ClientRequestInterface $request
+     * @return ClientResponseInterface
+     * @throws ApiServerException
+     */
+    protected function handleRequest(ClientRequestInterface $request): ClientResponseInterface
+    {
+        /** @var GenericIconRequest $request */
+
+        $clientIcons = $this->prepareClientIcons($iconFileHashes);
+        $this->fetchEntitiesToIcons($clientIcons);
+
+        $filteredClientIcons = $this->filterRequestedIcons($clientIcons, $namesByTypes);
+        $this->hydrateContentToIcons($filteredClientIcons);
+
+        $response = new GenericIconResponse();
+        $response->setIcons($filteredClientIcons);
+        return $response;
+    }
+
     /**
      * Creates the response data from the validated request data.
      * @param DataContainer $requestData
      * @return array
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function __handleRequest(DataContainer $requestData): array
     {
         $namesByTypes = $this->getEntityNamesByType($requestData);
         $iconFileHashes = $this->getIconFileHashesByTypesAndNames($namesByTypes);
@@ -100,11 +135,11 @@ class GenericIconHandler extends AbstractGenericHandler
      * Creates a client icon entity.
      * @param string $type
      * @param string $name
-     * @return ClientIconEntity
+     * @return ClientEntity
      */
-    protected function createClientIconEntity(string $type, string $name): ClientIconEntity
+    protected function createClientIconEntity(string $type, string $name): ClientEntity
     {
-        $result= new ClientIconEntity();
+        $result= new ClientEntity();
         $result->setType($type)
                ->setName($name);
         return $result;
@@ -153,7 +188,7 @@ class GenericIconHandler extends AbstractGenericHandler
         foreach ($iconFiles as $iconFile) {
             $iconFileHash = $iconFile->getHash();
             if (isset($clientIcons[$iconFileHash])) {
-                $clientIcons[$iconFileHash]->setContent(base64_encode($iconFile->getImage()));
+                $clientIcons[$iconFileHash]->setContent($iconFile->getImage());
             }
         }
     }

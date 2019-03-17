@@ -105,15 +105,27 @@ class RecipeDecorator implements SearchDecoratorInterface
         $result = null;
         $recipeId = $this->getRecipeIdFromResult($recipeResult);
         if (isset($this->recipes[$recipeId])) {
-            $result = new GenericEntityWithRecipes();
-            $this->mapperManager->map($this->recipes[$recipeId], $result);
+            $result = $this->createEntityForRecipe($this->recipes[$recipeId]);
 
             $recipe = $this->decorateRecipe($recipeResult);
             if ($recipe instanceof ClientRecipe) {
-                $result->addRecipe($recipe);
-                $result->setTotalNumberOfRecipes(1);
+                $result->addRecipe($recipe)
+                       ->setTotalNumberOfRecipes(1);
             }
         }
+        return $result;
+    }
+
+    /**
+     * Creates the entity to the recipe.
+     * @param DatabaseRecipe $recipe
+     * @return GenericEntityWithRecipes
+     * @throws MapperException
+     */
+    protected function createEntityForRecipe(DatabaseRecipe $recipe): GenericEntityWithRecipes
+    {
+        $result = new GenericEntityWithRecipes();
+        $this->mapperManager->map($recipe, $result);
         return $result;
     }
 
@@ -139,17 +151,17 @@ class RecipeDecorator implements SearchDecoratorInterface
      */
     public function decorateRecipe(RecipeResult $recipeResult): ?RecipeWithExpensiveVersion
     {
+        $normalRecipe = $this->mapRecipeWithId($recipeResult->getNormalRecipeId());
+        $expensiveRecipe = $this->mapRecipeWithId($recipeResult->getExpensiveRecipeId());
+
         $result = null;
-        if ($recipeResult->getNormalRecipeId() > 0) {
-            $result = $this->mapRecipeWithId($recipeResult->getNormalRecipeId());
-        }
-        if ($recipeResult->getExpensiveRecipeId() > 0) {
-            $recipe = $this->mapRecipeWithId($recipeResult->getExpensiveRecipeId());
-            if ($result === null) {
-                $result = $recipe;
-            } elseif ($recipe !== null) {
-                $this->mapperManager->map($result, $recipe);
+        if ($normalRecipe !== null) {
+            if ($expensiveRecipe !== null) {
+                $normalRecipe->setExpensiveVersion($expensiveRecipe);
             }
+            $result = $normalRecipe;
+        } elseif ($expensiveRecipe !== null) {
+            $result = $expensiveRecipe;
         }
         return $result;
     }

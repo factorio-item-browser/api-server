@@ -204,7 +204,7 @@ class AuthHandlerTest extends TestCase
      * @param array $enabledModNames
      * @param array $expectedModNames
      * @throws ReflectionException
-     * @covers ::getEnabledModCombinationIdsFromRequestData
+     * @covers ::getEnabledModCombinationIdsFromRequest
      * @dataProvider provideGetEnabledModCombinationIdsFromRequestData
      */
     public function testGetEnabledModCombinationIdsFromRequestData(

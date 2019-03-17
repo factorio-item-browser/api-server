@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
@@ -76,13 +75,11 @@ class SearchQueryHandler extends AbstractRequestHandler
 
     /**
      * Creates the response data from the validated request data.
-     * @param RequestInterface $request
+     * @param SearchQueryRequest $request
      * @return ResponseInterface
      */
-    protected function handleRequest(RequestInterface $request): ResponseInterface
+    protected function handleRequest($request): ResponseInterface
     {
-        /** @var SearchQueryRequest $request */
-
         $searchQuery = $this->searchManager->parseQuery(
             $request->getQuery(),
             $this->modService->getEnabledModCombinationIds(),

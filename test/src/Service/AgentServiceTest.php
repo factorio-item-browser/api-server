@@ -36,7 +36,7 @@ class AgentServiceTest extends TestCase
 
         $service = new AgentService([$agent1, $agent2]);
 
-        $this->assertSame($expectedAgents, $this->extractProperty($service, 'agents'));
+        $this->assertSame($expectedAgents, $this->extractProperty($service, 'agentsByName'));
     }
 
     /**

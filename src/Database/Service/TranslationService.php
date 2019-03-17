@@ -111,20 +111,41 @@ class TranslationService extends AbstractModsAwareService
      */
     protected function sortTranslationData(array $translationData): array
     {
-        usort($translationData, function (TranslationData $left, TranslationData $right): int {
-            $result = ($left->getLocale() !== 'en') <=> ($right->getLocale() !== 'en');
-            if ($result === 0) {
-                $result = $left->getType() <=> $right->getType();
-                if ($result === 0) {
-                    $result = $left->getOrder() <=> $right->getOrder();
-                    if ($result === 0) {
-                        $result = $left->getName() <=> $right->getName();
-                    }
-                }
-            }
-            return $result;
-        });
+        usort($translationData, [$this, 'compareTranslations']);
         return $translationData;
+    }
+
+    /**
+     * Compares the two translations.
+     * @param TranslationData $left
+     * @param TranslationData $right
+     * @return int
+     */
+    protected function compareTranslations(TranslationData $left, TranslationData $right): int
+    {
+        $leftCriteria = $this->getSortCriteria($left);
+        $rightCriteria = $this->getSortCriteria($right);
+
+        $result = 0;
+        while ($result === 0 && count($leftCriteria) > 0) {
+            $result = array_shift($leftCriteria) <=> array_shift($rightCriteria);
+        }
+        return $result;
+    }
+
+    /**
+     * Returns the criteria to sort the translation.
+     * @param TranslationData $translation
+     * @return array
+     */
+    protected function getSortCriteria(TranslationData $translation): array
+    {
+        return [
+            $translation->getLocale() !== 'en',
+            $translation->getType(),
+            $translation->getOrder(),
+            $translation->getName(),
+        ];
     }
 
     /**

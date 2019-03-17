@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
 use FactorioItemBrowser\Api\Client\Request\Mod\ModMetaRequest;
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Client\Response\Mod\ModMetaResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
@@ -45,10 +44,10 @@ class ModMetaHandler extends AbstractRequestHandler
 
     /**
      * Creates the response data from the validated request data.
-     * @param RequestInterface $request
+     * @param ModMetaRequest $request
      * @return ResponseInterface
      */
-    protected function handleRequest(RequestInterface $request): ResponseInterface
+    protected function handleRequest($request): ResponseInterface
     {
         $response = new ModMetaResponse();
         $response->setNumberOfAvailableMods($this->modService->getNumberOfAvailableMods())

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Exception;
 
-use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
+use FactorioItemBrowser\Api\Server\Exception\MalformedRequestException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Throwable;
 
 /**
- * The PHPUnit test of the InvalidAuthorizationTokenException class.
+ * The PHPUnit test of the MalformedRequestException class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException
+ * @coversDefaultClass \FactorioItemBrowser\Api\Server\Exception\MalformedRequestException
  */
-class InvalidAuthorizationTokenExceptionTest extends TestCase
+class MalformedRequestExceptionTest extends TestCase
 {
     /**
      * Tests the constructing.
@@ -26,13 +26,14 @@ class InvalidAuthorizationTokenExceptionTest extends TestCase
      */
     public function testConstruct(): void
     {
+        $message = 'abc';
         /* @var Throwable&MockObject $previous */
         $previous = $this->createMock(Throwable::class);
 
-        $exception = new InvalidAuthorizationTokenException($previous);
+        $exception = new MalformedRequestException($message, $previous);
 
-        $this->assertSame('The authorization token is invalid.', $exception->getMessage());
-        $this->assertSame(401, $exception->getCode());
+        $this->assertSame('Malformed request: abc', $exception->getMessage());
+        $this->assertSame(400, $exception->getCode());
         $this->assertSame($previous, $exception->getPrevious());
     }
 }

@@ -8,7 +8,6 @@ use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Client\Request\Mod\ModListRequest;
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Client\Response\Mod\ModListResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
@@ -58,11 +57,11 @@ class ModListHandler extends AbstractRequestHandler
     }
     /**
      * Creates the response data from the validated request data.
-     * @param RequestInterface $request
+     * @param ModListRequest $request
      * @return ResponseInterface
      * @throws MapperException
      */
-    protected function handleRequest(RequestInterface $request): ResponseInterface
+    protected function handleRequest($request): ResponseInterface
     {
         $response = new ModListResponse();
 

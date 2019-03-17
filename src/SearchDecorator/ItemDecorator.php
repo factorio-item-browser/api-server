@@ -122,18 +122,32 @@ class ItemDecorator implements SearchDecoratorInterface
      */
     public function decorate($itemResult): ?GenericEntityWithRecipes
     {
-        $item = $this->items[$itemResult->getId()];
+        $result = null;
+        $itemId = $itemResult->getId();
+        if (isset($this->items[$itemId])) {
+            $result = $this->createEntityForItem($this->items[$itemId]);
+
+            foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
+                $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
+                if ($recipe instanceof ClientRecipe) {
+                    $result->addRecipe($recipe);
+                }
+            }
+            $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
+        }
+        return $result;
+    }
+
+    /**
+     * Creates the entity to the item.
+     * @param DatabaseItem $item
+     * @return GenericEntityWithRecipes
+     * @throws MapperException
+     */
+    protected function createEntityForItem(DatabaseItem $item): GenericEntityWithRecipes
+    {
         $result = new GenericEntityWithRecipes();
         $this->mapperManager->map($item, $result);
-
-        foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
-            $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
-            if ($recipe instanceof ClientRecipe) {
-                $result->addRecipe($recipe);
-            }
-        }
-        $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
-
         return $result;
     }
 

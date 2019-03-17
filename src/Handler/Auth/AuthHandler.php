@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
 use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Database\Service\ModService;
@@ -69,16 +68,14 @@ class AuthHandler extends AbstractRequestHandler
 
     /**
      * Creates the response data from the validated request data.
-     * @param RequestInterface $request
+     * @param AuthRequest $request
      * @return ResponseInterface
      * @throws ApiServerException
      */
-    protected function handleRequest(RequestInterface $request): ResponseInterface
+    protected function handleRequest($request): ResponseInterface
     {
-        /** @var AuthRequest $request */
-
         $agent = $this->getAgentFromRequestData($request);
-        $enabledModCombinationIds = $this->getEnabledModCombinationIdsFromRequestData($agent, $request);
+        $enabledModCombinationIds = $this->getEnabledModCombinationIdsFromRequest($agent, $request);
         $authorizationToken = $this->createAuthorizationToken($agent, $enabledModCombinationIds);
 
         $response = new AuthResponse();
@@ -111,7 +108,7 @@ class AuthHandler extends AbstractRequestHandler
      * @param AuthRequest $request
      * @return array|int[]
      */
-    protected function getEnabledModCombinationIdsFromRequestData(Agent $agent, AuthRequest $request): array
+    protected function getEnabledModCombinationIdsFromRequest(Agent $agent, AuthRequest $request): array
     {
         $enabledModNames = $agent->getIsDemo() ? ['base'] : $request->getEnabledModNames();
         $this->modService->setEnabledCombinationsByModNames($enabledModNames);

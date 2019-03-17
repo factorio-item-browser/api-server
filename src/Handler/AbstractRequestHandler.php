@@ -61,9 +61,9 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
     /**
      * Creates the response data from the validated request data.
-     * @param ClientRequestInterface $request
+     * @param ClientRequestInterface $clientRequest
      * @return ClientResponseInterface
      * @throws ApiServerException
      */
-    abstract protected function handleRequest(ClientRequestInterface $request): ClientResponseInterface;
+    abstract protected function handleRequest($clientRequest): ClientResponseInterface;
 }
