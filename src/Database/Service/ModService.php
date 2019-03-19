@@ -7,8 +7,6 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 use FactorioItemBrowser\Api\Database\Entity\Mod;
 use FactorioItemBrowser\Api\Database\Repository\ModCombinationRepository;
 use FactorioItemBrowser\Api\Database\Repository\ModRepository;
-use FactorioItemBrowser\Api\Server\Database\Helper\ModCombinationResolver;
-use FactorioItemBrowser\Api\Server\Database\Helper\ModDependencyResolver;
 
 /**
  * The service class for the Mod database table.
@@ -74,35 +72,6 @@ class ModService
     public function getEnabledModNames(): array
     {
         return $this->modCombinationRepository->findModNamesByIds($this->enabledModCombinationIds);
-    }
-
-    /**
-     * Sets the enabled mods by their names.
-     * @param array|string[] $modNames
-     * @return $this
-     */
-    public function setEnabledCombinationsByModNames(array $modNames)
-    {
-        $dependencyResolver = new ModDependencyResolver($this);
-        $allModNames = $dependencyResolver->resolve($modNames);
-
-        $combinationResolver = new ModCombinationResolver($this);
-        $this->setEnabledModCombinationIds($combinationResolver->resolve($allModNames));
-        return $this;
-    }
-
-    /**
-     * Returns the mods with the specified names with their dependencies already fetched.
-     * @param array|string[] $modNames
-     * @return array|Mod[] The found mods. Keys are the mod names.
-     */
-    public function getModsWithDependencies(array $modNames): array
-    {
-        $result = [];
-        foreach ($this->modRepository->findByNamesWithDependencies($modNames) as $mod) {
-            $result[$mod->getName()] = $mod;
-        }
-        return $result;
     }
 
     /**

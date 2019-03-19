@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
-use FactorioItemBrowser\Api\Server\Database\Service\CleanableServiceInterface;
+use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -18,13 +17,6 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 class CleanupMiddlewareFactory implements FactoryInterface
 {
     /**
-     * The aliases of the services which may be cleaned.
-     */
-    protected const CLEANABLE_SERVICES = [
-        CachedSearchResultService::class,
-    ];
-
-    /**
      * Creates the cleanup middleware.
      * @param  ContainerInterface $container
      * @param  string $requestedName
@@ -33,20 +25,9 @@ class CleanupMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        return new CleanupMiddleware($this->getCleanableServices($container));
-    }
+        /* @var SearchCacheClearInterface $searchCacheClearer */
+        $searchCacheClearer = $container->get(SearchCacheClearInterface::class);
 
-    /**
-     * Returns the serbice instances to be cleaned.
-     * @param ContainerInterface $container
-     * @return array|CleanableServiceInterface[]
-     */
-    protected function getCleanableServices(ContainerInterface $container): array
-    {
-        $result = [];
-        foreach (self::CLEANABLE_SERVICES as $alias) {
-            $result[] = $container->get($alias);
-        }
-        return $result;
+        return new CleanupMiddleware($searchCacheClearer);
     }
 }

@@ -19,7 +19,6 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'dependencies' => [
         'factories'  => [
-            Database\Service\CachedSearchResultService::class => ReflectionFactory::class,
             Database\Service\IconService::class => ReflectionFactory::class,
             Database\Service\ItemService::class => ReflectionFactory::class,
             Database\Service\MachineService::class => ReflectionFactory::class,
@@ -54,6 +53,9 @@ return [
             Middleware\MetaMiddleware::class => Middleware\MetaMiddlewareFactory::class,
             Middleware\RequestDeserializerMiddleware::class => Middleware\RequestDeserializerMiddlewareFactory::class,
             Middleware\ResponseSerializerMiddleware::class => Middleware\ResponseSerializerMiddlewareFactory::class,
+
+            ModResolver\ModCombinationResolver::class => ReflectionFactory::class,
+            ModResolver\ModDependencyResolver::class => ReflectionFactory::class,
 
             SearchDecorator\ItemDecorator::class => ReflectionFactory::class,
             SearchDecorator\RecipeDecorator::class => ReflectionFactory::class,

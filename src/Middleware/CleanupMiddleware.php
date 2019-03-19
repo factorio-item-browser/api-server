@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\CleanableServiceInterface;
+use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -24,18 +24,18 @@ class CleanupMiddleware implements MiddlewareInterface
     protected const CLEANUP_FACTOR = 1000;
 
     /**
-     * The services which may be cleaned.
-     * @var array|CleanableServiceInterface[]
+     * The search cache clearer.
+     * @var SearchCacheClearInterface
      */
-    protected $cleanableServices;
+    protected $searchCacheClearer;
 
     /**
      * Initializes the middleware.
-     * @param array|CleanableServiceInterface[] $cleanableServices
+     * @param SearchCacheClearInterface $searchCacheClearer
      */
-    public function __construct(array $cleanableServices)
+    public function __construct(SearchCacheClearInterface $searchCacheClearer)
     {
-        $this->cleanableServices = $cleanableServices;
+        $this->searchCacheClearer = $searchCacheClearer;
     }
 
     /**
@@ -48,10 +48,8 @@ class CleanupMiddleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
 
-        foreach ($this->cleanableServices as $cleanableService) {
-            if ($this->getRandomNumber(self::CLEANUP_FACTOR) === 42) {
-                $cleanableService->cleanup();
-            }
+        if ($this->getRandomNumber(self::CLEANUP_FACTOR) === 42) {
+            $this->searchCacheClearer->cleanCache();
         }
 
         return $response;
