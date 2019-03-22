@@ -8,7 +8,6 @@ use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
 use FactorioItemBrowser\Api\Search\SearchManagerInterface;
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
 use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
@@ -21,12 +20,6 @@ use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
  */
 class SearchQueryHandler extends AbstractRequestHandler
 {
-    /**
-     * The mod service.
-     * @var ModService
-     */
-    protected $modService;
-
     /**
      * The search decorator service.
      * @var SearchDecoratorService
@@ -47,18 +40,15 @@ class SearchQueryHandler extends AbstractRequestHandler
 
     /**
      * Initializes the request handler.
-     * @param ModService $modService
      * @param SearchDecoratorService $searchDecoratorService
      * @param SearchManagerInterface $searchManager
      * @param TranslationService $translationService
      */
     public function __construct(
-        ModService $modService,
         SearchDecoratorService $searchDecoratorService,
         SearchManagerInterface $searchManager,
         TranslationService $translationService
     ) {
-        $this->modService = $modService;
         $this->searchDecoratorService = $searchDecoratorService;
         $this->searchManager = $searchManager;
         $this->translationService = $translationService;
@@ -82,7 +72,7 @@ class SearchQueryHandler extends AbstractRequestHandler
     {
         $searchQuery = $this->searchManager->parseQuery(
             $request->getQuery(),
-            $this->modService->getEnabledModCombinationIds(),
+            $this->getAuthorizationToken()->getEnabledModCombinationIds(),
             $this->translationService->getCurrentLocale()
         );
         $searchResults = $this->searchManager->search($searchQuery);

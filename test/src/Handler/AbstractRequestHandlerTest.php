@@ -7,6 +7,7 @@ namespace FactorioItemBrowserTest\Api\Server\Handler;
 use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Request\RequestInterface as ClientRequestInterface;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\UnexpectedRequestException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
@@ -57,6 +58,7 @@ class AbstractRequestHandlerTest extends TestCase
 
         $result = $handler->handle($request);
 
+        $this->assertSame($request, $this->extractProperty($handler, 'request'));
         $this->assertInstanceOf(ClientResponse::class, $result);
         /* @var ClientResponse $result */
         $this->assertSame($clientResponse, $result->getResponse());
@@ -155,5 +157,58 @@ class AbstractRequestHandlerTest extends TestCase
                 ->willReturn($expectedRequestClass);
 
         $this->invokeMethod($handler, 'getClientRequest', $request);
+    }
+
+    /**
+     * Tests the getAuthorizationToken method.
+     * @throws ReflectionException
+     * @covers ::getAuthorizationToken
+     */
+    public function testGetAuthorizationToken(): void
+    {
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getAttribute')
+                ->with($this->identicalTo(AuthorizationToken::class))
+                ->willReturn($authorizationToken);
+
+        /* @var AbstractRequestHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(AbstractRequestHandler::class)
+                        ->getMockForAbstractClass();
+        $this->injectProperty($handler, 'request', $request);
+
+        $result = $this->invokeMethod($handler, 'getAuthorizationToken');
+
+        $this->assertSame($authorizationToken, $result);
+    }
+
+    /**
+     * Tests the getAuthorizationToken method without an actual token.
+     * @throws ReflectionException
+     * @covers ::getAuthorizationToken
+     */
+    public function testGetAuthorizationTokenWithoutToken(): void
+    {
+        $expectedResult = new AuthorizationToken();
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getAttribute')
+                ->with($this->identicalTo(AuthorizationToken::class))
+                ->willReturn(null);
+
+        /* @var AbstractRequestHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(AbstractRequestHandler::class)
+                        ->getMockForAbstractClass();
+        $this->injectProperty($handler, 'request', $request);
+
+        $result = $this->invokeMethod($handler, 'getAuthorizationToken');
+
+        $this->assertEquals($expectedResult, $result);
     }
 }

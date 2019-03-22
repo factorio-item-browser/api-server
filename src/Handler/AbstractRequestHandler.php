@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Handler;
 
 use FactorioItemBrowser\Api\Client\Request\RequestInterface as ClientRequestInterface;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\UnexpectedRequestException;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
@@ -22,6 +23,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 abstract class AbstractRequestHandler implements RequestHandlerInterface
 {
     /**
+     * The request to handle.
+     * @var ServerRequestInterface
+     */
+    protected $request;
+
+    /**
      * Handle the request and return a response.
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -29,7 +36,9 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $this->request = $request;
         $clientRequest = $this->getClientRequest($request);
+
         $clientResponse = $this->handleRequest($clientRequest);
         return new ClientResponse($clientResponse);
     }
@@ -51,6 +60,19 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
             );
         }
         return $clientRequest;
+    }
+
+    /**
+     * Returns the authorization token used for the request.
+     * @return AuthorizationToken
+     */
+    protected function getAuthorizationToken(): AuthorizationToken
+    {
+        $result = $this->request->getAttribute(AuthorizationToken::class);
+        if (!$result instanceof AuthorizationToken) {
+            $result = new AuthorizationToken();
+        }
+        return $result;
     }
 
     /**

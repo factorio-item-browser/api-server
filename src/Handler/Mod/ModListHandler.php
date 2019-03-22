@@ -11,7 +11,8 @@ use FactorioItemBrowser\Api\Client\Request\Mod\ModListRequest;
 use FactorioItemBrowser\Api\Client\Response\Mod\ModListResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Database\Repository\ModCombinationRepository;
+use FactorioItemBrowser\Api\Database\Repository\ModRepository;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 
 /**
@@ -29,22 +30,31 @@ class ModListHandler extends AbstractRequestHandler
     protected $mapperManager;
 
     /**
-     * The database mod service.
-     * @var ModService
+     * The mod combination repository.
+     * @var ModCombinationRepository
      */
-    protected $modService;
+    protected $modCombinationRepository;
+
+    /**
+     * The mod repository.
+     * @var ModRepository
+     */
+    protected $modRepository;
 
     /**
      * Initializes the auth handler.
      * @param MapperManagerInterface $mapperManager
-     * @param ModService $modService
+     * @param ModCombinationRepository $modCombinationRepository
+     * @param ModRepository $modRepository
      */
     public function __construct(
         MapperManagerInterface $mapperManager,
-        ModService $modService
+        ModCombinationRepository $modCombinationRepository,
+        ModRepository $modRepository
     ) {
         $this->mapperManager = $mapperManager;
-        $this->modService = $modService;
+        $this->modCombinationRepository = $modCombinationRepository;
+        $this->modRepository = $modRepository;
     }
 
     /**
@@ -63,15 +73,25 @@ class ModListHandler extends AbstractRequestHandler
      */
     protected function handleRequest($request): ResponseInterface
     {
-        $response = new ModListResponse();
+        $enabledModNames = $this->getEnabledModNames();
 
-        $enabledModNames = $this->modService->getEnabledModNames();
-        foreach ($this->modService->getAllMods() as $databaseMod) {
+        $response = new ModListResponse();
+        foreach ($this->modRepository->findAll() as $databaseMod) {
             $isEnabled = in_array($databaseMod->getName(), $enabledModNames, true);
             $response->addMod($this->createClientMod($databaseMod, $isEnabled));
         }
-
         return $response;
+    }
+
+    /**
+     * Returns the names of the currently enabled mods.
+     * @return array|string[]
+     */
+    protected function getEnabledModNames(): array
+    {
+        $enabledModCombinationIds = $this->getAuthorizationToken()->getEnabledModCombinationIds();
+
+        return $this->modCombinationRepository->findModNamesByIds($enabledModCombinationIds);
     }
 
     /**

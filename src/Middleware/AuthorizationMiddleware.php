@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
@@ -36,20 +36,12 @@ class AuthorizationMiddleware implements MiddlewareInterface
     protected $authorizationService;
 
     /**
-     * The mod service.
-     * @var ModService
-     */
-    protected $modService;
-
-    /**
      * Initializes the authorization middleware class.
      * @param AuthorizationService $authorizationService
-     * @param ModService $modService
      */
-    public function __construct(AuthorizationService $authorizationService, ModService $modService)
+    public function __construct(AuthorizationService $authorizationService)
     {
         $this->authorizationService = $authorizationService;
-        $this->modService = $modService;
     }
 
     /**
@@ -79,8 +71,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $serializedToken = $this->extractSerializedTokenFromHeader($request->getHeaderLine('Authorization'));
         $token = $this->authorizationService->deserializeToken($serializedToken);
 
-        $this->modService->setEnabledModCombinationIds($token->getEnabledModCombinationIds());
-        $request = $request->withAttribute('agent', $token->getAgentName());
+        $request = $request->withAttribute(AuthorizationToken::class, $token);
         return $request;
     }
 
