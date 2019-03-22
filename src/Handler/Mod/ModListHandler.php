@@ -90,7 +90,6 @@ class ModListHandler extends AbstractRequestHandler
     protected function getEnabledModNames(): array
     {
         $enabledModCombinationIds = $this->getAuthorizationToken()->getEnabledModCombinationIds();
-
         return $this->modCombinationRepository->findModNamesByIds($enabledModCombinationIds);
     }
 
