@@ -7,6 +7,8 @@ namespace FactorioItemBrowser\Api\Server\Database\Service;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
+use FactorioItemBrowser\Api\Server\Constant\Config;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Common\Constant\EntityType;
 
 /**
@@ -15,7 +17,7 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class TranslationService extends AbstractModsAwareService
+class TranslationService
 {
     /**
      * The repository of the translations.
@@ -24,65 +26,34 @@ class TranslationService extends AbstractModsAwareService
     protected $translationRepository;
 
     /**
-     * The locale to be used for translations.
-     * @var string
-     */
-    protected $currentLocale = 'en';
-
-    /**
      * The entities which need to be translated.
      * @var array|GenericEntity[]
      */
     protected $entitiesToTranslate = [];
 
     /**
-     * TranslationService constructor.
-     * @param ModService $modService
+     * Initializes the service.
      * @param TranslationRepository $translationRepository
      */
-    public function __construct(ModService $modService, TranslationRepository $translationRepository)
+    public function __construct(TranslationRepository $translationRepository)
     {
-        parent::__construct($modService);
-
         $this->translationRepository = $translationRepository;
-    }
-
-    /**
-     * Sets the locale to be used for translations.
-     * @param string $currentLocale
-     * @return $this Implementing fluent interface.
-     */
-    public function setCurrentLocale(string $currentLocale)
-    {
-        $this->currentLocale = $currentLocale;
-        return $this;
-    }
-
-    /**
-     * Returns the locale to be used for translations.
-     * @return string
-     */
-    public function getCurrentLocale(): string
-    {
-        return $this->currentLocale;
     }
 
     /**
      * Adds an entity to be translated at a later point.
      * @param GenericEntity $entity
-     * @return $this
      */
-    public function addEntityToTranslate(GenericEntity $entity)
+    public function addEntityToTranslate(GenericEntity $entity): void
     {
         $this->entitiesToTranslate[] = $entity;
-        return $this;
     }
 
     /**
      * Translates the entities which have been added to the service.
-     * @return $this
+     * @param AuthorizationToken $authorizationToken
      */
-    public function translateEntities()
+    public function translateEntities(AuthorizationToken $authorizationToken): void
     {
         $entities = [];
         $namesByTypes = [];
@@ -95,13 +66,12 @@ class TranslationService extends AbstractModsAwareService
         }
 
         $translations = $this->translationRepository->findDataByTypesAndNames(
-            $this->currentLocale,
+            $authorizationToken->getLocale(),
             $namesByTypes,
-            $this->modService->getEnabledModCombinationIds()
+            $authorizationToken->getEnabledModCombinationIds()
         );
         $translations = $this->sortTranslationData($translations);
         $this->matchTranslationDataToEntities($entities, $translations);
-        return $this;
     }
 
     /**
@@ -141,7 +111,7 @@ class TranslationService extends AbstractModsAwareService
     protected function getSortCriteria(TranslationData $translation): array
     {
         return [
-            $translation->getLocale() !== 'en',
+            $translation->getLocale() !== Config::DEFAULT_LOCALE,
             $translation->getType(),
             $translation->getOrder(),
             $translation->getName(),

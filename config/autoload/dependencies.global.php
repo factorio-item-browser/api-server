@@ -46,7 +46,7 @@ return [
             Mapper\DatabaseRecipeToClientRecipeMapper::class => ReflectionFactory::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class => ReflectionFactory::class,
 
-            Middleware\AcceptLanguageMiddleware::class => ReflectionFactory::class,
+            Middleware\TranslationMiddleware::class => ReflectionFactory::class,
             Middleware\AuthorizationMiddleware::class => ReflectionFactory::class,
             Middleware\CleanupMiddleware::class => Middleware\CleanupMiddlewareFactory::class,
             Middleware\DocumentationRedirectMiddleware::class => ReflectionFactory::class,

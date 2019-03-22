@@ -12,7 +12,6 @@ use FactorioItemBrowser\Api\Search\Collection\PaginatedResultCollection;
 use FactorioItemBrowser\Api\Search\Entity\Query;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Search\SearchManagerInterface;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
@@ -44,12 +43,6 @@ class SearchQueryHandlerTest extends TestCase
     protected $searchManager;
 
     /**
-     * The mocked translation service.
-     * @var TranslationService&MockObject
-     */
-    protected $translationService;
-
-    /**
      * Sets up the test case.
      * @throws ReflectionException
      */
@@ -59,7 +52,6 @@ class SearchQueryHandlerTest extends TestCase
 
         $this->searchDecoratorService = $this->createMock(SearchDecoratorService::class);
         $this->searchManager = $this->createMock(SearchManagerInterface::class);
-        $this->translationService = $this->createMock(TranslationService::class);
     }
 
     /**
@@ -69,15 +61,10 @@ class SearchQueryHandlerTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $handler = new SearchQueryHandler(
-            $this->searchDecoratorService,
-            $this->searchManager,
-            $this->translationService
-        );
+        $handler = new SearchQueryHandler($this->searchDecoratorService, $this->searchManager);
 
         $this->assertSame($this->searchDecoratorService, $this->extractProperty($handler, 'searchDecoratorService'));
         $this->assertSame($this->searchManager, $this->extractProperty($handler, 'searchManager'));
-        $this->assertSame($this->translationService, $this->extractProperty($handler, 'translationService'));
     }
 
     /**
@@ -89,11 +76,7 @@ class SearchQueryHandlerTest extends TestCase
     {
         $expectedResult = SearchQueryRequest::class;
 
-        $handler = new SearchQueryHandler(
-            $this->searchDecoratorService,
-            $this->searchManager,
-            $this->translationService
-        );
+        $handler = new SearchQueryHandler($this->searchDecoratorService, $this->searchManager);
         $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
 
         $this->assertSame($expectedResult, $result);
@@ -111,7 +94,7 @@ class SearchQueryHandlerTest extends TestCase
         $numberOfResults = 21;
         $numberOfRecipesPerResult = 1337;
         $enabledModCombinationIds = [13, 37];
-        $currentLocale = 'def';
+        $locale = 'def';
         $countResults = 7331;
 
         /* @var Query&MockObject $searchQuery */
@@ -160,13 +143,16 @@ class SearchQueryHandlerTest extends TestCase
         $authorizationToken->expects($this->once())
                            ->method('getEnabledModCombinationIds')
                            ->willReturn($enabledModCombinationIds);
+        $authorizationToken->expects($this->once())
+                           ->method('getLocale')
+                           ->willReturn($locale);
 
         $this->searchManager->expects($this->once())
                             ->method('parseQuery')
                             ->with(
                                 $this->identicalTo($query),
                                 $this->identicalTo($enabledModCombinationIds),
-                                $this->identicalTo($currentLocale)
+                                $this->identicalTo($locale)
                             )
                             ->willReturn($searchQuery);
         $this->searchManager->expects($this->once())
@@ -182,18 +168,10 @@ class SearchQueryHandlerTest extends TestCase
                                      )
                                      ->willReturn($decoratedSearchResults);
 
-        $this->translationService->expects($this->once())
-                                 ->method('getCurrentLocale')
-                                 ->willReturn($currentLocale);
-
         /* @var SearchQueryHandler&MockObject $handler */
         $handler = $this->getMockBuilder(SearchQueryHandler::class)
                         ->setMethods(['getAuthorizationToken'])
-                        ->setConstructorArgs([
-                            $this->searchDecoratorService,
-                            $this->searchManager,
-                            $this->translationService
-                        ])
+                        ->setConstructorArgs([$this->searchDecoratorService, $this->searchManager])
                         ->getMock();
         $handler->expects($this->once())
                 ->method('getAuthorizationToken')

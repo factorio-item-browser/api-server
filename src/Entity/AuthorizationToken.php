@@ -25,6 +25,12 @@ class AuthorizationToken
     protected $enabledModCombinationIds = [];
 
     /**
+     * The locale to use for the request.
+     * @var string
+     */
+    protected $locale;
+
+    /**
      * Sets the name of the agent for which the token was issued.
      * @param string $agentName
      * @return $this
@@ -62,5 +68,25 @@ class AuthorizationToken
     public function getEnabledModCombinationIds(): array
     {
         return $this->enabledModCombinationIds;
+    }
+
+    /**
+     * Sets the locale to use for the request
+     * @param string $locale
+     * @return $this
+     */
+    public function setLocale(string $locale): self
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * Returns the locale to use for the request
+     * @return string
+     */
+    public function getLocale(): string
+    {
+        return $this->locale;
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Client\Constant\ServiceName;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use Interop\Container\ContainerInterface;
 use JMS\Serializer\SerializerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -29,9 +28,7 @@ class ResponseSerializerMiddlewareFactory implements FactoryInterface
     {
         /* @var SerializerInterface $serializer */
         $serializer = $container->get(ServiceName::SERIALIZER);
-        /* @var TranslationService $translationService */
-        $translationService = $container->get(TranslationService::class);
 
-        return new ResponseSerializerMiddleware($serializer, $translationService);
+        return new ResponseSerializerMiddleware($serializer);
     }
 }

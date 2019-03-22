@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -27,20 +26,12 @@ class ResponseSerializerMiddleware implements MiddlewareInterface
     protected $serializer;
 
     /**
-     * The translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * Initializes the middleware.
      * @param SerializerInterface $serializer
-     * @param TranslationService $translationService
      */
-    public function __construct(SerializerInterface $serializer, TranslationService $translationService)
+    public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
-        $this->translationService = $translationService;
     }
 
     /**
@@ -54,8 +45,6 @@ class ResponseSerializerMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
 
         if ($response instanceof ClientResponse) {
-            $this->translationService->translateEntities();
-
             $serializedResponse = $this->serializer->serialize($response->getResponse(), 'json');
             $response = $response->withSerializedResponse($serializedResponse);
         }

@@ -58,4 +58,18 @@ class AuthorizationTokenTest extends TestCase
         );
         $this->assertSame($enabledModCombinationIds, $authorizationToken->getEnabledModCombinationIds());
     }
+
+    /**
+     * Tests the setting and getting the locale.
+     * @covers ::getLocale
+     * @covers ::setLocale
+     */
+    public function testSetAndGetLocale(): void
+    {
+        $locale = 'abc';
+        $authorizationToken = new AuthorizationToken();
+
+        $this->assertSame($authorizationToken, $authorizationToken->setLocale($locale));
+        $this->assertSame($locale, $authorizationToken->getLocale());
+    }
 }

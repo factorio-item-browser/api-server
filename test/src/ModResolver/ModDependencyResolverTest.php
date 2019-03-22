@@ -406,5 +406,4 @@ class ModDependencyResolverTest extends TestCase
 
         $this->invokeMethod($resolver, 'processDependency', $dependency);
     }
-
 }

@@ -14,7 +14,6 @@ namespace FactorioItemBrowser\Api\Server;
 use Blast\BaseUrl\BaseUrlMiddleware;
 use Psr\Container\ContainerInterface;
 use Zend\Expressive\Application;
-use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
 use Zend\Expressive\Helper\ServerUrlMiddleware;
 use Zend\Expressive\MiddlewareFactory;
 use Zend\Expressive\Router\Middleware\DispatchMiddleware;
@@ -37,9 +36,9 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(ImplicitHeadMiddleware::class);
     $app->pipe(ImplicitOptionsMiddleware::class);
     $app->pipe(Middleware\AuthorizationMiddleware::class);
-    $app->pipe(Middleware\AcceptLanguageMiddleware::class);
     $app->pipe(Middleware\RequestDeserializerMiddleware::class);
     $app->pipe(Middleware\ResponseSerializerMiddleware::class);
+    $app->pipe(Middleware\TranslationMiddleware::class);
 
     $app->pipe(DispatchMiddleware::class);
     $app->pipe(Handler\NotFoundHandler::class);
