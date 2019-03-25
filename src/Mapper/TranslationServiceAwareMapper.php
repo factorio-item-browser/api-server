@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Server\Service\TranslationService;
 
 /**
  * The abstract class of the mappers.
@@ -16,7 +16,7 @@ use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 abstract class TranslationServiceAwareMapper
 {
     /**
-     * The database translation service.
+     * The translation service.
      * @var TranslationService
      */
     protected $translationService;
@@ -36,6 +36,6 @@ abstract class TranslationServiceAwareMapper
      */
     protected function addToTranslationService(GenericEntity $entity): void
     {
-        $this->translationService->addEntityToTranslate($entity);
+        $this->translationService->addEntity($entity);
     }
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Server\Constant\Config;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -21,7 +21,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class TranslationMiddleware implements MiddlewareInterface
 {
     /**
-     * The database translation service.
+     * The translation service.
      * @var TranslationService
      */
     protected $translationService;
@@ -48,7 +48,7 @@ class TranslationMiddleware implements MiddlewareInterface
 
         $response = $handler->handle($request);
 
-        $this->translationService->translateEntities($authorizationToken);
+        $this->translationService->translate($authorizationToken);
         return $response;
     }
 

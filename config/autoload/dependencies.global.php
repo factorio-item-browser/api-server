@@ -24,7 +24,7 @@ return [
             Database\Service\MachineService::class => ReflectionFactory::class,
             Database\Service\ModService::class => ReflectionFactory::class,
             Database\Service\RecipeService::class => ReflectionFactory::class,
-            Database\Service\TranslationService::class => ReflectionFactory::class,
+            Service\TranslationService::class => ReflectionFactory::class,
 
             Handler\Auth\AuthHandler::class => ReflectionFactory::class,
             Handler\Generic\GenericDetailsHandler::class => ReflectionFactory::class,

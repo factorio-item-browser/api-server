@@ -6,7 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\Config;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Middleware\TranslationMiddleware;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -77,7 +77,7 @@ class TranslationMiddlewareTest extends TestCase
         $response = $this->createMock(ResponseInterface::class);
 
         $this->translationService->expects($this->once())
-                                 ->method('translateEntities')
+                                 ->method('translate')
                                  ->with($this->identicalTo($authorizationToken));
 
         /* @var RequestHandlerInterface&MockObject $handler */
