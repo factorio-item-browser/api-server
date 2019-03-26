@@ -356,6 +356,7 @@ class TranslationServiceTest extends TestCase
      */
     public function provideGetTypesForTranslation(): array
     {
+        // Generic translations
         $translation1 = new TranslationData();
         $translation1->setType('abc')
                      ->setIsDuplicatedByMachine(true)
@@ -380,11 +381,27 @@ class TranslationServiceTest extends TestCase
                      ->setIsDuplicatedByRecipe(false);
         $result4 = ['jkl'];
 
+        // Machine-only translation
+        $translation5 = new TranslationData();
+        $translation5->setType(EntityType::MACHINE)
+                     ->setIsDuplicatedByMachine(false)
+                     ->setIsDuplicatedByRecipe(false);
+        $result5 = [EntityType::MACHINE];
+
+        // Recipe-only translation
+        $translation6 = new TranslationData();
+        $translation6->setType(EntityType::RECIPE)
+                     ->setIsDuplicatedByMachine(false)
+                     ->setIsDuplicatedByRecipe(false);
+        $result6 = [EntityType::RECIPE];
+
         return [
             [$translation1, $result1],
             [$translation2, $result2],
             [$translation3, $result3],
             [$translation4, $result4],
+            [$translation5, $result5],
+            [$translation6, $result6],
         ];
     }
 

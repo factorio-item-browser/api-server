@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use FactorioItemBrowser\Api\Server\Constant\RouteName;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
@@ -21,12 +22,14 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class AuthorizationMiddleware implements MiddlewareInterface
 {
+    use MatchedRouteNameTrait;
+
     /**
      * The routes which are whitelisted from the authorization.
      * @var array
      */
     protected const WHITELISTED_ROUTES = [
-        '/auth'
+        RouteName::AUTH,
     ];
 
     /**
@@ -54,7 +57,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!in_array($request->getRequestTarget(), self::WHITELISTED_ROUTES, true)) {
+        if (!in_array($this->getMatchedRouteName($request), self::WHITELISTED_ROUTES, true)) {
             $request = $this->readAuthorizationFromRequest($request);
         }
         return $handler->handle($request);

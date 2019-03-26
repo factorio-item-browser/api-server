@@ -19,12 +19,10 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'dependencies' => [
         'factories'  => [
-            Database\Service\IconService::class => ReflectionFactory::class,
             Database\Service\ItemService::class => ReflectionFactory::class,
             Database\Service\MachineService::class => ReflectionFactory::class,
             Database\Service\ModService::class => ReflectionFactory::class,
             Database\Service\RecipeService::class => ReflectionFactory::class,
-            Service\TranslationService::class => ReflectionFactory::class,
 
             Handler\Auth\AuthHandler::class => ReflectionFactory::class,
             Handler\Generic\GenericDetailsHandler::class => ReflectionFactory::class,
@@ -45,6 +43,8 @@ return [
             Mapper\DatabaseModToClientModMapper::class => ReflectionFactory::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class => ReflectionFactory::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class => ReflectionFactory::class,
+            Mapper\MachineDataToGenericEntityMapper::class => ReflectionFactory::class,
+            Mapper\RecipeDataToGenericEntityMapper::class => ReflectionFactory::class,
 
             Middleware\TranslationMiddleware::class => ReflectionFactory::class,
             Middleware\AuthorizationMiddleware::class => ReflectionFactory::class,
@@ -62,7 +62,9 @@ return [
 
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => Service\AuthorizationServiceFactory::class,
+            Service\IconService::class => ReflectionFactory::class,
             Service\SearchDecoratorService::class => Service\SearchDecoratorServiceFactory::class,
+            Service\TranslationService::class => ReflectionFactory::class,
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => InvokableFactory::class,

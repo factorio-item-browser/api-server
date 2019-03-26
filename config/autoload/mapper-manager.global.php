@@ -22,6 +22,8 @@ return [
             Mapper\DatabaseModToClientModMapper::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class,
+            Mapper\MachineDataToGenericEntityMapper::class,
+            Mapper\RecipeDataToGenericEntityMapper::class,
         ],
     ],
 ];

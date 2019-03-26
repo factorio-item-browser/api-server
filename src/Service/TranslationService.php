@@ -136,11 +136,14 @@ class TranslationService
      */
     protected function getTypesForTranslation(TranslationData $translation): array
     {
-        return array_keys(array_filter([
-            $translation->getType() => true,
-            EntityType::MACHINE => $translation->getIsDuplicatedByMachine(),
-            EntityType::RECIPE => $translation->getIsDuplicatedByRecipe(),
-        ]));
+        $result = [$translation->getType()];
+        if ($translation->getIsDuplicatedByMachine()) {
+            $result[] = EntityType::MACHINE;
+        }
+        if ($translation->getIsDuplicatedByRecipe()) {
+            $result[] = EntityType::RECIPE;
+        }
+        return array_values(array_unique($result));
     }
 
     /**

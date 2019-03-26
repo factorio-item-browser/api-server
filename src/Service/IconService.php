@@ -2,22 +2,29 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Database\Service;
+namespace FactorioItemBrowser\Api\Server\Service;
 
 use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Database\Entity\Icon;
 use FactorioItemBrowser\Api\Database\Entity\IconFile;
+use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 
 /**
- * The service class of the icon database table.
+ * The service handling the icons.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class IconService extends AbstractModsAwareService
+class IconService
 {
+    /**
+     * The data filter.
+     * @var DataFilter
+     */
+    protected $dataFilter;
+
     /**
      * The repository of the icon files.
      * @var IconFileRepository
@@ -31,20 +38,34 @@ class IconService extends AbstractModsAwareService
     protected $iconRepository;
 
     /**
+     * The ids of the enabled mod combinations.
+     * @var array|int[]
+     */
+    protected $enabledModCombinationIds = [];
+
+    /**
      * IconService constructor.
+     * @param DataFilter $dataFilter
      * @param IconFileRepository $iconFileRepository
      * @param IconRepository $iconRepository
-     * @param ModService $modService
      */
     public function __construct(
+        DataFilter $dataFilter,
         IconFileRepository $iconFileRepository,
-        IconRepository $iconRepository,
-        ModService $modService
+        IconRepository $iconRepository
     ) {
-        parent::__construct($modService);
-
+        $this->dataFilter = $dataFilter;
         $this->iconFileRepository = $iconFileRepository;
         $this->iconRepository = $iconRepository;
+    }
+
+    /**
+     * Injects the authorization token into the service.
+     * @param AuthorizationToken $authorizationToken
+     */
+    public function injectAuthorizationToken(AuthorizationToken $authorizationToken): void
+    {
+        $this->enabledModCombinationIds = $authorizationToken->getEnabledModCombinationIds();
     }
 
     /**
@@ -56,14 +77,14 @@ class IconService extends AbstractModsAwareService
     {
         $iconData = $this->iconRepository->findDataByTypesAndNames(
             $namesByTypes,
-            $this->modService->getEnabledModCombinationIds()
+            $this->enabledModCombinationIds
         );
 
-        $hashes = [];
+        $result = [];
         foreach ($iconData as $data) {
-            $hashes[$data->getHash()] = true;
+            $result[$data->getHash()] = true;
         }
-        return array_keys($hashes);
+        return array_keys($result);
     }
 
     /**
@@ -75,7 +96,7 @@ class IconService extends AbstractModsAwareService
     {
         $iconData = $this->iconRepository->findDataByHashes(
             $iconFileHashes,
-            $this->modService->getEnabledModCombinationIds()
+            $this->enabledModCombinationIds
         );
 
         $result = [];
@@ -86,25 +107,21 @@ class IconService extends AbstractModsAwareService
     }
 
     /**
-     * Returns the icons using the specified hashes.
+     * Returns the icon data using the specified hashes.
      * @param array|string[] $iconFileHashes
-     * @return array|Icon[]
+     * @return array|IconData[]
      */
-    public function getIconsByHashes(array $iconFileHashes): array
+    public function getIconDataByHashes(array $iconFileHashes): array
     {
-        $iconData = $this->iconRepository->findDataByHashes(
-            $iconFileHashes,
-            $this->modService->getEnabledModCombinationIds()
-        );
+        $iconData = $this->iconRepository->findDataByHashes($iconFileHashes, $this->enabledModCombinationIds);;
 
-        $iconIds = [];
-        foreach ($this->filterData($iconData) as $data) {
+        $result = [];
+        foreach ($this->dataFilter->filter($iconData) as $data) {
             if ($data instanceof IconData) {
-                $iconIds[] = $data->getId();
+                $result[] = $data;
             }
         }
-
-        return $this->iconRepository->findByIds($iconIds);
+        return $result;
     }
 
     /**
@@ -114,10 +131,6 @@ class IconService extends AbstractModsAwareService
      */
     public function getIconFilesByHashes(array $iconFileHashes): array
     {
-        $result = [];
-        foreach ($this->iconFileRepository->findByHashes($iconFileHashes) as $iconFile) {
-            $result[$iconFile->getHash()] = $iconFile;
-        }
-        return $result;
+        return $this->iconFileRepository->findByHashes($iconFileHashes);
     }
 }

@@ -151,44 +151,4 @@ class RecipeService extends AbstractModsAwareService
         }
         return $result;
     }
-
-    /**
-     * Filters the specified recipe names to only include the actually available ones.
-     * @param array|string[] $names
-     * @return array|string[]
-     */
-    public function filterAvailableNames(array $names): array
-    {
-        $recipeData = $this->recipeRepository->findDataByNames(
-            $names,
-            $this->modService->getEnabledModCombinationIds()
-        );
-
-        $result = [];
-        foreach ($recipeData as $data) {
-            $result[$data->getName()] = true;
-        }
-        return array_keys($result);
-    }
-
-    /**
-     * Returns the items matching the specified keywords.
-     * @param array|string[] $keywords
-     * @return array|RecipeData[]
-     */
-    public function getDataByKeywords(array $keywords): array
-    {
-        $recipeData = $this->recipeRepository->findDataByKeywords(
-            $keywords,
-            $this->modService->getEnabledModCombinationIds()
-        );
-
-        $results = [];
-        foreach ($this->filterData($recipeData) as $data) {
-            if ($data instanceof RecipeData) {
-                $results[] = $data;
-            }
-        }
-        return $results;
-    }
 }

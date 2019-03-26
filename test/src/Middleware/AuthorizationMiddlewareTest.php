@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use FactorioItemBrowser\Api\Server\Constant\RouteName;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
@@ -65,14 +66,10 @@ class AuthorizationMiddlewareTest extends TestCase
      */
     public function testProcess(): void
     {
-        $requestTarget = 'abc';
+        $matchedRouteName = 'abc';
 
         /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
-                ->method('getRequestTarget')
-                ->willReturn($requestTarget);
-
         /* @var ServerRequestInterface&MockObject $modifiedRequest */
         $modifiedRequest = $this->createMock(ServerRequestInterface::class);
         /* @var ResponseInterface&MockObject $response */
@@ -87,9 +84,13 @@ class AuthorizationMiddlewareTest extends TestCase
 
         /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
-                           ->setMethods(['readAuthorizationFromRequest'])
+                           ->setMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
                            ->disableOriginalConstructor()
                            ->getMock();
+        $middleware->expects($this->once())
+                   ->method('getMatchedRouteName')
+                   ->with($this->identicalTo($request))
+                   ->willReturn($matchedRouteName);
         $middleware->expects($this->once())
                    ->method('readAuthorizationFromRequest')
                    ->with($this->identicalTo($request))
@@ -108,14 +109,10 @@ class AuthorizationMiddlewareTest extends TestCase
      */
     public function testProcessWithWhitelistedRoute(): void
     {
-        $requestTarget = '/auth';
+        $matchedRouteName = RouteName::AUTH;
 
         /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
-                ->method('getRequestTarget')
-                ->willReturn($requestTarget);
-
         /* @var ResponseInterface&MockObject $response */
         $response = $this->createMock(ResponseInterface::class);
 
@@ -128,9 +125,13 @@ class AuthorizationMiddlewareTest extends TestCase
 
         /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
-                           ->setMethods(['readAuthorizationFromRequest'])
+                           ->setMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
                            ->disableOriginalConstructor()
                            ->getMock();
+        $middleware->expects($this->once())
+                   ->method('getMatchedRouteName')
+                   ->with($this->identicalTo($request))
+                   ->willReturn($matchedRouteName);
         $middleware->expects($this->never())
                    ->method('readAuthorizationFromRequest');
 
