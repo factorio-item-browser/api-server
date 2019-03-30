@@ -17,6 +17,7 @@ use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\Generic\GenericDetailsHandler;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use FactorioItemBrowser\Common\Constant\ItemType;
@@ -121,27 +122,17 @@ class GenericDetailsHandlerTest extends TestCase
      */
     public function testHandleRequest(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-        
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
         /* @var GenericDetailsResponse&MockObject $response */
         $response = $this->createMock(GenericDetailsResponse::class);
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
-        
-        /* @var GenericEntity&MockObject $entity1 */
-        $entity1 = $this->createMock(GenericEntity::class);
-        /* @var GenericEntity&MockObject $entity1 */
-        $entity2 = $this->createMock(GenericEntity::class);
-        /* @var GenericEntity&MockObject $entity1 */
-        $entity3 = $this->createMock(GenericEntity::class);
-        /* @var GenericEntity&MockObject $entity1 */
-        $entity4 = $this->createMock(GenericEntity::class);
 
-        $expectedEntities = [$entity1, $entity2, $entity3, $entity4];
-
+        $entities = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
         $requestEntities = [
             $this->createMock(Entity::class),
             $this->createMock(Entity::class),
@@ -158,7 +149,7 @@ class GenericDetailsHandlerTest extends TestCase
                         ->setMethods([
                             'extractTypesAndNames',
                             'getAuthorizationToken',
-                            'processType',
+                            'process',
                             'createResponse'
                         ])
                         ->disableOriginalConstructor()
@@ -170,27 +161,13 @@ class GenericDetailsHandlerTest extends TestCase
         $handler->expects($this->once())
                 ->method('getAuthorizationToken')
                 ->willReturn($authorizationToken);
-        $handler->expects($this->exactly(2))
-                ->method('processType')
-                ->withConsecutive(
-                    [
-                        $this->identicalTo('abc'),
-                        $this->identicalTo(['def', 'ghi']),
-                        $this->identicalTo($authorizationToken)
-                    ],
-                    [
-                        $this->identicalTo('jkl'),
-                        $this->identicalTo(['mno']),
-                        $this->identicalTo($authorizationToken)
-                    ]
-                )
-                ->willReturnOnConsecutiveCalls(
-                    [$entity1, $entity2],
-                    [$entity3, $entity4]
-                );
+        $handler->expects($this->once())
+                ->method('process')
+                ->with($this->identicalTo($namesByTypes), $this->identicalTo($authorizationToken))
+                ->willReturn($entities);
         $handler->expects($this->once())
                 ->method('createResponse')
-                ->with($this->equalTo($expectedEntities))
+                ->with($this->equalTo($entities))
                 ->willReturn($response);
 
         $result = $this->invokeMethod($handler, 'handleRequest', $request);
@@ -199,79 +176,91 @@ class GenericDetailsHandlerTest extends TestCase
     }
 
     /**
-     * Provides the data for the processType test.
-     * @return array
-     */
-    public function provideProcessType(): array
-    {
-        return [
-            [EntityType::ITEM, 'processItems'],
-            [EntityType::FLUID, 'processFluids'],
-            [EntityType::MACHINE, 'processMachines'],
-            [EntityType::RECIPE, 'processRecipes'],
-        ];
-    }
-
-    /**
-     * Tests the processType method.
-     * @param string $type
-     * @param string $expectedMethod
+     * Tests the process method.
      * @throws ReflectionException
-     * @covers ::processType
-     * @dataProvider provideProcessType
+     * @covers ::process
      */
-    public function testProcessType(string $type, string $expectedMethod): void
+    public function testProcess(): void
     {
-        $names = ['abc', 'def'];
+        $itemNames = ['abc', 'def'];
+        $fluidNames = ['ghi', 'jkl'];
+        $machineNames = ['mno', 'pqr'];
+        $recipeNames = ['stu', 'vwx'];
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
 
-        $entities = [
-            $this->createMock(GenericEntity::class),
-            $this->createMock(GenericEntity::class),
+        /* @var GenericEntity&MockObject $entity1 */
+        $entity1 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity2 */
+        $entity2 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity3 */
+        $entity3 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity4 */
+        $entity4 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity5 */
+        $entity5 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity6 */
+        $entity6 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity7 */
+        $entity7 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity8 */
+        $entity8 = $this->createMock(GenericEntity::class);
+
+        $expectedResult = [
+            $entity1,
+            $entity2,
+            $entity3,
+            $entity4,
+            $entity5,
+            $entity6,
+            $entity7,
+            $entity8,
         ];
+
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        $namesByTypes->expects($this->exactly(4))
+                     ->method('getNames')
+                     ->willReturnMap([
+                         [EntityType::ITEM, $itemNames],
+                         [EntityType::FLUID, $fluidNames],
+                         [EntityType::MACHINE, $machineNames],
+                         [EntityType::RECIPE, $recipeNames],
+                     ]);
 
         /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
-                        ->setMethods([$expectedMethod])
+                        ->setMethods([
+                            'processItems',
+                            'processFluids',
+                            'processMachines',
+                            'processRecipes',
+                        ])
                         ->disableOriginalConstructor()
                         ->getMock();
         $handler->expects($this->once())
-                ->method($expectedMethod)
-                ->with($this->identicalTo($names), $this->identicalTo($authorizationToken))
-                ->willReturn($entities);
+                ->method('processItems')
+                ->with($this->identicalTo($itemNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['abc' => $entity1, 'def' => $entity2]);
+        $handler->expects($this->once())
+                ->method('processFluids')
+                ->with($this->identicalTo($fluidNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['ghi' => $entity3, 'jkl' => $entity4]);
+        $handler->expects($this->once())
+                ->method('processMachines')
+                ->with($this->identicalTo($machineNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['mno' => $entity5, 'pqr' => $entity6]);
+        $handler->expects($this->once())
+                ->method('processRecipes')
+                ->with($this->identicalTo($recipeNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['stu' => $entity7, 'vwx' => $entity8]);
 
-        $result = $this->invokeMethod($handler, 'processType', $type, $names, $authorizationToken);
+        $result = $this->invokeMethod($handler, 'process', $namesByTypes, $authorizationToken);
 
-        $this->assertSame($entities, $result);
+        $this->assertEquals($expectedResult, $result);
     }
 
-    /**
-     * Tests the processType method without a match of the type.
-     * @throws ReflectionException
-     * @covers ::processType
-     */
-    public function testProcessTypeWithoutMatch(): void
-    {
-        $type = 'abc';
-        $names = ['def', 'ghi'];
-
-        /* @var AuthorizationToken&MockObject $authorizationToken */
-        $authorizationToken = $this->createMock(AuthorizationToken::class);
-
-
-        $handler = new GenericDetailsHandler(
-            $this->itemRepository,
-            $this->machineRepository,
-            $this->mapperManager,
-            $this->recipeRepository
-        );
-        $result = $this->invokeMethod($handler, 'processType', $type, $names, $authorizationToken);
-
-        $this->assertEquals([], $result);
-    }
-    
     /**
      * Tests the processItems method.
      * @throws ReflectionException

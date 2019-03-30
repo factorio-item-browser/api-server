@@ -10,6 +10,7 @@ use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 
 /**
  * The service handling the icons.
@@ -70,13 +71,13 @@ class IconService
 
     /**
      * Returns the icon file hashes used by the specified entities.
-     * @param array|string[][] $namesByTypes
+     * @param NamesByTypes $namesByTypes
      * @return array|string[]
      */
-    public function getIconFileHashesByTypesAndNames(array $namesByTypes): array
+    public function getHashesByTypesAndNames(NamesByTypes $namesByTypes): array
     {
         $iconData = $this->iconRepository->findDataByTypesAndNames(
-            $namesByTypes,
+            $namesByTypes->toArray(),
             $this->enabledModCombinationIds
         );
 
@@ -88,20 +89,15 @@ class IconService
     }
 
     /**
-     * Returns all types and names of icons which are using any of the specified hashes.
+     * Returns types and names of icons which are using any of the specified hashes.
      * @param array|string[] $iconFileHashes
-     * @return array|string[][]
+     * @return NamesByTypes
      */
-    public function getAllTypesAndNamesByHashes(array $iconFileHashes): array
+    public function getTypesAndNamesByHashes(array $iconFileHashes): NamesByTypes
     {
-        $iconData = $this->iconRepository->findDataByHashes(
-            $iconFileHashes,
-            $this->enabledModCombinationIds
-        );
-
-        $result = [];
-        foreach ($iconData as $data) {
-            $result[$data->getType()][] = $data->getName();
+        $result = new NamesByTypes();
+        foreach ($this->getIconDataByHashes($iconFileHashes) as $data) {
+            $result->addName($data->getType(), $data->getName());
         }
         return $result;
     }

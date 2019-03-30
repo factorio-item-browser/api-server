@@ -6,6 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Traits;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\Entity;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -57,10 +58,10 @@ class TypeAndNameFromEntityExtractorTraitTest extends TestCase
                 ->willReturn('mno');
 
         $entities = [$entity1, $entity2, $entity3];
-        $expectedResult = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
+        $expectedResult = new NamesByTypes();
+        $expectedResult->addName('abc', 'def')
+                       ->addName('abc', 'ghi')
+                       ->addName('jkl', 'mno');
 
         /* @var TypeAndNameFromEntityExtractorTrait&MockObject $trait */
         $trait = $this->getMockBuilder(TypeAndNameFromEntityExtractorTrait::class)

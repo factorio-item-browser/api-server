@@ -72,7 +72,7 @@ class TranslationService
     {
         $translations = $this->translationRepository->findDataByTypesAndNames(
             $authorizationToken->getLocale(),
-            $this->extractTypesAndNames($entities),
+            $this->extractTypesAndNames($entities)->toArray(),
             $authorizationToken->getEnabledModCombinationIds()
         );
 

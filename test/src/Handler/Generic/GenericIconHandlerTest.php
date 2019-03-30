@@ -12,6 +12,7 @@ use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
 use FactorioItemBrowser\Api\Database\Data\IconData;
 use FactorioItemBrowser\Api\Database\Entity\IconFile;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\Generic\GenericIconHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -80,12 +81,10 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testHandleRequest(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-        $iconFileHashes = ['pqr', 'stu'];
+        $iconFileHashes = ['abc', 'def'];
 
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         /* @var GenericIconResponse&MockObject $response */
@@ -166,19 +165,16 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testFetchIconFileHashes(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-        $iconFileHashes = ['pqr', 'stu'];
-        $allNamesByTypes = [
-            'vwx' => ['yza', 'bcd'],
-            'efg' => ['hij'],
-        ];
-        $allIconFileHashes = ['klm', 'nop'];
+        $iconFileHashes = ['abc', 'def'];
+        $allIconFileHashes = ['ghi', 'jkl'];
+
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        /* @var NamesByTypes&MockObject $allNamesByTypes */
+        $allNamesByTypes = $this->createMock(NamesByTypes::class);
 
         $this->iconService->expects($this->exactly(2))
-                          ->method('getIconFileHashesByTypesAndNames')
+                          ->method('getHashesByTypesAndNames')
                           ->withConsecutive(
                               [$this->identicalTo($namesByTypes)],
                               [$this->identicalTo($allNamesByTypes)]
@@ -188,7 +184,7 @@ class GenericIconHandlerTest extends TestCase
                               $allIconFileHashes
                           );
         $this->iconService->expects($this->once())
-                          ->method('getAllTypesAndNamesByHashes')
+                          ->method('getTypesAndNamesByHashes')
                           ->with($this->identicalTo($iconFileHashes))
                           ->willReturn($allNamesByTypes);
 
@@ -337,11 +333,8 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testFilterRequestedIcons(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
         /* @var ClientIcon&MockObject $clientIcon1 */
         $clientIcon1 = $this->createMock(ClientIcon::class);
         /* @var ClientIcon&MockObject $clientIcon2 */
@@ -389,16 +382,24 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testWasIconRequested(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-        
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        $namesByTypes->expects($this->exactly(2))
+                     ->method('hasName')
+                     ->withConsecutive(
+                         [$this->identicalTo('abc'), $this->identicalTo('def')],
+                         [$this->identicalTo('ghi'), $this->identicalTo('jkl')]
+                     )
+                     ->willReturnOnConsecutiveCalls(
+                         false,
+                         true
+                     );
+
         /* @var Entity&MockObject $entity1 */
         $entity1 = $this->createMock(Entity::class);
         $entity1->expects($this->once())
                 ->method('getType')
-                ->willReturn('foo');
+                ->willReturn('abc');
         $entity1->expects($this->once())
                 ->method('getName')
                 ->willReturn('def');
@@ -407,10 +408,10 @@ class GenericIconHandlerTest extends TestCase
         $entity2 = $this->createMock(Entity::class);
         $entity2->expects($this->once())
                 ->method('getType')
-                ->willReturn('abc');
+                ->willReturn('ghi');
         $entity2->expects($this->once())
                 ->method('getName')
-                ->willReturn('def');
+                ->willReturn('jkl');
 
         /* @var ClientIcon&MockObject $clientIcon */
         $clientIcon = $this->createMock(ClientIcon::class);
@@ -431,16 +432,24 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testWasIconRequestedWithUnrequestedIcon(): void
     {
-        $namesByTypes = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        $namesByTypes->expects($this->exactly(2))
+                     ->method('hasName')
+                     ->withConsecutive(
+                         [$this->identicalTo('abc'), $this->identicalTo('def')],
+                         [$this->identicalTo('ghi'), $this->identicalTo('jkl')]
+                     )
+                     ->willReturnOnConsecutiveCalls(
+                         false,
+                         false
+                     );
 
         /* @var Entity&MockObject $entity1 */
         $entity1 = $this->createMock(Entity::class);
         $entity1->expects($this->once())
                 ->method('getType')
-                ->willReturn('foo');
+                ->willReturn('abc');
         $entity1->expects($this->once())
                 ->method('getName')
                 ->willReturn('def');
@@ -449,10 +458,10 @@ class GenericIconHandlerTest extends TestCase
         $entity2 = $this->createMock(Entity::class);
         $entity2->expects($this->once())
                 ->method('getType')
-                ->willReturn('abc');
+                ->willReturn('ghi');
         $entity2->expects($this->once())
                 ->method('getName')
-                ->willReturn('bar');
+                ->willReturn('jkl');
 
         /* @var ClientIcon&MockObject $clientIcon */
         $clientIcon = $this->createMock(ClientIcon::class);

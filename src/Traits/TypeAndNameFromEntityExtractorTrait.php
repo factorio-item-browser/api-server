@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Traits;
 
 use FactorioItemBrowser\Api\Client\Entity\Entity;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 
 /**
  * The trait for extracting the names grouped by type from entities.
@@ -17,13 +18,13 @@ trait TypeAndNameFromEntityExtractorTrait
     /**
      * Extracts the names of the entities, grouped by their types.
      * @param array|Entity[] $entities
-     * @return array|string[][]
+     * @return NamesByTypes
      */
-    protected function extractTypesAndNames(array $entities): array
+    protected function extractTypesAndNames(array $entities): NamesByTypes
     {
-        $result = [];
+        $result = new NamesByTypes();
         foreach ($entities as $entity) {
-            $result[$entity->getType()][] = $entity->getName();
+            $result->addName($entity->getType(), $entity->getName());
         }
         return $result;
     }

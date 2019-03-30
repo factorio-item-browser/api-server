@@ -10,6 +10,7 @@ use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Data\IconData;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
@@ -69,14 +70,14 @@ class GenericIconHandler extends AbstractRequestHandler
 
     /**
      * Fetches the icon file hashes of the types and names.
-     * @param array|string[][] $namesByTypes
+     * @param NamesByTypes $namesByTypes
      * @return array|string[]
      */
-    protected function fetchIconFileHashes(array $namesByTypes): array
+    protected function fetchIconFileHashes(NamesByTypes $namesByTypes): array
     {
-        $iconFileHashes = $this->iconService->getIconFileHashesByTypesAndNames($namesByTypes);
-        $allNamesByTypes = $this->iconService->getAllTypesAndNamesByHashes($iconFileHashes);
-        return $this->iconService->getIconFileHashesByTypesAndNames($allNamesByTypes);
+        $iconFileHashes = $this->iconService->getHashesByTypesAndNames($namesByTypes);
+        $allNamesByTypes = $this->iconService->getTypesAndNamesByHashes($iconFileHashes);
+        return $this->iconService->getHashesByTypesAndNames($allNamesByTypes);
     }
 
     /**
@@ -125,10 +126,10 @@ class GenericIconHandler extends AbstractRequestHandler
     /**
      * Filters icons from the array which actually have been requested.
      * @param array|ClientIcon[] $clientIcons
-     * @param array|string[][] $namesByTypes
+     * @param NamesByTypes $namesByTypes
      * @return array|ClientIcon[]
      */
-    protected function filterRequestedIcons(array $clientIcons, array $namesByTypes): array
+    protected function filterRequestedIcons(array $clientIcons, NamesByTypes $namesByTypes): array
     {
         return array_filter($clientIcons, function (ClientIcon $clientIcon) use ($namesByTypes): bool {
             return $this->wasIconRequested($clientIcon, $namesByTypes);
@@ -138,13 +139,13 @@ class GenericIconHandler extends AbstractRequestHandler
     /**
      * Checks whether the icon was initially requested.
      * @param ClientIcon $clientIcon
-     * @param array|string[][] $namesByTypes
+     * @param NamesByTypes $namesByTypes
      * @return bool
      */
-    protected function wasIconRequested(ClientIcon $clientIcon, array $namesByTypes): bool
+    protected function wasIconRequested(ClientIcon $clientIcon, NamesByTypes $namesByTypes): bool
     {
         foreach ($clientIcon->getEntities() as $entity) {
-            if (in_array($entity->getName(), $namesByTypes[$entity->getType()] ?? [], true)) {
+            if ($namesByTypes->hasName($entity->getType(), $entity->getName())) {
                 return true;
             }
         }

@@ -14,6 +14,7 @@ use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use FactorioItemBrowser\Common\Constant\EntityType;
@@ -100,33 +101,26 @@ class GenericDetailsHandler extends AbstractRequestHandler
     {
         $namesByTypes = $this->extractTypesAndNames($request->getEntities());
         $authorizationToken = $this->getAuthorizationToken();
-
-        $entities = [];
-        foreach ($namesByTypes as $type => $names) {
-            $entities = array_merge($entities, $this->processType($type, $names, $authorizationToken));
-        }
-
+        $entities = $this->process($namesByTypes, $authorizationToken);
         return $this->createResponse($entities);
     }
 
     /**
-     * Processes a type of names.
-     * @param string $type
-     * @param array|string[] $names
+     * Processes the types and names.
+     * @param NamesByTypes $namesByTypes
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      */
-    protected function processType(string $type, array $names, AuthorizationToken $authorizationToken): array
+    protected function process(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $result = [];
-        if (isset(self::MAP_TYPE_TO_METHOD[$type])) {
-            $result =  call_user_func(
-                [$this, self::MAP_TYPE_TO_METHOD[$type]],
-                $names,
-                $authorizationToken
+        foreach (self::MAP_TYPE_TO_METHOD as $type => $method) {
+            $result = array_merge(
+                $result,
+                $this->$method($namesByTypes->getNames($type), $authorizationToken)
             );
         }
-        return $result;
+        return array_values($result);
     }
 
     /**

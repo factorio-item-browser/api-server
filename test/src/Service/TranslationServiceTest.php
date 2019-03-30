@@ -9,6 +9,7 @@ use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -126,7 +127,7 @@ class TranslationServiceTest extends TestCase
     {
         $locale = 'abc';
         $enabledModCombinationIds = [42, 1337];
-        $namesByTypes = [
+        $namesByTypesArray = [
             'def' => ['ghi', 'jkl'],
             'mno' => ['pqr', 'stu'],
         ];
@@ -144,6 +145,12 @@ class TranslationServiceTest extends TestCase
             'yza' => $this->createMock(TranslationData::class),
         ];
 
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        $namesByTypes->expects($this->once())
+                     ->method('toArray')
+                     ->willReturn($namesByTypesArray);
+
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
@@ -157,7 +164,7 @@ class TranslationServiceTest extends TestCase
                                     ->method('findDataByTypesAndNames')
                                     ->with(
                                         $this->identicalTo($locale),
-                                        $this->identicalTo($namesByTypes),
+                                        $this->identicalTo($namesByTypesArray),
                                         $this->identicalTo($enabledModCombinationIds)
                                     )
                                     ->willReturn($translations);
