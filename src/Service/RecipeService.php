@@ -50,7 +50,22 @@ class RecipeService
     }
 
     /**
-     * Returns the grouped recipe ids having any of the items as ingredient.
+     * Returns the recipe data having one of the names.
+     * @param array|string[] $names
+     * @param AuthorizationToken $authorizationToken
+     * @return RecipeDataCollection
+     */
+    public function getDataWithNames(array $names, AuthorizationToken $authorizationToken): RecipeDataCollection
+    {
+        $recipeData = $this->recipeRepository->findDataByNames(
+            $names,
+            $authorizationToken->getEnabledModCombinationIds()
+        );
+        return $this->createDataCollection($recipeData);
+    }
+
+    /**
+     * Returns the recipe data having any of the items as ingredient.
      * @param array|Item[] $items
      * @param AuthorizationToken $authorizationToken
      * @return RecipeDataCollection
@@ -65,7 +80,7 @@ class RecipeService
     }
 
     /**
-     * Returns the grouped recipe ids having any of the items as product.
+     * Returns the recipe data having any of the items as product.
      * @param array|Item[] $items
      * @param AuthorizationToken $authorizationToken
      * @return RecipeDataCollection
