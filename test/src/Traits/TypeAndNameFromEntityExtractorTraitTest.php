@@ -6,7 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Traits;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\Entity;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

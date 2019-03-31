@@ -9,7 +9,7 @@ use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use PHPUnit\Framework\MockObject\MockObject;

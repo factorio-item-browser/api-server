@@ -14,7 +14,7 @@ use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use FactorioItemBrowser\Common\Constant\EntityType;

@@ -65,6 +65,7 @@ class ModListHandler extends AbstractRequestHandler
     {
         return ModListRequest::class;
     }
+
     /**
      * Creates the response data from the validated request data.
      * @param ModListRequest $request

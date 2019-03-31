@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Traits;
 
 use FactorioItemBrowser\Api\Client\Entity\Entity;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 
 /**
  * The trait for extracting the names grouped by type from entities.

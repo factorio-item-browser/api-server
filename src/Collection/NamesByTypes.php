@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowser\Api\Server\Entity;
+namespace FactorioItemBrowser\Api\Server\Collection;
 
 use ArrayIterator;
 use IteratorAggregate;
@@ -17,13 +17,13 @@ use Traversable;
 class NamesByTypes implements IteratorAggregate
 {
     /**
-     * The values of the entity.
+     * The values of the collection.
      * @var array|string[][]
      */
     protected $values = [];
 
     /**
-     * Adds a type and name pair to the entity.
+     * Adds a type and name pair to the collection.
      * @param string $type
      * @param string $name
      * @return $this
@@ -57,7 +57,7 @@ class NamesByTypes implements IteratorAggregate
     }
 
     /**
-     * Returns whether the type and name pair is part of the entity.
+     * Returns whether the type and name pair is part of the collection.
      * @param string $type
      * @param string $name
      * @return bool
@@ -77,7 +77,7 @@ class NamesByTypes implements IteratorAggregate
     }
 
     /**
-     * Returns the iterator for the entity.
+     * Returns the iterator for the collection.
      * @return Traversable
      */
     public function getIterator(): Traversable

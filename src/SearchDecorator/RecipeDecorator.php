@@ -11,7 +11,7 @@ use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
+use FactorioItemBrowser\Api\Server\Service\RecipeService;
 
 /**
  * The decorator of the recipe search results.

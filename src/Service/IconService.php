@@ -10,7 +10,7 @@ use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 
 /**
  * The service handling the icons.
@@ -109,7 +109,7 @@ class IconService
      */
     public function getIconDataByHashes(array $iconFileHashes): array
     {
-        $iconData = $this->iconRepository->findDataByHashes($iconFileHashes, $this->enabledModCombinationIds);;
+        $iconData = $this->iconRepository->findDataByHashes($iconFileHashes, $this->enabledModCombinationIds);
 
         $result = [];
         foreach ($this->dataFilter->filter($iconData) as $data) {

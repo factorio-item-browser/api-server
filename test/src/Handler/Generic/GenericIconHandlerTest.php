@@ -12,7 +12,7 @@ use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
 use FactorioItemBrowser\Api\Database\Data\IconData;
 use FactorioItemBrowser\Api\Database\Entity\IconFile;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\Generic\GenericIconHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use PHPUnit\Framework\MockObject\MockObject;

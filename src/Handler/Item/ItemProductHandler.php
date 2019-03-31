@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
-use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use FactorioItemBrowser\Api\Client\Request\Item\ItemProductRequest;
+use FactorioItemBrowser\Api\Client\Response\Item\ItemProductResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 
 /**
  * The handler of the /item/product request.
@@ -15,12 +19,30 @@ use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 class ItemProductHandler extends AbstractItemRecipeHandler
 {
     /**
-     * Fetches the IDs of the grouped recipes.
-     * @param DatabaseItem $item
-     * @return array|int[][]
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function fetchGroupedRecipeIds(DatabaseItem $item): array
+    protected function getExpectedRequestClass(): string
     {
-        return $this->recipeService->getIdsWithProduct($item->getId());
+        return ItemProductRequest::class;
+    }
+
+    /**
+     * Creates the response data from the validated request data.
+     * @param ItemProductRequest $request
+     * @return ResponseInterface
+     * @throws ApiServerException
+     * @throws MapperException
+     */
+    protected function handleRequest($request): ResponseInterface
+    {
+        $authorizationToken = $this->getAuthorizationToken();
+        $item = $this->fetchItem($request->getType(), $request->getName(), $authorizationToken);
+        $recipeData = $this->recipeService->getDataWithProduct($item, $authorizationToken);
+        $limitedRecipeData = $recipeData->limitNames($request->getNumberOfResults(), $request->getIndexOfFirstResult());
+
+        $response = new ItemProductResponse();
+        $response->setItem($this->createResponseEntity($item, $limitedRecipeData, $recipeData->countNames()));
+        return $response;
     }
 }

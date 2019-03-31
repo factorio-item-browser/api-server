@@ -11,7 +11,7 @@ use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
+use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\SearchDecorator\RecipeDecorator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

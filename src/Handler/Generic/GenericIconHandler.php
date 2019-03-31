@@ -10,7 +10,7 @@ use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;

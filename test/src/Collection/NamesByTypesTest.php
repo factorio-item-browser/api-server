@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FactorioItemBrowserTest\Api\Server\Entity;
+namespace FactorioItemBrowserTest\Api\Server\Collection;
 
 use ArrayIterator;
 use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 
@@ -15,7 +15,7 @@ use ReflectionException;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Entity\NamesByTypes
+ * @coversDefaultClass \FactorioItemBrowser\Api\Server\Collection\NamesByTypes
  */
 class NamesByTypesTest extends TestCase
 {
@@ -28,9 +28,9 @@ class NamesByTypesTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $entity = new NamesByTypes();
+        $collection = new NamesByTypes();
 
-        $this->assertSame([], $this->extractProperty($entity, 'values'));
+        $this->assertSame([], $this->extractProperty($collection, 'values'));
     }
 
     /**
@@ -48,13 +48,13 @@ class NamesByTypesTest extends TestCase
             'jkl' => ['mno'],
         ];
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $this->assertSame($entity, $entity->addName('abc', 'ghi'));
-        $this->assertSame($entity, $entity->addName('jkl', 'mno'));
+        $this->assertSame($collection, $collection->addName('abc', 'ghi'));
+        $this->assertSame($collection, $collection->addName('jkl', 'mno'));
 
-        $this->assertEquals($expectedValues, $this->extractProperty($entity, 'values'));
+        $this->assertEquals($expectedValues, $this->extractProperty($collection, 'values'));
     }
 
     /**
@@ -76,12 +76,12 @@ class NamesByTypesTest extends TestCase
         $type = 'abc';
         $names = ['pqr', 'stu'];
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $this->assertSame($entity, $entity->setNames($type, $names));
+        $this->assertSame($collection, $collection->setNames($type, $names));
 
-        $this->assertEquals($expectedValues, $this->extractProperty($entity, 'values'));
+        $this->assertEquals($expectedValues, $this->extractProperty($collection, 'values'));
     }
 
     /**
@@ -96,11 +96,11 @@ class NamesByTypesTest extends TestCase
             'jkl' => ['mno'],
         ];
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $this->assertEquals(['def', 'ghi'], $entity->getNames('abc'));
-        $this->assertEquals([], $entity->getNames('foo'));
+        $this->assertEquals(['def', 'ghi'], $collection->getNames('abc'));
+        $this->assertEquals([], $collection->getNames('foo'));
     }
 
     /**
@@ -115,12 +115,12 @@ class NamesByTypesTest extends TestCase
             'jkl' => ['mno'],
         ];
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $this->assertTrue($entity->hasName('abc', 'def'));
-        $this->assertFalse($entity->hasName('jkl', 'foo'));
-        $this->assertFalse($entity->hasName('foo', 'bar'));
+        $this->assertTrue($collection->hasName('abc', 'def'));
+        $this->assertFalse($collection->hasName('jkl', 'foo'));
+        $this->assertFalse($collection->hasName('foo', 'bar'));
     }
 
     /**
@@ -135,10 +135,10 @@ class NamesByTypesTest extends TestCase
             'jkl' => ['mno'],
         ];
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $this->assertSame($values, $entity->toArray());
+        $this->assertSame($values, $collection->toArray());
     }
 
     /**
@@ -154,10 +154,10 @@ class NamesByTypesTest extends TestCase
         ];
         $expectedResult = new ArrayIterator($values);
 
-        $entity = new NamesByTypes();
-        $this->injectProperty($entity, 'values', $values);
+        $collection = new NamesByTypes();
+        $this->injectProperty($collection, 'values', $values);
 
-        $result = $entity->getIterator();
+        $result = $collection->getIterator();
         $this->assertEquals($expectedResult, $result);
     }
 }

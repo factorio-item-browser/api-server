@@ -11,7 +11,7 @@ use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Entity\NamesByTypes;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

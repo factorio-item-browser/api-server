@@ -23,6 +23,7 @@ return [
             Mapper\DatabaseRecipeToClientRecipeMapper::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class,
             Mapper\MachineDataToGenericEntityMapper::class,
+            Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class,
             Mapper\RecipeDataToGenericEntityMapper::class,
         ],
     ],
