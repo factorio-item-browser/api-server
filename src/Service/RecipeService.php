@@ -33,6 +33,12 @@ class RecipeService
     protected $recipeRepository;
 
     /**
+     * The already requested recipe details.
+     * @var array|Recipe[]
+     */
+    protected $recipeCache = [];
+
+    /**
      * Initializes the service.
      * @param DataFilter $dataFilter
      * @param RecipeRepository $recipeRepository
@@ -44,33 +50,47 @@ class RecipeService
     }
 
     /**
-     * Returns the grouped recipe ids having the item as ingredient.
-     * @param Item $item
+     * Returns the grouped recipe ids having any of the items as ingredient.
+     * @param array|Item[] $items
      * @param AuthorizationToken $authorizationToken
      * @return RecipeDataCollection
      */
-    public function getDataWithIngredient(Item $item, AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getDataWithIngredients(array $items, AuthorizationToken $authorizationToken): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByIngredientItemIds(
-            [$item->getId()],
+            $this->extractIdsFromItems($items),
             $authorizationToken->getEnabledModCombinationIds()
         );
         return $this->createDataCollection($recipeData);
     }
 
     /**
-     * Returns the grouped recipe ids having the item as product.
-     * @param Item $item
+     * Returns the grouped recipe ids having any of the items as product.
+     * @param array|Item[] $items
      * @param AuthorizationToken $authorizationToken
      * @return RecipeDataCollection
      */
-    public function getDataWithProduct(Item $item, AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getDataWithProducts(array $items, AuthorizationToken $authorizationToken): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByProductItemIds(
-            [$item->getId()],
+            $this->extractIdsFromItems($items),
             $authorizationToken->getEnabledModCombinationIds()
         );
         return $this->createDataCollection($recipeData);
+    }
+
+    /**
+     * Extracts the ids from the items.
+     * @param array|Item[] $items
+     * @return array|int[]
+     */
+    protected function extractIdsFromItems(array $items): array
+    {
+        $result = [];
+        foreach ($items as $item) {
+            $result[] = $item->getId();
+        }
+        return $result;
     }
 
     /**
@@ -94,10 +114,19 @@ class RecipeService
      */
     public function getDetailsByIds(array $ids): array
     {
-        $result = [];
-        foreach ($this->recipeRepository->findByIds($ids) as $recipe) {
-            $result[$recipe->getId()] = $recipe;
+        $this->fetchRecipeDetails($ids);
+        return array_intersect_key($this->recipeCache, array_flip($ids));
+    }
+
+    /**
+     * Fetches the recipe details into the local cache.
+     * @param array|int[] $ids
+     */
+    protected function fetchRecipeDetails(array $ids): void
+    {
+        $missingIds = array_diff($ids, array_keys($this->recipeCache));
+        foreach ($this->recipeRepository->findByIds($missingIds) as $recipe) {
+            $this->recipeCache[$recipe->getId()] = $recipe;
         }
-        return $result;
     }
 }

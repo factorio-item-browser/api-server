@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
-use BluePsyduck\Common\Data\DataContainer;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
-use FactorioItemBrowser\Api\Database\Entity\Recipe;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Client\Request\Item\ItemRandomRequest;
+use FactorioItemBrowser\Api\Client\Response\Item\ItemRandomResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Database\Entity\Item;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
+use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
+use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use Zend\Filter\ToInt;
-use Zend\InputFilter\InputFilter;
-use Zend\Validator\NotEmpty;
 
 /**
  * The handler of the /item/random request.
@@ -27,10 +25,10 @@ use Zend\Validator\NotEmpty;
 class ItemRandomHandler extends AbstractRequestHandler
 {
     /**
-     * The database item service.
-     * @var ItemService
+     * The item repository.
+     * @var ItemRepository
      */
-    protected $itemService;
+    protected $itemRepository;
 
     /**
      * The mapper manager.
@@ -45,129 +43,79 @@ class ItemRandomHandler extends AbstractRequestHandler
     protected $recipeService;
 
     /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * Initializes the request handler.
-     * @param ItemService $itemService
+     * @param ItemRepository $itemRepository
      * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
-     * @param TranslationService $translationService
      */
     public function __construct(
-        ItemService $itemService,
+        ItemRepository $itemRepository,
         MapperManagerInterface $mapperManager,
-        RecipeService $recipeService,
-        TranslationService $translationService
+        RecipeService $recipeService
     ) {
-        $this->itemService = $itemService;
+        $this->itemRepository = $itemRepository;
         $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
-        $this->translationService = $translationService;
     }
 
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        $inputFilter = new InputFilter();
-        $inputFilter
-            ->add([
-                'name' => 'numberOfResults',
-                'required' => true,
-                'fallback_value' => 10,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfRecipesPerResult',
-                'required' => true,
-                'fallback_value' => 3,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ]);
-
-        return $inputFilter;
+        return ItemRandomRequest::class;
     }
 
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param ItemRandomRequest $request
+     * @return ResponseInterface
      * @throws MapperException
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest($request): ResponseInterface
     {
-        $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
+        $authorizationToken = $this->getAuthorizationToken();
 
-        $items = $this->itemService->getRandom($requestData->getInteger('numberOfResults'));
-        $groupedRecipeIds = $this->recipeService->getIdsWithProducts(array_keys($items));
-        $recipes = $this->fetchRecipeDetails($groupedRecipeIds, $numberOfRecipesPerResult);
+        $items = $this->itemRepository->findRandom(
+            $request->getNumberOfResults(),
+            $authorizationToken->getEnabledModCombinationIds()
+        );
+        $recipeData = $this->recipeService->getDataWithProducts($items, $authorizationToken);
 
-        $clientItems = [];
-        foreach ($items as $itemId => $item) {
-            $clientItem = new GenericEntityWithRecipes();
-            $this->mapperManager->map($item, $clientItem);
-            $clientItem->setTotalNumberOfRecipes(count($groupedRecipeIds[$itemId] ?? []));
+        // Prefetch all recipes for later mapping
+        $this->recipeService->getDetailsByIds($recipeData->getAllIds());
 
-            foreach ($groupedRecipeIds[$itemId] ?? [] as $recipeIdGroup) {
-                $currentRecipe = null;
-                foreach ($recipeIdGroup as $recipeId) {
-                    if (isset($recipes[$recipeId])) {
-                        $mappedRecipe = new RecipeWithExpensiveVersion();
-                        $this->mapperManager->map($recipes[$recipeId], $mappedRecipe);
-
-                        if (is_null($currentRecipe)) {
-                            $currentRecipe = $mappedRecipe;
-                        } else {
-                            $this->mapperManager->map($currentRecipe, $mappedRecipe);
-                        }
-                    }
-                }
-                if ($currentRecipe instanceof RecipeWithExpensiveVersion) {
-                    $clientItem->addRecipe($currentRecipe);
-                }
-            }
-
-            $clientItems[] = $clientItem;
+        $response = new ItemRandomResponse();
+        foreach ($items as $item) {
+            $response->addItem($this->createItem(
+                $item,
+                $recipeData->filterItemId($item->getId()),
+                $request->getNumberOfRecipesPerResult()
+            ));
         }
-
-        $this->translationService->translateEntities();
-        return [
-            'items' => $clientItems
-        ];
+        return $response;
     }
 
     /**
-     * Fetches the recipe details of the specified recipe ids.
-     * @param array|int[][][] $groupedRecipeIds
-     * @param int $numberOfRecipesPerResult
-     * @return array|Recipe[]
+     * Creates the response entity for the item.
+     * @param Item $item
+     * @param RecipeDataCollection $recipeData
+     * @param int $numberOfRecipes
+     * @return GenericEntityWithRecipes
+     * @throws MapperException
      */
-    protected function fetchRecipeDetails(array $groupedRecipeIds, int $numberOfRecipesPerResult): array
-    {
-        $allRecipeIds = [];
-        foreach ($groupedRecipeIds as $itemId => $recipeIdsGroup) {
-            foreach (array_slice($recipeIdsGroup, 0, $numberOfRecipesPerResult) as $recipeIds) {
-                $allRecipeIds = array_merge(
-                    $allRecipeIds,
-                    $recipeIds
-                );
-            }
-        }
-        return $this->recipeService->getDetailsByIds($allRecipeIds);
+    protected function createItem(
+        Item $item,
+        RecipeDataCollection $recipeData,
+        int $numberOfRecipes
+    ): GenericEntityWithRecipes {
+        $result = new GenericEntityWithRecipes();
+
+        $this->mapperManager->map($item, $result);
+        $this->mapperManager->map($recipeData->limitNames($numberOfRecipes, 0), $result);
+        $result->setTotalNumberOfRecipes($recipeData->countNames());
+
+        return $result;
     }
 }

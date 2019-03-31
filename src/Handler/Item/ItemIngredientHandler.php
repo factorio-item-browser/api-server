@@ -38,7 +38,7 @@ class ItemIngredientHandler extends AbstractItemRecipeHandler
     {
         $authorizationToken = $this->getAuthorizationToken();
         $item = $this->fetchItem($request->getType(), $request->getName(), $authorizationToken);
-        $recipeData = $this->recipeService->getDataWithIngredient($item, $authorizationToken);
+        $recipeData = $this->recipeService->getDataWithIngredients([$item], $authorizationToken);
         $limitedRecipeData = $recipeData->limitNames($request->getNumberOfResults(), $request->getIndexOfFirstResult());
 
         $response = new ItemIngredientResponse();

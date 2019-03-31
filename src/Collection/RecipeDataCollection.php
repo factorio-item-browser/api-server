@@ -21,7 +21,7 @@ class RecipeDataCollection implements IteratorAggregate
      * The values of the collection.
      * @var array|RecipeData[]
      */
-    protected $values;
+    protected $values = [];
 
     /**
      * Adds recipe data to the collection.
@@ -43,19 +43,6 @@ class RecipeDataCollection implements IteratorAggregate
         $result = [];
         foreach ($this->values as $recipeData) {
             $result[] = $recipeData->getId();
-        }
-        return array_values(array_unique(array_filter($result)));
-    }
-
-    /**
-     * Returns the item ids from the recipe data.
-     * @return array|int[]
-     */
-    public function getItemIds(): array
-    {
-        $result = [];
-        foreach ($this->values as $recipeData) {
-            $result[] = $recipeData->getItemId();
         }
         return array_values(array_unique(array_filter($result)));
     }
