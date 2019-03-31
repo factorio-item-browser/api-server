@@ -116,8 +116,10 @@ class RecipeService
     protected function createDataCollection(array $recipeData): RecipeDataCollection
     {
         $result = new RecipeDataCollection();
-        foreach ($recipeData as $data) {
-            $result->add($data);
+        foreach ($this->dataFilter->filter($recipeData) as $data) {
+            if ($data instanceof RecipeData) {
+                $result->add($data);
+            }
         }
         return $result;
     }

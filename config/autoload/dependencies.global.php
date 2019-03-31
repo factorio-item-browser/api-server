@@ -20,7 +20,6 @@ return [
     'dependencies' => [
         'factories'  => [
             Database\Service\ItemService::class => ReflectionFactory::class,
-            Database\Service\MachineService::class => ReflectionFactory::class,
             Database\Service\ModService::class => ReflectionFactory::class,
 
             Handler\Auth\AuthHandler::class => ReflectionFactory::class,
@@ -36,7 +35,6 @@ return [
             Handler\Recipe\RecipeMachinesHandler::class => ReflectionFactory::class,
             Handler\Search\SearchQueryHandler::class => ReflectionFactory::class,
 
-            Mapper\CombiningRecipeMapper::class => ReflectionFactory::class,
             Mapper\DatabaseItemToGenericEntityMapper::class => ReflectionFactory::class,
             Mapper\DatabaseMachineToClientMachineMapper::class => ReflectionFactory::class,
             Mapper\DatabaseModToClientModMapper::class => ReflectionFactory::class,
@@ -63,6 +61,7 @@ return [
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => Service\AuthorizationServiceFactory::class,
             Service\IconService::class => ReflectionFactory::class,
+            Service\MachineService::class => ReflectionFactory::class,
             Service\RecipeService::class => ReflectionFactory::class,
             Service\SearchDecoratorService::class => Service\SearchDecoratorServiceFactory::class,
             Service\TranslationService::class => ReflectionFactory::class,

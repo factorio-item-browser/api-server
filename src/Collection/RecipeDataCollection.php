@@ -132,6 +132,16 @@ class RecipeDataCollection implements IteratorAggregate
     }
 
     /**
+     * Returns the first value from the collection.
+     * @return RecipeData|null
+     */
+    public function getFirstValue(): ?RecipeData
+    {
+        $result = reset($this->values);
+        return $result instanceof RecipeData ? $result : null;
+    }
+
+    /**
      * Returns an iterator for the collection.
      * @return Traversable
      */

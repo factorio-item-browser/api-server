@@ -16,7 +16,6 @@ use BluePsyduck\MapperManager\Constant\ConfigKey;
 return [
     ConfigKey::MAIN => [
         ConfigKey::MAPPERS => [
-            Mapper\CombiningRecipeMapper::class,
             Mapper\DatabaseItemToGenericEntityMapper::class,
             Mapper\DatabaseMachineToClientMachineMapper::class,
             Mapper\DatabaseModToClientModMapper::class,
