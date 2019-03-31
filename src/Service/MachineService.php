@@ -108,7 +108,7 @@ class MachineService
 
     /**
      * Counts the item with a type.
-     * @param Collection|RecipeIngredient[]|RecipeProduct[] $entities
+     * @param Collection $entities
      * @param string $type
      * @return int
      */

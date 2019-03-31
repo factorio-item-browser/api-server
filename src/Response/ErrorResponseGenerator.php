@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -45,21 +46,23 @@ class ErrorResponseGenerator
         ServerRequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
-        $statusCode = $exception->getCode();
-        $message = $exception->getMessage();
-        if ($statusCode < 400 || $statusCode >= 600) {
+        if ($exception instanceof ApiServerException) {
+            $statusCode = $exception->getCode();
+            $message = $exception->getMessage();
+        } else {
             $statusCode = 500;
-            $message = 'An unexpected error occurred.';
-
-            if ($this->logger instanceof LoggerInterface) {
-                $this->logger->crit((string) $exception);
-            }
+            $message = 'Internal server error.';
         }
 
-        $errorData = [
-            'message' => $message,
-        ];
+        if ($this->logger instanceof LoggerInterface && floor($statusCode / 100) === 5.) {
+            $this->logger->crit((string) $exception);
+        }
 
-        return new JsonResponse(['error' => $errorData], $statusCode, $response->getHeaders());
+        $errorResponse = [
+            'error' => [
+                'message' => $message,
+            ],
+        ];
+        return new JsonResponse($errorResponse, $statusCode, $response->getHeaders());
     }
 }

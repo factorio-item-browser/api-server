@@ -31,16 +31,6 @@ class GenericDetailsHandler extends AbstractRequestHandler
     use TypeAndNameFromEntityExtractorTrait;
 
     /**
-     * The map of the entity types to their processing methods.
-     */
-    protected const MAP_TYPE_TO_METHOD = [
-        EntityType::ITEM => 'processItems',
-        EntityType::FLUID => 'processFluids',
-        EntityType::MACHINE => 'processMachines',
-        EntityType::RECIPE => 'processRecipes',
-    ];
-
-    /**
      * The item repository.
      * @var ItemRepository
      */
@@ -96,6 +86,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
      * Creates the response data from the validated request data.
      * @param GenericDetailsRequest $request
      * @return ResponseInterface
+     * @throws MapperException
      */
     protected function handleRequest($request): ResponseInterface
     {
@@ -110,22 +101,21 @@ class GenericDetailsHandler extends AbstractRequestHandler
      * @param NamesByTypes $namesByTypes
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
+     * @throws MapperException
      */
     protected function process(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
-        $result = [];
-        foreach (self::MAP_TYPE_TO_METHOD as $type => $method) {
-            $result = array_merge(
-                $result,
-                $this->$method($namesByTypes->getNames($type), $authorizationToken)
-            );
-        }
-        return array_values($result);
+        return array_values(array_merge(
+            $this->processItems($namesByTypes->getNames(EntityType::ITEM), $authorizationToken),
+            $this->processFluids($namesByTypes->getNames(EntityType::FLUID), $authorizationToken),
+            $this->processMachines($namesByTypes->getNames(EntityType::MACHINE), $authorizationToken),
+            $this->processRecipes($namesByTypes->getNames(EntityType::RECIPE), $authorizationToken)
+        ));
     }
 
     /**
      * Processes the items.
-     * @param array|string $names
+     * @param array|string[] $names
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
@@ -142,7 +132,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
 
     /**
      * Processes the fluids.
-     * @param array|string $names
+     * @param array|string[] $names
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
@@ -159,7 +149,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
 
     /**
      * Processes the machines.
-     * @param array|string $names
+     * @param array|string[] $names
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
@@ -176,7 +166,7 @@ class GenericDetailsHandler extends AbstractRequestHandler
     
     /**
      * Processes the recipes.
-     * @param array|string $names
+     * @param array|string[] $names
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException

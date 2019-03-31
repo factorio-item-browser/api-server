@@ -10,9 +10,9 @@ use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Search\Entity\Result\ItemResult;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 use FactorioItemBrowser\Api\Server\SearchDecorator\ItemDecorator;
 use FactorioItemBrowser\Api\Server\SearchDecorator\RecipeDecorator;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -31,10 +31,10 @@ class ItemDecoratorTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * The mocked item service.
-     * @var ItemService&MockObject
+     * The mocked item repository.
+     * @var ItemRepository&MockObject
      */
-    protected $itemService;
+    protected $itemRepository;
 
     /**
      * The mocked mapper manager.
@@ -56,7 +56,7 @@ class ItemDecoratorTest extends TestCase
     {
         parent::setUp();
 
-        $this->itemService = $this->createMock(ItemService::class);
+        $this->itemRepository = $this->createMock(ItemRepository::class);
         $this->mapperManager = $this->createMock(MapperManagerInterface::class);
         $this->recipeDecorator = $this->createMock(RecipeDecorator::class);
     }
@@ -68,9 +68,9 @@ class ItemDecoratorTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
 
-        $this->assertSame($this->itemService, $this->extractProperty($decorator, 'itemService'));
+        $this->assertSame($this->itemRepository, $this->extractProperty($decorator, 'itemRepository'));
         $this->assertSame($this->mapperManager, $this->extractProperty($decorator, 'mapperManager'));
         $this->assertSame($this->recipeDecorator, $this->extractProperty($decorator, 'recipeDecorator'));
     }
@@ -81,7 +81,7 @@ class ItemDecoratorTest extends TestCase
      */
     public function testGetSupportedResultClass(): void
     {
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
         $result = $decorator->getSupportedResultClass();
 
         $this->assertSame(ItemResult::class, $result);
@@ -96,7 +96,7 @@ class ItemDecoratorTest extends TestCase
     {
         $numberOfRecipesPerResult = 42;
 
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
         $this->injectProperty($decorator, 'itemIds', [1337]);
         $this->injectProperty($decorator, 'items', [$this->createMock(ItemResult::class)]);
 
@@ -141,7 +141,7 @@ class ItemDecoratorTest extends TestCase
         /* @var ItemDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(ItemDecorator::class)
                           ->setMethods(['getRecipesFromItem'])
-                          ->setConstructorArgs([$this->itemService, $this->mapperManager, $this->recipeDecorator])
+                          ->setConstructorArgs([$this->itemRepository, $this->mapperManager, $this->recipeDecorator])
                           ->getMock();
         $decorator->expects($this->once())
                   ->method('getRecipesFromItem')
@@ -164,22 +164,35 @@ class ItemDecoratorTest extends TestCase
         $itemIds = [42, 1337, 42, 0];
         $expectedItemIds = [42, 1337];
 
-        $items = [
-            $this->createMock(DatabaseItem::class),
-            $this->createMock(DatabaseItem::class),
+        /* @var DatabaseItem&MockObject $item1 */
+        $item1 = $this->createMock(DatabaseItem::class);
+        $item1->expects($this->once())
+              ->method('getId')
+              ->willReturn(21);
+
+        /* @var DatabaseItem&MockObject $item2 */
+        $item2 = $this->createMock(DatabaseItem::class);
+        $item2->expects($this->once())
+              ->method('getId')
+              ->willReturn(7331);
+
+        $items = [$item1, $item2];
+        $expectedItems = [
+            21 => $item1,
+            7331 => $item2,
         ];
 
-        $this->itemService->expects($this->once())
-                          ->method('getByIds')
-                          ->with($this->identicalTo($expectedItemIds))
-                          ->willReturn($items);
+        $this->itemRepository->expects($this->once())
+                             ->method('findByIds')
+                             ->with($this->equalTo($expectedItemIds))
+                             ->willReturn($items);
 
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
         $this->injectProperty($decorator, 'itemIds', $itemIds);
 
         $decorator->prepare();
 
-        $this->assertEquals($items, $this->extractProperty($decorator, 'items'));
+        $this->assertEquals($expectedItems, $this->extractProperty($decorator, 'items'));
     }
 
     /**
@@ -247,7 +260,7 @@ class ItemDecoratorTest extends TestCase
         /* @var ItemDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(ItemDecorator::class)
                           ->setMethods(['createEntityForItem', 'getRecipesFromItem'])
-                          ->setConstructorArgs([$this->itemService, $this->mapperManager, $this->recipeDecorator])
+                          ->setConstructorArgs([$this->itemRepository, $this->mapperManager, $this->recipeDecorator])
                           ->getMock();
         $decorator->expects($this->once())
                   ->method('createEntityForItem')
@@ -287,7 +300,7 @@ class ItemDecoratorTest extends TestCase
         /* @var ItemDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(ItemDecorator::class)
                           ->setMethods(['createEntityForItem', 'getRecipesFromItem'])
-                          ->setConstructorArgs([$this->itemService, $this->mapperManager, $this->recipeDecorator])
+                          ->setConstructorArgs([$this->itemRepository, $this->mapperManager, $this->recipeDecorator])
                           ->getMock();
         $decorator->expects($this->never())
                   ->method('createEntityForItem');
@@ -317,7 +330,7 @@ class ItemDecoratorTest extends TestCase
                                 $this->isInstanceOf(GenericEntityWithRecipes::class)
                             );
 
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
         $this->invokeMethod($decorator, 'createEntityForItem', $databaseItem);
     }
 
@@ -349,7 +362,7 @@ class ItemDecoratorTest extends TestCase
                    ->method('getRecipes')
                    ->willReturn($recipes);
 
-        $decorator = new ItemDecorator($this->itemService, $this->mapperManager, $this->recipeDecorator);
+        $decorator = new ItemDecorator($this->itemRepository, $this->mapperManager, $this->recipeDecorator);
         $this->injectProperty($decorator, 'numberOfRecipesPerResult', $numberOfRecipesPerResult);
 
         $result = $this->invokeMethod($decorator, 'getRecipesFromItem', $itemResult);

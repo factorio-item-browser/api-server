@@ -9,9 +9,9 @@ use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Search\Entity\Result\ItemResult;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 
 /**
  * The decorator of the item search results.
@@ -22,10 +22,10 @@ use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
 class ItemDecorator implements SearchDecoratorInterface
 {
     /**
-     * The item service.
-     * @var ItemService
+     * The item repository.
+     * @var ItemRepository
      */
-    protected $itemService;
+    protected $itemRepository;
 
     /**
      * The mapper manager.
@@ -59,16 +59,16 @@ class ItemDecorator implements SearchDecoratorInterface
 
     /**
      * Initializes the decorator.
-     * @param ItemService $itemService
+     * @param ItemRepository $itemRepository
      * @param MapperManagerInterface $mapperManager
      * @param RecipeDecorator $recipeDecorator
      */
     public function __construct(
-        ItemService $itemService,
+        ItemRepository $itemRepository,
         MapperManagerInterface $mapperManager,
         RecipeDecorator $recipeDecorator
     ) {
-        $this->itemService = $itemService;
+        $this->itemRepository = $itemRepository;
         $this->mapperManager = $mapperManager;
         $this->recipeDecorator = $recipeDecorator;
     }
@@ -111,7 +111,11 @@ class ItemDecorator implements SearchDecoratorInterface
     public function prepare(): void
     {
         $itemIds = array_values(array_unique(array_filter($this->itemIds)));
-        $this->items = $this->itemService->getByIds($itemIds);
+
+        $this->items = [];
+        foreach ($this->itemRepository->findByIds($itemIds) as $item) {
+            $this->items[$item->getId()] = $item;
+        }
     }
 
     /**
