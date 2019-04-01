@@ -13,12 +13,10 @@ use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Database\Entity\Machine as DatabaseMachine;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
-use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Exception\EntityNotFoundException;
-use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Common\Constant\EntityType;
@@ -44,40 +42,25 @@ class RecipeMachinesHandler extends AbstractRequestHandler
     protected $machineService;
 
     /**
-     * The recipe repository.
-     * @var RecipeRepository
-     */
-    protected $recipeRepository;
-
-    /**
      * The database service of the recipes.
      * @var RecipeService
      */
     protected $recipeService;
 
     /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * Initializes the request handler.
      * @param MachineService $machineService
      * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
-     * @param TranslationService $translationService
      */
     public function __construct(
         MachineService $machineService,
         MapperManagerInterface $mapperManager,
-        RecipeService $recipeService,
-        TranslationService $translationService
+        RecipeService $recipeService
     ) {
         $this->machineService = $machineService;
         $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
-        $this->translationService = $translationService;
     }
 
     /**
@@ -100,23 +83,15 @@ class RecipeMachinesHandler extends AbstractRequestHandler
     {
         $authorizationToken = $this->getAuthorizationToken();
         $recipe = $this->fetchRecipe($request, $authorizationToken);
-        $craftingCategory = $recipe->getCraftingCategory();
 
-        $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory, $authorizationToken);
-        $filteredMachines = $this->machineService->filterMachinesForRecipe($databaseMachines, $recipe);
-        $sortedMachines = $this->machineService->sortMachines($filteredMachines);
-        $limitedMachines = array_slice(
-            $sortedMachines,
+        $machines = $this->fetchMachines($recipe, $authorizationToken);
+        $limitedMachines = array_values(array_slice(
+            $machines,
             $request->getIndexOfFirstResult(),
             $request->getNumberOfResults()
-        );
+        ));
 
-        $response = new RecipeMachinesResponse();
-        foreach ($limitedMachines as $databaseMachine) {
-            $response->addMachine($this->mapMachine($databaseMachine));
-        }
-        $response->setTotalNumberOfResults(count($databaseMachines));
-        return $response;
+        return $this->createResponse($limitedMachines, count($machines));
     }
 
     /**
@@ -141,6 +116,39 @@ class RecipeMachinesHandler extends AbstractRequestHandler
         }
 
         return $recipe;
+    }
+
+    /**
+     * Fetches the machines able to craft the recipe.
+     * @param Recipe $recipe
+     * @param AuthorizationToken $authorizationToken
+     * @return array|DatabaseMachine[]
+     */
+    protected function fetchMachines(Recipe $recipe, AuthorizationToken $authorizationToken): array
+    {
+        $craftingCategory = $recipe->getCraftingCategory();
+
+        $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory, $authorizationToken);
+        $filteredMachines = $this->machineService->filterMachinesForRecipe($databaseMachines, $recipe);
+        $sortedMachines = $this->machineService->sortMachines($filteredMachines);
+        return $sortedMachines;
+    }
+
+    /**
+     * Creates the response with the machines.
+     * @param array|DatabaseMachine[] $databaseMachines
+     * @param int $totalNumberOfMachines
+     * @return RecipeMachinesResponse
+     * @throws MapperException
+     */
+    protected function createResponse(array $databaseMachines, int $totalNumberOfMachines): RecipeMachinesResponse
+    {
+        $result = new RecipeMachinesResponse();
+        foreach ($databaseMachines as $databaseMachine) {
+            $result->addMachine($this->mapMachine($databaseMachine));
+        }
+        $result->setTotalNumberOfResults($totalNumberOfMachines);
+        return $result;
     }
 
     /**
