@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\MapperManager\Exception\MapperException;
+use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Item\ItemIngredientRequest;
 use FactorioItemBrowser\Api\Client\Response\Item\ItemIngredientResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
@@ -40,9 +41,19 @@ class ItemIngredientHandler extends AbstractItemRecipeHandler
         $item = $this->fetchItem($request->getType(), $request->getName(), $authorizationToken);
         $recipeData = $this->recipeService->getDataWithIngredients([$item], $authorizationToken);
         $limitedRecipeData = $recipeData->limitNames($request->getNumberOfResults(), $request->getIndexOfFirstResult());
+        $responseItem = $this->createResponseEntity($item, $limitedRecipeData, $recipeData->countNames());
+        return $this->createResponse($responseItem);
+    }
 
-        $response = new ItemIngredientResponse();
-        $response->setItem($this->createResponseEntity($item, $limitedRecipeData, $recipeData->countNames()));
-        return $response;
+    /**
+     * Creates the response for the client.
+     * @param GenericEntityWithRecipes $item
+     * @return ItemIngredientResponse
+     */
+    protected function createResponse(GenericEntityWithRecipes $item): ItemIngredientResponse
+    {
+        $result = new ItemIngredientResponse();
+        $result->setItem($item);
+        return $result;
     }
 }

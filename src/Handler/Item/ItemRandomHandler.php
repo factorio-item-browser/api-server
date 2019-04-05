@@ -86,15 +86,33 @@ class ItemRandomHandler extends AbstractRequestHandler
         // Prefetch all recipes for later mapping
         $this->recipeService->getDetailsByIds($recipeData->getAllIds());
 
-        $response = new ItemRandomResponse();
+        return $this->createResponse($items, $recipeData, $request->getNumberOfRecipesPerResult());
+    }
+
+    /**
+     * Creates the response to send to the client.
+     * @param array|Item[] $items
+     * @param RecipeDataCollection $recipeData
+     * @param int $numberOfRecipesPerResult
+     * @return ItemRandomResponse
+     * @throws MapperException
+     */
+    protected function createResponse(
+        array $items,
+        RecipeDataCollection $recipeData,
+        int $numberOfRecipesPerResult
+    ): ItemRandomResponse {
+        $result = new ItemRandomResponse();
+
         foreach ($items as $item) {
-            $response->addItem($this->createItem(
+            $result->addItem($this->createItem(
                 $item,
                 $recipeData->filterItemId($item->getId()),
-                $request->getNumberOfRecipesPerResult()
+                $numberOfRecipesPerResult
             ));
         }
-        return $response;
+
+        return $result;
     }
 
     /**
