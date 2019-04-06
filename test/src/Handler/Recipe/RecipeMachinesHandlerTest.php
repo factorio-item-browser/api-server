@@ -327,7 +327,7 @@ class RecipeMachinesHandlerTest extends TestCase
         ];
 
         $this->machineService->expects($this->once())
-                             ->method('getByCraftingCategory')
+                             ->method('getMachinesByCraftingCategory')
                              ->with($this->identicalTo($craftingCategory), $this->identicalTo($authorizationToken))
                              ->willReturn($databaseMachines);
         $this->machineService->expects($this->once())

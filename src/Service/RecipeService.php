@@ -141,7 +141,7 @@ class RecipeService
      */
     protected function fetchRecipeDetails(array $ids): void
     {
-        $missingIds = array_diff($ids, array_keys($this->recipeCache));
+        $missingIds = array_values(array_diff($ids, array_keys($this->recipeCache)));
         foreach ($this->recipeRepository->findByIds($missingIds) as $recipe) {
             $this->recipeCache[$recipe->getId()] = $recipe;
         }

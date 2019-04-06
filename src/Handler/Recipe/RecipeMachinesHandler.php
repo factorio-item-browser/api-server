@@ -128,7 +128,10 @@ class RecipeMachinesHandler extends AbstractRequestHandler
     {
         $craftingCategory = $recipe->getCraftingCategory();
 
-        $databaseMachines = $this->machineService->getByCraftingCategory($craftingCategory, $authorizationToken);
+        $databaseMachines = $this->machineService->getMachinesByCraftingCategory(
+            $craftingCategory,
+            $authorizationToken
+        );
         $filteredMachines = $this->machineService->filterMachinesForRecipe($databaseMachines, $recipe);
         $sortedMachines = $this->machineService->sortMachines($filteredMachines);
         return $sortedMachines;

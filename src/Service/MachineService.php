@@ -25,6 +25,11 @@ use FactorioItemBrowser\Common\Constant\ItemType;
 class MachineService
 {
     /**
+     * The machine names to prefer.
+     */
+    protected const PREFERRED_MACHINE_NAME = 'player';
+
+    /**
      * The data filter.
      * @var DataFilter
      */
@@ -53,29 +58,29 @@ class MachineService
      * @param AuthorizationToken $authorizationToken
      * @return array|Machine[]
      */
-    public function getByCraftingCategory(
+    public function getMachinesByCraftingCategory(
         CraftingCategory $craftingCategory,
         AuthorizationToken $authorizationToken
     ): array {
-        $allMachineData = $this->machineRepository->findDataByCraftingCategories(
+        $machineData = $this->machineRepository->findDataByCraftingCategories(
             [$craftingCategory->getName()],
             $authorizationToken->getEnabledModCombinationIds()
         );
-        $machineIds = $this->extractIdsFromMachineData($allMachineData);
+        $machineIds = $this->extractIdsFromMachineData($machineData);
         return $this->machineRepository->findByIds($machineIds);
     }
 
     /**
      * Extracts the machine ids of the machine data array.
-     * @param array|MachineData[] $allMachineData
+     * @param array|MachineData[] $machineData
      * @return array|int[]
      */
-    protected function extractIdsFromMachineData(array $allMachineData): array
+    protected function extractIdsFromMachineData(array $machineData): array
     {
         $result = [];
-        foreach ($this->dataFilter->filter($allMachineData) as $machineData) {
-            if ($machineData instanceof MachineData) {
-                $result[] = $machineData->getId();
+        foreach ($this->dataFilter->filter($machineData) as $data) {
+            if ($data instanceof MachineData) {
+                $result[] = $data->getId();
             }
         }
         return $result;
@@ -95,11 +100,7 @@ class MachineService
 
         $result = [];
         foreach ($machines as $machine) {
-            if (($machine->getNumberOfItemSlots() === Machine::VALUE_UNLIMITED_SLOTS
-                    || $machine->getNumberOfItemSlots() >= $numberOfItems)
-                && $machine->getNumberOfFluidInputSlots() >= $numberOfFluidInputs
-                && $machine->getNumberOfFluidOutputSlots() >= $numberOfFluidOutputs
-            ) {
+            if ($this->isMachineValid($machine, $numberOfItems, $numberOfFluidInputs, $numberOfFluidOutputs)) {
                 $result[] = $machine;
             }
         }
@@ -116,13 +117,45 @@ class MachineService
     {
         $result = 0;
         foreach ($entities as $entity) {
-            if (($entity instanceof RecipeIngredient || $entity instanceof RecipeProduct)
-                && $entity->getItem()->getType() === $type
-            ) {
+            if ($this->getItemType($entity) === $type) {
                 ++$result;
             }
         }
         return $result;
+    }
+
+    /**
+     * Returns the item type of the entity.
+     * @param object $entity
+     * @return string|null
+     */
+    protected function getItemType($entity): ?string
+    {
+        $result = null;
+        if (($entity instanceof RecipeIngredient || $entity instanceof RecipeProduct)) {
+            $result = $entity->getItem()->getType();
+        }
+        return $result;
+    }
+
+    /**
+     * Returns whether the machine is valid with the number of inputs and outputs.
+     * @param Machine $machine
+     * @param int $numberOfItems
+     * @param int $numberOfFluidInputs
+     * @param int $numberOfFluidOutputs
+     * @return bool
+     */
+    protected function isMachineValid(
+        Machine $machine,
+        int $numberOfItems,
+        int $numberOfFluidInputs,
+        int $numberOfFluidOutputs
+    ): bool {
+        return ($machine->getNumberOfItemSlots() === Machine::VALUE_UNLIMITED_SLOTS
+                || $machine->getNumberOfItemSlots() >= $numberOfItems)
+            && $machine->getNumberOfFluidInputSlots() >= $numberOfFluidInputs
+            && $machine->getNumberOfFluidOutputSlots() >= $numberOfFluidOutputs;
     }
 
     /**
@@ -132,16 +165,25 @@ class MachineService
      */
     public function sortMachines(array $machines): array
     {
-        usort($machines, function (Machine $left, Machine $right): int {
-            if ($left->getName() === 'player') {
-                $result = -1;
-            } elseif ($right->getName() === 'player') {
-                $result = 1;
-            } else {
-                $result = strtolower($left->getName()) <=> strtolower($right->getName());
-            }
-            return $result;
-        });
+        usort($machines, [$this, 'compareMachines']);
         return array_values($machines);
+    }
+
+    /**
+     * Compares the two machines for sorting.
+     * @param Machine $left
+     * @param Machine $right
+     * @return int
+     */
+    protected function compareMachines(Machine $left, Machine $right): int
+    {
+        if ($left->getName() === self::PREFERRED_MACHINE_NAME) {
+            $result = -1;
+        } elseif ($right->getName() === self::PREFERRED_MACHINE_NAME) {
+            $result = 1;
+        } else {
+            $result = strtolower($left->getName()) <=> strtolower($right->getName());
+        }
+        return $result;
     }
 }
