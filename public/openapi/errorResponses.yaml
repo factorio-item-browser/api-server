@@ -22,9 +22,6 @@ badRequest:
         example:
           error:
             message: "Request validation failed."
-            parameters:
-              - name: "foo"
-                message: "Element must not be empty."
 
 # 401 responses
 unauthorized:

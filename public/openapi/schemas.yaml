@@ -207,15 +207,3 @@ Error:
     message:
       type: "string"
       description: "The message of the error which occurred."
-    parameters:
-      type: "array"
-      description: "The request parameters which caused the error."
-      items:
-        type: "object"
-        properties:
-          name:
-            type: "string"
-            description: "The name of the parameter which failed validation."
-          message:
-            type: "string"
-            description: "The message why the parameter failed validation."
