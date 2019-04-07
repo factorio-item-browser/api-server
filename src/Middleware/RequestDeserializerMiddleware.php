@@ -32,14 +32,14 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
 
     /**
      * The map of the routes to their corresponding requests.
-     * @var array
+     * @var array|string[]
      */
     protected $mapRouteToRequest;
 
     /**
      * Initializes the middleware.
      * @param SerializerInterface $serializer
-     * @param array $mapRouteToRequest
+     * @param array|string[] $mapRouteToRequest
      */
     public function __construct(SerializerInterface $serializer, array $mapRouteToRequest)
     {

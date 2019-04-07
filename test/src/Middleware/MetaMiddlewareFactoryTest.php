@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Middleware\MetaMiddleware;
 use FactorioItemBrowser\Api\Server\Middleware\MetaMiddlewareFactory;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the MetaMiddlewareFactory class.
@@ -22,13 +24,14 @@ class MetaMiddlewareFactoryTest extends TestCase
     /**
      * Tests the invoking.
      * @covers ::__invoke
+     * @throws ReflectionException
      */
     public function testInvoke(): void
     {
         $config = [
-            'factorio-item-browser' => [
-                'api-server' => [
-                    'version' => '1.2.3',
+            ConfigKey::PROJECT => [
+                ConfigKey::API_SERVER => [
+                    ConfigKey::VERSION => '1.2.3',
                 ],
             ],
         ];
