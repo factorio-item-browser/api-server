@@ -19,9 +19,6 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'dependencies' => [
         'factories'  => [
-            Database\Service\ItemService::class => ReflectionFactory::class,
-            Database\Service\ModService::class => ReflectionFactory::class,
-
             Handler\Auth\AuthHandler::class => ReflectionFactory::class,
             Handler\Generic\GenericDetailsHandler::class => ReflectionFactory::class,
             Handler\Generic\GenericIconHandler::class => ReflectionFactory::class,

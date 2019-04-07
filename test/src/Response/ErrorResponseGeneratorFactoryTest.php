@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
+use FactorioItemBrowser\Api\Server\Constant\ServiceName;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGeneratorFactory;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Zend\Log\LoggerInterface;
 
 /**
@@ -24,42 +26,87 @@ class ErrorResponseGeneratorFactoryTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * Provides the data for the invoke test.
-     * @return array
+     * Tests the invoking.
+     * @throws ReflectionException
+     * @covers ::__invoke
      */
-    public function provideInvoke(): array
+    public function testInvoke(): void
     {
-        return [
-            [true, $this->createMock(LoggerInterface::class)],
-            [false, null]
+        $config = [
+            'debug' => true,
         ];
+        /* @var LoggerInterface&MockObject $logger */
+        $logger = $this->createMock(LoggerInterface::class);
+
+        $expectedResult = new ErrorResponseGenerator($logger, true);
+
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())
+                  ->method('get')
+                  ->with($this->identicalTo('config'))
+                  ->willReturn($config);
+
+        /* @var ErrorResponseGeneratorFactory&MockObject $factory */
+        $factory = $this->getMockBuilder(ErrorResponseGeneratorFactory::class)
+                        ->setMethods(['fetchLogger'])
+                        ->getMock();
+        $factory->expects($this->once())
+                ->method('fetchLogger')
+                ->with($this->identicalTo($container))
+                ->willReturn($logger);
+
+        $result = $factory($container, ErrorResponseGenerator::class);
+
+        $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the invoking.
-     * @param bool $resultHas
-     * @param mixed $logger
-     * @covers ::__invoke
-     * @dataProvider provideInvoke
+     * Tests the fetchLogger method.
+     * @throws ReflectionException
+     * @covers ::fetchLogger
      */
-    public function testInvoke(bool $resultHas, $logger): void
+    public function testFetchLogger(): void
     {
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['has', 'get'])
-                          ->disableOriginalConstructor()
-                          ->getMock();
+        /* @var LoggerInterface&MockObject $logger */
+        $logger = $this->createMock(LoggerInterface::class);
+
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('has')
-                  ->with(ErrorResponseGeneratorFactory::LOGGER_SERVICE_NAME)
-                  ->willReturn($resultHas);
-        $container->expects($logger === null ? $this->never() : $this->once())
+                  ->with($this->identicalTo(ServiceName::LOGGER))
+                  ->willReturn(true);
+        $container->expects($this->once())
                   ->method('get')
-                  ->with(ErrorResponseGeneratorFactory::LOGGER_SERVICE_NAME)
+                  ->with($this->identicalTo(ServiceName::LOGGER))
                   ->willReturn($logger);
 
         $factory = new ErrorResponseGeneratorFactory();
-        $result = $factory($container, ErrorResponseGenerator::class);
-        $this->assertSame($logger, $this->extractProperty($result, 'logger'));
+        $result = $this->invokeMethod($factory, 'fetchLogger', $container);
+
+        $this->assertSame($logger, $result);
+    }
+
+    /**
+     * Tests the fetchLogger method without an actual logger.
+     * @throws ReflectionException
+     * @covers ::fetchLogger
+     */
+    public function testFetchLoggerWithoutLogger(): void
+    {
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())
+                  ->method('has')
+                  ->with($this->identicalTo(ServiceName::LOGGER))
+                  ->willReturn(false);
+        $container->expects($this->never())
+                  ->method('get');
+
+        $factory = new ErrorResponseGeneratorFactory();
+        $result = $this->invokeMethod($factory, 'fetchLogger', $container);
+
+        $this->assertNull($result);
     }
 }

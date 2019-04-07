@@ -11,21 +11,22 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use FactorioItemBrowser\Api\Server\Constant\ServiceName;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
 return [
     'log' => [
-        'logger.factorio-item-browser' => [
+        ServiceName::LOGGER => [
             'writers' => [
                 [
                     'name' => Stream::class,
                     'priority' => Logger::ERR,
                     'options' => [
-                        'stream' => 'php://stderr'
-                    ]
-                ]
-            ]
-        ]
-    ]
+                        'stream' => 'php://stderr',
+                    ],
+                ],
+            ],
+        ],
+    ],
 ];

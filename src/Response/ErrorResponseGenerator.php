@@ -26,12 +26,20 @@ class ErrorResponseGenerator
     protected $logger;
 
     /**
+     * Whether the debug mode is enabled.
+     * @var bool
+     */
+    protected $isDebug;
+
+    /**
      * Initializes the generator.
      * @param LoggerInterface|null $logger
+     * @param bool $isDebug
      */
-    public function __construct(?LoggerInterface $logger)
+    public function __construct(?LoggerInterface $logger, bool $isDebug)
     {
         $this->logger = $logger;
+        $this->isDebug = $isDebug;
     }
 
     /**
@@ -54,15 +62,45 @@ class ErrorResponseGenerator
             $message = 'Internal server error.';
         }
 
-        if ($this->logger instanceof LoggerInterface && floor($statusCode / 100) === 5.) {
-            $this->logger->crit((string) $exception);
-        }
+        $this->logException($statusCode, $exception);
 
         $errorResponse = [
-            'error' => [
-                'message' => $message,
-            ],
+            'error' => $this->createResponseError($message, $exception)
         ];
-        return new JsonResponse($errorResponse, $statusCode, $response->getHeaders());
+        return new JsonResponse($errorResponse, $statusCode);
+    }
+
+    /**
+     * Logs the exception if an actual logger is present.
+     * @param int $statusCode
+     * @param Throwable $exception
+     */
+    protected function logException(int $statusCode, Throwable $exception): void
+    {
+        if (floor($statusCode / 100) === 5. && $this->logger instanceof LoggerInterface) {
+            $this->logger->crit($exception);
+        }
+    }
+
+    /**
+     * Creates the error response data.
+     * @param string $message
+     * @param Throwable $exception
+     * @return array
+     */
+    protected function createResponseError(string $message, Throwable $exception): array
+    {
+        if ($this->isDebug) {
+            $result = [
+                'message' => $exception->getMessage(),
+                'backtrace' => $exception->getTrace(),
+            ];
+        } else {
+            $result = [
+                'message' => $message,
+            ];
+        }
+
+        return $result;
     }
 }
