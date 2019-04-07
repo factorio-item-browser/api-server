@@ -87,7 +87,7 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
     {
         $this->databaseRecipes = $this->recipeService->getDetailsByIds($recipeData->getAllIds());
         $recipes = $this->mapNormalRecipes($recipeData->filterMode(RecipeMode::NORMAL));
-        $recipes = $this->addExpensiveRecipes($recipes, $recipeData->filterMode(RecipeMode::EXPENSIVE));
+        $recipes = $this->mapExpensiveRecipes($recipes, $recipeData->filterMode(RecipeMode::EXPENSIVE));
         $entity->setRecipes($recipes);
     }
 
@@ -102,30 +102,43 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
         $result = [];
         foreach ($recipeData->getValues() as $data) {
             if (isset($this->databaseRecipes[$data->getId()])) {
-                $result[$data->getName()] = $this->mapDatabaseRecipe($this->databaseRecipes[$data->getId()]);
+                $normalRecipe = $this->mapDatabaseRecipe($this->databaseRecipes[$data->getId()]);
+                $result[$normalRecipe->getName()] = $normalRecipe;
             }
         }
         return $result;
     }
 
     /**
-     * Adds the expensive recipes to the already mapped normal ones.
+     * Maps the expensive recipes, adding them to the already mapped normal ones.
      * @param array|RecipeWithExpensiveVersion[] $recipes
      * @param RecipeDataCollection $recipeData
      * @return array|RecipeWithExpensiveVersion[]
      * @throws MapperException
      */
-    protected function addExpensiveRecipes(array $recipes, RecipeDataCollection $recipeData): array
+    protected function mapExpensiveRecipes(array $recipes, RecipeDataCollection $recipeData): array
     {
         foreach ($recipeData->getValues() as $data) {
             if (isset($this->databaseRecipes[$data->getId()])) {
                 $expensiveRecipe = $this->mapDatabaseRecipe($this->databaseRecipes[$data->getId()]);
-                if (isset($recipes[$data->getName()])) {
-                    $recipes[$data->getName()]->setExpensiveVersion($expensiveRecipe);
-                } else {
-                    $recipes[$data->getName()] = $expensiveRecipe;
-                }
+                $recipes = $this->addExpensiveRecipe($recipes, $expensiveRecipe);
             }
+        }
+        return $recipes;
+    }
+
+    /**
+     * Adds the expensive recipe to the recipe array.
+     * @param array|RecipeWithExpensiveVersion[] $recipes
+     * @param RecipeWithExpensiveVersion $expensiveRecipe
+     * @return array|RecipeWithExpensiveVersion[]
+     */
+    protected function addExpensiveRecipe(array $recipes, RecipeWithExpensiveVersion $expensiveRecipe): array
+    {
+        if (isset($recipes[$expensiveRecipe->getName()])) {
+            $recipes[$expensiveRecipe->getName()]->setExpensiveVersion($expensiveRecipe);
+        } else {
+            $recipes[$expensiveRecipe->getName()] = $expensiveRecipe;
         }
         return $recipes;
     }
