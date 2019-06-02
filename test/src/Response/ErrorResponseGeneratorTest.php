@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
+use BluePsyduck\Common\Test\ReflectionTrait;
 use Exception;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use ReflectionException;
 use Zend\Diactoros\Response\JsonResponse;
-use Zend\Diactoros\ServerRequest;
 use Zend\Log\LoggerInterface;
 
 /**
@@ -23,115 +25,219 @@ use Zend\Log\LoggerInterface;
  */
 class ErrorResponseGeneratorTest extends TestCase
 {
-    /**
-     * Provides the data for the invoke test.
-     * @return array
-     */
-    public function provideInvoke(): array
-    {
-        $exception = new Exception('abc');
+    use ReflectionTrait;
 
-        return [
-            [
-                new ApiServerException('abc', 418),
-                false,
-                null,
-                [
-                    'error' => [
-                        'message' => 'abc'
-                    ]
-                ],
-                418
-            ],
-            [
-                (new ApiServerException('abc', 418))->addParameter('def', 'ghi'),
-                true,
-                null,
-                [
-                    'error' => [
-                        'message' => 'abc',
-                        'parameters' => [[
-                            'name' => 'def',
-                            'message' => 'ghi'
-                        ]]
-                    ]
-                ],
-                418
-            ],
-            [
-                $exception,
-                false,
-                null,
-                [
-                    'error' => [
-                        'message' => 'An unexpected error occurred.'
-                    ]
-                ],
-                500
-            ],
-            [
-                $exception,
-                true,
-                $exception,
-                [
-                    'error' => [
-                        'message' => 'An unexpected error occurred.'
-                    ]
-                ],
-                500
-            ],
-        ];
+    /**
+     * The mocked logger.
+     * @var LoggerInterface&MockObject
+     */
+    protected $logger;
+
+    /**
+     * Sets up the test case.
+     * @throws ReflectionException
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->logger = $this->createMock(LoggerInterface::class);
     }
 
     /**
-     * Tests the invoke method.
-     * @param Exception $exception
-     * @param bool $useLogger
-     * @param mixed $expectedLog
-     * @param array $expectedPayload
-     * @param int $expectedStatusCode
+     * Tests the constructing.
+     * @throws ReflectionException
      * @covers ::__construct
-     * @covers ::__invoke
-     * @dataProvider provideInvoke
      */
-    public function testInvoke(
-        Exception $exception,
-        bool $useLogger,
-        $expectedLog,
-        array $expectedPayload,
-        int $expectedStatusCode
-    ) {
-        /* @var ServerRequest $request */
-        $request = $this->createMock(ServerRequest::class);
+    public function testConstruct(): void
+    {
+        $generator = new ErrorResponseGenerator($this->logger, true);
 
-        /* @var ResponseInterface|MockObject $response */
-        $response = $this->getMockBuilder(ResponseInterface::class)
-                         ->setMethods(['getHeaders'])
-                         ->disableOriginalConstructor()
-                         ->getMockForAbstractClass();
-        $response->expects($this->once())
-                 ->method('getHeaders')
-                 ->willReturn(['foo' => 'bar']);
+        $this->assertSame($this->logger, $this->extractProperty($generator, 'logger'));
+        $this->assertTrue($this->extractProperty($generator, 'isDebug'));
+    }
 
-        if ($useLogger) {
-            /* @var LoggerInterface|MockObject $logger */
-            $logger = $this->getMockBuilder(LoggerInterface::class)
-                           ->setMethods(['crit'])
-                           ->getMockForAbstractClass();
-            $logger->expects($expectedLog === null ? $this->never() : $this->once())
-                   ->method('crit')
-                   ->with($expectedLog);
-        } else {
-            $logger = null;
-        }
+    /**
+     * Tests the invoking.
+     * @throws ReflectionException
+     * @covers ::__invoke
+     */
+    public function testInvoke(): void
+    {
+        $exception = new Exception();
+        $expectedStatusCode = 500;
+        $expectedMessage = 'Internal server error.';
+        $responseError = [
+            'abc' => 'def',
+        ];
+        $expectedPayload = [
+            'error' => [
+                'abc' => 'def',
+            ],
+        ];
 
-        $generator = new ErrorResponseGenerator($logger);
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
 
-        /* @var JsonResponse $result */
+        /* @var ErrorResponseGenerator&MockObject $generator */
+        $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
+                          ->setMethods(['logException', 'createResponseError'])
+                          ->setConstructorArgs([$this->logger, true])
+                          ->getMock();
+        $generator->expects($this->once())
+                  ->method('logException')
+                  ->with($this->identicalTo($expectedStatusCode), $this->identicalTo($exception));
+        $generator->expects($this->once())
+                  ->method('createResponseError')
+                  ->with($this->identicalTo($expectedMessage), $this->identicalTo($exception))
+                  ->willReturn($responseError);
+
         $result = $generator($exception, $request, $response);
+
         $this->assertInstanceOf(JsonResponse::class, $result);
-        $this->assertSame($expectedPayload, $result->getPayload());
-        $this->assertSame($expectedStatusCode, $result->getStatusCode());
-        $this->assertSame('bar', $result->getHeaderLine('foo'));
+        /* @var JsonResponse $result */
+        $this->assertEquals($expectedPayload, $result->getPayload());
+    }
+
+    /**
+     * Tests the invoking with an ApiServerException.
+     * @throws ReflectionException
+     * @covers ::__invoke
+     */
+    public function testInvokeWithApiServerException(): void
+    {
+        $exception = new ApiServerException('foo', 123);
+        $expectedStatusCode = 123;
+        $expectedMessage = 'foo';
+        $responseError = [
+            'abc' => 'def',
+        ];
+        $expectedPayload = [
+            'error' => [
+                'abc' => 'def',
+            ],
+        ];
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
+
+        /* @var ErrorResponseGenerator&MockObject $generator */
+        $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
+                          ->setMethods(['logException', 'createResponseError'])
+                          ->setConstructorArgs([$this->logger, true])
+                          ->getMock();
+        $generator->expects($this->once())
+                  ->method('logException')
+                  ->with($this->identicalTo($expectedStatusCode), $this->identicalTo($exception));
+        $generator->expects($this->once())
+                  ->method('createResponseError')
+                  ->with($this->identicalTo($expectedMessage), $this->identicalTo($exception))
+                  ->willReturn($responseError);
+
+        $result = $generator($exception, $request, $response);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+        /* @var JsonResponse $result */
+        $this->assertEquals($expectedPayload, $result->getPayload());
+    }
+
+
+
+    /**
+     * Tests the logException method.
+     * @throws ReflectionException
+     * @covers ::logException
+     */
+    public function testLogException(): void
+    {
+        $statusCode = 500;
+        /* @var Exception&MockObject $exception */
+        $exception = $this->createMock(Exception::class);
+
+        $this->logger->expects($this->once())
+                     ->method('crit')
+                     ->with($this->identicalTo($exception));
+
+        $generator = new ErrorResponseGenerator($this->logger, true);
+        $this->invokeMethod($generator, 'logException', $statusCode, $exception);
+    }
+
+    /**
+     * Tests the logException method with a statusCode outside the logged range.
+     * @throws ReflectionException
+     * @covers ::logException
+     */
+    public function testLogExceptionWithInvalidStatusCode(): void
+    {
+        $statusCode = 400;
+        /* @var Exception&MockObject $exception */
+        $exception = $this->createMock(Exception::class);
+
+        $this->logger->expects($this->never())
+                     ->method('crit');
+
+        $generator = new ErrorResponseGenerator($this->logger, true);
+        $this->invokeMethod($generator, 'logException', $statusCode, $exception);
+    }
+
+    /**
+     * Tests the logException method without an actual logger.
+     * @throws ReflectionException
+     * @covers ::logException
+     */
+    public function testLogExceptionWithoutLogger(): void
+    {
+        $statusCode = 500;
+        /* @var Exception&MockObject $exception */
+        $exception = $this->createMock(Exception::class);
+
+        $generator = new ErrorResponseGenerator(null, true);
+        $this->invokeMethod($generator, 'logException', $statusCode, $exception);
+
+        $this->expectNotToPerformAssertions();
+    }
+
+    /**
+     * Tests the createResponseError method with debug mode.
+     * @throws ReflectionException
+     * @covers ::createResponseError
+     */
+    public function testCreateResponseErrorWithDebug(): void
+    {
+        $message = 'abc';
+        $exceptionMessage = 'def';
+        $exception = new Exception($exceptionMessage);
+
+        $generator = new ErrorResponseGenerator($this->logger, true);
+        $result = $this->invokeMethod($generator, 'createResponseError', $message, $exception);
+
+        $this->assertArrayHasKey('message', $result);
+        $this->assertSame($exceptionMessage, $result['message']);
+        $this->assertArrayHasKey('backtrace', $result);
+        $this->assertIsArray($result['backtrace']);
+    }
+
+    /**
+     * Tests the createResponseError method without debug mode.
+     * @throws ReflectionException
+     * @covers ::createResponseError
+     */
+    public function testCreateResponseErrorWithoutDebug(): void
+    {
+        $message = 'abc';
+        $exceptionMessage = 'def';
+        $exception = new Exception($exceptionMessage);
+        $expectedResult = [
+            'message' => 'abc',
+        ];
+
+        $generator = new ErrorResponseGenerator($this->logger, false);
+        $result = $this->invokeMethod($generator, 'createResponseError', $message, $exception);
+
+        $this->assertEquals($expectedResult, $result);
     }
 }

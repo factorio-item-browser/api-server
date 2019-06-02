@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 
-use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Server\Database\Service\ModService;
+use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
+use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use Firebase\JWT\JWT;
-use Zend\InputFilter\ArrayInput;
-use Zend\InputFilter\InputFilter;
-use Zend\Validator\NotEmpty;
+use FactorioItemBrowser\Api\Server\ModResolver\ModCombinationResolver;
+use FactorioItemBrowser\Api\Server\ModResolver\ModDependencyResolver;
+use FactorioItemBrowser\Api\Server\Service\AgentService;
+use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 
 /**
  * The handler of the /auth request.
@@ -22,119 +25,127 @@ use Zend\Validator\NotEmpty;
 class AuthHandler extends AbstractRequestHandler
 {
     /**
-     * The lifetime of a token.
+     * The agent service.
+     * @var AgentService
      */
-    const TOKEN_LIFETIME = 86400;
+    protected $agentService;
 
     /**
-     * The key used for creating the authorization token.
-     * @var string
+     * The authorization service.
+     * @var AuthorizationService
      */
-    protected $authorizationKey;
+    protected $authorizationService;
 
     /**
-     * The agents of the API.
-     * @var array
+     * The mod combination resolver.
+     * @var ModCombinationResolver
      */
-    protected $agents;
+    protected $modCombinationResolver;
 
     /**
-     * The database mod service.
-     * @var ModService
+     * The mod dependency resolver.
+     * @var ModDependencyResolver
      */
-    protected $modService;
+    protected $modDependencyResolver;
 
     /**
      * Initializes the auth handler.
-     * @param string $authorizationKey
-     * @param array $agents
-     * @param ModService $modService
+     * @param AgentService $agentService
+     * @param AuthorizationService $authorizationService
+     * @param ModCombinationResolver $modCombinationResolver
+     * @param ModDependencyResolver $modDependencyResolver
      */
-    public function __construct(string $authorizationKey, array $agents, ModService $modService)
-    {
-        $this->authorizationKey = $authorizationKey;
-        $this->agents = $agents;
-        $this->modService = $modService;
+    public function __construct(
+        AgentService $agentService,
+        AuthorizationService $authorizationService,
+        ModCombinationResolver $modCombinationResolver,
+        ModDependencyResolver $modDependencyResolver
+    ) {
+        $this->authorizationService = $authorizationService;
+        $this->agentService = $agentService;
+        $this->modCombinationResolver = $modCombinationResolver;
+        $this->modDependencyResolver = $modDependencyResolver;
     }
 
     /**
-     * Creates the input filter to use for the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        $inputFilter = new InputFilter();
-        $inputFilter
-            ->add([
-                'name' => 'agent',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'accessKey',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'type' => ArrayInput::class,
-                'name' => 'enabledModNames',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ]);
-        return $inputFilter;
+        return AuthRequest::class;
     }
 
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param AuthRequest $request
+     * @return ResponseInterface
+     * @throws ApiServerException
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest($request): ResponseInterface
     {
-        $agent = $requestData->getString('agent');
-        $accessKey = $requestData->getString('accessKey');
-        $agentConfig = $this->agents[$agent] ?? [];
-        if (empty($agentConfig) || !isset($agentConfig['accessKey']) || $agentConfig['accessKey'] !== $accessKey) {
-            throw new ApiServerException('Invalid agent or access key.', 403);
-        }
-
-        $enabledModNames = ($agentConfig['isDemo'] ?? false) ? ['base'] : $requestData->getArray('enabledModNames');
-        $this->modService->setEnabledCombinationsByModNames($enabledModNames);
-
-        return [
-            'authorizationToken' => $this->createToken(
-                $agent,
-                $this->modService->getEnabledModCombinationIds(),
-                $agentConfig['allowImport'] ?? false
-            )
-        ];
+        $agent = $this->getAgentFromRequest($request);
+        $enabledModCombinationIds = $this->getEnabledModCombinationIdsFromRequest($agent, $request);
+        $authorizationToken = $this->createAuthorizationToken($agent, $enabledModCombinationIds);
+        return $this->createResponse($authorizationToken);
     }
 
     /**
-     * Creates and returns a new token.
-     * @param string $agent
-     * @param array $enabledModCombinationIds
-     * @param bool $allowImport
-     * @return string
+     * Returns the agent from the request.
+     * @param AuthRequest $clientRequest
+     * @return Agent
+     * @throws UnknownAgentException
      */
-    protected function createToken(string $agent, array $enabledModCombinationIds, bool $allowImport): string
+    protected function getAgentFromRequest(AuthRequest $clientRequest): Agent
     {
-        $token = [
-            'iat' => time(),
-            'exp' => time() + self::TOKEN_LIFETIME,
-            'agt' => $agent,
-            'mds' => $enabledModCombinationIds
-        ];
-        if ($allowImport ?? false) {
-            $token['imp'] = 1;
+        $result = $this->agentService->getByAccessKey(
+            $clientRequest->getAgent(),
+            $clientRequest->getAccessKey()
+        );
+        if ($result === null) {
+            throw new UnknownAgentException();
         }
 
-        return JWT::encode($token, $this->authorizationKey);
+        return $result;
+    }
+
+    /**
+     * Returns the enabled mod combination ids from the specified request.
+     * @param Agent $agent
+     * @param AuthRequest $request
+     * @return array|int[]
+     */
+    protected function getEnabledModCombinationIdsFromRequest(Agent $agent, AuthRequest $request): array
+    {
+        if ($agent->getIsDemo()) {
+            $modNames = ['base'];
+        } else {
+            $modNames = $this->modDependencyResolver->resolve($request->getEnabledModNames());
+        }
+        return $this->modCombinationResolver->resolve($modNames);
+    }
+
+    /**
+     * Creates the authorization token for the agent and enabled combinations.
+     * @param Agent $agent
+     * @param array|int[] $enabledModCombinationIds
+     * @return string
+     */
+    protected function createAuthorizationToken(Agent $agent, array $enabledModCombinationIds): string
+    {
+        $token = $this->authorizationService->createToken($agent, $enabledModCombinationIds);
+        return $this->authorizationService->serializeToken($token);
+    }
+
+    /**
+     * Creates the response to return.
+     * @param string $authorizationToken
+     * @return AuthResponse
+     */
+    protected function createResponse(string $authorizationToken): AuthResponse
+    {
+        $result = new AuthResponse();
+        $result->setAuthorizationToken($authorizationToken);
+        return $result;
     }
 }

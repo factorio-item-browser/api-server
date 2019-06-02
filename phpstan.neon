@@ -4,14 +4,16 @@ parameters:
     - src
     - test/src
 
-  excludes_analyse:
-    - src/Import
-
   ignoreErrors:
-    - '#Method [a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\) should return stdClass but returns object.#'
-    - '#Property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9_]+ \([a-zA-Z0-9\\_]+\) does not accept Doctrine\\ORM\\EntityRepository<[a-zA-Z0-9\\_]+>.#'
+    - '#Dynamic call to static method PHPUnit\\Framework\\.*#'
+    - '#Parameter \#1 \$message of method Zend\\Log\\LoggerInterface::.*\(\) expects string, .* given.#'
+    - '#Method FactorioItemBrowser\\Api\\Server\\Handler\\AbstractRequestHandler::getClientRequest\(\) should return FactorioItemBrowser\\Api\\Client\\Request\\RequestInterface but returns object\.#'
+    - '#Method FactorioItemBrowser\\Api\\Server\\Service\\AuthorizationService::decodeSerializedToken\(\) should return stdClass but returns object\.#'
+    - '#.* should be contravariant with parameter .* \(FactorioItemBrowser\\Api\\Client\\Request\\RequestInterface\) of method FactorioItemBrowser\\Api\\Server\\Handler\\AbstractRequestHandler::handleRequest\(\)#'
+    - '#.* should be contravariant with parameter .* \(FactorioItemBrowser\\Api\\Search\\Entity\\Result\\ResultInterface\) of method FactorioItemBrowser\\Api\\Server\\SearchDecorator\\SearchDecoratorInterface\:\:.*\(\)#'
+    - '#.* should be contravariant with parameter .* \(object\) of method BluePsyduck\\MapperManager\\Mapper\\MapperInterface\:\:map\(\)#'
 
 includes:
-  - vendor/phpstan/phpstan-doctrine/extension.neon
   - vendor/phpstan/phpstan-phpunit/extension.neon
   - vendor/phpstan/phpstan-phpunit/rules.neon
+  - vendor/phpstan/phpstan-strict-rules/rules.neon

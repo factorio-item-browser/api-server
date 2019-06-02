@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
-use BluePsyduck\Common\Data\DataContainer;
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
+use FactorioItemBrowser\Api\Search\SearchManagerInterface;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Search\Handler\SearchHandlerManager;
-use FactorioItemBrowser\Api\Server\Search\Result\CachedResultCollection;
-use FactorioItemBrowser\Api\Server\Search\Result\ResultCollection;
-use FactorioItemBrowser\Api\Server\Search\SearchDecorator;
-use FactorioItemBrowser\Api\Server\Search\SearchQueryParser;
-use Zend\Filter\ToInt;
-use Zend\InputFilter\InputFilter;
-use Zend\Validator\NotEmpty;
+use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
 
 /**
  * The handler of the /search/query request.
@@ -26,130 +20,66 @@ use Zend\Validator\NotEmpty;
 class SearchQueryHandler extends AbstractRequestHandler
 {
     /**
-     * The search handler manager.
-     * @var SearchHandlerManager
+     * The search decorator service.
+     * @var SearchDecoratorService
      */
-    protected $searchHandlerManager;
+    protected $searchDecoratorService;
 
     /**
-     * The search decorator.
-     * @var SearchDecorator
+     * The search manager.
+     * @var SearchManagerInterface
      */
-    protected $searchDecorator;
-
-    /**
-     * The database cached search result service.
-     * @var CachedSearchResultService
-     */
-    protected $cachedSearchResultService;
-
-    /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
+    protected $searchManager;
 
     /**
      * Initializes the request handler.
-     * @param SearchHandlerManager $searchHandlerManager
-     * @param SearchDecorator $searchDecorator
-     * @param CachedSearchResultService $cachedSearchResultService
-     * @param TranslationService $translationService
+     * @param SearchDecoratorService $searchDecoratorService
+     * @param SearchManagerInterface $searchManager
      */
     public function __construct(
-        SearchHandlerManager $searchHandlerManager,
-        SearchDecorator $searchDecorator,
-        CachedSearchResultService $cachedSearchResultService,
-        TranslationService $translationService
+        SearchDecoratorService $searchDecoratorService,
+        SearchManagerInterface $searchManager
     ) {
-        $this->searchHandlerManager = $searchHandlerManager;
-        $this->searchDecorator = $searchDecorator;
-        $this->cachedSearchResultService = $cachedSearchResultService;
-        $this->translationService = $translationService;
+        $this->searchDecoratorService = $searchDecoratorService;
+        $this->searchManager = $searchManager;
     }
 
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function createInputFilter(): InputFilter
+    protected function getExpectedRequestClass(): string
     {
-        $inputFilter = new InputFilter();
-        $inputFilter
-            ->add([
-                'name' => 'query',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfResults',
-                'required' => true,
-                'fallback_value' => 10,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'indexOfFirstResult',
-                'required' => true,
-                'fallback_value' => 0,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfRecipesPerResult',
-                'required' => true,
-                'fallback_value' => 3,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ]);
-
-        return $inputFilter;
+        return SearchQueryRequest::class;
     }
 
     /**
      * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
+     * @param SearchQueryRequest $request
+     * @return ResponseInterface
      */
-    protected function handleRequest(DataContainer $requestData): array
+    protected function handleRequest($request): ResponseInterface
     {
-        $searchQuery = (new SearchQueryParser())->parse($requestData->getString('query'));
-        $numberOfResults = $requestData->getInteger('numberOfResults');
-        $indexOfFirstResult = $requestData->getInteger('indexOfFirstResult');
-        $numberOfRecipesPerResult = $requestData->getInteger('numberOfRecipesPerResult');
+        $authorizationToken = $this->getAuthorizationToken();
 
-        $cachedSearchResults = $this->cachedSearchResultService->getSearchResults($searchQuery);
-        if (!$cachedSearchResults instanceof CachedResultCollection) {
-            $searchResults = new ResultCollection();
-            $this->searchHandlerManager->handle($searchQuery, $searchResults);
-            $searchResults->sort();
-
-            $cachedSearchResults = $this->cachedSearchResultService->persistSearchResults($searchQuery, $searchResults);
-        }
-
-        $results = $this->searchDecorator->decorate(
-            $cachedSearchResults->getResults($numberOfResults, $indexOfFirstResult),
-            $numberOfRecipesPerResult
+        $searchQuery = $this->searchManager->parseQuery(
+            $request->getQuery(),
+            $authorizationToken->getEnabledModCombinationIds(),
+            $authorizationToken->getLocale()
+        );
+        $searchResults = $this->searchManager->search($searchQuery);
+        $currentSearchResults = $searchResults->getResults(
+            $request->getIndexOfFirstResult(),
+            $request->getNumberOfResults()
+        );
+        $decoratedSearchResults = $this->searchDecoratorService->decorate(
+            $currentSearchResults,
+            $request->getNumberOfRecipesPerResult()
         );
 
-        $this->translationService->translateEntities();
-        return [
-            'results' => $results,
-            'totalNumberOfResults' => $cachedSearchResults->count()
-        ];
+        $response = new SearchQueryResponse();
+        $response->setResults($decoratedSearchResults)
+                 ->setTotalNumberOfResults($searchResults->count());
+        return $response;
     }
 }

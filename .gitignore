@@ -1,5 +1,6 @@
 /.idea
 /data/*
-!/data/database
 /test/log
 /vendor
+
+/.phpunit.result.cache

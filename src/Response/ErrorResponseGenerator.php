@@ -26,12 +26,20 @@ class ErrorResponseGenerator
     protected $logger;
 
     /**
+     * Whether the debug mode is enabled.
+     * @var bool
+     */
+    protected $isDebug;
+
+    /**
      * Initializes the generator.
      * @param LoggerInterface|null $logger
+     * @param bool $isDebug
      */
-    public function __construct(?LoggerInterface $logger)
+    public function __construct(?LoggerInterface $logger, bool $isDebug)
     {
         $this->logger = $logger;
+        $this->isDebug = $isDebug;
     }
 
     /**
@@ -46,24 +54,53 @@ class ErrorResponseGenerator
         ServerRequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
-        $statusCode = $exception->getCode();
-        $message = $exception->getMessage();
-        if ($statusCode < 400 || $statusCode >= 600) {
+        if ($exception instanceof ApiServerException) {
+            $statusCode = $exception->getCode();
+            $message = $exception->getMessage();
+        } else {
             $statusCode = 500;
-            $message = 'An unexpected error occurred.';
-
-            if ($this->logger instanceof LoggerInterface) {
-                $this->logger->crit((string) $exception);
-            }
+            $message = 'Internal server error.';
         }
 
-        $errorData = [
-            'message' => $message,
+        $this->logException($statusCode, $exception);
+
+        $errorResponse = [
+            'error' => $this->createResponseError($message, $exception)
         ];
-        if ($exception instanceof ApiServerException && count($exception->getParameters()) > 0) {
-            $errorData['parameters'] = $exception->getParameters();
+        return new JsonResponse($errorResponse, $statusCode);
+    }
+
+    /**
+     * Logs the exception if an actual logger is present.
+     * @param int $statusCode
+     * @param Throwable $exception
+     */
+    protected function logException(int $statusCode, Throwable $exception): void
+    {
+        if (floor($statusCode / 100) === 5. && $this->logger instanceof LoggerInterface) {
+            $this->logger->crit($exception);
+        }
+    }
+
+    /**
+     * Creates the error response data.
+     * @param string $message
+     * @param Throwable $exception
+     * @return array
+     */
+    protected function createResponseError(string $message, Throwable $exception): array
+    {
+        if ($this->isDebug) {
+            $result = [
+                'message' => $exception->getMessage(),
+                'backtrace' => $exception->getTrace(),
+            ];
+        } else {
+            $result = [
+                'message' => $message,
+            ];
         }
 
-        return new JsonResponse(['error' => $errorData], $statusCode, $response->getHeaders());
+        return $result;
     }
 }

@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Handler\Item;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Server\Database\Entity\Item;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use BluePsyduck\MapperManager\MapperManagerInterface;
+use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Request\Item\ItemIngredientRequest;
+use FactorioItemBrowser\Api\Client\Response\Item\ItemIngredientResponse;
+use FactorioItemBrowser\Api\Database\Entity\Item;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
+use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Handler\Item\ItemIngredientHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
+use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the ItemIngredientHandler class.
@@ -27,42 +31,151 @@ class ItemIngredientHandlerTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * Tests the fetchGroupedRecipeIds method.
-     * @covers ::fetchGroupedRecipeIds
+     * The mocked item repository.
+     * @var ItemRepository&MockObject
      */
-    public function testFetchGroupedRecipeIds()
+    protected $itemRepository;
+
+    /**
+     * The mocked mapper manager.
+     * @var MapperManagerInterface&MockObject
+     */
+    protected $mapperManager;
+
+    /**
+     * The mocked recipe service.
+     * @var RecipeService&MockObject
+     */
+    protected $recipeService;
+
+    /**
+     * Sets up the test case.
+     * @throws ReflectionException
+     */
+    protected function setUp(): void
     {
-        $item = new Item('abc', 'def');
-        $item->setId(42);
-        $items = [$item];
+        parent::setUp();
 
-        /* @var RecipeService|MockObject $recipeService */
-        $recipeService = $this->getMockBuilder(RecipeService::class)
-                              ->setMethods(['getIdsWithIngredient'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        $recipeService->expects($this->once())
-                      ->method('getIdsWithIngredient')
-                      ->with(42)
-                      ->willReturn($items);
+        $this->itemRepository = $this->createMock(ItemRepository::class);
+        $this->mapperManager = $this->createMock(MapperManagerInterface::class);
+        $this->recipeService = $this->createMock(RecipeService::class);
+    }
 
-        /* @var ItemMapper $itemMapper */
-        $itemMapper = $this->createMock(ItemMapper::class);
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var RecipeMapper $recipeMapper */
-        $recipeMapper = $this->createMock(RecipeMapper::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
+    /**
+     * Tests the getExpectedRequestClass method.
+     * @throws ReflectionException
+     * @covers ::getExpectedRequestClass
+     */
+    public function testGetExpectedRequestClass(): void
+    {
+        $expectedResult = ItemIngredientRequest::class;
 
-        $handler = new ItemIngredientHandler(
-            $itemMapper,
-            $itemService,
-            $recipeMapper,
-            $recipeService,
-            $translationService
-        );
-        $result = $this->invokeMethod($handler, 'fetchGroupedRecipeIds', $item);
-        $this->assertSame($items, $result);
+        $handler = new ItemIngredientHandler($this->itemRepository, $this->mapperManager, $this->recipeService);
+        $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    /**
+     * Tests the handleRequest method.
+     * @throws ReflectionException
+     * @covers ::handleRequest
+     */
+    public function testHandleRequest(): void
+    {
+        $type = 'abc';
+        $name = 'def';
+        $numberOfResults = 42;
+        $indexOfFirstResult = 1337;
+        $countNames = 21;
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        /* @var Item&MockObject $item */
+        $item = $this->createMock(Item::class);
+        /* @var RecipeDataCollection&MockObject $limitedRecipeData */
+        $limitedRecipeData = $this->createMock(RecipeDataCollection::class);
+        /* @var GenericEntityWithRecipes&MockObject $responseItem */
+        $responseItem = $this->createMock(GenericEntityWithRecipes::class);
+        /* @var ItemIngredientResponse&MockObject $response */
+        $response = $this->createMock(ItemIngredientResponse::class);
+
+        /* @var ItemIngredientRequest&MockObject $request */
+        $request = $this->createMock(ItemIngredientRequest::class);
+        $request->expects($this->once())
+                ->method('getType')
+                ->willReturn($type);
+        $request->expects($this->once())
+                ->method('getName')
+                ->willReturn($name);
+        $request->expects($this->once())
+                ->method('getNumberOfResults')
+                ->willReturn($numberOfResults);
+        $request->expects($this->once())
+                ->method('getIndexOfFirstResult')
+                ->willReturn($indexOfFirstResult);
+
+        /* @var RecipeDataCollection&MockObject $recipeData */
+        $recipeData = $this->createMock(RecipeDataCollection::class);
+        $recipeData->expects($this->once())
+                   ->method('limitNames')
+                   ->with($this->identicalTo($numberOfResults), $this->identicalTo($indexOfFirstResult))
+                   ->willReturn($limitedRecipeData);
+        $recipeData->expects($this->once())
+                   ->method('countNames')
+                   ->willReturn($countNames);
+
+        $this->recipeService->expects($this->once())
+                            ->method('getDataWithIngredients')
+                            ->with($this->equalTo([$item]), $this->identicalTo($authorizationToken))
+                            ->willReturn($recipeData);
+
+        /* @var ItemIngredientHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(ItemIngredientHandler::class)
+                        ->setMethods(['getAuthorizationToken', 'fetchItem', 'createResponseEntity', 'createResponse'])
+                        ->setConstructorArgs([$this->itemRepository, $this->mapperManager, $this->recipeService])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('getAuthorizationToken')
+                ->willReturn($authorizationToken);
+        $handler->expects($this->once())
+                ->method('fetchItem')
+                ->with($this->identicalTo($type), $this->identicalTo($name), $this->identicalTo($authorizationToken))
+                ->willReturn($item);
+        $handler->expects($this->once())
+                ->method('createResponseEntity')
+                ->with(
+                    $this->identicalTo($item),
+                    $this->identicalTo($limitedRecipeData),
+                    $this->identicalTo($countNames)
+                )
+                ->willReturn($responseItem);
+        $handler->expects($this->once())
+                ->method('createResponse')
+                ->with($this->identicalTo($responseItem))
+                ->willReturn($response);
+
+        $result = $this->invokeMethod($handler, 'handleRequest', $request);
+
+        $this->assertSame($response, $result);
+    }
+
+    /**
+     * Tests the createResponse method.
+     * @throws ReflectionException
+     * @covers ::createResponse
+     */
+    public function testCreateResponse(): void
+    {
+        /* @var GenericEntityWithRecipes&MockObject $item */
+        $item = $this->createMock(GenericEntityWithRecipes::class);
+
+        $expectedResult = new ItemIngredientResponse();
+        $expectedResult->setItem($item);
+
+        $handler = new ItemIngredientHandler($this->itemRepository, $this->mapperManager, $this->recipeService);
+        $result = $this->invokeMethod($handler, 'createResponse', $item);
+
+        $this->assertEquals($expectedResult, $result);
     }
 }

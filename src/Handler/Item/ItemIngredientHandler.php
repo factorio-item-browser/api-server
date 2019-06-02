@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
-use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Request\Item\ItemIngredientRequest;
+use FactorioItemBrowser\Api\Client\Response\Item\ItemIngredientResponse;
+use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 
 /**
  * The handler of the /item/ingredient request.
@@ -15,12 +20,40 @@ use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
 class ItemIngredientHandler extends AbstractItemRecipeHandler
 {
     /**
-     * Fetches the IDs of the grouped recipes.
-     * @param DatabaseItem $item
-     * @return array|int[][]
+     * Returns the request class the handler is expecting.
+     * @return string
      */
-    protected function fetchGroupedRecipeIds(DatabaseItem $item): array
+    protected function getExpectedRequestClass(): string
     {
-        return $this->recipeService->getIdsWithIngredient((int) $item->getId());
+        return ItemIngredientRequest::class;
+    }
+
+    /**
+     * Creates the response data from the validated request data.
+     * @param ItemIngredientRequest $request
+     * @return ResponseInterface
+     * @throws ApiServerException
+     * @throws MapperException
+     */
+    protected function handleRequest($request): ResponseInterface
+    {
+        $authorizationToken = $this->getAuthorizationToken();
+        $item = $this->fetchItem($request->getType(), $request->getName(), $authorizationToken);
+        $recipeData = $this->recipeService->getDataWithIngredients([$item], $authorizationToken);
+        $limitedRecipeData = $recipeData->limitNames($request->getNumberOfResults(), $request->getIndexOfFirstResult());
+        $responseItem = $this->createResponseEntity($item, $limitedRecipeData, $recipeData->countNames());
+        return $this->createResponse($responseItem);
+    }
+
+    /**
+     * Creates the response for the client.
+     * @param GenericEntityWithRecipes $item
+     * @return ItemIngredientResponse
+     */
+    protected function createResponse(GenericEntityWithRecipes $item): ItemIngredientResponse
+    {
+        $result = new ItemIngredientResponse();
+        $result->setItem($item);
+        return $result;
     }
 }

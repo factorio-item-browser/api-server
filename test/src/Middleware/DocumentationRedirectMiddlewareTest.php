@@ -9,10 +9,11 @@ use FactorioItemBrowser\Api\Server\Middleware\DocumentationRedirectMiddleware;
 use Fig\Http\Message\RequestMethodInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
+use ReflectionException;
 use Zend\Diactoros\Response\RedirectResponse;
-use Zend\Diactoros\ServerRequest;
 
 /**
  * The PHPUnit test of the DocumentationRedirectMiddleware class.
@@ -24,63 +25,73 @@ use Zend\Diactoros\ServerRequest;
 class DocumentationRedirectMiddlewareTest extends TestCase
 {
     /**
-     * Provides the data for the process test.
-     * @return array
-     */
-    public function provideProcess(): array
-    {
-        return [
-            [RequestMethodInterface::METHOD_GET, true],
-            [RequestMethodInterface::METHOD_POST, false],
-        ];
-    }
-
-    /**
      * Tests the process method.
-     * @param string $requestMethod
-     * @param bool $expectRedirect
+     * @throws ReflectionException
      * @covers ::__construct
      * @covers ::process
-     * @dataProvider provideProcess
      */
-    public function testProcess(string $requestMethod, bool $expectRedirect)
+    public function testProcess(): void
     {
-        /* @var ServerRequest|MockObject $request */
-        $request = $this->getMockBuilder(ServerRequest::class)
-                        ->setMethods(['getMethod'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
+        $requestMethod = RequestMethodInterface::METHOD_POST;
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getMethod')
                 ->willReturn($requestMethod);
 
-        /* @var BasePathHelper|MockObject $basePathHelper */
-        $basePathHelper = $this->getMockBuilder(BasePathHelper::class)
-                               ->setMethods(['__invoke'])
-                               ->disableOriginalConstructor()
-                               ->getMock();
-        $basePathHelper->expects($expectRedirect ? $this->once() : $this->never())
-                       ->method('__invoke')
-                       ->with('/docs')
-                       ->willReturn('abc');
+        /* @var BasePathHelper&MockObject $basePathHelper */
+        $basePathHelper = $this->createMock(BasePathHelper::class);
+        $basePathHelper->expects($this->never())
+                       ->method('__invoke');
 
-        /* @var Response $response */
-        $response = $this->createMock(Response::class);
-        /* @var RequestHandlerInterface|MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
-                        ->setMethods(['handle'])
-                        ->getMockForAbstractClass();
-        $handler->expects($expectRedirect ? $this->never() : $this->once())
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
+
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())
                 ->method('handle')
-                ->with($request)
+                ->with($this->identicalTo($request))
                 ->willReturn($response);
 
         $middleware = new DocumentationRedirectMiddleware($basePathHelper);
         $result = $middleware->process($request, $handler);
-        if ($expectRedirect) {
-            $this->assertInstanceOf(RedirectResponse::class, $result);
-        } else {
-            $this->assertSame($response, $result);
-        }
+
+        $this->assertSame($response, $result);
+    }
+
+    /**
+     * Tests the process method with a redirect.
+     * @throws ReflectionException
+     * @covers ::__construct
+     * @covers ::process
+     */
+    public function testProcessWithRedirect(): void
+    {
+        $requestMethod = RequestMethodInterface::METHOD_GET;
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getMethod')
+                ->willReturn($requestMethod);
+
+        /* @var BasePathHelper&MockObject $basePathHelper */
+        $basePathHelper = $this->createMock(BasePathHelper::class);
+        $basePathHelper->expects($this->once())
+                       ->method('__invoke')
+                       ->with($this->identicalTo('/docs'))
+                       ->willReturn('abc');
+
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->never())
+                ->method('handle');
+
+        $middleware = new DocumentationRedirectMiddleware($basePathHelper);
+        $result = $middleware->process($request, $handler);
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 }

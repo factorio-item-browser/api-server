@@ -4,17 +4,27 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Generic;
 
-use BluePsyduck\Common\Data\DataContainer;
 use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Client\Constant\EntityType;
+use BluePsyduck\MapperManager\MapperManagerInterface;
+use FactorioItemBrowser\Api\Client\Entity\Entity;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\MachineService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
+use FactorioItemBrowser\Api\Client\Request\Generic\GenericDetailsRequest;
+use FactorioItemBrowser\Api\Client\Response\Generic\GenericDetailsResponse;
+use FactorioItemBrowser\Api\Database\Entity\Item;
+use FactorioItemBrowser\Api\Database\Entity\Machine;
+use FactorioItemBrowser\Api\Database\Entity\Recipe;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
+use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
+use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\Generic\GenericDetailsHandler;
+use FactorioItemBrowser\Common\Constant\EntityType;
+use FactorioItemBrowser\Common\Constant\ItemType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use stdClass;
 
 /**
  * The PHPUnit test of the GenericDetailsHandler class.
@@ -28,282 +38,554 @@ class GenericDetailsHandlerTest extends TestCase
     use ReflectionTrait;
 
     /**
+     * The mocked item repository.
+     * @var ItemRepository&MockObject
+     */
+    protected $itemRepository;
+
+    /**
+     * The mocked machine repository.
+     * @var MachineRepository&MockObject
+     */
+    protected $machineRepository;
+
+    /**
+     * The mocked mapper manager.
+     * @var MapperManagerInterface&MockObject
+     */
+    protected $mapperManager;
+
+    /**
+     * The mocked recipe repository.
+     * @var RecipeRepository&MockObject
+     */
+    protected $recipeRepository;
+
+    /**
+     * Sets up the test case.
+     * @throws ReflectionException
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->itemRepository = $this->createMock(ItemRepository::class);
+        $this->machineRepository = $this->createMock(MachineRepository::class);
+        $this->mapperManager = $this->createMock(MapperManagerInterface::class);
+        $this->recipeRepository = $this->createMock(RecipeRepository::class);
+    }
+
+    /**
      * Tests the constructing.
+     * @throws ReflectionException
      * @covers ::__construct
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var MachineService $machineService */
-        $machineService = $this->createMock(MachineService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $this->createMock(RecipeService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
+        $handler = new GenericDetailsHandler(
+            $this->itemRepository,
+            $this->machineRepository,
+            $this->mapperManager,
+            $this->recipeRepository
+        );
 
-        $handler = new GenericDetailsHandler($itemService, $machineService, $recipeService, $translationService);
-        $this->assertSame($itemService, $this->extractProperty($handler, 'itemService'));
-        $this->assertSame($machineService, $this->extractProperty($handler, 'machineService'));
-        $this->assertSame($recipeService, $this->extractProperty($handler, 'recipeService'));
-        $this->assertSame($translationService, $this->extractProperty($handler, 'translationService'));
+        $this->assertSame($this->itemRepository, $this->extractProperty($handler, 'itemRepository'));
+        $this->assertSame($this->machineRepository, $this->extractProperty($handler, 'machineRepository'));
+        $this->assertSame($this->mapperManager, $this->extractProperty($handler, 'mapperManager'));
+        $this->assertSame($this->recipeRepository, $this->extractProperty($handler, 'recipeRepository'));
+    }
+
+    /**
+     * Tests the getExpectedRequestClass method.
+     * @throws ReflectionException
+     * @covers ::getExpectedRequestClass
+     */
+    public function testGetExpectedRequestClass(): void
+    {
+        $expectedResult = GenericDetailsRequest::class;
+
+        $handler = new GenericDetailsHandler(
+            $this->itemRepository,
+            $this->machineRepository,
+            $this->mapperManager,
+            $this->recipeRepository
+        );
+        $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
+
+        $this->assertSame($expectedResult, $result);
     }
 
     /**
      * Tests the handleRequest method.
+     * @throws ReflectionException
      * @covers ::handleRequest
      */
-    public function testHandleRequest()
+    public function testHandleRequest(): void
     {
-        $entity1 = new GenericEntity();
-        $entity2 = new GenericEntity();
-        $entity3 = new GenericEntity();
-        $entity4 = new GenericEntity();
-        $entity5 = new GenericEntity();
-        $entity6 = new GenericEntity();
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        /* @var GenericDetailsResponse&MockObject $response */
+        $response = $this->createMock(GenericDetailsResponse::class);
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
 
-        $requestData = new DataContainer(['abc' => 'def']);
-        $namesByTypes = [
-            EntityType::FLUID => ['ghi'],
-            EntityType::ITEM => ['jkl'],
-            EntityType::MACHINE => ['mno'],
-            EntityType::RECIPE => ['pqr'],
+        $entities = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
         ];
-        $expectedResult = [
-            'entities' => [
-                $entity1,
-                $entity2,
-                $entity3,
-                $entity4,
-                $entity5,
-                $entity6,
-            ]
+        $requestEntities = [
+            $this->createMock(Entity::class),
+            $this->createMock(Entity::class),
         ];
 
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var MachineService $machineService */
-        $machineService = $this->createMock(MachineService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $this->createMock(RecipeService::class);
+        /* @var GenericDetailsRequest&MockObject $request */
+        $request = $this->createMock(GenericDetailsRequest::class);
+        $request->expects($this->once())
+                ->method('getEntities')
+                ->willReturn($requestEntities);
 
-        /* @var TranslationService|MockObject $translationService */
-        $translationService = $this->getMockBuilder(TranslationService::class)
-                                   ->setMethods(['translateEntities'])
-                                   ->disableOriginalConstructor()
-                                   ->getMock();
-        $translationService->expects($this->once())
-                           ->method('translateEntities');
-
-        /* @var GenericDetailsHandler|MockObject $handler */
+        /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
-                        ->setMethods(['getEntityNamesByType', 'handleRecipes', 'handleMachines', 'handleItems'])
-                        ->setConstructorArgs([$itemService, $machineService, $recipeService, $translationService])
+                        ->setMethods([
+                            'extractTypesAndNames',
+                            'getAuthorizationToken',
+                            'process',
+                            'createResponse'
+                        ])
+                        ->disableOriginalConstructor()
                         ->getMock();
         $handler->expects($this->once())
-                ->method('getEntityNamesByType')
-                ->with($requestData)
+                ->method('extractTypesAndNames')
+                ->with($this->identicalTo($requestEntities))
                 ->willReturn($namesByTypes);
         $handler->expects($this->once())
-                ->method('handleRecipes')
-                ->with(['pqr'])
-                ->willReturn([$entity1, $entity2]);
+                ->method('getAuthorizationToken')
+                ->willReturn($authorizationToken);
         $handler->expects($this->once())
-                ->method('handleMachines')
-                ->with(['mno'])
-                ->willReturn([$entity3, $entity4]);
+                ->method('process')
+                ->with($this->identicalTo($namesByTypes), $this->identicalTo($authorizationToken))
+                ->willReturn($entities);
         $handler->expects($this->once())
-                ->method('handleItems')
-                ->with([EntityType::FLUID => ['ghi'], EntityType::ITEM => ['jkl']])
-                ->willReturn([$entity5, $entity6]);
+                ->method('createResponse')
+                ->with($this->equalTo($entities))
+                ->willReturn($response);
 
-        $result = $this->invokeMethod($handler, 'handleRequest', $requestData);
-        $this->assertSame($expectedResult, $result);
+        $result = $this->invokeMethod($handler, 'handleRequest', $request);
+
+        $this->assertSame($response, $result);
     }
 
     /**
-     * Tests the handleRecipes method.
-     * @covers ::handleRecipes
+     * Tests the process method.
+     * @throws ReflectionException
+     * @covers ::process
      */
-    public function testHandleRecipes()
+    public function testProcess(): void
     {
-        $recipeNames = ['abc', 'def', 'ghi'];
-        $availableRecipeNames = ['def', 'ghi'];
-        $entity1 = new GenericEntity();
-        $entity2 = new GenericEntity();
-        $expectedResult = [$entity1, $entity2];
+        $itemNames = ['abc', 'def'];
+        $fluidNames = ['ghi', 'jkl'];
+        $machineNames = ['mno', 'pqr'];
+        $recipeNames = ['stu', 'vwx'];
 
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var MachineService $machineService */
-        $machineService = $this->createMock(MachineService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
 
-        /* @var RecipeService|MockObject $recipeService */
-        $recipeService = $this->getMockBuilder(RecipeService::class)
-                              ->setMethods(['filterAvailableNames'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        $recipeService->expects($this->once())
-                      ->method('filterAvailableNames')
-                      ->with($recipeNames)
-                      ->willReturn($availableRecipeNames);
+        /* @var GenericEntity&MockObject $entity1 */
+        $entity1 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity2 */
+        $entity2 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity3 */
+        $entity3 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity4 */
+        $entity4 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity5 */
+        $entity5 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity6 */
+        $entity6 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity7 */
+        $entity7 = $this->createMock(GenericEntity::class);
+        /* @var GenericEntity&MockObject $entity8 */
+        $entity8 = $this->createMock(GenericEntity::class);
 
-        /* @var GenericDetailsHandler|MockObject $handler */
+        $expectedResult = [
+            $entity1,
+            $entity2,
+            $entity3,
+            $entity4,
+            $entity5,
+            $entity6,
+            $entity7,
+            $entity8,
+        ];
+
+        /* @var NamesByTypes&MockObject $namesByTypes */
+        $namesByTypes = $this->createMock(NamesByTypes::class);
+        $namesByTypes->expects($this->exactly(4))
+                     ->method('getNames')
+                     ->willReturnMap([
+                         [EntityType::ITEM, $itemNames],
+                         [EntityType::FLUID, $fluidNames],
+                         [EntityType::MACHINE, $machineNames],
+                         [EntityType::RECIPE, $recipeNames],
+                     ]);
+
+        /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
-                        ->setMethods(['createGenericEntity'])
-                        ->setConstructorArgs([$itemService, $machineService, $recipeService, $translationService])
+                        ->setMethods([
+                            'processItems',
+                            'processFluids',
+                            'processMachines',
+                            'processRecipes',
+                        ])
+                        ->disableOriginalConstructor()
                         ->getMock();
-        $handler->expects($this->exactly(2))
-                ->method('createGenericEntity')
-                ->withConsecutive(
-                    [EntityType::RECIPE, 'def'],
-                    [EntityType::RECIPE, 'ghi']
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $entity1,
-                    $entity2
-                );
+        $handler->expects($this->once())
+                ->method('processItems')
+                ->with($this->identicalTo($itemNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['abc' => $entity1, 'def' => $entity2]);
+        $handler->expects($this->once())
+                ->method('processFluids')
+                ->with($this->identicalTo($fluidNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['ghi' => $entity3, 'jkl' => $entity4]);
+        $handler->expects($this->once())
+                ->method('processMachines')
+                ->with($this->identicalTo($machineNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['mno' => $entity5, 'pqr' => $entity6]);
+        $handler->expects($this->once())
+                ->method('processRecipes')
+                ->with($this->identicalTo($recipeNames), $this->identicalTo($authorizationToken))
+                ->willReturn(['stu' => $entity7, 'vwx' => $entity8]);
 
-        $result = $this->invokeMethod($handler, 'handleRecipes', $recipeNames);
-        $this->assertSame($expectedResult, $result);
+        $result = $this->invokeMethod($handler, 'process', $namesByTypes, $authorizationToken);
+
+        $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the handleMachines method.
-     * @covers ::handleMachines
+     * Tests the processItems method.
+     * @throws ReflectionException
+     * @covers ::processItems
      */
-    public function testHandleMachines()
+    public function testProcessItems(): void
     {
-        $machineNames = ['abc', 'def', 'ghi'];
-        $availableMachineNames = ['def', 'ghi'];
-        $entity1 = new GenericEntity();
-        $entity2 = new GenericEntity();
-        $expectedResult = [$entity1, $entity2];
+        $names = ['abc', 'def'];
+        $enabledModCombinationIds = [42, 1337];
+        
+        $expectedNamesByTypes = [
+            ItemType::ITEM => $names,
+        ];
 
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $this->createMock(RecipeService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
+        $items = [
+            $this->createMock(Item::class),
+            $this->createMock(Item::class),
+        ];
+        $mappedItems = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
 
-        /* @var MachineService|MockObject $machineService */
-        $machineService = $this->getMockBuilder(MachineService::class)
-                              ->setMethods(['filterAvailableNames'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        $machineService->expects($this->once())
-                      ->method('filterAvailableNames')
-                      ->with($machineNames)
-                      ->willReturn($availableMachineNames);
-
-        /* @var GenericDetailsHandler|MockObject $handler */
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getEnabledModCombinationIds')
+                           ->willReturn($enabledModCombinationIds);
+        
+        $this->itemRepository->expects($this->once())
+                             ->method('findByTypesAndNames')
+                             ->with(
+                                 $this->equalTo($expectedNamesByTypes),
+                                 $this->identicalTo($enabledModCombinationIds)
+                             )
+                             ->willReturn($items);
+        
+        /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
-                        ->setMethods(['createGenericEntity'])
-                        ->setConstructorArgs([$itemService, $machineService, $recipeService, $translationService])
+                        ->setMethods(['mapObjectsToEntities'])
+                        ->setConstructorArgs([
+                            $this->itemRepository,
+                            $this->machineRepository,
+                            $this->mapperManager,
+                            $this->recipeRepository
+                        ])
                         ->getMock();
-        $handler->expects($this->exactly(2))
-                ->method('createGenericEntity')
-                ->withConsecutive(
-                    [EntityType::MACHINE, 'def'],
-                    [EntityType::MACHINE, 'ghi']
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $entity1,
-                    $entity2
-                );
+        $handler->expects($this->once())
+                ->method('mapObjectsToEntities')
+                ->with($this->identicalTo($items))
+                ->willReturn($mappedItems);
 
-        $result = $this->invokeMethod($handler, 'handleMachines', $machineNames);
-        $this->assertSame($expectedResult, $result);
-    }
+        $result = $this->invokeMethod($handler, 'processItems', $names, $authorizationToken);
 
-    /**
-     * Tests the handleItems method.
-     * @covers ::handleItems
-     */
-    public function testHandleItems()
-    {
-        $itemNamesByType = ['abc', 'def', 'ghi'];
-        $availableItemNamesByTypes = ['abc' => ['def', 'ghi'], 'jkl' => ['mno']];
-        $entity1 = new GenericEntity();
-        $entity2 = new GenericEntity();
-        $entity3 = new GenericEntity();
-        $expectedResult = [$entity1, $entity2, $entity3];
-
-        /* @var MachineService $machineService */
-        $machineService = $this->createMock(MachineService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $this->createMock(RecipeService::class);
-        /* @var TranslationService $translationService */
-        $translationService = $this->createMock(TranslationService::class);
-
-        /* @var ItemService|MockObject $itemService */
-        $itemService = $this->getMockBuilder(ItemService::class)
-                              ->setMethods(['filterAvailableTypesAndNames'])
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        $itemService->expects($this->once())
-                      ->method('filterAvailableTypesAndNames')
-                      ->with($itemNamesByType)
-                      ->willReturn($availableItemNamesByTypes);
-
-        /* @var GenericDetailsHandler|MockObject $handler */
-        $handler = $this->getMockBuilder(GenericDetailsHandler::class)
-                        ->setMethods(['createGenericEntity'])
-                        ->setConstructorArgs([$itemService, $machineService, $recipeService, $translationService])
-                        ->getMock();
-        $handler->expects($this->exactly(3))
-                ->method('createGenericEntity')
-                ->withConsecutive(
-                    ['abc', 'def'],
-                    ['abc', 'ghi'],
-                    ['jkl', 'mno']
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $entity1,
-                    $entity2,
-                    $entity3
-                );
-
-        $result = $this->invokeMethod($handler, 'handleItems', $itemNamesByType);
-        $this->assertSame($expectedResult, $result);
+        $this->assertSame($mappedItems, $result);
     }
     
     /**
-     * Tests the createGenericEntity method.
-     * @covers ::createGenericEntity
+     * Tests the processFluids method.
+     * @throws ReflectionException
+     * @covers ::processFluids
      */
-    public function testCreateGenericEntity()
+    public function testProcessFluids(): void
+    {
+        $names = ['abc', 'def'];
+        $enabledModCombinationIds = [42, 1337];
+        
+        $expectedNamesByTypes = [
+            ItemType::FLUID => $names,
+        ];
+
+        $fluids = [
+            $this->createMock(Item::class),
+            $this->createMock(Item::class),
+        ];
+        $mappedFluids = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getEnabledModCombinationIds')
+                           ->willReturn($enabledModCombinationIds);
+        
+        $this->itemRepository->expects($this->once())
+                             ->method('findByTypesAndNames')
+                             ->with(
+                                 $this->equalTo($expectedNamesByTypes),
+                                 $this->identicalTo($enabledModCombinationIds)
+                             )
+                             ->willReturn($fluids);
+        
+        /* @var GenericDetailsHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(GenericDetailsHandler::class)
+                        ->setMethods(['mapObjectsToEntities'])
+                        ->setConstructorArgs([
+                            $this->itemRepository,
+                            $this->machineRepository,
+                            $this->mapperManager,
+                            $this->recipeRepository
+                        ])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('mapObjectsToEntities')
+                ->with($this->identicalTo($fluids))
+                ->willReturn($mappedFluids);
+
+        $result = $this->invokeMethod($handler, 'processFluids', $names, $authorizationToken);
+
+        $this->assertSame($mappedFluids, $result);
+    }
+    
+    /**
+     * Tests the processMachines method.
+     * @throws ReflectionException
+     * @covers ::processMachines
+     */
+    public function testProcessMachines(): void
+    {
+        $names = ['abc', 'def'];
+        $enabledModCombinationIds = [42, 1337];
+        
+        $machines = [
+            $this->createMock(Machine::class),
+            $this->createMock(Machine::class),
+        ];
+        $mappedMachines = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getEnabledModCombinationIds')
+                           ->willReturn($enabledModCombinationIds);
+        
+        $this->machineRepository->expects($this->once())
+                             ->method('findDataByNames')
+                             ->with(
+                                 $this->equalTo($names),
+                                 $this->identicalTo($enabledModCombinationIds)
+                             )
+                             ->willReturn($machines);
+        
+        /* @var GenericDetailsHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(GenericDetailsHandler::class)
+                        ->setMethods(['mapObjectsToEntities'])
+                        ->setConstructorArgs([
+                            $this->itemRepository,
+                            $this->machineRepository,
+                            $this->mapperManager,
+                            $this->recipeRepository
+                        ])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('mapObjectsToEntities')
+                ->with($this->identicalTo($machines))
+                ->willReturn($mappedMachines);
+
+        $result = $this->invokeMethod($handler, 'processMachines', $names, $authorizationToken);
+
+        $this->assertSame($mappedMachines, $result);
+    }
+    
+    /**
+     * Tests the processRecipes method.
+     * @throws ReflectionException
+     * @covers ::processRecipes
+     */
+    public function testProcessRecipes(): void
+    {
+        $names = ['abc', 'def'];
+        $enabledModCombinationIds = [42, 1337];
+        
+        $recipes = [
+            $this->createMock(Recipe::class),
+            $this->createMock(Recipe::class),
+        ];
+        $mappedRecipes = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getEnabledModCombinationIds')
+                           ->willReturn($enabledModCombinationIds);
+        
+        $this->recipeRepository->expects($this->once())
+                             ->method('findDataByNames')
+                             ->with(
+                                 $this->equalTo($names),
+                                 $this->identicalTo($enabledModCombinationIds)
+                             )
+                             ->willReturn($recipes);
+        
+        /* @var GenericDetailsHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(GenericDetailsHandler::class)
+                        ->setMethods(['mapObjectsToEntities'])
+                        ->setConstructorArgs([
+                            $this->itemRepository,
+                            $this->machineRepository,
+                            $this->mapperManager,
+                            $this->recipeRepository
+                        ])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('mapObjectsToEntities')
+                ->with($this->identicalTo($recipes))
+                ->willReturn($mappedRecipes);
+
+        $result = $this->invokeMethod($handler, 'processRecipes', $names, $authorizationToken);
+
+        $this->assertSame($mappedRecipes, $result);
+    }
+
+    /**
+     * Tests the mapObjectsToEntities method.
+     * @throws ReflectionException
+     * @covers ::mapObjectsToEntities
+     */
+    public function testMapObjectsToEntities(): void
+    {
+        /* @var stdClass&MockObject $object1 */
+        $object1 = $this->createMock(stdClass::class);
+        /* @var stdClass&MockObject $object2 */
+        $object2 = $this->createMock(stdClass::class);
+
+        $objects = [$object1, $object2];
+        $expectedResult = [
+            'abc' => new GenericEntity(),
+            'def' => new GenericEntity(),
+        ];
+
+        $this->mapperManager->expects($this->exactly(2))
+                            ->method('map')
+                            ->withConsecutive(
+                                [$this->identicalTo($object1), $this->isInstanceOf(GenericEntity::class)],
+                                [$this->identicalTo($object2), $this->isInstanceOf(GenericEntity::class)]
+                            );
+
+        /* @var GenericDetailsHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(GenericDetailsHandler::class)
+                        ->setMethods(['getEntityKey'])
+                        ->setConstructorArgs([
+                            $this->itemRepository,
+                            $this->machineRepository,
+                            $this->mapperManager,
+                            $this->recipeRepository
+                        ])
+                        ->getMock();
+        $handler->expects($this->exactly(2))
+                ->method('getEntityKey')
+                ->withConsecutive(
+                    [$this->isInstanceOf(GenericEntity::class)],
+                    [$this->isInstanceOf(GenericEntity::class)]
+                )
+                ->willReturnOnConsecutiveCalls(
+                    'abc',
+                    'def'
+                );
+
+        $result = $this->invokeMethod($handler, 'mapObjectsToEntities', $objects);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Tests the getEntityKey method.
+     * @throws ReflectionException
+     * @covers ::getEntityKey
+     */
+    public function testGetEntityKey(): void
     {
         $type = 'abc';
         $name = 'def';
-        $expectedResult = new GenericEntity();
-        $expectedResult->setType($type)
-                       ->setName($name);
+        $expectedResult = 'abc|def';
 
-        /* @var ItemService $itemService */
-        $itemService = $this->createMock(ItemService::class);
-        /* @var MachineService $machineService */
-        $machineService = $this->createMock(MachineService::class);
-        /* @var RecipeService $recipeService */
-        $recipeService = $this->createMock(RecipeService::class);
+        /* @var GenericEntity&MockObject $entity */
+        $entity = $this->createMock(GenericEntity::class);
+        $entity->expects($this->once())
+               ->method('getType')
+               ->willReturn($type);
+        $entity->expects($this->once())
+               ->method('getName')
+               ->willReturn($name);
 
-        /* @var TranslationService|MockObject $translationService */
-        $translationService = $this->getMockBuilder(TranslationService::class)
-                                   ->setMethods(['addEntityToTranslate'])
-                                   ->disableOriginalConstructor()
-                                   ->getMock();
-        $translationService->expects($this->once())
-                           ->method('addEntityToTranslate')
-                           ->with($this->callback(function ($param) use ($expectedResult) {
-                               $this->assertEquals($expectedResult, $param);
-                               return true;
-                           }));
+        $handler = new GenericDetailsHandler(
+            $this->itemRepository,
+            $this->machineRepository,
+            $this->mapperManager,
+            $this->recipeRepository
+        );
+        $result = $this->invokeMethod($handler, 'getEntityKey', $entity);
 
-        $handler = new GenericDetailsHandler($itemService, $machineService, $recipeService, $translationService);
-        $result = $this->invokeMethod($handler, 'createGenericEntity', $type, $name);
+        $this->assertSame($expectedResult, $result);
+    }
+
+    /**
+     * Tests the createResponse method.
+     * @throws ReflectionException
+     * @covers ::createResponse
+     */
+    public function testCreateResponse(): void
+    {
+        $entities = [
+            $this->createMock(GenericEntity::class),
+            $this->createMock(GenericEntity::class),
+        ];
+
+        $expectedResult = new GenericDetailsResponse();
+        $expectedResult->setEntities($entities);
+
+        $handler = new GenericDetailsHandler(
+            $this->itemRepository,
+            $this->machineRepository,
+            $this->mapperManager,
+            $this->recipeRepository
+        );
+        $result = $this->invokeMethod($handler, 'createResponse', $entities);
+
         $this->assertEquals($expectedResult, $result);
     }
 }

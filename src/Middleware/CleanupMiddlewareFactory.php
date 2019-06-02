@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
+use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -25,9 +25,9 @@ class CleanupMiddlewareFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /* @var CachedSearchResultService $cachedSearchResultService */
-        $cachedSearchResultService = $container->get(CachedSearchResultService::class);
+        /* @var SearchCacheClearInterface $searchCacheClearer */
+        $searchCacheClearer = $container->get(SearchCacheClearInterface::class);
 
-        return new CleanupMiddleware($cachedSearchResultService);
+        return new CleanupMiddleware($searchCacheClearer);
     }
 }

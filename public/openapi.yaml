@@ -300,6 +300,8 @@ paths:
           $ref: "openapi/errorResponses.yaml#/recipeNotFound"
         "500":
           $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
 
   /search/query:
     post:

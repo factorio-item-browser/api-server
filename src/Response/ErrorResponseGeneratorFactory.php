@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
+use FactorioItemBrowser\Api\Server\Constant\ServiceName;
 use Interop\Container\ContainerInterface;
 use Zend\Log\LoggerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
@@ -17,11 +18,6 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 class ErrorResponseGeneratorFactory implements FactoryInterface
 {
     /**
-     * The name of the logger service.
-     */
-    public const LOGGER_SERVICE_NAME = 'logger.factorio-item-browser';
-
-    /**
      * Creates the error response generator.
      * @param  ContainerInterface $container
      * @param  string $requestedName
@@ -30,12 +26,21 @@ class ErrorResponseGeneratorFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $logger = null;
-        if ($container->has(self::LOGGER_SERVICE_NAME)) {
-            /* @var LoggerInterface $logger */
-            $logger = $container->get(self::LOGGER_SERVICE_NAME);
-        }
+        $config = $container->get('config');
+        return new ErrorResponseGenerator($this->fetchLogger($container), $config['debug'] ?? false);
+    }
 
-        return new ErrorResponseGenerator($logger);
+    /**
+     * Fetches and returns the logger from the container.
+     * @param ContainerInterface $container
+     * @return LoggerInterface|null
+     */
+    protected function fetchLogger(ContainerInterface $container): ?LoggerInterface
+    {
+        $result = null;
+        if ($container->has(ServiceName::LOGGER)) {
+            $result = $container->get(ServiceName::LOGGER);
+        }
+        return $result;
     }
 }

@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
-use BluePsyduck\Common\Data\DataContainer;
+use BluePsyduck\MapperManager\Exception\MapperException;
+use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
-use FactorioItemBrowser\Api\Server\Database\Entity\Item as DatabaseItem;
-use FactorioItemBrowser\Api\Server\Database\Service\ItemService;
-use FactorioItemBrowser\Api\Server\Database\Service\RecipeService;
-use FactorioItemBrowser\Api\Server\Database\Service\TranslationService;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
+use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
+use FactorioItemBrowser\Api\Server\Service\RecipeService;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Exception\EntityNotFoundException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\Mapper\ItemMapper;
-use FactorioItemBrowser\Api\Server\Mapper\RecipeMapper;
-use Zend\Filter\ToInt;
-use Zend\InputFilter\InputFilter;
-use Zend\Validator\NotEmpty;
 
 /**
  * The abstract class of the item recipe request handlers.
@@ -28,22 +24,16 @@ use Zend\Validator\NotEmpty;
 abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
 {
     /**
-     * The item mapper.
-     * @var ItemMapper
+     * The item repository.
+     * @var ItemRepository
      */
-    protected $itemMapper;
+    protected $itemRepository;
 
     /**
-     * The database item service.
-     * @var ItemService
+     * The mapper manager.
+     * @var MapperManagerInterface
      */
-    protected $itemService;
-
-    /**
-     * The recipe mapper.
-     * @var RecipeMapper
-     */
-    protected $recipeMapper;
+    protected $mapperManager;
 
     /**
      * The database recipe service.
@@ -52,151 +42,62 @@ abstract class AbstractItemRecipeHandler extends AbstractRequestHandler
     protected $recipeService;
 
     /**
-     * The database translation service.
-     * @var TranslationService
-     */
-    protected $translationService;
-
-    /**
      * Initializes the request handler.
-     * @param ItemMapper $itemMapper
-     * @param ItemService $itemService
-     * @param RecipeMapper $recipeMapper
+     * @param ItemRepository $itemRepository
+     * @param MapperManagerInterface $mapperManager
      * @param RecipeService $recipeService
-     * @param TranslationService $translationService
      */
     public function __construct(
-        ItemMapper $itemMapper,
-        ItemService $itemService,
-        RecipeMapper $recipeMapper,
-        RecipeService $recipeService,
-        TranslationService $translationService
+        ItemRepository $itemRepository,
+        MapperManagerInterface $mapperManager,
+        RecipeService $recipeService
     ) {
-        $this->itemMapper = $itemMapper;
-        $this->itemService = $itemService;
-        $this->recipeMapper = $recipeMapper;
+        $this->itemRepository = $itemRepository;
+        $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
-        $this->translationService = $translationService;
     }
 
     /**
-     * Creates the input filter to use to verify the request.
-     * @return InputFilter
+     * Fetches the item from the database.
+     * @param string $type
+     * @param string $name
+     * @param AuthorizationToken $authorizationToken
+     * @return DatabaseItem
+     * @throws EntityNotFoundException
      */
-    protected function createInputFilter(): InputFilter
+    protected function fetchItem(string $type, string $name, AuthorizationToken $authorizationToken): DatabaseItem
     {
-        $inputFilter = new InputFilter();
-        $inputFilter
-            ->add([
-                'name' => 'type',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'name',
-                'required' => true,
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'numberOfResults',
-                'required' => true,
-                'fallback_value' => 10,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ])
-            ->add([
-                'name' => 'indexOfFirstResult',
-                'required' => true,
-                'fallback_value' => 0,
-                'filters' => [
-                    new ToInt()
-                ],
-                'validators' => [
-                    new NotEmpty()
-                ]
-            ]);
+        $items = $this->itemRepository->findByTypesAndNames(
+            [$type => [$name]],
+            $authorizationToken->getEnabledModCombinationIds()
+        );
+        $item = reset($items);
 
-        return $inputFilter;
+        if (!$item instanceof DatabaseItem) {
+            throw new EntityNotFoundException($type, $name);
+        }
+        return $item;
     }
 
     /**
-     * Creates the response data from the validated request data.
-     * @param DataContainer $requestData
-     * @return array
-     */
-    protected function handleRequest(DataContainer $requestData): array
-    {
-        $databaseItem = $this->itemService->getByTypeAndName(
-            $requestData->getString('type'),
-            $requestData->getString('name')
-        );
-        if (!$databaseItem instanceof DatabaseItem) {
-            throw new ApiServerException('Item not found or not available in the enabled mods.', 404);
-        }
-        $clientItem = new GenericEntityWithRecipes();
-        $this->itemMapper->mapItem($databaseItem, $clientItem);
-
-        $groupedRecipeIds = $this->fetchGroupedRecipeIds($databaseItem);
-        $totalNumberOfRecipes = count($groupedRecipeIds);
-        $recipeIds = $this->limitGroupedRecipeIds(
-            $groupedRecipeIds,
-            max($requestData->getInteger('numberOfResults'), 0),
-            max($requestData->getInteger('indexOfFirstResult'), 0)
-        );
-
-        $clientRecipes = [];
-        foreach ($this->recipeService->getDetailsByIds($recipeIds) as $databaseRecipe) {
-            $mappedRecipe = new RecipeWithExpensiveVersion();
-            $this->recipeMapper->mapRecipe($databaseRecipe, $mappedRecipe);
-
-            if (isset($clientRecipes[$databaseRecipe->getName()])) {
-                $this->recipeMapper->combineRecipes($clientRecipes[$databaseRecipe->getName()], $mappedRecipe);
-            } else {
-                $clientRecipes[$databaseRecipe->getName()] = $mappedRecipe;
-            }
-        }
-
-        $clientItem->setRecipes($clientRecipes)
-                   ->setTotalNumberOfRecipes($totalNumberOfRecipes);
-
-        $this->translationService->translateEntities();
-        return [
-            'item' => $clientItem
-        ];
-    }
-
-    /**
-     * Fetches the IDs of the grouped recipes.
+     * Creates the item entity to use in the response.
      * @param DatabaseItem $item
-     * @return array|int[][]
+     * @param RecipeDataCollection $recipeData
+     * @param int $totalNumberOfRecipes
+     * @return GenericEntityWithRecipes
+     * @throws MapperException
      */
-    abstract protected function fetchGroupedRecipeIds(DatabaseItem $item): array;
+    protected function createResponseEntity(
+        DatabaseItem $item,
+        RecipeDataCollection $recipeData,
+        int $totalNumberOfRecipes
+    ): GenericEntityWithRecipes {
+        $result = new GenericEntityWithRecipes();
 
-    /**
-     * Limits the grouped recipe ids to the specified slice.
-     * @param array|int[][] $groupedRecipeIds
-     * @param int $limit
-     * @param int $offset
-     * @return array|int[]
-     */
-    protected function limitGroupedRecipeIds(array $groupedRecipeIds, int $limit, int $offset): array
-    {
-        if ($limit > 0) {
-            $groupedRecipeIds = array_slice($groupedRecipeIds, $offset, $limit);
-        }
-        if (count($groupedRecipeIds) > 0) {
-            $recipeIds = call_user_func_array('array_merge', $groupedRecipeIds);
-        } else {
-            $recipeIds = [];
-        }
-        return $recipeIds;
+        $this->mapperManager->map($item, $result);
+        $this->mapperManager->map($recipeData, $result);
+        $result->setTotalNumberOfRecipes($totalNumberOfRecipes);
+
+        return $result;
     }
 }

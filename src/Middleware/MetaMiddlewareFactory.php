@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -25,7 +26,8 @@ class MetaMiddlewareFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
+        $projectConfig = $config[ConfigKey::PROJECT][ConfigKey::API_SERVER];
 
-        return new MetaMiddleware($config['factorio-item-browser']['api-server']['version']);
+        return new MetaMiddleware($projectConfig[ConfigKey::VERSION]);
     }
 }

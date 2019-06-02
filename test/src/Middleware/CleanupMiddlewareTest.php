@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
 use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
+use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use FactorioItemBrowser\Api\Server\Middleware\CleanupMiddleware;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the CleanupMiddleware class.
@@ -25,73 +26,118 @@ class CleanupMiddlewareTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * Provides the data for the process test.
-     * @return array
+     * The mocked search cache clearer.
+     * @var SearchCacheClearInterface&MockObject
      */
-    public function provideProcess(): array
+    protected $searchCacheClearer;
+
+    /**
+     * Seats up the test case.
+     * @throws ReflectionException
+     */
+    protected function setUp(): void
     {
-        return [
-            [42, true],
-            [21, false]
-        ];
+        parent::setUp();
+
+        $this->searchCacheClearer = $this->createMock(SearchCacheClearInterface::class);
+    }
+
+    /**
+     * Tests the constructing.
+     * @throws ReflectionException
+     * @covers ::__construct
+     */
+    public function testConstruct(): void
+    {
+        $middleware = new CleanupMiddleware($this->searchCacheClearer);
+
+        $this->assertSame($this->searchCacheClearer, $this->extractProperty($middleware, 'searchCacheClearer'));
     }
 
     /**
      * Tests the process method.
-     * @param int $randomNumber
-     * @param bool $expectCleanup
-     * @covers ::__construct
+     * @throws ReflectionException
      * @covers ::process
-     * @dataProvider provideProcess
      */
-    public function testProcess(int $randomNumber, bool $expectCleanup)
+    public function testProcess(): void
     {
-        /* @var CachedSearchResultService|MockObject $cachedSearchResultService */
-        $cachedSearchResultService = $this->getMockBuilder(CachedSearchResultService::class)
-                                          ->setMethods(['cleanup'])
-                                          ->disableOriginalConstructor()
-                                          ->getMock();
-        $cachedSearchResultService->expects($expectCleanup ? $this->once() : $this->never())
-                                  ->method('cleanup');
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
 
-        /* @var ServerRequest $request */
-        $request = $this->createMock(ServerRequest::class);
-        /* @var Response $response */
-        $response = $this->createMock(Response::class);
-        /* @var RequestHandlerInterface|MockObject $handler */
-        $handler = $this->getMockBuilder(RequestHandlerInterface::class)
-                        ->setMethods(['handle'])
-                        ->getMockForAbstractClass();
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
-                ->with($request)
+                ->with($this->identicalTo($request))
                 ->willReturn($response);
 
-        /* @var CleanupMiddleware|MockObject $middleware */
+        $this->searchCacheClearer->expects($this->once())
+                                 ->method('cleanCache');
+
+        /* @var CleanupMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(CleanupMiddleware::class)
                            ->setMethods(['getRandomNumber'])
-                           ->setConstructorArgs([$cachedSearchResultService])
+                           ->setConstructorArgs([$this->searchCacheClearer])
                            ->getMock();
         $middleware->expects($this->once())
                    ->method('getRandomNumber')
-                   ->with(1000)
-                   ->willReturn($randomNumber);
+                   ->with($this->identicalTo(1000))
+                   ->willReturn(42);
 
         $result = $middleware->process($request, $handler);
+
+        $this->assertSame($response, $result);
+    }
+
+    /**
+     * Tests the process method without matching the random number.
+     * @throws ReflectionException
+     * @covers ::process
+     */
+    public function testProcessWithoutRandomMatch(): void
+    {
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        /* @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
+
+        /* @var RequestHandlerInterface&MockObject $handler */
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())
+                ->method('handle')
+                ->with($this->identicalTo($request))
+                ->willReturn($response);
+
+        $this->searchCacheClearer->expects($this->never())
+                                 ->method('cleanCache');
+
+        /* @var CleanupMiddleware&MockObject $middleware */
+        $middleware = $this->getMockBuilder(CleanupMiddleware::class)
+                           ->setMethods(['getRandomNumber'])
+                           ->setConstructorArgs([$this->searchCacheClearer])
+                           ->getMock();
+        $middleware->expects($this->once())
+                   ->method('getRandomNumber')
+                   ->with($this->identicalTo(1000))
+                   ->willReturn(21);
+
+        $result = $middleware->process($request, $handler);
+
         $this->assertSame($response, $result);
     }
 
     /**
      * Tests the getRandomNumber method.
+     * @throws ReflectionException
      * @covers ::getRandomNumber
      */
-    public function testGetRandomNumber()
+    public function testGetRandomNumber(): void
     {
-        /* @var CachedSearchResultService $cachedSearchResultService */
-        $cachedSearchResultService = $this->createMock(CachedSearchResultService::class);
-
-        $middleware = new CleanupMiddleware($cachedSearchResultService);
+        $middleware = new CleanupMiddleware($this->searchCacheClearer);
         $result = $this->invokeMethod($middleware, 'getRandomNumber', 1000);
-        $this->assertInternalType('int', $result);
+
+        $this->assertIsInt($result);
     }
 }

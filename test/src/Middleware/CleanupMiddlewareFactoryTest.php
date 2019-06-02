@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Database\Service\CachedSearchResultService;
+use BluePsyduck\Common\Test\ReflectionTrait;
+use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use FactorioItemBrowser\Api\Server\Middleware\CleanupMiddleware;
 use FactorioItemBrowser\Api\Server\Middleware\CleanupMiddlewareFactory;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the CleanupMiddlewareFactory class.
@@ -20,23 +22,30 @@ use PHPUnit\Framework\TestCase;
  */
 class CleanupMiddlewareFactoryTest extends TestCase
 {
+    use ReflectionTrait;
+
     /**
      * Tests the invoking.
+     * @throws ReflectionException
      * @covers ::__invoke
      */
-    public function testInvoke()
+    public function testInvoke(): void
     {
-        /* @var ContainerInterface|MockObject $container */
-        $container = $this->getMockBuilder(ContainerInterface::class)
-                          ->setMethods(['get'])
-                          ->getMockForAbstractClass();
+        /* @var SearchCacheClearInterface&MockObject $searchCacheClearer */
+        $searchCacheClearer = $this->createMock(SearchCacheClearInterface::class);
+
+        $expectedResult = new CleanupMiddleware($searchCacheClearer);
+
+        /* @var ContainerInterface&MockObject $container */
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
                   ->method('get')
-                  ->with(CachedSearchResultService::class)
-                  ->willReturn($this->createMock(CachedSearchResultService::class));
+                  ->with($this->identicalTo(SearchCacheClearInterface::class))
+                  ->willReturn($searchCacheClearer);
 
         $factory = new CleanupMiddlewareFactory();
         $result = $factory($container, CleanupMiddleware::class);
-        $this->assertInstanceOf(CleanupMiddleware::class, $result);
+
+        $this->assertEquals($expectedResult, $result);
     }
 }

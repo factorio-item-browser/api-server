@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler;
 
+use FactorioItemBrowser\Api\Server\Exception\ApiEndpointNotFoundException;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Handler\NotFoundHandler;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Zend\Diactoros\ServerRequest;
+use Psr\Http\Message\ServerRequestInterface;
+use ReflectionException;
 
 /**
  * The PHPUnit test of the NotFoundHandler class.
@@ -21,14 +24,23 @@ class NotFoundHandlerTest extends TestCase
     /**
      * Tests the handle method.
      * @covers ::handle
+     * @throws ApiServerException
+     * @throws ReflectionException
      */
-    public function testHandle()
+    public function testHandle(): void
     {
-        $this->expectException(ApiServerException::class);
-        $this->expectExceptionCode(404);
-        $this->expectExceptionMessage('API endpoint not found: /abc');
+        $requestTarget = 'abc';
+
+        /* @var ServerRequestInterface&MockObject $request */
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getRequestTarget')
+                ->willReturn($requestTarget);
+
+        $this->expectException(ApiEndpointNotFoundException::class);
+        $this->expectExceptionMessage('API endpoint not found: abc');
 
         $handler = new NotFoundHandler();
-        $handler->handle((new ServerRequest())->withRequestTarget('/abc'));
+        $handler->handle($request);
     }
 }

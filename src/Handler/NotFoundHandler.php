@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler;
 
+use FactorioItemBrowser\Api\Server\Exception\ApiEndpointNotFoundException;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,6 +26,6 @@ class NotFoundHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        throw new ApiServerException('API endpoint not found: ' . $request->getRequestTarget(), 404);
+        throw new ApiEndpointNotFoundException($request->getRequestTarget());
     }
 }

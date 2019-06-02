@@ -4,6 +4,7 @@ matrix:
   fast_finish: true
   include:
     - php: 7.2
+    - php: 7.3
 
 cache:
   directories:
@@ -13,8 +14,9 @@ install:
   - composer install --prefer-dist --no-interaction
 
 script:
-  - composer validate
+  - composer validate --strict
   - vendor/bin/phpunit --coverage-clover=coverage.xml
+#  - vendor/bin/coverage-check coverage.xml 100
   - vendor/bin/phpcs -np --colors
   - vendor/bin/phpstan analyse --no-interaction
 
