@@ -2,6 +2,10 @@
 
 ## 1.2.0 - Unreleased
 
+### Added
+
+- Attribute `size` to the generic icon response.
+
 ### Changed
 
 - Full refactoring of the API server.

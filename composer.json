@@ -17,8 +17,8 @@
     "ext-json": "*",
     "ext-PDO": "*",
     "bluepsyduck/mapper-manager": "^1.0",
-    "factorio-item-browser/api-client": "^2.0",
-    "factorio-item-browser/api-database": "^2.0",
+    "factorio-item-browser/api-client": "dev-feature/icon-size",
+    "factorio-item-browser/api-database": "dev-feature/icon-size as 2.1",
     "factorio-item-browser/api-search": "^1.0",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
@@ -52,6 +52,12 @@
     }
   },
   "scripts": {
+    "build-cache": [
+      "rm -rf data/cache/*",
+      "bin/build-cache.php",
+      "vendor/bin/doctrine orm:generate-proxies",
+      "chown -R www-data:www-data data/cache/*"
+    ],
     "coverage-check": "coverage-check test/log/clover.xml 100",
     "phpcbf": "phpcbf -p --colors",
     "phpcs": "phpcs -p --colors",
@@ -59,12 +65,6 @@
     "phpunit": "phpunit --colors=always --coverage-html=test/log --coverage-clover=test/log/clover.xml",
     "post-autoload-dump": [
       "mkdir -p data/cache && chmod 0777 data/cache"
-    ],
-    "rebuild-cache": [
-      "rm -rf data/cache/*",
-      "bin/build-cache.php",
-      "vendor/bin/doctrine orm:generate-proxies",
-      "chown -R www-data:www-data data/cache/*"
     ],
     "test": [
       "@composer validate --strict",
