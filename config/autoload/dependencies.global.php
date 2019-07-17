@@ -12,7 +12,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server;
 
 use BluePsyduck\ZendAutoWireFactory\AutoWireFactory;
-use BluePsyduck\ZendAutoWireFactory\ConfigReaderFactory;
+use function BluePsyduck\ZendAutoWireFactory\injectAliasArray;
+use function BluePsyduck\ZendAutoWireFactory\readConfig;
 use FactorioItemBrowser\Api\Client\Constant\ServiceName;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use JMS\Serializer\SerializerInterface;
@@ -67,17 +68,19 @@ return [
             Service\IconService::class => AutoWireFactory::class,
             Service\MachineService::class => AutoWireFactory::class,
             Service\RecipeService::class => AutoWireFactory::class,
-            Service\SearchDecoratorService::class => Service\SearchDecoratorServiceFactory::class,
+            Service\SearchDecoratorService::class => AutoWireFactory::class,
             Service\TranslationService::class => AutoWireFactory::class,
 
             // Dependencies of other libraries
-            BodyParamsMiddleware::class => InvokableFactory::class,
+            BodyParamsMiddleware::class => AutoWireFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
             // Auto-wire helpers
-            'array $mapRouteToRequest' => ConfigReaderFactory::register(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
-            'string $authorizationKey' => ConfigReaderFactory::register(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_KEY),
-            'string $version' => ConfigReaderFactory::register(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::VERSION),
+            'array $mapRouteToRequest' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
+            'array $searchDecorators' => injectAliasArray(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::SEARCH_DECORATORS),
+
+            'string $authorizationKey' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_KEY),
+            'string $version' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::VERSION),
         ],
     ],
 ];
