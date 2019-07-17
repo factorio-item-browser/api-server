@@ -162,7 +162,8 @@ class GenericIconHandler extends AbstractRequestHandler
         foreach ($iconFiles as $iconFile) {
             $iconFileHash = $iconFile->getHash();
             if (isset($clientIcons[$iconFileHash])) {
-                $clientIcons[$iconFileHash]->setContent($iconFile->getImage());
+                $clientIcons[$iconFileHash]->setContent($iconFile->getImage())
+                                           ->setSize($iconFile->getSize());
             }
         }
     }

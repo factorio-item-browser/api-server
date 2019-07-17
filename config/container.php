@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Blast\ReflectionFactory\ReflectionFactory;
+use BluePsyduck\ZendAutoWireFactory\AutoWireFactory;
 use Zend\ConfigAggregator\ConfigAggregator;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
@@ -27,7 +27,7 @@ $container = new ServiceManager();
 $container->setService('config', $config);
 
 if ($config[ConfigAggregator::ENABLE_CACHE] ?? false) {
-    ReflectionFactory::enableCache(__DIR__ . '/../data/cache/reflection-factory-cache.php');
+    AutoWireFactory::setCacheFile(__DIR__ . '/../data/cache/autowire-factory-cache.php');
 }
 
 return $container;

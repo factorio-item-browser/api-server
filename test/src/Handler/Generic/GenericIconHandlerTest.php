@@ -484,18 +484,30 @@ class GenericIconHandlerTest extends TestCase
     {
         $image1 = 'foo';
         $image2 = 'bar';
+        $size1 = 42;
+        $size2 = 1337;
 
         /* @var ClientIcon&MockObject $clientIcon1 */
         $clientIcon1 = $this->createMock(ClientIcon::class);
         $clientIcon1->expects($this->once())
                     ->method('setContent')
-                    ->with($this->identicalTo($image1));
+                    ->with($this->identicalTo($image1))
+                    ->willReturnSelf();
+        $clientIcon1->expects($this->once())
+                    ->method('setSize')
+                    ->with($this->identicalTo($size1))
+                    ->willReturnSelf();
 
         /* @var ClientIcon&MockObject $clientIcon2 */
         $clientIcon2 = $this->createMock(ClientIcon::class);
         $clientIcon2->expects($this->once())
                     ->method('setContent')
-                    ->with($this->identicalTo($image2));
+                    ->with($this->identicalTo($image2))
+                    ->willReturnSelf();
+        $clientIcon2->expects($this->once())
+                    ->method('setSize')
+                    ->with($this->identicalTo($size2))
+                    ->willReturnSelf();
 
         $clientIcons = [
             'abc' => $clientIcon1,
@@ -511,6 +523,9 @@ class GenericIconHandlerTest extends TestCase
         $iconFile1->expects($this->once())
                   ->method('getImage')
                   ->willReturn($image1);
+        $iconFile1->expects($this->once())
+                  ->method('getSize')
+                  ->willReturn($size1);
 
         /* @var IconFile&MockObject $iconFile2 */
         $iconFile2 = $this->createMock(IconFile::class);
@@ -520,6 +535,9 @@ class GenericIconHandlerTest extends TestCase
         $iconFile2->expects($this->once())
                   ->method('getImage')
                   ->willReturn($image2);
+        $iconFile2->expects($this->once())
+                  ->method('getSize')
+                  ->willReturn($size2);
 
         $iconFiles = [$iconFile1, $iconFile2];
 

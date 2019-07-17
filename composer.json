@@ -17,12 +17,12 @@
     "ext-json": "*",
     "ext-PDO": "*",
     "bluepsyduck/mapper-manager": "^1.0",
-    "factorio-item-browser/api-client": "^2.0",
-    "factorio-item-browser/api-database": "^2.0",
-    "factorio-item-browser/api-search": "^1.0",
+    "bluepsyduck/zend-autowire-factory": "^1.1",
+    "factorio-item-browser/api-client": "^2.1",
+    "factorio-item-browser/api-database": "^2.1",
+    "factorio-item-browser/api-search": "^1.1",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
-    "mtymek/blast-reflection-factory": "^1.0",
     "zendframework/zend-config-aggregator": "^1.0",
     "zendframework/zend-diactoros": "^1.7",
     "zendframework/zend-expressive": "^3.0",
@@ -52,23 +52,24 @@
     }
   },
   "scripts": {
-    "coverage-check": "coverage-check test/log/clover.xml 100",
-    "phpcbf": "phpcbf -p --colors",
-    "phpcs": "phpcs -p --colors",
-    "phpstan": "phpstan analyse --no-interaction --ansi",
-    "phpunit": "phpunit --colors=always --coverage-html=test/log --coverage-clover=test/log/clover.xml",
-    "post-autoload-dump": [
-      "mkdir -p data/cache && chmod 0777 data/cache"
-    ],
-    "rebuild-cache": [
+    "build-cache": [
       "rm -rf data/cache/*",
       "bin/build-cache.php",
       "vendor/bin/doctrine orm:generate-proxies",
       "chown -R www-data:www-data data/cache/*"
     ],
+    "coverage-check": "coverage-check test/coverage/clover.xml 100",
+    "phpcbf": "phpcbf -p --colors",
+    "phpcs": "phpcs -p --colors",
+    "phpstan": "phpstan analyse --no-interaction --ansi",
+    "phpunit": "phpunit --colors=always --coverage-html=test/coverage --coverage-clover=test/coverage/clover.xml",
+    "post-autoload-dump": [
+      "mkdir -p data/cache && chmod 0777 data/cache"
+    ],
     "test": [
       "@composer validate --strict",
       "@phpunit",
+      "@coverage-check",
       "@phpcs",
       "@phpstan"
     ]

@@ -78,6 +78,7 @@ genericIcon:
                 - type: "recipe"
                   name: "iron-plate"
               content: "{base64 string}"
+              size: 64
 
 itemIngredient:
   description:

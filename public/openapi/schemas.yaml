@@ -61,6 +61,9 @@ Icon:
     content:
       type: "string"
       description: "The base64 encoded contents of the icon file."
+    size:
+      type: "int"
+      description: "The size of the icon in pixels."
 
 Item:
   title: "Item"
