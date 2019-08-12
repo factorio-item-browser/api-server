@@ -14,6 +14,7 @@ use FactorioItemBrowser\Api\Database\Entity\RecipeProduct;
 use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\Common\Constant\ItemType;
 
 /**
@@ -27,7 +28,7 @@ class MachineService
     /**
      * The machine names to prefer.
      */
-    protected const PREFERRED_MACHINE_NAME = 'player';
+    protected const PREFERRED_MACHINE_NAME = Constant::ENTITY_NAME_CHARACTER;
 
     /**
      * The data filter.

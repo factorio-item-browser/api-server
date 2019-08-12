@@ -48,7 +48,6 @@ class MachineServiceTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -73,7 +72,6 @@ class MachineServiceTest extends TestCase
 
     /**
      * Tests the getMachinesByCraftingCategory method.
-     * @throws ReflectionException
      * @covers ::getMachinesByCraftingCategory
      */
     public function testGetMachinesByCraftingCategory(): void
@@ -168,7 +166,6 @@ class MachineServiceTest extends TestCase
 
     /**
      * Tests the filterMachinesForRecipe method.
-     * @throws ReflectionException
      * @covers ::filterMachinesForRecipe
      */
     public function testFilterMachinesForRecipe(): void
@@ -443,7 +440,6 @@ class MachineServiceTest extends TestCase
 
     /**
      * Tests the sortMachines method.
-     * @throws ReflectionException
      * @covers ::sortMachines
      */
     public function testSortMachines(): void
@@ -474,7 +470,6 @@ class MachineServiceTest extends TestCase
     /**
      * Provides the data for the compareMachines test.
      * @return array
-     * @throws ReflectionException
      */
     public function provideCompareMachines(): array
     {
@@ -494,7 +489,7 @@ class MachineServiceTest extends TestCase
         $player = $this->createMock(Machine::class);
         $player->expects($this->any())
                ->method('getName')
-               ->willReturn('player');
+               ->willReturn('character');
 
         return [
             [$machine1, $machine2, -1],
