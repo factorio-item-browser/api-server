@@ -15,6 +15,7 @@
   database (with the exception of the CachedSearchResult table).
 - Changed library `factorio-item-browser/client` to latest version 2.1.
 - Use client request and response entities and its serializer to parse requests and build responses.
+- Machine preferred in sorting from "player" to "character" as of in-game change.
 
 ### Removed 
 
