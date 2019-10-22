@@ -13,16 +13,9 @@ namespace FactorioItemBrowser\Api\Server;
 
 use Doctrine\DBAL\Driver\PDOMySql\Driver as PDOMySqlDriver;
 use PDO;
-use Zend\ConfigAggregator\ConfigAggregator;
 
 return [
     'doctrine' => [
-        'configuration' => [
-            'orm_default' => [
-                'metadata_cache' => 'filesystem',
-                'query_cache' => 'filesystem',
-            ]
-        ],
         'connection' => [
             'orm_default' => [
                 'driverClass' => PDOMySqlDriver::class,
@@ -33,15 +26,10 @@ return [
                     'password' => 'docker',
                     'dbname'   => 'docker',
                     'driverOptions' => [
-                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
-                    ]
-                ]
-            ]
-        ],
-        'driver' => [
-            'orm_default' => [
-                'cache' => 'filesystem',
-            ]
+                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                    ],
+                ],
+            ],
         ],
     ],
 ];

@@ -117,7 +117,7 @@ class GenericIconHandler extends AbstractRequestHandler
      */
     protected function createEntityForIconData(IconData $iconData): ClientEntity
     {
-        $result= new ClientEntity();
+        $result = new ClientEntity();
         $result->setType($iconData->getType())
                ->setName($iconData->getName());
         return $result;
