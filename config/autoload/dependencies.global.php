@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use BluePsyduck\ContainerInteropDoctrineMigrations\MigrationsConfigurationFactory;
 use BluePsyduck\ZendAutoWireFactory\AutoWireFactory;
 use function BluePsyduck\ZendAutoWireFactory\injectAliasArray;
 use function BluePsyduck\ZendAutoWireFactory\readConfig;
@@ -74,6 +75,8 @@ return [
             // Dependencies of other libraries
             BodyParamsMiddleware::class => AutoWireFactory::class,
             ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
+
+            'doctrine.migrations.orm_default' => MigrationsConfigurationFactory::class,
 
             // Auto-wire helpers
             'array $mapRouteToRequest' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
