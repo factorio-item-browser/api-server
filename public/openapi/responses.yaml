@@ -19,7 +19,28 @@ auth:
             type: "string"
             description: "The authorization token to use in the other requests."
         example:
-          authorizationToken: "SomeEncryptedValue"
+          authorizationToken: "SomeTokenizedValue"
+
+exportStatus:
+  description:
+    The current status of the export process.
+  header:
+    X-Runtime:
+      $ref: "headers.yaml#/X-Runtime"
+    X-Version:
+      $ref: "headers.yaml#/X-Version"
+  content:
+    application/json:
+      schema:
+        properties:
+          export:
+            $ref: "schemas.yaml#/ExportStatus"
+        example:
+          export:
+            status: "done"
+            creationTime: "2038-01-19T03:10:07+00:00"
+            exportTime: "2038-01-19T03:12:07+00:00"
+            importTime: "2038-01-19T03:14:07+00:00"
 
 genericDetails:
   description:

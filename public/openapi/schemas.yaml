@@ -3,6 +3,35 @@
 # @author BluePsyduck <bluepsyduck@gmx.com>
 # @license http://opensource.org/licenses/GPL-3.0 GPL v3
 
+ExportStatus:
+  title: "ExportStatus"
+  type: "object"
+  description: "The status of an actual export."
+  properties:
+    status:
+      type: "string"
+      enum:
+        - queued
+        - downloading
+        - processing
+        - uploading
+        - uploaded
+        - done
+        - error
+      description: "The current status of the export process."
+    creationTime:
+      type: "string"
+      format: "datetime"
+      description: "The time when the export was triggered and put into the queue."
+    exportTime:
+      type: "string"
+      format: "datetime"
+      description: "The time when the actual export was processed."
+    importTime:
+      type: "string"
+      format: "datetime"
+      description: "The time when the exported data has been imported to the browser database."
+
 GenericEntity:
   title: "GenericEntity"
   type: "object"

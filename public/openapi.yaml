@@ -14,6 +14,8 @@ servers:
 tags:
   - name: "Authorization"
     description: "Requests to authorize against the API."
+  - name: "Export"
+    description: "Requests related to the export of mod data to the browser."
   - name: "Generic"
     description: "Requests providing generic data to entities."
   - name: "Items"
@@ -29,15 +31,15 @@ paths:
   /auth:
     post:
       summary:
-        Authorizes the access to the API by specifying the used mods.
+        Authorizes the access to the API by specifying the mods.
       description:
         This request is used to create an authorization token to be used in all other requests. Part of the
-        authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
-        should be enabled for the token. The token will last for about an hour. Whenever you encounter a 401 error in
-        the other requests, re-authorize to get a new token.<br />
+        authorization is an access key provided by the administrator, as well as the names of mods which should be
+        enabled for the token. The token will last for about an hour. Whenever you encounter a 401 error in the other
+        requests, re-authorize to get a new token.<br />
         <br />
-        To get a first look into the API, you may use the "demo" agent with the access key "factorio-item-browser".
-        This agent is restricted to base mod only, though.
+        To get a first look into the API, you may use the "demo" access key. This key is restricted to base mod only,
+        though.
       operationId: "auth"
       tags:
         - Authorization
@@ -52,6 +54,56 @@ paths:
           $ref: "openapi/errorResponses.yaml#/accessDenied"
         "500":
           $ref: "openapi/errorResponses.yaml#/unexpectedError"
+
+  /export/request:
+    post:
+      summary:
+        Requests the combination of mods of the authorization token to be exported from the game.
+      description:
+        This request will trigger a new export of the combination of mods specified in the authorization token to be
+        exported from the Factorio game and imported into the database. This process will take some time. The current
+        status of the process can be accessed through the /export/status endpoint.
+      operationId: "export.request"
+      tags:
+        - Export
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/exportStatus"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "403":
+          $ref: "openapi/errorResponses.yaml#/accessDenied"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
+
+  /export/status:
+    post:
+      summary:
+        Provides information about the current status of the export of the mod data to the browser.
+      description:
+        This request provides information on how far the export process has progressed to make the dataa of the mods
+        available to the browser. As long as the isAvailable flag is not true, the browser will fall back to the
+        vanilla data.
+      operationId: "export.status"
+      tags:
+        - Export
+      parameters:
+        - $ref: "openapi/parameters.yaml#/Authorization"
+      responses:
+        "200":
+          $ref: "openapi/responses.yaml#/exportStatus"
+        "401":
+          $ref: "openapi/errorResponses.yaml#/unauthorized"
+        "403":
+          $ref: "openapi/errorResponses.yaml#/accessDenied"
+        "500":
+          $ref: "openapi/errorResponses.yaml#/unexpectedError"
+      security:
+        - jwt: []
 
   /generic/details:
     post:
@@ -303,6 +355,8 @@ paths:
 
 components:
   schemas:
+    ExportStatus:
+      $ref: "openapi/schemas.yaml#/ExportStatus"
     GenericEntity:
       $ref: "openapi/schemas.yaml#/GenericEntity"
     GenericEntityWithRecipes:

@@ -8,25 +8,21 @@ auth:
     application/json:
       schema:
         properties:
-          agent:
-            type: "string"
-            description: "The agent to use for the API, provided by the admin."
           accessKey:
             type: "string"
-            description: "The access key to the API, provided by the admin."
-          enabledModNames:
+            description: "The access key to the API."
+          modNames:
             type: "array"
-            description: "The internal names of the mods to enable."
+            description: "The names of the mods to enable."
             items:
               type: "string"
         required:
           - agent
           - accessKey
-          - enabledModNames
+          - modNames
         example:
-          agent: "demo"
-          accessKey: "factorio-item-browser"
-          enabledModNames:
+          accessKey: "demo"
+          modNames:
             - base
   required: true
 

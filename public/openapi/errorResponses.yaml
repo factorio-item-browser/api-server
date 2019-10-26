@@ -45,7 +45,7 @@ unauthorized:
 # 403 responses
 accessDenied:
   description:
-    Access denied. Please check your agent and accessKey values.
+    Access denied. Either the specified access key is invalid, or it is not allowed to actually access this endpoint.
   headers:
     X-Runtime:
       $ref: "headers.yaml#/X-Runtime"
