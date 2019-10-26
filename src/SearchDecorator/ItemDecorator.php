@@ -114,7 +114,9 @@ class ItemDecorator implements SearchDecoratorInterface
 
         $this->items = [];
         foreach ($this->itemRepository->findByIds($itemIds) as $item) {
-            $this->items[$item->getId()] = $item;
+            if ($item->getId() !== null) {
+                $this->items[$item->getId()->toString()] = $item;
+            }
         }
     }
 
@@ -126,19 +128,22 @@ class ItemDecorator implements SearchDecoratorInterface
      */
     public function decorate($itemResult): ?GenericEntityWithRecipes
     {
-        $result = null;
-        $itemId = $itemResult->getId();
-        if (isset($this->items[$itemId])) {
-            $result = $this->createEntityForItem($this->items[$itemId]);
-
-            foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
-                $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
-                if ($recipe instanceof ClientRecipe) {
-                    $result->addRecipe($recipe);
-                }
-            }
-            $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
+        if ($itemResult->getId() === null) {
+            return null;
         }
+        $itemId = $itemResult->getId()->toString();
+        if (!isset($this->items[$itemId])) {
+            return null;
+        }
+
+        $result = $this->createEntityForItem($this->items[$itemId]);
+        foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
+            $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
+            if ($recipe instanceof ClientRecipe) {
+                $result->addRecipe($recipe);
+            }
+        }
+        $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
         return $result;
     }
 

@@ -97,7 +97,7 @@ class IconServiceTest extends TestCase
     /**
      * Tests the getHashesByTypesAndNames method.
      * @throws ReflectionException
-     * @covers ::getHashesByTypesAndNames
+     * @covers ::getImageIdsByTypesAndNames
      */
     public function testGetHashesByTypesAndNames(): void
     {
@@ -146,7 +146,7 @@ class IconServiceTest extends TestCase
         $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
         $this->injectProperty($service, 'enabledModCombinationIds', $enabledModCombinationIds);
 
-        $result = $service->getHashesByTypesAndNames($namesByTypes);
+        $result = $service->getImageIdsByTypesAndNames($namesByTypes);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -154,7 +154,7 @@ class IconServiceTest extends TestCase
     /**
      * Tests the getTypesAndNamesByHashes method.
      * @throws ReflectionException
-     * @covers ::getTypesAndNamesByHashes
+     * @covers ::getTypesAndNamesByImageIds
      */
     public function testGetTypesAndNamesByHashes(): void
     {
@@ -193,7 +193,7 @@ class IconServiceTest extends TestCase
                     ->with($this->identicalTo($hashes))
                     ->willReturn($iconData);
 
-        $result = $iconService->getTypesAndNamesByHashes($hashes);
+        $result = $iconService->getTypesAndNamesByImageIds($hashes);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -201,7 +201,7 @@ class IconServiceTest extends TestCase
     /**
      * Tests the getIconDataByHashes method.
      * @throws ReflectionException
-     * @covers ::getIconDataByHashes
+     * @covers ::getIconsByImageIds
      */
     public function testGetIconDataByHashes(): void
     {
@@ -230,7 +230,7 @@ class IconServiceTest extends TestCase
         $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
         $this->injectProperty($service, 'enabledModCombinationIds', $enabledModCombinationIds);
 
-        $result = $service->getIconDataByHashes($hashes);
+        $result = $service->getIconsByImageIds($hashes);
 
         $this->assertEquals($filteredIconData, $result);
     }
@@ -238,7 +238,7 @@ class IconServiceTest extends TestCase
     /**
      * Tests the getIconFilesByHashes method.
      * @throws ReflectionException
-     * @covers ::getIconFilesByHashes
+     * @covers ::getImagesByIds
      */
     public function testGetIconFilesByHashes(): void
     {
@@ -254,7 +254,7 @@ class IconServiceTest extends TestCase
                                  ->willReturn($iconFiles);
 
         $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
-        $result = $service->getIconFilesByHashes($hashes);
+        $result = $service->getImagesByIds($hashes);
 
         $this->assertSame($iconFiles, $result);
     }

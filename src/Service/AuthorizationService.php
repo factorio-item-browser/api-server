@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use Exception;
-use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
 use Firebase\JWT\JWT;
+use Ramsey\Uuid\Uuid;
 use stdClass;
 
 /**
@@ -27,7 +27,7 @@ class AuthorizationService
     /**
      * The lifetime of the auth tokens.
      */
-    protected const AUTH_TOKEN_LIFETIME = 86400;
+    protected const AUTH_TOKEN_LIFETIME = 3600;
 
     /**
      * The key to use for the authorization.
@@ -42,20 +42,6 @@ class AuthorizationService
     public function __construct(string $authorizationKey)
     {
         $this->authorizationKey = $authorizationKey;
-    }
-
-    /**
-     * Creates an authorization token with the specified values.
-     * @param Agent $agent
-     * @param array $enabledModCombinationIds
-     * @return AuthorizationToken
-     */
-    public function createToken(Agent $agent, array $enabledModCombinationIds): AuthorizationToken
-    {
-        $result = new AuthorizationToken();
-        $result->setAgentName($agent->getName())
-               ->setEnabledModCombinationIds($enabledModCombinationIds);
-        return $result;
     }
 
     /**
@@ -82,7 +68,8 @@ class AuthorizationService
         return [
             'exp' => time() + self::AUTH_TOKEN_LIFETIME,
             'agt' => $token->getAgentName(),
-            'mds' => $token->getEnabledModCombinationIds(),
+            'cmb' => $token->getCombinationId()->toString(),
+            'mds' => $token->getModNames(),
         ];
     }
 
@@ -97,8 +84,9 @@ class AuthorizationService
         $rawToken = $this->decodeSerializedToken($serializedToken);
 
         $result = new AuthorizationToken();
-        $result->setAgentName((string) ($rawToken->agt ?? ''))
-               ->setEnabledModCombinationIds(array_map('intval', $rawToken->mds ?? []));
+        $result->setAgentName($rawToken->agt)
+               ->setCombinationId(Uuid::fromString($rawToken->cmb))
+               ->setModNames($rawToken->mds);
 
         return $result;
     }

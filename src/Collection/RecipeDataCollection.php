@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Collection;
 use ArrayIterator;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use IteratorAggregate;
+use Ramsey\Uuid\UuidInterface;
 use Traversable;
 
 /**
@@ -36,7 +37,7 @@ class RecipeDataCollection implements IteratorAggregate
 
     /**
      * Returns all the recipe ids currently known to the collection.
-     * @return array|int[]
+     * @return array|UuidInterface[]
      */
     public function getAllIds(): array
     {
@@ -74,13 +75,13 @@ class RecipeDataCollection implements IteratorAggregate
 
     /**
      * Returns a new instance with the item id filtered.
-     * @param int $itemId
+     * @param UuidInterface $itemId
      * @return self
      */
-    public function filterItemId(int $itemId): self
+    public function filterItemId(UuidInterface $itemId): self
     {
         return $this->filter(function (RecipeData $recipeData) use ($itemId): bool {
-            return $recipeData->getItemId() === $itemId;
+            return $itemId->equals($recipeData->getItemId());
         });
     }
 

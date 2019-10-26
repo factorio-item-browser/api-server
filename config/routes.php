@@ -27,7 +27,6 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->post('/item/random', Handler\Item\ItemRandomHandler::class, RouteName::ITEM_RANDOM);
 
     $app->post('/mod/list', Handler\Mod\ModListHandler::class, RouteName::MOD_LIST);
-    $app->post('/mod/meta', Handler\Mod\ModMetaHandler::class, RouteName::MOD_META);
 
     $app->post('/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, RouteName::RECIPE_DETAILS);
     $app->post('/recipe/machines', Handler\Recipe\RecipeMachinesHandler::class, RouteName::RECIPE_MACHINES);

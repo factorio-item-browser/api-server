@@ -35,7 +35,6 @@ return [
             Handler\Item\ItemProductHandler::class => AutoWireFactory::class,
             Handler\Item\ItemRandomHandler::class => AutoWireFactory::class,
             Handler\Mod\ModListHandler::class => AutoWireFactory::class,
-            Handler\Mod\ModMetaHandler::class => AutoWireFactory::class,
             Handler\NotFoundHandler::class => InvokableFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeMachinesHandler::class => AutoWireFactory::class,
@@ -43,10 +42,10 @@ return [
 
             Mapper\DatabaseItemToGenericEntityMapper::class => AutoWireFactory::class,
             Mapper\DatabaseMachineToClientMachineMapper::class => AutoWireFactory::class,
+            Mapper\DatabaseMachineToGenericEntityMapper::class => AutoWireFactory::class,
             Mapper\DatabaseModToClientModMapper::class => AutoWireFactory::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class => AutoWireFactory::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class => AutoWireFactory::class,
-            Mapper\MachineDataToGenericEntityMapper::class => AutoWireFactory::class,
             Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class => AutoWireFactory::class,
             Mapper\RecipeDataToGenericEntityMapper::class => AutoWireFactory::class,
 
@@ -57,9 +56,6 @@ return [
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
-
-            ModResolver\ModCombinationResolver::class => AutoWireFactory::class,
-            ModResolver\ModDependencyResolver::class => AutoWireFactory::class,
 
             SearchDecorator\ItemDecorator::class => AutoWireFactory::class,
             SearchDecorator\RecipeDecorator::class => AutoWireFactory::class,

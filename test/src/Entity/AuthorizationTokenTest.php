@@ -25,7 +25,7 @@ class AuthorizationTokenTest extends TestCase
         $authorizationToken = new AuthorizationToken();
 
         $this->assertSame('', $authorizationToken->getAgentName());
-        $this->assertSame([], $authorizationToken->getEnabledModCombinationIds());
+        $this->assertSame([], $authorizationToken->getModNames());
     }
 
     /**
@@ -44,8 +44,8 @@ class AuthorizationTokenTest extends TestCase
 
     /**
      * Tests setting and getting the enabled mod combination ids.
-     * @covers ::getEnabledModCombinationIds
-     * @covers ::setEnabledModCombinationIds
+     * @covers ::getModNames
+     * @covers ::setModNames
      */
     public function testSetAndGetEnabledModCombinationIds(): void
     {
@@ -54,9 +54,9 @@ class AuthorizationTokenTest extends TestCase
 
         $this->assertSame(
             $authorizationToken,
-            $authorizationToken->setEnabledModCombinationIds($enabledModCombinationIds)
+            $authorizationToken->setModNames($enabledModCombinationIds)
         );
-        $this->assertSame($enabledModCombinationIds, $authorizationToken->getEnabledModCombinationIds());
+        $this->assertSame($enabledModCombinationIds, $authorizationToken->getModNames());
     }
 
     /**

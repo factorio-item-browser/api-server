@@ -51,7 +51,7 @@ class AuthorizationServiceTest extends TestCase
 
         $expectedResult = new AuthorizationToken();
         $expectedResult->setAgentName('abc')
-                       ->setEnabledModCombinationIds([42, 1337]);
+                       ->setModNames([42, 1337]);
 
         $service = new AuthorizationService('foo');
         $result = $service->createToken($agent, $enabledModCombinationIds);
@@ -101,7 +101,7 @@ class AuthorizationServiceTest extends TestCase
 
         $token = new AuthorizationToken();
         $token->setAgentName($agent)
-              ->setEnabledModCombinationIds($enabledModCombinationIds);
+              ->setModNames($enabledModCombinationIds);
 
         $service = new AuthorizationService('foo');
         $result = $this->invokeMethod($service, 'getTokenData', $token);
@@ -125,7 +125,7 @@ class AuthorizationServiceTest extends TestCase
         $token2 = (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => ['42', '1337']];
         $expectedToken = new AuthorizationToken();
         $expectedToken->setAgentName('def')
-                      ->setEnabledModCombinationIds([42, 1337]);
+                      ->setModNames([42, 1337]);
 
         return [
             [$token1, $expectedToken],

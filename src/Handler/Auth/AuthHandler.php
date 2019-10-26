@@ -8,13 +8,13 @@ use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
 use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
+use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
-use FactorioItemBrowser\Api\Server\ModResolver\ModCombinationResolver;
-use FactorioItemBrowser\Api\Server\ModResolver\ModDependencyResolver;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
+use Ramsey\Uuid\Uuid;
 
 /**
  * The handler of the /auth request.
@@ -37,34 +37,16 @@ class AuthHandler extends AbstractRequestHandler
     protected $authorizationService;
 
     /**
-     * The mod combination resolver.
-     * @var ModCombinationResolver
-     */
-    protected $modCombinationResolver;
-
-    /**
-     * The mod dependency resolver.
-     * @var ModDependencyResolver
-     */
-    protected $modDependencyResolver;
-
-    /**
      * Initializes the auth handler.
      * @param AgentService $agentService
      * @param AuthorizationService $authorizationService
-     * @param ModCombinationResolver $modCombinationResolver
-     * @param ModDependencyResolver $modDependencyResolver
      */
     public function __construct(
         AgentService $agentService,
-        AuthorizationService $authorizationService,
-        ModCombinationResolver $modCombinationResolver,
-        ModDependencyResolver $modDependencyResolver
+        AuthorizationService $authorizationService
     ) {
         $this->authorizationService = $authorizationService;
         $this->agentService = $agentService;
-        $this->modCombinationResolver = $modCombinationResolver;
-        $this->modDependencyResolver = $modDependencyResolver;
     }
 
     /**
@@ -84,17 +66,35 @@ class AuthHandler extends AbstractRequestHandler
      */
     protected function handleRequest($request): ResponseInterface
     {
+        $token = $this->createAuthorizationToken($request);
+
+        return $this->createResponse($token);
+    }
+
+    /**
+     * Creates the authorization token for the request.
+     * @param AuthRequest $request
+     * @return AuthorizationToken
+     * @throws ApiServerException
+     */
+    protected function createAuthorizationToken(AuthRequest $request): AuthorizationToken
+    {
         $agent = $this->getAgentFromRequest($request);
-        $enabledModCombinationIds = $this->getEnabledModCombinationIdsFromRequest($agent, $request);
-        $authorizationToken = $this->createAuthorizationToken($agent, $enabledModCombinationIds);
-        return $this->createResponse($authorizationToken);
+        $modNames = $this->getModModNamesFromRequest($agent, $request);
+
+        $token = new AuthorizationToken();
+        $token->setAgentName($agent->getName())
+              ->setCombinationId(Uuid::fromString('6E6F47E8572744C0B759EF9ED5F994A2'))
+              ->setModNames($modNames);
+
+        return $token;
     }
 
     /**
      * Returns the agent from the request.
      * @param AuthRequest $clientRequest
      * @return Agent
-     * @throws UnknownAgentException
+     * @throws ApiServerException
      */
     protected function getAgentFromRequest(AuthRequest $clientRequest): Agent
     {
@@ -113,39 +113,25 @@ class AuthHandler extends AbstractRequestHandler
      * Returns the enabled mod combination ids from the specified request.
      * @param Agent $agent
      * @param AuthRequest $request
-     * @return array|int[]
+     * @return array|string[]
      */
-    protected function getEnabledModCombinationIdsFromRequest(Agent $agent, AuthRequest $request): array
+    protected function getModModNamesFromRequest(Agent $agent, AuthRequest $request): array
     {
         if ($agent->getIsDemo()) {
-            $modNames = ['base'];
-        } else {
-            $modNames = $this->modDependencyResolver->resolve($request->getEnabledModNames());
+            return ['base'];
         }
-        return $this->modCombinationResolver->resolve($modNames);
-    }
-
-    /**
-     * Creates the authorization token for the agent and enabled combinations.
-     * @param Agent $agent
-     * @param array|int[] $enabledModCombinationIds
-     * @return string
-     */
-    protected function createAuthorizationToken(Agent $agent, array $enabledModCombinationIds): string
-    {
-        $token = $this->authorizationService->createToken($agent, $enabledModCombinationIds);
-        return $this->authorizationService->serializeToken($token);
+        return $request->getEnabledModNames();
     }
 
     /**
      * Creates the response to return.
-     * @param string $authorizationToken
+     * @param AuthorizationToken $authorizationToken
      * @return AuthResponse
      */
-    protected function createResponse(string $authorizationToken): AuthResponse
+    protected function createResponse(AuthorizationToken $authorizationToken): AuthResponse
     {
         $result = new AuthResponse();
-        $result->setAuthorizationToken($authorizationToken);
+        $result->setAuthorizationToken($this->authorizationService->serializeToken($authorizationToken));
         return $result;
     }
 }

@@ -227,7 +227,7 @@ itemRandom:
 
 modList:
   description:
-    The list of available mods.
+    The list of mods.
   headers:
     X-Runtime:
       $ref: "headers.yaml#/X-Runtime"
@@ -253,23 +253,6 @@ modList:
               description: "Smelt extra ores into plates, and make useful intermediate products."
               author: "Bobingabout"
               version: "0.60.0"
-
-modMeta:
-  description:
-    The meta information of the mods.
-  content:
-    application/json:
-      schema:
-        properties:
-          numberOfAvailableMods:
-            type: "integer"
-            description: "The number of available mods in the browser."
-          numberOfEnabledMods:
-            type: "integer"
-            description: "The number of currently enabled mods."
-        example:
-          numberOfAvailableMods: 42
-          numberOfEnabledMods: 21
 
 recipeDetails:
   description:

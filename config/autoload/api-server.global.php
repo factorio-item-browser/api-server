@@ -33,7 +33,6 @@ return [
                 RouteName::ITEM_PRODUCT => Request\Item\ItemProductRequest::class,
                 RouteName::ITEM_RANDOM => Request\Item\ItemRandomRequest::class,
                 RouteName::MOD_LIST => Request\Mod\ModListRequest::class,
-                RouteName::MOD_META => Request\Mod\ModMetaRequest::class,
                 RouteName::RECIPE_DETAILS => Request\Recipe\RecipeDetailsRequest::class,
                 RouteName::RECIPE_MACHINES => Request\Recipe\RecipeMachinesRequest::class,
                 RouteName::SEARCH_QUERY => Request\Search\SearchQueryRequest::class,

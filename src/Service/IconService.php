@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Database\Entity\IconFile;
-use FactorioItemBrowser\Api\Database\Filter\DataFilter;
-use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Entity\Icon;
+use FactorioItemBrowser\Api\Database\Entity\IconImage;
+use FactorioItemBrowser\Api\Database\Repository\IconImageRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The service handling the icons.
@@ -21,16 +21,10 @@ use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 class IconService
 {
     /**
-     * The data filter.
-     * @var DataFilter
+     * The icon image repository.
+     * @var IconImageRepository
      */
-    protected $dataFilter;
-
-    /**
-     * The repository of the icon files.
-     * @var IconFileRepository
-     */
-    protected $iconFileRepository;
+    protected $iconImageRepository;
 
     /**
      * The repository of the icons.
@@ -39,24 +33,21 @@ class IconService
     protected $iconRepository;
 
     /**
-     * The ids of the enabled mod combinations.
-     * @var array|int[]
+     * The combination id.
+     * @var UuidInterface
      */
-    protected $enabledModCombinationIds = [];
+    protected $combinationId;
 
     /**
      * IconService constructor.
-     * @param DataFilter $dataFilter
-     * @param IconFileRepository $iconFileRepository
+     * @param IconImageRepository $iconImageRepository
      * @param IconRepository $iconRepository
      */
     public function __construct(
-        DataFilter $dataFilter,
-        IconFileRepository $iconFileRepository,
+        IconImageRepository $iconImageRepository,
         IconRepository $iconRepository
     ) {
-        $this->dataFilter = $dataFilter;
-        $this->iconFileRepository = $iconFileRepository;
+        $this->iconImageRepository = $iconImageRepository;
         $this->iconRepository = $iconRepository;
     }
 
@@ -66,37 +57,37 @@ class IconService
      */
     public function injectAuthorizationToken(AuthorizationToken $authorizationToken): void
     {
-        $this->enabledModCombinationIds = $authorizationToken->getEnabledModCombinationIds();
+        $this->combinationId = $authorizationToken->getCombinationId();
     }
 
     /**
-     * Returns the icon file hashes used by the specified entities.
+     * Returns the image ids used by the specified entities.
      * @param NamesByTypes $namesByTypes
-     * @return array|string[]
+     * @return array|UuidInterface[]
      */
-    public function getHashesByTypesAndNames(NamesByTypes $namesByTypes): array
+    public function getImageIdsByTypesAndNames(NamesByTypes $namesByTypes): array
     {
-        $iconData = $this->iconRepository->findDataByTypesAndNames(
-            $namesByTypes->toArray(),
-            $this->enabledModCombinationIds
+        $icons = $this->iconRepository->findByTypesAndNames(
+            $this->combinationId,
+            $namesByTypes
         );
 
         $result = [];
-        foreach ($iconData as $data) {
-            $result[$data->getHash()] = true;
+        foreach ($icons as $icon) {
+            $result[$icon->getImage()->getId()->toString()] = $icon->getImage()->getId();
         }
-        return array_keys($result);
+        return array_values($result);
     }
 
     /**
      * Returns types and names of icons which are using any of the specified hashes.
-     * @param array|string[] $iconFileHashes
+     * @param array|UuidInterface[] $imageIds
      * @return NamesByTypes
      */
-    public function getTypesAndNamesByHashes(array $iconFileHashes): NamesByTypes
+    public function getTypesAndNamesByImageIds(array $imageIds): NamesByTypes
     {
         $result = new NamesByTypes();
-        foreach ($this->getIconDataByHashes($iconFileHashes) as $data) {
+        foreach ($this->getIconsByImageIds($imageIds) as $data) {
             $result->addName($data->getType(), $data->getName());
         }
         return $result;
@@ -104,29 +95,21 @@ class IconService
 
     /**
      * Returns the icon data using the specified hashes.
-     * @param array|string[] $iconFileHashes
-     * @return array|IconData[]
+     * @param array|UuidInterface[] $imageIds
+     * @return array|Icon[]
      */
-    public function getIconDataByHashes(array $iconFileHashes): array
+    public function getIconsByImageIds(array $imageIds): array
     {
-        $iconData = $this->iconRepository->findDataByHashes($iconFileHashes, $this->enabledModCombinationIds);
-
-        $result = [];
-        foreach ($this->dataFilter->filter($iconData) as $data) {
-            if ($data instanceof IconData) {
-                $result[] = $data;
-            }
-        }
-        return $result;
+        return $this->iconRepository->findByImageIds($this->combinationId, $imageIds);
     }
 
     /**
      * Returns the icon files with the specified hashes.
-     * @param array|string[] $iconFileHashes
-     * @return array|IconFile[]
+     * @param array|UuidInterface[] $imageIds
+     * @return array|IconImage[]
      */
-    public function getIconFilesByHashes(array $iconFileHashes): array
+    public function getImagesByIds(array $imageIds): array
     {
-        return $this->iconFileRepository->findByHashes($iconFileHashes);
+        return $this->iconImageRepository->findByIds($imageIds);
     }
 }

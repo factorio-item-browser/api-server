@@ -154,10 +154,7 @@ Mod:
       description: "The author of the mod."
     version:
       type: "string"
-      description: "The version of the mod available in the browser."
-    isEnabled:
-      type: "boolean"
-      description: "Whether the mod is currently enabled for the specified authorization token."
+      description: "The version of the mod."
 
 Recipe:
   title: "Recipe"

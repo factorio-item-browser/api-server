@@ -238,7 +238,7 @@ class AuthHandlerTest extends TestCase
     /**
      * Tests the getEnabledModCombinationIdsFromRequest method.
      * @throws ReflectionException
-     * @covers ::getEnabledModCombinationIdsFromRequest
+     * @covers ::getModModNamesFromRequest
      */
     public function testGetEnabledModCombinationIdsFromRequest(): void
     {
@@ -283,7 +283,7 @@ class AuthHandlerTest extends TestCase
     /**
      * Tests the getEnabledModCombinationIdsFromRequest method with the demo agent.
      * @throws ReflectionException
-     * @covers ::getEnabledModCombinationIdsFromRequest
+     * @covers ::getModModNamesFromRequest
      */
     public function testGetEnabledModCombinationIdsFromRequestWithDemoAgent(): void
     {

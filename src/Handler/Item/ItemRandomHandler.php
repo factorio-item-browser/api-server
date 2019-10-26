@@ -78,8 +78,8 @@ class ItemRandomHandler extends AbstractRequestHandler
         $authorizationToken = $this->getAuthorizationToken();
 
         $items = $this->itemRepository->findRandom(
-            $request->getNumberOfResults(),
-            $authorizationToken->getEnabledModCombinationIds()
+            $authorizationToken->getCombinationId(),
+            $request->getNumberOfResults()
         );
         $recipeData = $this->recipeService->getDataWithProducts($items, $authorizationToken);
 

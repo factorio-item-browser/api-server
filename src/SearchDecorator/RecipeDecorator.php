@@ -12,6 +12,7 @@ use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The decorator of the recipe search results.
@@ -35,7 +36,7 @@ class RecipeDecorator implements SearchDecoratorInterface
 
     /**
      * The recipe ids of the announced search results.
-     * @var array|int[]
+     * @var array|UuidInterface[]
      */
     protected $recipeIds = [];
 
@@ -102,16 +103,21 @@ class RecipeDecorator implements SearchDecoratorInterface
      */
     public function decorate($recipeResult): ?GenericEntityWithRecipes
     {
-        $result = null;
         $recipeId = $this->getRecipeIdFromResult($recipeResult);
-        if (isset($this->recipes[$recipeId])) {
-            $result = $this->createEntityForRecipe($this->recipes[$recipeId]);
+        if ($recipeId === null) {
+            return null;
+        }
 
-            $recipe = $this->decorateRecipe($recipeResult);
-            if ($recipe instanceof ClientRecipe) {
-                $result->addRecipe($recipe)
-                       ->setTotalNumberOfRecipes(1);
-            }
+        $recipeId = $recipeId->toString();
+        if (!isset($this->recipes[$recipeId])) {
+            return null;
+        }
+
+        $result = $this->createEntityForRecipe($this->recipes[$recipeId]);
+        $recipe = $this->decorateRecipe($recipeResult);
+        if ($recipe instanceof ClientRecipe) {
+            $result->addRecipe($recipe)
+                   ->setTotalNumberOfRecipes(1);
         }
         return $result;
     }
@@ -132,12 +138,12 @@ class RecipeDecorator implements SearchDecoratorInterface
     /**
      * Returns the recipe id from the result.
      * @param RecipeResult $recipeResult
-     * @return int
+     * @return UuidInterface|null
      */
-    protected function getRecipeIdFromResult(RecipeResult $recipeResult): int
+    protected function getRecipeIdFromResult(RecipeResult $recipeResult): ?UuidInterface
     {
         $result = $recipeResult->getNormalRecipeId();
-        if ($result === 0) {
+        if ($result === null) {
             $result = $recipeResult->getExpensiveRecipeId();
         }
         return $result;
@@ -168,17 +174,18 @@ class RecipeDecorator implements SearchDecoratorInterface
 
     /**
      * Maps the recipe with the id.
-     * @param int $recipeId
+     * @param UuidInterface|null $recipeId
      * @return RecipeWithExpensiveVersion
      * @throws MapperException
      */
-    protected function mapRecipeWithId(int $recipeId): ?RecipeWithExpensiveVersion
+    protected function mapRecipeWithId(?UuidInterface $recipeId): ?RecipeWithExpensiveVersion
     {
-        $result = null;
-        if (isset($this->recipes[$recipeId])) {
-            $result = new RecipeWithExpensiveVersion();
-            $this->mapperManager->map($this->recipes[$recipeId], $result);
+        if ($recipeId === null || !isset($this->recipes[$recipeId->toString()])) {
+            return null;
         }
+
+        $result = new RecipeWithExpensiveVersion();
+        $this->mapperManager->map($this->recipes[$recipeId->toString()], $result);
         return $result;
     }
 }

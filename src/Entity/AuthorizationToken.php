@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Entity;
 
+use Ramsey\Uuid\UuidInterface;
+
 /**
  * The class representing an authorization token.
  *
@@ -19,10 +21,16 @@ class AuthorizationToken
     protected $agentName = '';
 
     /**
-     * The ids of the enabled mod combinations of the token.
+     * The combination id of the token.
+     * @var UuidInterface
+     */
+    protected $combinationId;
+
+    /**
+     * The mod names to use with this token.
      * @var array|int[]
      */
-    protected $enabledModCombinationIds = [];
+    protected $modNames = [];
 
     /**
      * The locale to use for the request.
@@ -51,27 +59,47 @@ class AuthorizationToken
     }
 
     /**
-     * Sets the ids of the enabled mod combinations of the token.
-     * @param array|int[] $enabledModCombinationIds
+     * Sets the combination id of the token.
+     * @param UuidInterface $combinationId
      * @return $this
      */
-    public function setEnabledModCombinationIds(array $enabledModCombinationIds): self
+    public function setCombinationId(UuidInterface $combinationId): self
     {
-        $this->enabledModCombinationIds = $enabledModCombinationIds;
+        $this->combinationId = $combinationId;
         return $this;
     }
 
     /**
-     * Returns the ids of the enabled mod combinations of the token.
-     * @return array|int[]
+     * Returns the combination id of the token.
+     * @return UuidInterface
      */
-    public function getEnabledModCombinationIds(): array
+    public function getCombinationId(): UuidInterface
     {
-        return $this->enabledModCombinationIds;
+        return $this->combinationId;
     }
 
     /**
-     * Sets the locale to use for the request
+     * Sets the mod names to use with this token.
+     * @param array|string[] $modNames
+     * @return $this
+     */
+    public function setModNames(array $modNames): self
+    {
+        $this->modNames = $modNames;
+        return $this;
+    }
+
+    /**
+     * Returns the mod names to use with this token.
+     * @return array|string[]
+     */
+    public function getModNames(): array
+    {
+        return $this->modNames;
+    }
+
+    /**
+     * Sets the locale to use for the request.
      * @param string $locale
      * @return $this
      */
@@ -82,7 +110,7 @@ class AuthorizationToken
     }
 
     /**
-     * Returns the locale to use for the request
+     * Returns the locale to use for the request.
      * @return string
      */
     public function getLocale(): string

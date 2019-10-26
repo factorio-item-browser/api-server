@@ -18,10 +18,10 @@ return [
         ConfigKey::MAPPERS => [
             Mapper\DatabaseItemToGenericEntityMapper::class,
             Mapper\DatabaseMachineToClientMachineMapper::class,
+            Mapper\DatabaseMachineToGenericEntityMapper::class,
             Mapper\DatabaseModToClientModMapper::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class,
-            Mapper\MachineDataToGenericEntityMapper::class,
             Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class,
             Mapper\RecipeDataToGenericEntityMapper::class,
         ],

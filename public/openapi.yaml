@@ -33,9 +33,8 @@ paths:
       description:
         This request is used to create an authorization token to be used in all other requests. Part of the
         authorization is an agent and an accessKey provided by the administrator, as well as the names of mods which
-        should be enabled for the token. The token will normally last for 24 hours, but may invalidate at any point
-        when the database changed and the mod names must be re-evaluated. Whenever you encounter a 401 error in the
-        other requests, re-authorize to get a new token.<br />
+        should be enabled for the token. The token will last for about an hour. Whenever you encounter a 401 error in
+        the other requests, re-authorize to get a new token.<br />
         <br />
         To get a first look into the API, you may use the "demo" agent with the access key "factorio-item-browser".
         This agent is restricted to base mod only, though.
@@ -212,31 +211,6 @@ paths:
       responses:
         "200":
           $ref: "openapi/responses.yaml#/modList"
-        "400":
-          $ref: "openapi/errorResponses.yaml#/badRequest"
-        "401":
-          $ref: "openapi/errorResponses.yaml#/unauthorized"
-        "500":
-          $ref: "openapi/errorResponses.yaml#/unexpectedError"
-      security:
-        - jwt: []
-
-  /mod/meta:
-    post:
-      summary:
-        Provides some meta information about the currently enabled mods.
-      description:
-        This request will provide some meta information of the mods like the number of available and enabled mods. This
-        request is to avoid requesting the full list of mods to get these information.
-      operationId: "mod.meta"
-      tags:
-        - Mods
-      parameters:
-        - $ref: "openapi/parameters.yaml#/Authorization"
-        - $ref: "openapi/parameters.yaml#/Accept-Language"
-      responses:
-        "200":
-          $ref: "openapi/responses.yaml#/modMeta"
         "400":
           $ref: "openapi/errorResponses.yaml#/badRequest"
         "401":

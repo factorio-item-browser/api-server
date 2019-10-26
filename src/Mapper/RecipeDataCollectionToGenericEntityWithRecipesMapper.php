@@ -101,10 +101,13 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
     {
         $result = [];
         foreach ($recipeData->getValues() as $data) {
-            if (isset($this->databaseRecipes[$data->getId()])) {
-                $normalRecipe = $this->mapDatabaseRecipe($this->databaseRecipes[$data->getId()]);
-                $result[$normalRecipe->getName()] = $normalRecipe;
+            $databaseRecipe = $this->databaseRecipes[$data->getId()->toString()] ?? null;
+            if ($databaseRecipe === null) {
+                continue;
             }
+
+            $normalRecipe = $this->mapDatabaseRecipe($databaseRecipe);
+            $result[$normalRecipe->getName()] = $normalRecipe;
         }
         return $result;
     }
@@ -119,10 +122,13 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
     protected function mapExpensiveRecipes(array $recipes, RecipeDataCollection $recipeData): array
     {
         foreach ($recipeData->getValues() as $data) {
-            if (isset($this->databaseRecipes[$data->getId()])) {
-                $expensiveRecipe = $this->mapDatabaseRecipe($this->databaseRecipes[$data->getId()]);
-                $recipes = $this->addExpensiveRecipe($recipes, $expensiveRecipe);
+            $databaseRecipe = $this->databaseRecipes[$data->getId()->toString()] ?? null;
+            if ($databaseRecipe === null) {
+                continue;
             }
+
+            $expensiveRecipe = $this->mapDatabaseRecipe($databaseRecipe);
+            $recipes = $this->addExpensiveRecipe($recipes, $expensiveRecipe);
         }
         return $recipes;
     }

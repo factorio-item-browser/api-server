@@ -6,6 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Service;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\TranslationData;
+use FactorioItemBrowser\Api\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
@@ -58,6 +59,10 @@ class TranslationService
      */
     public function translate(AuthorizationToken $authorizationToken): void
     {
+        if (count($this->entities) === 0) {
+            return;
+        }
+
         $translations = $this->fetchTranslations($this->entities, $authorizationToken);
         $this->matchTranslationsToEntities($translations, $this->entities);
     }
@@ -66,14 +71,14 @@ class TranslationService
      * Fetches the translations to the entities.
      * @param array|GenericEntity[] $entities
      * @param AuthorizationToken $authorizationToken
-     * @return array|TranslationData[]
+     * @return array|Translation[]
      */
     protected function fetchTranslations(array $entities, AuthorizationToken $authorizationToken): array
     {
-        $translations = $this->translationRepository->findDataByTypesAndNames(
+        $translations = $this->translationRepository->findByTypesAndNames(
+            $authorizationToken->getCombinationId(),
             $authorizationToken->getLocale(),
-            $this->extractTypesAndNames($entities)->toArray(),
-            $authorizationToken->getEnabledModCombinationIds()
+            $this->extractTypesAndNames($entities)
         );
 
         usort($translations, [$this, 'compareTranslations']);
@@ -82,11 +87,11 @@ class TranslationService
 
     /**
      * Compares the two translations.
-     * @param TranslationData $left
-     * @param TranslationData $right
+     * @param Translation $left
+     * @param Translation $right
      * @return int
      */
-    protected function compareTranslations(TranslationData $left, TranslationData $right): int
+    protected function compareTranslations(Translation $left,Translation $right): int
     {
         $leftCriteria = $this->getSortCriteria($left);
         $rightCriteria = $this->getSortCriteria($right);
@@ -100,22 +105,21 @@ class TranslationService
 
     /**
      * Returns the criteria to sort the translation.
-     * @param TranslationData $translation
+     * @param Translation $translation
      * @return array
      */
-    protected function getSortCriteria(TranslationData $translation): array
+    protected function getSortCriteria(Translation $translation): array
     {
         return [
             $translation->getLocale() !== Config::DEFAULT_LOCALE,
             $translation->getType(),
-            $translation->getOrder(),
             $translation->getName(),
         ];
     }
 
     /**
      * Prepares the translations for matching to the entities.
-     * @param array|TranslationData[] $translations
+     * @param array|Translation[] $translations
      * @return array
      */
     protected function prepareTranslations(array $translations): array
@@ -131,10 +135,10 @@ class TranslationService
 
     /**
      * Returns the types the translation can be applied to.
-     * @param TranslationData $translation
+     * @param Translation $translation
      * @return array|string[]
      */
-    protected function getTypesForTranslation(TranslationData $translation): array
+    protected function getTypesForTranslation(Translation $translation): array
     {
         $result = [$translation->getType()];
         if ($translation->getIsDuplicatedByMachine()) {
@@ -148,7 +152,7 @@ class TranslationService
 
     /**
      * Matches the translations to the entities.
-     * @param array|TranslationData[] $translations
+     * @param array|Translation[] $translations
      * @param array|GenericEntity[] $entities
      */
     protected function matchTranslationsToEntities(array $translations, array $entities): void

@@ -161,7 +161,7 @@ class GenericIconHandlerTest extends TestCase
     /**
      * Tests the fetchIconFileHashes method.
      * @throws ReflectionException
-     * @covers ::fetchIconFileHashes
+     * @covers ::fetchImageIds
      */
     public function testFetchIconFileHashes(): void
     {
@@ -301,7 +301,7 @@ class GenericIconHandlerTest extends TestCase
     /**
      * Tests the createEntityForIconData method.
      * @throws ReflectionException
-     * @covers ::createEntityForIconData
+     * @covers ::createEntityForIcon
      */
     public function testCreateEntityForIconData(): void
     {

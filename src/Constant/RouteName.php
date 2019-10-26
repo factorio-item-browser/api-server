@@ -19,7 +19,6 @@ interface RouteName
     public const ITEM_PRODUCT = 'item.product';
     public const ITEM_RANDOM = 'item.random';
     public const MOD_LIST = 'mod.list';
-    public const MOD_META = 'mod.meta';
     public const RECIPE_DETAILS = 'recipe.details';
     public const RECIPE_MACHINES = 'recipe.machines';
     public const SEARCH_QUERY = 'search.query';
