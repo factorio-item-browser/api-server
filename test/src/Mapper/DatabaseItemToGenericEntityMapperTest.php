@@ -105,7 +105,7 @@ class DatabaseItemToGenericEntityMapperTest extends TestCase
 
         /* @var DatabaseItemToGenericEntityMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseItemToGenericEntityMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

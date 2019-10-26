@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Auth;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
 use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
@@ -127,7 +127,7 @@ class AuthHandlerTest extends TestCase
 
         /* @var AuthHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AuthHandler::class)
-                        ->setMethods([
+                        ->onlyMethods([
                             'getAgentFromRequest',
                             'getEnabledModCombinationIdsFromRequest',
                             'createAuthorizationToken',

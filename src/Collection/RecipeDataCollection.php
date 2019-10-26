@@ -43,9 +43,9 @@ class RecipeDataCollection implements IteratorAggregate
     {
         $result = [];
         foreach ($this->values as $recipeData) {
-            $result[] = $recipeData->getId();
+            $result[$recipeData->getId()->toString()] = $recipeData->getId();
         }
-        return array_values(array_unique(array_filter($result)));
+        return array_values($result);
     }
 
     /**

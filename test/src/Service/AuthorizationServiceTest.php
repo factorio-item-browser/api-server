@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Server\Entity\Agent;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 use stdClass;
 
@@ -40,43 +40,29 @@ class AuthorizationServiceTest extends TestCase
     }
 
     /**
-     * Tests the createToken method.
-     * @covers ::createToken
-     */
-    public function testCreateToken(): void
-    {
-        $agent = new Agent();
-        $agent->setName('abc');
-        $enabledModCombinationIds = [42, 1337];
-
-        $expectedResult = new AuthorizationToken();
-        $expectedResult->setAgentName('abc')
-                       ->setModNames([42, 1337]);
-
-        $service = new AuthorizationService('foo');
-        $result = $service->createToken($agent, $enabledModCombinationIds);
-
-        $this->assertEquals($expectedResult, $result);
-    }
-
-    /**
      * Tests the serializeToken method.
      * @covers ::serializeToken
      */
     public function testSerializeToken(): void
     {
-        $authorizationKey = 'abc';
-        $token = (new AuthorizationToken())->setAgentName('def');
+        $authorizationKey = 'foo';
+        $combinationId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+
+        $token = new AuthorizationToken();
+        $token->setAgentName('abc')
+              ->setCombinationId($combinationId)
+              ->setModNames(['def', 'ghi']);
         $tokenData = [
             'exp' => 2147483647,
-            'agt' => 'def',
-            'mds' => [42, 1337]
+            'agt' => 'abc',
+            'cmb' => '999a23e4-addb-4821-91b5-1adf0971f6f4',
+            'mds' => ['def', 'ghi'],
         ];
         $expectedResult = trim((string) file_get_contents(__DIR__ . '/../../asset/token/valid.txt'));
 
         /* @var AuthorizationService&MockObject $service */
         $service = $this->getMockBuilder(AuthorizationService::class)
-                        ->setMethods(['getTokenData'])
+                        ->onlyMethods(['getTokenData'])
                         ->setConstructorArgs([$authorizationKey])
                         ->getMock();
         $service->expects($this->once())
@@ -97,11 +83,13 @@ class AuthorizationServiceTest extends TestCase
     public function testGetTokenData(): void
     {
         $agent = 'abc';
-        $enabledModCombinationIds = [42, 1337];
+        $combinationId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $modNames = ['def', 'ghi'];
 
         $token = new AuthorizationToken();
         $token->setAgentName($agent)
-              ->setModNames($enabledModCombinationIds);
+              ->setCombinationId($combinationId)
+              ->setModNames($modNames);
 
         $service = new AuthorizationService('foo');
         $result = $this->invokeMethod($service, 'getTokenData', $token);
@@ -109,45 +97,37 @@ class AuthorizationServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('exp', $result);
         $this->assertArrayHasKey('agt', $result);
+        $this->assertArrayHasKey('cmb', $result);
         $this->assertArrayHasKey('mds', $result);
         $this->assertIsInt($result['exp']);
         $this->assertSame($agent, $result['agt']);
-        $this->assertSame($enabledModCombinationIds, $result['mds']);
-    }
-
-    /**
-     * Provides the data for the deserializeToken test.
-     * @return array
-     */
-    public function provideDeserializeToken(): array
-    {
-        $token1 = (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => [42, 1337]];
-        $token2 = (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => ['42', '1337']];
-        $expectedToken = new AuthorizationToken();
-        $expectedToken->setAgentName('def')
-                      ->setModNames([42, 1337]);
-
-        return [
-            [$token1, $expectedToken],
-            [$token2, $expectedToken],
-        ];
+        $this->assertSame($combinationId->toString(), $result['cmb']);
+        $this->assertSame($modNames, $result['mds']);
     }
 
     /**
      * Tests the deserializeToken method.
      * @covers ::deserializeToken
-     * @dataProvider provideDeserializeToken
-     * @param stdClass $token
-     * @param AuthorizationToken $expectedResult
      * @throws InvalidAuthorizationTokenException
      */
-    public function testDeserializeToken(stdClass $token, AuthorizationToken $expectedResult): void
+    public function testDeserializeToken(): void
     {
+        $token = (object) [
+            'exp' => 2147483647,
+            'agt' => 'abc',
+            'cmb' => '999a23e4-addb-4821-91b5-1adf0971f6f4',
+            'mds' => ['def', 'ghi']
+        ];
+
         $serializedToken = 'abc';
+        $expectedResult = new AuthorizationToken();
+        $expectedResult->setAgentName('abc')
+                      ->setCombinationId(Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4'))
+                      ->setModNames(['def', 'ghi']);
 
         /* @var AuthorizationService&MockObject $service */
         $service = $this->getMockBuilder(AuthorizationService::class)
-                        ->setMethods(['decodeSerializedToken'])
+                        ->onlyMethods(['decodeSerializedToken'])
                         ->disableOriginalConstructor()
                         ->getMock();
         $service->expects($this->once())
@@ -169,7 +149,12 @@ class AuthorizationServiceTest extends TestCase
             [ // Valid token
                 file_get_contents(__DIR__ . '/../../asset/token/valid.txt'),
                 false,
-                (object) ['exp' => 2147483647, 'agt' => 'def', 'mds' => [42, 1337]],
+                (object) [
+                    'exp' => 2147483647,
+                    'agt' => 'abc',
+                    'cmb' => '999a23e4-addb-4821-91b5-1adf0971f6f4',
+                    'mds' => ['def', 'ghi']
+                ],
             ],
             [ // Expired token
                 file_get_contents(__DIR__ . '/../../asset/token/expired.txt'),
@@ -198,7 +183,7 @@ class AuthorizationServiceTest extends TestCase
         bool $expectException,
         ?stdClass $expectedResult
     ): void {
-        $authorizationKey = 'abc';
+        $authorizationKey = 'foo';
 
         if ($expectException) {
             $this->expectException(InvalidAuthorizationTokenException::class);

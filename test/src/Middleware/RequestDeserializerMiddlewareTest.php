@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
@@ -97,7 +97,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
         /* @var RequestDeserializerMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'deserializeRequestBody'])
+                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
                            ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
                            ->getMock();
         $middleware->expects($this->once())
@@ -142,7 +142,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
         /* @var RequestDeserializerMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'deserializeRequestBody'])
+                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
                            ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
                            ->getMock();
         $middleware->expects($this->once())

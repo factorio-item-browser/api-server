@@ -8,7 +8,6 @@ use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the ClientResponse class.
@@ -21,7 +20,6 @@ class ClientResponseTest extends TestCase
 {
     /**
      * Tests the constructing.
-     * @throws ReflectionException
      * @covers ::__construct
      * @covers ::getResponse
      */
@@ -44,7 +42,6 @@ class ClientResponseTest extends TestCase
 
     /**
      * Tests the withSerializedResponse method.
-     * @throws ReflectionException
      * @covers ::withSerializedResponse
      */
     public function testWithSerializedResponse(): void

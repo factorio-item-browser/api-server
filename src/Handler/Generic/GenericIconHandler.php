@@ -61,9 +61,9 @@ class GenericIconHandler extends AbstractRequestHandler
         $this->iconService->injectAuthorizationToken($this->getAuthorizationToken());
 
         $namesByTypes = $this->extractTypesAndNames($request->getEntities());
-        $iconFileHashes = $this->fetchImageIds($namesByTypes);
+        $imageIds = $this->fetchImageIds($namesByTypes);
 
-        $clientIcons = $this->fetchIcons($iconFileHashes);
+        $clientIcons = $this->fetchIcons($imageIds);
         $filteredClientIcons = $this->filterRequestedIcons($clientIcons, $namesByTypes);
         $this->hydrateContentToIcons($filteredClientIcons);
 
@@ -84,14 +84,14 @@ class GenericIconHandler extends AbstractRequestHandler
 
     /**
      * Fetches the icons to the file hashes.
-     * @param array $iconFileHashes
+     * @param array|UuidInterface[] $imageIds
      * @return array|ClientIcon[]
      */
-    protected function fetchIcons(array $iconFileHashes): array
+    protected function fetchIcons(array $imageIds): array
     {
         /* @var ClientIcon[] $result */
         $result = [];
-        foreach ($this->iconService->getIconsByImageIds($iconFileHashes) as $icon) {
+        foreach ($this->iconService->getIconsByImageIds($imageIds) as $icon) {
             $imageId = $icon->getImage()->getId()->toString();
             if (!isset($result[$imageId])) {
                 $result[$imageId] = $this->createClientIcon();
@@ -166,12 +166,10 @@ class GenericIconHandler extends AbstractRequestHandler
 
         foreach ($iconFiles as $iconFile) {
             $imageId = $iconFile->getId()->toString();
-            if (!isset($clientIcons[$imageId])) {
-                continue;
+            if (isset($clientIcons[$imageId])) {
+                $clientIcons[$imageId]->setContent($iconFile->getContents())
+                                      ->setSize($iconFile->getSize());
             }
-
-            $clientIcons[$imageId]->setContent($iconFile->getContents())
-                                  ->setSize($iconFile->getSize());
         }
     }
 

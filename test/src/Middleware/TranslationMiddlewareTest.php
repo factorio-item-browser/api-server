@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
@@ -89,7 +89,7 @@ class TranslationMiddlewareTest extends TestCase
 
         /* @var TranslationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(TranslationMiddleware::class)
-                           ->setMethods(['getAuthorizationTokenFromRequest', 'getLocaleFromRequest'])
+                           ->onlyMethods(['getAuthorizationTokenFromRequest', 'getLocaleFromRequest'])
                            ->setConstructorArgs([$this->translationService])
                            ->getMock();
         $middleware->expects($this->once())

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Client\Entity\Item as ClientItem;
@@ -39,7 +39,6 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -51,7 +50,6 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
     /**
      * Provides the data for the supports test.
      * @return array
-     * @throws ReflectionException
      */
     public function provideSupports(): array
     {
@@ -107,10 +105,10 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
         /* @var DatabaseRecipe&MockObject $databaseRecipe */
         $databaseRecipe = $this->createMock(DatabaseRecipe::class);
         $databaseRecipe->expects($this->once())
-                       ->method('getOrderedIngredients')
+                       ->method('getIngredients')
                        ->willReturn(new ArrayCollection([$databaseIngredient1, $databaseIngredient2]));
         $databaseRecipe->expects($this->once())
-                       ->method('getOrderedProducts')
+                       ->method('getProducts')
                        ->willReturn(new ArrayCollection([$databaseProduct1, $databaseProduct2]));
 
         /* @var ClientRecipe&MockObject $clientRecipe */
@@ -124,7 +122,7 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
         /* @var DatabaseRecipeToClientRecipeMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseRecipeToClientRecipeMapper::class)
-                       ->setMethods(['mapRecipe', 'mapIngredient', 'mapProduct'])
+                       ->onlyMethods(['mapRecipe', 'mapIngredient', 'mapProduct'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())
@@ -182,7 +180,7 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
         /* @var DatabaseRecipeToClientRecipeMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseRecipeToClientRecipeMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())
@@ -234,7 +232,7 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
         /* @var DatabaseRecipeToClientRecipeMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseRecipeToClientRecipeMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())
@@ -286,7 +284,7 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
         /* @var DatabaseRecipeToClientRecipeMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseRecipeToClientRecipeMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
@@ -52,7 +52,7 @@ class AgentServiceFactoryTest extends TestCase
 
         /* @var AgentServiceFactory&MockObject $factory */
         $factory = $this->getMockBuilder(AgentServiceFactory::class)
-                        ->setMethods(['createAgent'])
+                        ->onlyMethods(['createAgent'])
                         ->getMock();
         $factory->expects($this->exactly(2))
                 ->method('createAgent')

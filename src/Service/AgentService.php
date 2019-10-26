@@ -51,7 +51,8 @@ class AgentService
     public function getByAccessKey(string $name, string $accessKey): ?Agent
     {
         $result = null;
-        if ($name !== '' && $accessKey !== ''
+        if (
+            $name !== '' && $accessKey !== ''
             && isset($this->agentsByName[$name])
             && $this->agentsByName[$name]->getAccessKey() === $accessKey
         ) {

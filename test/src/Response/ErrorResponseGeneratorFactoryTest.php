@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\ServiceName;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGeneratorFactory;
@@ -49,7 +49,7 @@ class ErrorResponseGeneratorFactoryTest extends TestCase
 
         /* @var ErrorResponseGeneratorFactory&MockObject $factory */
         $factory = $this->getMockBuilder(ErrorResponseGeneratorFactory::class)
-                        ->setMethods(['fetchLogger'])
+                        ->onlyMethods(['fetchLogger'])
                         ->getMock();
         $factory->expects($this->once())
                 ->method('fetchLogger')

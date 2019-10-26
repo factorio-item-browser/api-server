@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
@@ -83,7 +83,7 @@ class ErrorResponseGeneratorTest extends TestCase
 
         /* @var ErrorResponseGenerator&MockObject $generator */
         $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
-                          ->setMethods(['logException', 'createResponseError'])
+                          ->onlyMethods(['logException', 'createResponseError'])
                           ->setConstructorArgs([$this->logger, true])
                           ->getMock();
         $generator->expects($this->once())
@@ -127,7 +127,7 @@ class ErrorResponseGeneratorTest extends TestCase
 
         /* @var ErrorResponseGenerator&MockObject $generator */
         $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
-                          ->setMethods(['logException', 'createResponseError'])
+                          ->onlyMethods(['logException', 'createResponseError'])
                           ->setConstructorArgs([$this->logger, true])
                           ->getMock();
         $generator->expects($this->once())

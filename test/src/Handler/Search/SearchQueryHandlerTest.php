@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Search;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
@@ -17,6 +17,7 @@ use FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -44,7 +45,6 @@ class SearchQueryHandlerTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -93,12 +93,13 @@ class SearchQueryHandlerTest extends TestCase
         $indexOfFirstResult = 42;
         $numberOfResults = 21;
         $numberOfRecipesPerResult = 1337;
-        $enabledModCombinationIds = [13, 37];
         $locale = 'def';
         $countResults = 7331;
 
         /* @var Query&MockObject $searchQuery */
         $searchQuery = $this->createMock(Query::class);
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
 
         $currentSearchResults = [
             $this->createMock(ResultInterface::class),
@@ -141,8 +142,8 @@ class SearchQueryHandlerTest extends TestCase
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
-                           ->method('getEnabledModCombinationIds')
-                           ->willReturn($enabledModCombinationIds);
+                           ->method('getCombinationId')
+                           ->willReturn($combinationId);
         $authorizationToken->expects($this->once())
                            ->method('getLocale')
                            ->willReturn($locale);
@@ -150,9 +151,9 @@ class SearchQueryHandlerTest extends TestCase
         $this->searchManager->expects($this->once())
                             ->method('parseQuery')
                             ->with(
-                                $this->identicalTo($query),
-                                $this->identicalTo($enabledModCombinationIds),
-                                $this->identicalTo($locale)
+                                $this->identicalTo($combinationId),
+                                $this->identicalTo($locale),
+                                $this->identicalTo($query)
                             )
                             ->willReturn($searchQuery);
         $this->searchManager->expects($this->once())
@@ -170,7 +171,7 @@ class SearchQueryHandlerTest extends TestCase
 
         /* @var SearchQueryHandler&MockObject $handler */
         $handler = $this->getMockBuilder(SearchQueryHandler::class)
-                        ->setMethods(['getAuthorizationToken'])
+                        ->onlyMethods(['getAuthorizationToken'])
                         ->setConstructorArgs([$this->searchDecoratorService, $this->searchManager])
                         ->getMock();
         $handler->expects($this->once())

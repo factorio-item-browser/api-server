@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Collection;
 
 use ArrayIterator;
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -68,20 +69,29 @@ class RecipeDataCollectionTest extends TestCase
      */
     public function testGetAllIds(): void
     {
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
+
         /* @var RecipeData&MockObject $recipeData1 */
         $recipeData1 = $this->createMock(RecipeData::class);
-        $recipeData1->expects($this->once())
+        $recipeData1->expects($this->any())
                     ->method('getId')
-                    ->willReturn(42);
+                    ->willReturn($id1);
 
         /* @var RecipeData&MockObject $recipeData2 */
         $recipeData2 = $this->createMock(RecipeData::class);
-        $recipeData2->expects($this->once())
+        $recipeData2->expects($this->any())
                     ->method('getId')
-                    ->willReturn(1337);
+                    ->willReturn($id2);
 
-        $values = [$recipeData1, $recipeData2];
-        $expectedResult = [42, 1337];
+        /* @var RecipeData&MockObject $recipeData3 */
+        $recipeData3 = $this->createMock(RecipeData::class);
+        $recipeData3->expects($this->any())
+                    ->method('getId')
+                    ->willReturn($id1);
+
+        $values = [$recipeData1, $recipeData2, $recipeData3];
+        $expectedResult = [$id1, $id2];
 
         $collection = new RecipeDataCollection();
         $this->injectProperty($collection, 'values', $values);
@@ -129,7 +139,6 @@ class RecipeDataCollectionTest extends TestCase
 
     /**
      * Tests the filterMode method.
-     * @throws ReflectionException
      * @covers ::filterMode
      */
     public function testFilterMode(): void
@@ -153,11 +162,11 @@ class RecipeDataCollectionTest extends TestCase
 
         /* @var RecipeDataCollection&MockObject $collection */
         $collection = $this->getMockBuilder(RecipeDataCollection::class)
-                           ->setMethods(['filter'])
+                           ->onlyMethods(['filter'])
                            ->getMock();
         $collection->expects($this->once())
                    ->method('filter')
-                   ->with($this->callback(function (callable  $callback) use ($recipeData1, $recipeData2): bool {
+                   ->with($this->callback(function (callable $callback) use ($recipeData1, $recipeData2): bool {
                        $this->assertTrue($callback($recipeData1));
                        $this->assertFalse($callback($recipeData2));
                        return true;
@@ -171,35 +180,37 @@ class RecipeDataCollectionTest extends TestCase
 
     /**
      * Tests the filterItemId method.
-     * @throws ReflectionException
      * @covers ::filterItemId
      */
     public function testFilterItemId(): void
     {
-        $itemId = 42;
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
+
+        $itemId = $id1;
 
         /* @var RecipeData&MockObject $recipeData1 */
         $recipeData1 = $this->createMock(RecipeData::class);
         $recipeData1->expects($this->once())
                     ->method('getItemId')
-                    ->willReturn(42);
+                    ->willReturn($id1);
 
         /* @var RecipeData&MockObject $recipeData2 */
         $recipeData2 = $this->createMock(RecipeData::class);
         $recipeData2->expects($this->once())
                     ->method('getItemId')
-                    ->willReturn(1337);
+                    ->willReturn($id2);
 
         /* @var RecipeDataCollection&MockObject $newCollection */
         $newCollection = $this->createMock(RecipeDataCollection::class);
 
         /* @var RecipeDataCollection&MockObject $collection */
         $collection = $this->getMockBuilder(RecipeDataCollection::class)
-                           ->setMethods(['filter'])
+                           ->onlyMethods(['filter'])
                            ->getMock();
         $collection->expects($this->once())
                    ->method('filter')
-                   ->with($this->callback(function (callable  $callback) use ($recipeData1, $recipeData2): bool {
+                   ->with($this->callback(function (callable $callback) use ($recipeData1, $recipeData2): bool {
                        $this->assertTrue($callback($recipeData1));
                        $this->assertFalse($callback($recipeData2));
                        return true;

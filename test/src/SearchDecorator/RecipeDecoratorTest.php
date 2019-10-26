@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\SearchDecorator;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
@@ -15,6 +15,8 @@ use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\SearchDecorator\RecipeDecorator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -42,7 +44,6 @@ class RecipeDecoratorTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -87,7 +88,7 @@ class RecipeDecoratorTest extends TestCase
         $numberOfRecipesPerResult = 42;
 
         $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipeIds', [1337]);
+        $this->injectProperty($decorator, 'recipeIds', [$this->createMock(UuidInterface::class)]);
         $this->injectProperty($decorator, 'recipes', [$this->createMock(RecipeResult::class)]);
 
         $decorator->initialize($numberOfRecipesPerResult);
@@ -103,11 +104,15 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testAnnounce(): void
     {
-        $normalRecipeId = 42;
-        $expensiveRecipeId = 21;
+        /* @var UuidInterface&MockObject $normalRecipeId */
+        $normalRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $expensiveRecipeId */
+        $expensiveRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $existingRecipeId */
+        $existingRecipeId = $this->createMock(UuidInterface::class);
 
-        $recipeIds = [1337];
-        $expectedRecipeIds = [1337, 42, 21];
+        $recipeIds = [$expensiveRecipeId];
+        $expectedRecipeIds = [$existingRecipeId, $normalRecipeId, $expensiveRecipeId];
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -162,7 +167,7 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testDecorate(): void
     {
-        $recipeId = 42;
+        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -172,7 +177,7 @@ class RecipeDecoratorTest extends TestCase
         $recipe = $this->createMock(DatabaseRecipe::class);
 
         $recipes = [
-            42 => $recipe,
+            $recipeId->toString() => $recipe,
         ];
 
         /* @var GenericEntityWithRecipes&MockObject $entity */
@@ -187,7 +192,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
+                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->once())
@@ -217,7 +222,7 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testDecorateWithoutDecoratedRecipe(): void
     {
-        $recipeId = 42;
+        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -225,7 +230,7 @@ class RecipeDecoratorTest extends TestCase
         $recipe = $this->createMock(DatabaseRecipe::class);
 
         $recipes = [
-            42 => $recipe,
+            $recipeId->toString() => $recipe,
         ];
 
         /* @var GenericEntityWithRecipes&MockObject $entity */
@@ -235,7 +240,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
+                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->once())
@@ -265,7 +270,7 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testDecorateWithoutRecipe(): void
     {
-        $recipeId = 42;
+        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -274,7 +279,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
+                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->once())
@@ -291,6 +296,32 @@ class RecipeDecoratorTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    /**
+     * Tests the decorate method.
+     * @throws MapperException
+     * @covers ::decorate
+     */
+    public function testDecorateWithoutRecipeId(): void
+    {
+        /* @var RecipeResult&MockObject $recipeResult */
+        $recipeResult = $this->createMock(RecipeResult::class);
+
+        /* @var RecipeDecorator&MockObject $decorator */
+        $decorator = $this->getMockBuilder(RecipeDecorator::class)
+                          ->onlyMethods(['getRecipeIdFromResult'])
+                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
+                          ->getMock();
+        $decorator->expects($this->once())
+                  ->method('getRecipeIdFromResult')
+                  ->with($this->identicalTo($recipeResult))
+                  ->willReturn(null);
+
+        $result = $decorator->decorate($recipeResult);
+
+        $this->assertNull($result);
+    }
+
 
     /**
      * Tests the createEntityForRecipe method.
@@ -319,24 +350,32 @@ class RecipeDecoratorTest extends TestCase
      */
     public function provideGetRecipeIdFromResult(): array
     {
+        /* @var UuidInterface&MockObject $id1 */
+        $id1 = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $id2 */
+        $id2 = $this->createMock(UuidInterface::class);
+
         return [
-            [42, 1337, 42],
-            [0, 1337, 1337],
-            [0, 0, 0],
+            [$id1, $id2, $id1],
+            [null, $id2, $id2],
+            [null, null, null],
         ];
     }
 
     /**
      * Tests the getRecipeIdFromResult method.
-     * @param int $normalRecipeId
-     * @param int $expensiveRecipeId
-     * @param int $expectedReuslt
+     * @param UuidInterface|null $normalRecipeId
+     * @param UuidInterface|null $expensiveRecipeId
+     * @param UuidInterface|null $expectedResult
      * @throws ReflectionException
      * @covers ::getRecipeIdFromResult
      * @dataProvider provideGetRecipeIdFromResult
      */
-    public function testGetRecipeIdFromResult(int $normalRecipeId, int $expensiveRecipeId, int $expectedReuslt): void
-    {
+    public function testGetRecipeIdFromResult(
+        ?UuidInterface $normalRecipeId,
+        ?UuidInterface $expensiveRecipeId,
+        ?UuidInterface $expectedResult
+    ): void {
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
         $recipeResult->expects($this->once())
@@ -349,19 +388,20 @@ class RecipeDecoratorTest extends TestCase
         $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
         $result = $this->invokeMethod($decorator, 'getRecipeIdFromResult', $recipeResult);
 
-        $this->assertSame($expectedReuslt, $result);
+        $this->assertSame($expectedResult, $result);
     }
 
     /**
      * Tests the decorateRecipe method.
      * @throws MapperException
-     * @throws ReflectionException
      * @covers ::decorateRecipe
      */
     public function testDecorateRecipe(): void
     {
-        $normalRecipeId = 42;
-        $expensiveRecipeId = 1337;
+        /* @var UuidInterface&MockObject $normalRecipeId */
+        $normalRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $expensiveRecipeId */
+        $expensiveRecipeId = $this->createMock(UuidInterface::class);
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -383,7 +423,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['mapRecipeWithId'])
+                          ->onlyMethods(['mapRecipeWithId'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->exactly(2))
@@ -405,13 +445,14 @@ class RecipeDecoratorTest extends TestCase
     /**
      * Tests the decorateRecipe method with only having a normal recipe.
      * @throws MapperException
-     * @throws ReflectionException
      * @covers ::decorateRecipe
      */
     public function testDecorateRecipeWithNormalRecipe(): void
     {
-        $normalRecipeId = 42;
-        $expensiveRecipeId = 1337;
+        /* @var UuidInterface&MockObject $normalRecipeId */
+        $normalRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $expensiveRecipeId */
+        $expensiveRecipeId = $this->createMock(UuidInterface::class);
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -429,7 +470,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['mapRecipeWithId'])
+                          ->onlyMethods(['mapRecipeWithId'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->exactly(2))
@@ -451,13 +492,14 @@ class RecipeDecoratorTest extends TestCase
     /**
      * Tests the decorateRecipe method with only having an expensive recipe.
      * @throws MapperException
-     * @throws ReflectionException
      * @covers ::decorateRecipe
      */
     public function testDecorateRecipeWithExpensiveRecipe(): void
     {
-        $normalRecipeId = 42;
-        $expensiveRecipeId = 1337;
+        /* @var UuidInterface&MockObject $normalRecipeId */
+        $normalRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $expensiveRecipeId */
+        $expensiveRecipeId = $this->createMock(UuidInterface::class);
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -473,7 +515,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['mapRecipeWithId'])
+                          ->onlyMethods(['mapRecipeWithId'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->exactly(2))
@@ -495,13 +537,14 @@ class RecipeDecoratorTest extends TestCase
     /**
      * Tests the decorateRecipe method without any actual recipes.
      * @throws MapperException
-     * @throws ReflectionException
      * @covers ::decorateRecipe
      */
     public function testDecorateRecipeWithoutRecipes(): void
     {
-        $normalRecipeId = 42;
-        $expensiveRecipeId = 1337;
+        /* @var UuidInterface&MockObject $normalRecipeId */
+        $normalRecipeId = $this->createMock(UuidInterface::class);
+        /* @var UuidInterface&MockObject $expensiveRecipeId */
+        $expensiveRecipeId = $this->createMock(UuidInterface::class);
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
@@ -514,7 +557,7 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeDecorator&MockObject $decorator */
         $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->setMethods(['mapRecipeWithId'])
+                          ->onlyMethods(['mapRecipeWithId'])
                           ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                           ->getMock();
         $decorator->expects($this->exactly(2))
@@ -540,13 +583,13 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testMapRecipeWithId(): void
     {
-        $recipeId = 42;
+        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
 
         /* @var DatabaseRecipe&MockObject $recipe */
         $recipe = $this->createMock(DatabaseRecipe::class);
 
         $recipes = [
-            42 => $recipe,
+            $recipeId->toString() => $recipe,
         ];
 
         $this->mapperManager->expects($this->once())
@@ -568,7 +611,7 @@ class RecipeDecoratorTest extends TestCase
      */
     public function testMapRecipeWithIdWithoutRecipe(): void
     {
-        $recipeId = 42;
+        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
         $recipes = [];
 
         $this->mapperManager->expects($this->never())

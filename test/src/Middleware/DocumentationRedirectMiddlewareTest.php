@@ -26,7 +26,6 @@ class DocumentationRedirectMiddlewareTest extends TestCase
 {
     /**
      * Tests the process method.
-     * @throws ReflectionException
      * @covers ::__construct
      * @covers ::process
      */

@@ -10,7 +10,6 @@ use FactorioItemBrowser\Api\Server\Mapper\DatabaseModToClientModMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the DatabaseModToClientModMapper class.
@@ -29,7 +28,6 @@ class DatabaseModToClientModMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -68,7 +66,6 @@ class DatabaseModToClientModMapperTest extends TestCase
 
     /**
      * Tests the map method.
-     * @throws ReflectionException
      * @covers ::map
      */
     public function testMap(): void
@@ -82,7 +79,7 @@ class DatabaseModToClientModMapperTest extends TestCase
                     ->method('getAuthor')
                     ->willReturn('def');
         $databaseMod->expects($this->once())
-                    ->method('getCurrentVersion')
+                    ->method('getVersion')
                     ->willReturn('ghi');
 
         /* @var ClientMod&MockObject $clientMod */
@@ -102,7 +99,7 @@ class DatabaseModToClientModMapperTest extends TestCase
 
         /* @var DatabaseModToClientModMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseModToClientModMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Generic;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\Entity;
 use FactorioItemBrowser\Api\Client\Entity\Icon as ClientIcon;
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
-use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Database\Entity\IconFile;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Entity\Icon as DatabaseIcon;
+use FactorioItemBrowser\Api\Database\Entity\IconImage;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\Generic\GenericIconHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -38,7 +40,6 @@ class GenericIconHandlerTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -81,7 +82,10 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testHandleRequest(): void
     {
-        $iconFileHashes = ['abc', 'def'];
+        $imageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
 
         /* @var NamesByTypes&MockObject $namesByTypes */
         $namesByTypes = $this->createMock(NamesByTypes::class);
@@ -115,10 +119,10 @@ class GenericIconHandlerTest extends TestCase
 
         /* @var GenericIconHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericIconHandler::class)
-                        ->setMethods([
+                        ->onlyMethods([
                             'getAuthorizationToken',
                             'extractTypesAndNames',
-                            'fetchIconFileHashes',
+                            'fetchImageIds',
                             'fetchIcons',
                             'filterRequestedIcons',
                             'hydrateContentToIcons',
@@ -134,12 +138,12 @@ class GenericIconHandlerTest extends TestCase
                 ->with($this->identicalTo($entities))
                 ->willReturn($namesByTypes);
         $handler->expects($this->once())
-                ->method('fetchIconFileHashes')
+                ->method('fetchImageIds')
                 ->with($this->identicalTo($namesByTypes))
-                ->willReturn($iconFileHashes);
+                ->willReturn($imageIds);
         $handler->expects($this->once())
                 ->method('fetchIcons')
-                ->with($this->identicalTo($iconFileHashes))
+                ->with($this->identicalTo($imageIds))
                 ->willReturn($clientIcons);
         $handler->expects($this->once())
                 ->method('filterRequestedIcons')
@@ -159,14 +163,20 @@ class GenericIconHandlerTest extends TestCase
     }
 
     /**
-     * Tests the fetchIconFileHashes method.
+     * Tests the fetchImageIds method.
      * @throws ReflectionException
      * @covers ::fetchImageIds
      */
-    public function testFetchIconFileHashes(): void
+    public function testFetchImageIds(): void
     {
-        $iconFileHashes = ['abc', 'def'];
-        $allIconFileHashes = ['ghi', 'jkl'];
+        $imageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
+        $allImageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
 
         /* @var NamesByTypes&MockObject $namesByTypes */
         $namesByTypes = $this->createMock(NamesByTypes::class);
@@ -174,24 +184,24 @@ class GenericIconHandlerTest extends TestCase
         $allNamesByTypes = $this->createMock(NamesByTypes::class);
 
         $this->iconService->expects($this->exactly(2))
-                          ->method('getHashesByTypesAndNames')
+                          ->method('getImageIdsByTypesAndNames')
                           ->withConsecutive(
                               [$this->identicalTo($namesByTypes)],
                               [$this->identicalTo($allNamesByTypes)]
                           )
                           ->willReturnOnConsecutiveCalls(
-                              $iconFileHashes,
-                              $allIconFileHashes
+                              $imageIds,
+                              $allImageIds
                           );
         $this->iconService->expects($this->once())
-                          ->method('getTypesAndNamesByHashes')
-                          ->with($this->identicalTo($iconFileHashes))
+                          ->method('getTypesAndNamesByImageIds')
+                          ->with($this->identicalTo($imageIds))
                           ->willReturn($allNamesByTypes);
 
         $handler = new GenericIconHandler($this->iconService);
-        $result = $this->invokeMethod($handler, 'fetchIconFileHashes', $namesByTypes);
+        $result = $this->invokeMethod($handler, 'fetchImageIds', $namesByTypes);
 
-        $this->assertSame($allIconFileHashes, $result);
+        $this->assertSame($allImageIds, $result);
     }
 
     /**
@@ -201,25 +211,40 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testFetchIcons(): void
     {
-        $iconFileHashes = ['abc', 'def'];
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
 
-        /* @var IconData&MockObject $iconData1 */
-        $iconData1 = $this->createMock(IconData::class);
-        $iconData1->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('abc');
+        $imageIds = [$id1, $id2];
 
-        /* @var IconData&MockObject $iconData2 */
-        $iconData2 = $this->createMock(IconData::class);
-        $iconData2->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('abc');
+        /* @var IconImage&MockObject $image1 */
+        $image1 = $this->createMock(IconImage::class);
+        $image1->expects($this->any())
+               ->method('getId')
+               ->willReturn($id1);
 
-        /* @var IconData&MockObject $iconData3 */
-        $iconData3 = $this->createMock(IconData::class);
-        $iconData3->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('def');
+        /* @var IconImage&MockObject $image2 */
+        $image2 = $this->createMock(IconImage::class);
+        $image2->expects($this->any())
+               ->method('getId')
+               ->willReturn($id2);
+
+        /* @var DatabaseIcon&MockObject $icon1 */
+        $icon1 = $this->createMock(DatabaseIcon::class);
+        $icon1->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image1);
+
+        /* @var DatabaseIcon&MockObject $icon2 */
+        $icon2 = $this->createMock(DatabaseIcon::class);
+        $icon2->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image1);
+
+        /* @var DatabaseIcon&MockObject $icon3 */
+        $icon3 = $this->createMock(DatabaseIcon::class);
+        $icon3->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image2);
 
         /* @var Entity&MockObject $entity1 */
         $entity1 = $this->createMock(Entity::class);
@@ -244,18 +269,18 @@ class GenericIconHandlerTest extends TestCase
                     ->with($this->identicalTo($entity3));
 
         $expectedResult = [
-            'abc' => $clientIcon1,
-            'def' => $clientIcon2,
+            $id1->toString() => $clientIcon1,
+            $id2->toString() => $clientIcon2,
         ];
 
         $this->iconService->expects($this->once())
-                          ->method('getIconDataByHashes')
-                          ->with($this->identicalTo($iconFileHashes))
-                          ->willReturn([$iconData1, $iconData2, $iconData3]);
+                          ->method('getIconsByImageIds')
+                          ->with($this->identicalTo($imageIds))
+                          ->willReturn([$icon1, $icon2, $icon3]);
 
         /* @var GenericIconHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericIconHandler::class)
-                        ->setMethods(['createClientIcon', 'createEntityForIconData'])
+                        ->onlyMethods(['createClientIcon', 'createEntityForIcon'])
                         ->setConstructorArgs([$this->iconService])
                         ->getMock();
         $handler->expects($this->exactly(2))
@@ -265,11 +290,11 @@ class GenericIconHandlerTest extends TestCase
                     $clientIcon2
                 );
         $handler->expects($this->exactly(3))
-                ->method('createEntityForIconData')
+                ->method('createEntityForIcon')
                 ->withConsecutive(
-                    [$this->identicalTo($iconData1)],
-                    [$this->identicalTo($iconData2)],
-                    [$this->identicalTo($iconData3)]
+                    [$this->identicalTo($icon1)],
+                    [$this->identicalTo($icon2)],
+                    [$this->identicalTo($icon3)]
                 )
                 ->willReturnOnConsecutiveCalls(
                     $entity1,
@@ -277,7 +302,7 @@ class GenericIconHandlerTest extends TestCase
                     $entity3
                 );
 
-        $result = $this->invokeMethod($handler, 'fetchIcons', $iconFileHashes);
+        $result = $this->invokeMethod($handler, 'fetchIcons', $imageIds);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -299,11 +324,11 @@ class GenericIconHandlerTest extends TestCase
     }
 
     /**
-     * Tests the createEntityForIconData method.
+     * Tests the createEntityForIcon method.
      * @throws ReflectionException
      * @covers ::createEntityForIcon
      */
-    public function testCreateEntityForIconData(): void
+    public function testCreateEntityForIcon(): void
     {
         $type = 'abc';
         $name = 'def';
@@ -311,17 +336,17 @@ class GenericIconHandlerTest extends TestCase
         $expectedResult->setType($type)
                        ->setName($name);
 
-        /* @var IconData&MockObject $iconData */
-        $iconData = $this->createMock(IconData::class);
-        $iconData->expects($this->once())
-                 ->method('getType')
-                 ->willReturn($type);
-        $iconData->expects($this->once())
-                 ->method('getName')
-                 ->willReturn($name);
+        /* @var DatabaseIcon&MockObject $icon */
+        $icon = $this->createMock(DatabaseIcon::class);
+        $icon->expects($this->once())
+             ->method('getType')
+             ->willReturn($type);
+        $icon->expects($this->once())
+             ->method('getName')
+             ->willReturn($name);
 
         $handler = new GenericIconHandler($this->iconService);
-        $result = $this->invokeMethod($handler, 'createEntityForIconData', $iconData);
+        $result = $this->invokeMethod($handler, 'createEntityForIcon', $icon);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -354,7 +379,7 @@ class GenericIconHandlerTest extends TestCase
 
         /* @var GenericIconHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericIconHandler::class)
-                        ->setMethods(['wasIconRequested'])
+                        ->onlyMethods(['wasIconRequested'])
                         ->setConstructorArgs([$this->iconService])
                         ->getMock();
         $handler->expects($this->exactly(3))
@@ -482,16 +507,20 @@ class GenericIconHandlerTest extends TestCase
      */
     public function testHydrateContentToIcons(): void
     {
-        $image1 = 'foo';
-        $image2 = 'bar';
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
+        $imageContents1 = 'foo';
+        $imageContents2 = 'bar';
         $size1 = 42;
         $size2 = 1337;
+
+        $expectedImageIds = [$id1, $id2];
 
         /* @var ClientIcon&MockObject $clientIcon1 */
         $clientIcon1 = $this->createMock(ClientIcon::class);
         $clientIcon1->expects($this->once())
                     ->method('setContent')
-                    ->with($this->identicalTo($image1))
+                    ->with($this->identicalTo($imageContents1))
                     ->willReturnSelf();
         $clientIcon1->expects($this->once())
                     ->method('setSize')
@@ -502,7 +531,7 @@ class GenericIconHandlerTest extends TestCase
         $clientIcon2 = $this->createMock(ClientIcon::class);
         $clientIcon2->expects($this->once())
                     ->method('setContent')
-                    ->with($this->identicalTo($image2))
+                    ->with($this->identicalTo($imageContents2))
                     ->willReturnSelf();
         $clientIcon2->expects($this->once())
                     ->method('setSize')
@@ -510,41 +539,40 @@ class GenericIconHandlerTest extends TestCase
                     ->willReturnSelf();
 
         $clientIcons = [
-            'abc' => $clientIcon1,
-            'def' => $clientIcon2,
+            $id1->toString() => $clientIcon1,
+            $id2->toString() => $clientIcon2,
         ];
-        $iconFileHashes = ['abc', 'def'];
 
-        /* @var IconFile&MockObject $iconFile1 */
-        $iconFile1 = $this->createMock(IconFile::class);
-        $iconFile1->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('abc');
-        $iconFile1->expects($this->once())
-                  ->method('getImage')
-                  ->willReturn($image1);
-        $iconFile1->expects($this->once())
-                  ->method('getSize')
-                  ->willReturn($size1);
+        /* @var IconImage&MockObject $image1 */
+        $image1 = $this->createMock(IconImage::class);
+        $image1->expects($this->once())
+               ->method('getId')
+               ->willReturn($id1);
+        $image1->expects($this->once())
+               ->method('getContents')
+               ->willReturn($imageContents1);
+        $image1->expects($this->once())
+               ->method('getSize')
+               ->willReturn($size1);
 
-        /* @var IconFile&MockObject $iconFile2 */
-        $iconFile2 = $this->createMock(IconFile::class);
-        $iconFile2->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('def');
-        $iconFile2->expects($this->once())
-                  ->method('getImage')
-                  ->willReturn($image2);
-        $iconFile2->expects($this->once())
-                  ->method('getSize')
-                  ->willReturn($size2);
+        /* @var IconImage&MockObject $image2 */
+        $image2 = $this->createMock(IconImage::class);
+        $image2->expects($this->once())
+               ->method('getId')
+               ->willReturn($id2);
+        $image2->expects($this->once())
+               ->method('getContents')
+               ->willReturn($imageContents2);
+        $image2->expects($this->once())
+               ->method('getSize')
+               ->willReturn($size2);
 
-        $iconFiles = [$iconFile1, $iconFile2];
+        $images = [$image1, $image2];
 
         $this->iconService->expects($this->once())
-                          ->method('getIconFilesByHashes')
-                          ->with($this->equalTo($iconFileHashes))
-                          ->willReturn($iconFiles);
+                          ->method('getImagesByIds')
+                          ->with($this->equalTo($expectedImageIds))
+                          ->willReturn($images);
 
         $handler = new GenericIconHandler($this->iconService);
         $this->invokeMethod($handler, 'hydrateContentToIcons', $clientIcons);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Recipe;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
@@ -115,7 +115,7 @@ class RecipeDetailsHandlerTest extends TestCase
 
         /* @var RecipeDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(RecipeDetailsHandler::class)
-                        ->setMethods(['getAuthorizationToken', 'mapRecipes', 'createResponse'])
+                        ->onlyMethods(['getAuthorizationToken', 'mapRecipes', 'createResponse'])
                         ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                         ->getMock();
         $handler->expects($this->once())

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Recipe;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Client\Request\Recipe\RecipeMachinesRequest;
@@ -21,6 +21,7 @@ use FactorioItemBrowser\Api\Server\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -134,7 +135,7 @@ class RecipeMachinesHandlerTest extends TestCase
 
         /* @var RecipeMachinesHandler&MockObject $handler */
         $handler = $this->getMockBuilder(RecipeMachinesHandler::class)
-                        ->setMethods([
+                        ->onlyMethods([
                             'getAuthorizationToken',
                             'fetchRecipe',
                             'fetchMachines',
@@ -170,9 +171,10 @@ class RecipeMachinesHandlerTest extends TestCase
      */
     public function testFetchRecipe(): void
     {
-        $recipeId = 42;
         $name = 'abc';
 
+        /* @var UuidInterface&MockObject $recipeId */
+        $recipeId = $this->createMock(UuidInterface::class);
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
 
@@ -256,9 +258,10 @@ class RecipeMachinesHandlerTest extends TestCase
      */
     public function testFetchRecipeWithoutEntity(): void
     {
-        $recipeId = 42;
         $name = 'abc';
 
+        /* @var UuidInterface&MockObject $recipeId */
+        $recipeId = $this->createMock(UuidInterface::class);
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
 
@@ -370,7 +373,7 @@ class RecipeMachinesHandlerTest extends TestCase
 
         /* @var RecipeMachinesHandler&MockObject $handler */
         $handler = $this->getMockBuilder(RecipeMachinesHandler::class)
-                        ->setMethods(['mapMachine'])
+                        ->onlyMethods(['mapMachine'])
                         ->disableOriginalConstructor()
                         ->getMock();
         $handler->expects($this->exactly(2))

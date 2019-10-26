@@ -125,7 +125,9 @@ class RecipeService
 
         $result = [];
         foreach ($recipeIds as $recipeId) {
-            $result[$recipeId->toString()] = $this->recipeCache[$recipeId->toString()];
+            if (isset($this->recipeCache[$recipeId->toString()])) {
+                $result[$recipeId->toString()] = $this->recipeCache[$recipeId->toString()];
+            }
         }
         return $result;
     }
@@ -137,7 +139,7 @@ class RecipeService
     protected function fetchRecipeDetails(array $recipeIds): void
     {
         $missingIds = [];
-        foreach($recipeIds as $recipeId) {
+        foreach ($recipeIds as $recipeId) {
             if (!isset($this->recipeCache[$recipeId->toString()])) {
                 $missingIds[] = $recipeId;
             }

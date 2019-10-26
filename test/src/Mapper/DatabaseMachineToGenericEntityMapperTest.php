@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Database\Data\MachineData;
+use FactorioItemBrowser\Api\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Server\Mapper\DatabaseMachineToGenericEntityMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the MachineDataToGenericEntityMapper class.
@@ -20,7 +19,7 @@ use ReflectionException;
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  * @coversDefaultClass \FactorioItemBrowser\Api\Server\Mapper\DatabaseMachineToGenericEntityMapper
  */
-class MachineDataToGenericEntityMapperTest extends TestCase
+class DatabaseMachineToGenericEntityMapperTest extends TestCase
 {
     /**
      * The mocked translation service.
@@ -30,7 +29,6 @@ class MachineDataToGenericEntityMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -45,7 +43,7 @@ class MachineDataToGenericEntityMapperTest extends TestCase
      */
     public function testGetSupportedSourceClass(): void
     {
-        $expectedResult = MachineData::class;
+        $expectedResult = Machine::class;
 
         $mapper = new DatabaseMachineToGenericEntityMapper($this->translationService);
         $result = $mapper->getSupportedSourceClass();
@@ -69,16 +67,15 @@ class MachineDataToGenericEntityMapperTest extends TestCase
 
     /**
      * Tests the map method.
-     * @throws ReflectionException
      * @covers ::map
      */
     public function testMap(): void
     {
-        /* @var MachineData&MockObject $machineData */
-        $machineData = $this->createMock(MachineData::class);
-        $machineData->expects($this->once())
-                   ->method('getName')
-                   ->willReturn('abc');
+        /* @var Machine&MockObject $machine */
+        $machine = $this->createMock(Machine::class);
+        $machine->expects($this->once())
+                ->method('getName')
+                ->willReturn('abc');
 
         /* @var GenericEntity&MockObject $genericEntity */
         $genericEntity = $this->createMock(GenericEntity::class);
@@ -93,13 +90,13 @@ class MachineDataToGenericEntityMapperTest extends TestCase
 
         /* @var DatabaseMachineToGenericEntityMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseMachineToGenericEntityMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())
                ->method('addToTranslationService')
                ->with($this->identicalTo($genericEntity));
 
-        $mapper->map($machineData, $genericEntity);
+        $mapper->map($machine, $genericEntity);
     }
 }

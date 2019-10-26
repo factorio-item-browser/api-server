@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Entity;
 
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The PHPUnit test of the AuthorizationToken class.
@@ -43,20 +45,32 @@ class AuthorizationTokenTest extends TestCase
     }
 
     /**
-     * Tests setting and getting the enabled mod combination ids.
+     * Tests the setting and getting the combination id.
+     * @covers ::getCombinationId
+     * @covers ::setCombinationId
+     */
+    public function testSetAndGetCombinationId(): void
+    {
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
+        $authorizationToken = new AuthorizationToken();
+
+        $this->assertSame($authorizationToken, $authorizationToken->setCombinationId($combinationId));
+        $this->assertSame($combinationId, $authorizationToken->getCombinationId());
+    }
+
+    /**
+     * Tests the setting and getting the mod names.
      * @covers ::getModNames
      * @covers ::setModNames
      */
-    public function testSetAndGetEnabledModCombinationIds(): void
+    public function testSetAndGetModNames(): void
     {
-        $enabledModCombinationIds = [42, 1337];
+        $modNames = ['abc', 'def'];
         $authorizationToken = new AuthorizationToken();
 
-        $this->assertSame(
-            $authorizationToken,
-            $authorizationToken->setModNames($enabledModCombinationIds)
-        );
-        $this->assertSame($enabledModCombinationIds, $authorizationToken->getModNames());
+        $this->assertSame($authorizationToken, $authorizationToken->setModNames($modNames));
+        $this->assertSame($modNames, $authorizationToken->getModNames());
     }
 
     /**

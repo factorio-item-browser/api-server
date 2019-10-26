@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use FactorioItemBrowser\Api\Database\Data\MachineData;
 use FactorioItemBrowser\Api\Database\Entity\CraftingCategory;
 use FactorioItemBrowser\Api\Database\Entity\Item;
 use FactorioItemBrowser\Api\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient;
 use FactorioItemBrowser\Api\Database\Entity\RecipeProduct;
-use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Service\MachineService;
+use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\Common\Constant\ItemType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -35,12 +35,6 @@ class MachineServiceTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * The mocked data filter.
-     * @var DataFilter&MockObject
-     */
-    protected $dataFilter;
-
-    /**
      * The mocked machine repository.
      * @var MachineRepository&MockObject
      */
@@ -48,13 +42,11 @@ class MachineServiceTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->dataFilter = $this->createMock(DataFilter::class);
         $this->machineRepository = $this->createMock(MachineRepository::class);
     }
 
@@ -65,31 +57,27 @@ class MachineServiceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
 
-        $this->assertSame($this->dataFilter, $this->extractProperty($service, 'dataFilter'));
         $this->assertSame($this->machineRepository, $this->extractProperty($service, 'machineRepository'));
     }
 
     /**
      * Tests the getMachinesByCraftingCategory method.
-     * @throws ReflectionException
      * @covers ::getMachinesByCraftingCategory
      */
     public function testGetMachinesByCraftingCategory(): void
     {
         $craftingCategoryName = 'abc';
-        $enabledModCombinationIds = [42, 1337];
-        $machineData = [
-            $this->createMock(MachineData::class),
-            $this->createMock(MachineData::class),
-        ];
-        $machineIds = [21, 7331];
+
         $machines = [
             $this->createMock(Machine::class),
             $this->createMock(Machine::class),
         ];
-        
+
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
+
         /* @var CraftingCategory&MockObject $craftingCategory */
         $craftingCategory = $this->createMock(CraftingCategory::class);
         $craftingCategory->expects($this->once())
@@ -99,76 +87,25 @@ class MachineServiceTest extends TestCase
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
-                           ->method('getEnabledModCombinationIds')
-                           ->willReturn($enabledModCombinationIds);
+                           ->method('getCombinationId')
+                           ->willReturn($combinationId);
         
         $this->machineRepository->expects($this->once())
-                                ->method('findDataByCraftingCategories')
+                                ->method('findByCraftingCategoryName')
                                 ->with(
-                                    $this->identicalTo([$craftingCategoryName]),
-                                    $this->identicalTo($enabledModCombinationIds)
+                                    $this->identicalTo($combinationId),
+                                    $this->identicalTo($craftingCategoryName)
                                 )
-                                ->willReturn($machineData);
-        $this->machineRepository->expects($this->once())
-                                ->method('findByIds')
-                                ->with($this->identicalTo($machineIds))
                                 ->willReturn($machines);
 
-        /* @var MachineService&MockObject $service */
-        $service = $this->getMockBuilder(MachineService::class)
-                        ->setMethods(['extractIdsFromMachineData'])
-                        ->setConstructorArgs([$this->dataFilter, $this->machineRepository])
-                        ->getMock();
-        $service->expects($this->once())
-                ->method('extractIdsFromMachineData')
-                ->with($this->identicalTo($machineData))
-                ->willReturn($machineIds);
-
+        $service = new MachineService($this->machineRepository);
         $result = $service->getMachinesByCraftingCategory($craftingCategory, $authorizationToken);
 
         $this->assertSame($machines, $result);
     }
 
     /**
-     * Tests the extractIdsFromMachineData method.
-     * @throws ReflectionException
-     * @covers ::extractIdsFromMachineData
-     */
-    public function testExtractIdsFromMachineData(): void
-    {
-        /* @var MachineData&MockObject $machineData1 */
-        $machineData1 = $this->createMock(MachineData::class);
-        $machineData1->expects($this->once())
-                     ->method('getId')
-                     ->willReturn(42);
-
-        /* @var MachineData&MockObject $machineData2 */
-        $machineData2 = $this->createMock(MachineData::class);
-        $machineData2->expects($this->once())
-                     ->method('getId')
-                     ->willReturn(1337);
-
-        $machineData = [
-            $this->createMock(MachineData::class),
-            $this->createMock(MachineData::class),
-        ];
-        $filteredMachineData = [$machineData1, $machineData2];
-        $expectedResult = [42, 1337];
-
-        $this->dataFilter->expects($this->once())
-                         ->method('filter')
-                         ->with($this->identicalTo($machineData))
-                         ->willReturn($filteredMachineData);
-
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
-        $result = $this->invokeMethod($service, 'extractIdsFromMachineData', $machineData);
-
-        $this->assertEquals($expectedResult, $result);
-    }
-
-    /**
      * Tests the filterMachinesForRecipe method.
-     * @throws ReflectionException
      * @covers ::filterMachinesForRecipe
      */
     public function testFilterMachinesForRecipe(): void
@@ -203,8 +140,8 @@ class MachineServiceTest extends TestCase
 
         /* @var MachineService&MockObject $service */
         $service = $this->getMockBuilder(MachineService::class)
-                        ->setMethods(['countItemType', 'isMachineValid'])
-                        ->setConstructorArgs([$this->dataFilter, $this->machineRepository])
+                        ->onlyMethods(['countItemType', 'isMachineValid'])
+                        ->setConstructorArgs([$this->machineRepository])
                         ->getMock();
         $service->expects($this->exactly(3))
                 ->method('countItemType')
@@ -274,8 +211,8 @@ class MachineServiceTest extends TestCase
 
         /* @var MachineService&MockObject $service */
         $service = $this->getMockBuilder(MachineService::class)
-                        ->setMethods(['getItemType'])
-                        ->setConstructorArgs([$this->dataFilter, $this->machineRepository])
+                        ->onlyMethods(['getItemType'])
+                        ->setConstructorArgs([$this->machineRepository])
                         ->getMock();
         $service->expects($this->exactly(4))
                 ->method('getItemType')
@@ -318,7 +255,7 @@ class MachineServiceTest extends TestCase
                ->method('getItem')
                ->willReturn($item);
 
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
         $result = $this->invokeMethod($service, 'getItemType', $entity);
 
         $this->assertSame($type, $result);
@@ -345,7 +282,7 @@ class MachineServiceTest extends TestCase
                ->method('getItem')
                ->willReturn($item);
 
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
         $result = $this->invokeMethod($service, 'getItemType', $entity);
 
         $this->assertSame($type, $result);
@@ -358,7 +295,7 @@ class MachineServiceTest extends TestCase
      */
     public function testGetItemTypeWithInvalidEntity(): void
     {
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
         $result = $this->invokeMethod($service, 'getItemType', $this);
 
         $this->assertNull($result);
@@ -367,7 +304,6 @@ class MachineServiceTest extends TestCase
     /**
      * Provides the data for the isMachineValid test.
      * @return array
-     * @throws ReflectionException
      */
     public function provideIsMachineValid(): array
     {
@@ -427,7 +363,7 @@ class MachineServiceTest extends TestCase
         int $numberOfFluidOutputs,
         bool $expectedResult
     ): void {
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
 
         $result = $this->invokeMethod(
             $service,
@@ -443,7 +379,6 @@ class MachineServiceTest extends TestCase
 
     /**
      * Tests the sortMachines method.
-     * @throws ReflectionException
      * @covers ::sortMachines
      */
     public function testSortMachines(): void
@@ -458,8 +393,8 @@ class MachineServiceTest extends TestCase
 
         /* @var MachineService&MockObject $service */
         $service = $this->getMockBuilder(MachineService::class)
-                        ->setMethods(['compareMachines'])
-                        ->setConstructorArgs([$this->dataFilter, $this->machineRepository])
+                        ->onlyMethods(['compareMachines'])
+                        ->setConstructorArgs([$this->machineRepository])
                         ->getMock();
         $service->expects($this->once())
                 ->method('compareMachines')
@@ -474,7 +409,6 @@ class MachineServiceTest extends TestCase
     /**
      * Provides the data for the compareMachines test.
      * @return array
-     * @throws ReflectionException
      */
     public function provideCompareMachines(): array
     {
@@ -494,7 +428,7 @@ class MachineServiceTest extends TestCase
         $player = $this->createMock(Machine::class);
         $player->expects($this->any())
                ->method('getName')
-               ->willReturn('player');
+               ->willReturn(Constant::ENTITY_NAME_CHARACTER);
 
         return [
             [$machine1, $machine2, -1],
@@ -519,7 +453,7 @@ class MachineServiceTest extends TestCase
      */
     public function testCompareMachines(Machine $left, Machine $right, int $expectedResult): void
     {
-        $service = new MachineService($this->dataFilter, $this->machineRepository);
+        $service = new MachineService($this->machineRepository);
         $result = $this->invokeMethod($service, 'compareMachines', $left, $right);
 
         $this->assertSame($expectedResult, $result);

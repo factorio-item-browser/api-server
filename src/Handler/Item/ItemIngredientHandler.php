@@ -8,7 +8,7 @@ use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Item\ItemIngredientRequest;
 use FactorioItemBrowser\Api\Client\Response\Item\ItemIngredientResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
-use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
+use FactorioItemBrowser\Api\Database\Entity\Item;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
 
 /**
@@ -30,10 +30,10 @@ class ItemIngredientHandler extends AbstractItemRecipeHandler
 
     /**
      * Fetches the recipe data to the specified item.
-     * @param DatabaseItem $item
+     * @param Item $item
      * @return RecipeDataCollection
      */
-    protected function fetchRecipeData(DatabaseItem $item): RecipeDataCollection
+    protected function fetchRecipeData(Item $item): RecipeDataCollection
     {
         return $this->recipeService->getDataWithIngredients([$item], $this->getAuthorizationToken());
     }

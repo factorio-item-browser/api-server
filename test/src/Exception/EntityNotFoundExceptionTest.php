@@ -7,7 +7,6 @@ namespace FactorioItemBrowserTest\Api\Server\Exception;
 use FactorioItemBrowser\Api\Server\Exception\EntityNotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 use Throwable;
 
 /**
@@ -21,7 +20,6 @@ class EntityNotFoundExceptionTest extends TestCase
 {
     /**
      * Tests the constructing.
-     * @throws ReflectionException
      * @covers ::__construct
      */
     public function testConstruct(): void

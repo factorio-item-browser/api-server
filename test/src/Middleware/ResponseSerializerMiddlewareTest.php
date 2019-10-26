@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
 use FactorioItemBrowser\Api\Server\Middleware\ResponseSerializerMiddleware;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;

@@ -105,20 +105,20 @@ class GenericDetailsHandler extends AbstractRequestHandler
     protected function process(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         return array_values(array_merge(
-            $this->processItems($authorizationToken, $namesByTypes),
-            $this->processMachines($authorizationToken, $namesByTypes),
-            $this->processRecipes($authorizationToken, $namesByTypes)
+            $this->processItems($namesByTypes, $authorizationToken),
+            $this->processMachines($namesByTypes, $authorizationToken),
+            $this->processRecipes($namesByTypes, $authorizationToken)
         ));
     }
 
     /**
      * Processes the items.
-     * @param AuthorizationToken $authorizationToken
      * @param NamesByTypes $namesByTypes
+     * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processItems(AuthorizationToken $authorizationToken, NamesByTypes $namesByTypes): array
+    protected function processItems(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $items = $this->itemRepository->findByTypesAndNames(
             $authorizationToken->getCombinationId(),
@@ -129,12 +129,12 @@ class GenericDetailsHandler extends AbstractRequestHandler
 
     /**
      * Processes the machines.
-     * @param AuthorizationToken $authorizationToken
      * @param NamesByTypes $namesByTypes
+     * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processMachines(AuthorizationToken $authorizationToken, NamesByTypes $namesByTypes): array
+    protected function processMachines(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $machines = $this->machineRepository->findByNames(
             $authorizationToken->getCombinationId(),
@@ -145,12 +145,12 @@ class GenericDetailsHandler extends AbstractRequestHandler
 
     /**
      * Processes the recipes.
-     * @param AuthorizationToken $authorizationToken
      * @param NamesByTypes $namesByTypes
+     * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processRecipes(AuthorizationToken $authorizationToken, NamesByTypes $namesByTypes): array
+    protected function processRecipes(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $recipes = $this->recipeRepository->findDataByNames(
             $authorizationToken->getCombinationId(),
@@ -171,9 +171,19 @@ class GenericDetailsHandler extends AbstractRequestHandler
         foreach ($objects as $object) {
             $entity = new GenericEntity();
             $this->mapperManager->map($object, $entity);
-            $result["{$entity->getType()}|{$entity->getName()}"] = $entity;
+            $result[$this->getEntityKey($entity)] = $entity;
         }
         return $result;
+    }
+
+    /**
+     * Returns the key of the entity.
+     * @param GenericEntity $entity
+     * @return string
+     */
+    protected function getEntityKey(GenericEntity $entity): string
+    {
+        return "{$entity->getType()}|{$entity->getName()}";
     }
 
     /**

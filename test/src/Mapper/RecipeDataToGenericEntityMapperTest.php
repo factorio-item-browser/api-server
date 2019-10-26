@@ -93,7 +93,7 @@ class RecipeDataToGenericEntityMapperTest extends TestCase
 
         /* @var RecipeDataToGenericEntityMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(RecipeDataToGenericEntityMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

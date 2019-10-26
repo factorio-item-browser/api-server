@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Server\SearchDecorator\SearchDecoratorInterface;
@@ -73,7 +73,7 @@ class SearchDecoratorServiceTest extends TestCase
 
         /* @var SearchDecoratorService&MockObject $service */
         $service = $this->getMockBuilder(SearchDecoratorService::class)
-                        ->setMethods([
+                        ->onlyMethods([
                             'initializeSearchDecorators',
                             'announceSearchResults',
                             'prepareSearchDecorators',

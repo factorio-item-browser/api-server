@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Exception\InternalServerException;
 use FactorioItemBrowser\Api\Server\Middleware\MatchedRouteNameTrait;
 use PHPUnit\Framework\MockObject\MockObject;

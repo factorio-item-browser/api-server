@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Database\Data\TranslationData;
 use FactorioItemBrowser\Api\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 use FactorioItemBrowser\Api\Server\Constant\Config;
@@ -91,7 +90,7 @@ class TranslationService
      * @param Translation $right
      * @return int
      */
-    protected function compareTranslations(Translation $left,Translation $right): int
+    protected function compareTranslations(Translation $left, Translation $right): int
     {
         $leftCriteria = $this->getSortCriteria($left);
         $rightCriteria = $this->getSortCriteria($right);
@@ -175,6 +174,6 @@ class TranslationService
      */
     protected function getTranslationKey(string $type, string $name): string
     {
-        return implode('|', [$type, $name]);
+        return "{$type}|{$name}";
     }
 }
