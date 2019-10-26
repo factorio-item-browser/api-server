@@ -191,13 +191,13 @@ class RecipeDataCollectionTest extends TestCase
 
         /* @var RecipeData&MockObject $recipeData1 */
         $recipeData1 = $this->createMock(RecipeData::class);
-        $recipeData1->expects($this->once())
+        $recipeData1->expects($this->any())
                     ->method('getItemId')
                     ->willReturn($id1);
 
         /* @var RecipeData&MockObject $recipeData2 */
         $recipeData2 = $this->createMock(RecipeData::class);
-        $recipeData2->expects($this->once())
+        $recipeData2->expects($this->any())
                     ->method('getItemId')
                     ->willReturn($id2);
 

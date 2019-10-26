@@ -2,20 +2,13 @@
 
 declare(strict_types=1);
 
-/**
- * The interface of the search decorators.
- *
- * @author BluePsyduck <bluepsyduck@gmx.com>
- * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- */
-
 namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 
 /**
- * The decorator for the items.
+ * The interface of the search decorators.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3

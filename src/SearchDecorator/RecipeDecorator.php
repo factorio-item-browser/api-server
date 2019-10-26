@@ -82,8 +82,12 @@ class RecipeDecorator implements SearchDecoratorInterface
      */
     public function announce($recipeResult): void
     {
-        $this->recipeIds[] = $recipeResult->getNormalRecipeId();
-        $this->recipeIds[] = $recipeResult->getExpensiveRecipeId();
+        if ($recipeResult->getNormalRecipeId() !== null) {
+            $this->recipeIds[] = $recipeResult->getNormalRecipeId();
+        }
+        if ($recipeResult->getExpensiveRecipeId() !== null) {
+            $this->recipeIds[] = $recipeResult->getExpensiveRecipeId();
+        }
     }
 
     /**

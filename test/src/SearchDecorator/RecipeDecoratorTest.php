@@ -116,10 +116,10 @@ class RecipeDecoratorTest extends TestCase
 
         /* @var RecipeResult&MockObject $recipeResult */
         $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
+        $recipeResult->expects($this->any())
                      ->method('getNormalRecipeId')
                      ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->once())
+        $recipeResult->expects($this->any())
                      ->method('getExpensiveRecipeId')
                      ->willReturn($expensiveRecipeId);
 

@@ -12,6 +12,7 @@ use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Search\Entity\Result\ItemResult;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The decorator of the item search results.
@@ -47,7 +48,7 @@ class ItemDecorator implements SearchDecoratorInterface
 
     /**
      * The item ids of the announced search results.
-     * @var array|int[]
+     * @var array|UuidInterface[]
      */
     protected $itemIds = [];
 
@@ -99,7 +100,9 @@ class ItemDecorator implements SearchDecoratorInterface
      */
     public function announce($itemResult): void
     {
-        $this->itemIds[] = $itemResult->getId();
+        if ($itemResult->getId() !== null) {
+            $this->itemIds[] = $itemResult->getId();
+        }
         foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
             $this->recipeDecorator->announce($recipeResult);
         }
@@ -114,9 +117,7 @@ class ItemDecorator implements SearchDecoratorInterface
 
         $this->items = [];
         foreach ($this->itemRepository->findByIds($itemIds) as $item) {
-            if ($item->getId() !== null) {
-                $this->items[$item->getId()->toString()] = $item;
-            }
+            $this->items[$item->getId()->toString()] = $item;
         }
     }
 

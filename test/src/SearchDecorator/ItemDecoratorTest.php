@@ -132,7 +132,7 @@ class ItemDecoratorTest extends TestCase
 
         /* @var ItemResult&MockObject $itemResult */
         $itemResult = $this->createMock(ItemResult::class);
-        $itemResult->expects($this->once())
+        $itemResult->expects($this->any())
                    ->method('getId')
                    ->willReturn($itemId);
 

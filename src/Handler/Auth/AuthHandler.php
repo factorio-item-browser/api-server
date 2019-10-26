@@ -14,7 +14,9 @@ use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
+use FactorioItemBrowser\Common\Constant\Constant;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The handler of the /auth request.
@@ -80,11 +82,11 @@ class AuthHandler extends AbstractRequestHandler
     protected function createAuthorizationToken(AuthRequest $request): AuthorizationToken
     {
         $agent = $this->getAgentFromRequest($request);
-        $modNames = $this->getModModNamesFromRequest($agent, $request);
+        $modNames = $this->getModNamesFromRequest($agent, $request);
 
         $token = new AuthorizationToken();
         $token->setAgentName($agent->getName())
-              ->setCombinationId(Uuid::fromString('6E6F47E8572744C0B759EF9ED5F994A2'))
+              ->setCombinationId($this->calculateCombinationId($modNames))
               ->setModNames($modNames);
 
         return $token;
@@ -115,12 +117,28 @@ class AuthHandler extends AbstractRequestHandler
      * @param AuthRequest $request
      * @return array|string[]
      */
-    protected function getModModNamesFromRequest(Agent $agent, AuthRequest $request): array
+    protected function getModNamesFromRequest(Agent $agent, AuthRequest $request): array
     {
         if ($agent->getIsDemo()) {
-            return ['base'];
+            return [Constant::MOD_NAME_BASE];
         }
         return $request->getEnabledModNames();
+    }
+
+    /**
+     * Calculates and returns the combination id to use for the mod names.
+     * @param array|string[] $modNames
+     * @return UuidInterface
+     */
+    protected function calculateCombinationId(array $modNames): UuidInterface
+    {
+        $modNames = array_map(function (string $modName): string {
+            return trim($modName);
+        }, $modNames);
+        sort($modNames);
+
+        $hash = hash('md5', (string) json_encode($modNames));
+        return Uuid::fromString($hash);
     }
 
     /**

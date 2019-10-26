@@ -73,7 +73,7 @@ class GenericIconHandler extends AbstractRequestHandler
     /**
      * Fetches the image ids of the types and names.
      * @param NamesByTypes $namesByTypes
-     * @return array|string[]
+     * @return array|UuidInterface[]
      */
     protected function fetchImageIds(NamesByTypes $namesByTypes): array
     {

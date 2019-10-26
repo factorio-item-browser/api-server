@@ -28,7 +28,7 @@ class AuthorizationToken
 
     /**
      * The mod names to use with this token.
-     * @var array|int[]
+     * @var array|string[]
      */
     protected $modNames = [];
 

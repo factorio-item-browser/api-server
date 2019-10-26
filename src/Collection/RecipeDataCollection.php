@@ -81,7 +81,7 @@ class RecipeDataCollection implements IteratorAggregate
     public function filterItemId(UuidInterface $itemId): self
     {
         return $this->filter(function (RecipeData $recipeData) use ($itemId): bool {
-            return $itemId->equals($recipeData->getItemId());
+            return $recipeData->getItemId() !== null && $itemId->equals($recipeData->getItemId());
         });
     }
 
