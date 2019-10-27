@@ -21,7 +21,7 @@ auth:
         example:
           authorizationToken: "SomeTokenizedValue"
 
-exportStatus:
+export:
   description:
     The current status of the export process.
   header:
@@ -34,7 +34,7 @@ exportStatus:
       schema:
         properties:
           export:
-            $ref: "schemas.yaml#/ExportStatus"
+            $ref: "schemas.yaml#/Export"
         example:
           export:
             status: "done"

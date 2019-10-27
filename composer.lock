@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "31fd621de4adfd591d4390ac5343f083",
+    "content-hash": "816c320031a5c41f32af4625769fcaf2",
     "packages": [
         {
             "name": "bluepsyduck/container-interop-doctrine-migrations",
@@ -1191,16 +1191,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "2.1.0",
+            "version": "dev-project-phoenix",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "0f88c2f87984907c980f4be4b764da825a84b498"
+                "reference": "1830f3f63060dbeea78726e163922bd5ee457f9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/0f88c2f87984907c980f4be4b764da825a84b498",
-                "reference": "0f88c2f87984907c980f4be4b764da825a84b498",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/1830f3f63060dbeea78726e163922bd5ee457f9b",
+                "reference": "1830f3f63060dbeea78726e163922bd5ee457f9b",
                 "shasum": ""
             },
             "require": {
@@ -1251,7 +1251,7 @@
                 "api",
                 "client"
             ],
-            "time": "2019-07-15T19:15:03+00:00"
+            "time": "2019-10-26T20:19:09+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
@@ -7318,6 +7318,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "factorio-item-browser/api-client": 20,
         "factorio-item-browser/api-database": 20,
         "factorio-item-browser/api-search": 20
     },

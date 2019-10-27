@@ -10,7 +10,8 @@ use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
 use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
+use FactorioItemBrowser\Api\Server\Exception\InvalidAccessKeyException;
+use FactorioItemBrowser\Api\Server\Exception\MissingBaseModException;
 use FactorioItemBrowser\Api\Server\Handler\Auth\AuthHandler;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
@@ -172,8 +173,7 @@ class AuthHandlerTest extends TestCase
      */
     public function testGetAgentFromRequest(): void
     {
-        $agentName = 'abc';
-        $accessKey = 'def';
+        $accessKey = 'abc';
 
         /* @var Agent&MockObject $agent */
         $agent = $this->createMock(Agent::class);
@@ -181,15 +181,12 @@ class AuthHandlerTest extends TestCase
         /* @var AuthRequest&MockObject $request */
         $request = $this->createMock(AuthRequest::class);
         $request->expects($this->once())
-                ->method('getAgent')
-                ->willReturn($agentName);
-        $request->expects($this->once())
                 ->method('getAccessKey')
                 ->willReturn($accessKey);
 
         $this->agentService->expects($this->once())
                            ->method('getByAccessKey')
-                           ->with($this->identicalTo($agentName), $this->identicalTo($accessKey))
+                           ->with($this->identicalTo($accessKey))
                            ->willReturn($agent);
 
         $handler = new AuthHandler($this->agentService, $this->authorizationService);
@@ -205,24 +202,20 @@ class AuthHandlerTest extends TestCase
      */
     public function testGetAgentFromRequestWithException(): void
     {
-        $agentName = 'abc';
-        $accessKey = 'def';
+        $accessKey = 'abc';
 
         /* @var AuthRequest&MockObject $request */
         $request = $this->createMock(AuthRequest::class);
-        $request->expects($this->once())
-                ->method('getAgent')
-                ->willReturn($agentName);
         $request->expects($this->once())
                 ->method('getAccessKey')
                 ->willReturn($accessKey);
 
         $this->agentService->expects($this->once())
                            ->method('getByAccessKey')
-                           ->with($this->identicalTo($agentName), $this->identicalTo($accessKey))
+                           ->with($this->identicalTo($accessKey))
                            ->willReturn(null);
 
-        $this->expectException(UnknownAgentException::class);
+        $this->expectException(InvalidAccessKeyException::class);
 
         $handler = new AuthHandler($this->agentService, $this->authorizationService);
         $this->invokeMethod($handler, 'getAgentFromRequest', $request);
@@ -236,7 +229,7 @@ class AuthHandlerTest extends TestCase
     public function testGetModNamesFromRequest(): void
     {
         $isDemo = false;
-        $modNames = ['def', 'ghi'];
+        $modNames = ['abc', Constant::MOD_NAME_BASE, 'def'];
 
         /* @var Agent&MockObject $agent */
         $agent = $this->createMock(Agent::class);
@@ -247,7 +240,7 @@ class AuthHandlerTest extends TestCase
         /* @var AuthRequest&MockObject $request */
         $request = $this->createMock(AuthRequest::class);
         $request->expects($this->once())
-                ->method('getEnabledModNames')
+                ->method('getModNames')
                 ->willReturn($modNames);
 
         $handler = new AuthHandler($this->agentService, $this->authorizationService);
@@ -275,12 +268,40 @@ class AuthHandlerTest extends TestCase
         /* @var AuthRequest&MockObject $request */
         $request = $this->createMock(AuthRequest::class);
         $request->expects($this->never())
-                ->method('getEnabledModNames');
+                ->method('getModNames');
 
         $handler = new AuthHandler($this->agentService, $this->authorizationService);
         $result = $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
 
         $this->assertSame($expectedResult, $result);
+    }
+
+    /**
+     * Tests the getModNamesFromRequest method.
+     * @throws ReflectionException
+     * @covers ::getModNamesFromRequest
+     */
+    public function testGetModNamesFromRequestWithoutBaseMod(): void
+    {
+        $isDemo = false;
+        $modNames = ['abc', 'def'];
+
+        /* @var Agent&MockObject $agent */
+        $agent = $this->createMock(Agent::class);
+        $agent->expects($this->once())
+              ->method('getIsDemo')
+              ->willReturn($isDemo);
+
+        /* @var AuthRequest&MockObject $request */
+        $request = $this->createMock(AuthRequest::class);
+        $request->expects($this->once())
+                ->method('getModNames')
+                ->willReturn($modNames);
+
+        $this->expectException(MissingBaseModException::class);
+
+        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
     }
 
     /**

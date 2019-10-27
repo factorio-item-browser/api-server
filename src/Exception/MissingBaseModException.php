@@ -7,17 +7,17 @@ namespace FactorioItemBrowser\Api\Server\Exception;
 use Throwable;
 
 /**
- * The exception thrown when an agent is not known.
+ * The exception thrown when the mandatory base mod is not included in the list of mods.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class UnknownAgentException extends ApiServerException
+class MissingBaseModException extends ApiServerException
 {
     /**
      * The message template of the exception.
      */
-    protected const MESSAGE = 'Agent is not known or invalid access key.';
+    protected const MESSAGE = 'The mandatory base mod is missing in the list of mods.';
 
     /**
      * Initializes the exception.
@@ -25,6 +25,6 @@ class UnknownAgentException extends ApiServerException
      */
     public function __construct(?Throwable $previous = null)
     {
-        parent::__construct(self::MESSAGE, 403, $previous);
+        parent::__construct(self::MESSAGE, 400, $previous);
     }
 }

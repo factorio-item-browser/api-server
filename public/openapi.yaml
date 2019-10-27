@@ -55,7 +55,7 @@ paths:
         "500":
           $ref: "openapi/errorResponses.yaml#/unexpectedError"
 
-  /export/request:
+  /export/create:
     post:
       summary:
         Requests the combination of mods of the authorization token to be exported from the game.
@@ -70,7 +70,7 @@ paths:
         - $ref: "openapi/parameters.yaml#/Authorization"
       responses:
         "200":
-          $ref: "openapi/responses.yaml#/exportStatus"
+          $ref: "openapi/responses.yaml#/export"
         "401":
           $ref: "openapi/errorResponses.yaml#/unauthorized"
         "403":
@@ -95,7 +95,7 @@ paths:
         - $ref: "openapi/parameters.yaml#/Authorization"
       responses:
         "200":
-          $ref: "openapi/responses.yaml#/exportStatus"
+          $ref: "openapi/responses.yaml#/export"
         "401":
           $ref: "openapi/errorResponses.yaml#/unauthorized"
         "403":
@@ -355,8 +355,8 @@ paths:
 
 components:
   schemas:
-    ExportStatus:
-      $ref: "openapi/schemas.yaml#/ExportStatus"
+    Export:
+      $ref: "openapi/schemas.yaml#/Export"
     GenericEntity:
       $ref: "openapi/schemas.yaml#/GenericEntity"
     GenericEntityWithRecipes:

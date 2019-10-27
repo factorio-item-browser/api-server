@@ -10,7 +10,8 @@ use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\UnknownAgentException;
+use FactorioItemBrowser\Api\Server\Exception\MissingBaseModException;
+use FactorioItemBrowser\Api\Server\Exception\InvalidAccessKeyException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
@@ -100,12 +101,9 @@ class AuthHandler extends AbstractRequestHandler
      */
     protected function getAgentFromRequest(AuthRequest $clientRequest): Agent
     {
-        $result = $this->agentService->getByAccessKey(
-            $clientRequest->getAgent(),
-            $clientRequest->getAccessKey()
-        );
+        $result = $this->agentService->getByAccessKey($clientRequest->getAccessKey());
         if ($result === null) {
-            throw new UnknownAgentException();
+            throw new InvalidAccessKeyException();
         }
 
         return $result;
@@ -116,13 +114,18 @@ class AuthHandler extends AbstractRequestHandler
      * @param Agent $agent
      * @param AuthRequest $request
      * @return array|string[]
+     * @throws ApiServerException
      */
     protected function getModNamesFromRequest(Agent $agent, AuthRequest $request): array
     {
         if ($agent->getIsDemo()) {
             return [Constant::MOD_NAME_BASE];
         }
-        return $request->getEnabledModNames();
+        $modNames = $request->getModNames();
+        if (!in_array(Constant::MOD_NAME_BASE, $modNames, true)) {
+            throw new MissingBaseModException();
+        }
+        return $modNames;
     }
 
     /**

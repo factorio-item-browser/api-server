@@ -19,7 +19,7 @@
     "bluepsyduck/container-interop-doctrine-migrations": "^1.0",
     "bluepsyduck/mapper-manager": "^1.0",
     "bluepsyduck/zend-autowire-factory": "^1.1",
-    "factorio-item-browser/api-client": "^2.1",
+    "factorio-item-browser/api-client": "dev-project-phoenix",
     "factorio-item-browser/api-database": "dev-project-phoenix",
     "factorio-item-browser/api-search": "dev-project-phoenix",
     "firebase/php-jwt": "^5.0",

@@ -3,10 +3,10 @@
 # @author BluePsyduck <bluepsyduck@gmx.com>
 # @license http://opensource.org/licenses/GPL-3.0 GPL v3
 
-ExportStatus:
-  title: "ExportStatus"
+Export:
+  title: "Export"
   type: "object"
-  description: "The status of an actual export."
+  description: "An export with its current status."
   properties:
     status:
       type: "string"

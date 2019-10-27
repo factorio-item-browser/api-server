@@ -21,7 +21,7 @@ return [
             ConfigKey::AGENTS => [
                 [
                     ConfigKey::AGENT_NAME => 'demo',
-                    ConfigKey::AGENT_ACCESS_KEY => 'factorio-item-browser',
+                    ConfigKey::AGENT_ACCESS_KEY => 'demo',
                     ConfigKey::AGENT_DEMO => true,
                 ],
             ],
