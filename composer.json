@@ -22,6 +22,7 @@
     "factorio-item-browser/api-client": "dev-project-phoenix",
     "factorio-item-browser/api-database": "dev-project-phoenix",
     "factorio-item-browser/api-search": "dev-project-phoenix",
+    "factorio-item-browser/export-queue-client": "^1.0",
     "firebase/php-jwt": "^5.0",
     "mtymek/blast-base-url": "^1.0",
     "ramsey/uuid": "^3.8",

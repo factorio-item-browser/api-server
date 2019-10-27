@@ -28,6 +28,7 @@ $aggregator = new ConfigAggregator([
     \FactorioItemBrowser\Api\Client\ConfigProvider::class,
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,
     \FactorioItemBrowser\Api\Search\ConfigProvider::class,
+    \FactorioItemBrowser\ExportQueue\Client\ConfigProvider::class,
     \Zend\Expressive\Helper\ConfigProvider::class,
     \Zend\Expressive\ConfigProvider::class,
     \Zend\Expressive\Router\ConfigProvider::class,

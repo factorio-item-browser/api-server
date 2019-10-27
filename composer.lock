@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "816c320031a5c41f32af4625769fcaf2",
+    "content-hash": "562354e56bb76517e395a15d72729654",
     "packages": [
         {
             "name": "bluepsyduck/container-interop-doctrine-migrations",
@@ -1195,18 +1195,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "1830f3f63060dbeea78726e163922bd5ee457f9b"
+                "reference": "8a877d1431fed9ebc1919f216f3f4de31656be5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/1830f3f63060dbeea78726e163922bd5ee457f9b",
-                "reference": "1830f3f63060dbeea78726e163922bd5ee457f9b",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/8a877d1431fed9ebc1919f216f3f4de31656be5d",
+                "reference": "8a877d1431fed9ebc1919f216f3f4de31656be5d",
                 "shasum": ""
             },
             "require": {
                 "factorio-item-browser/common": "^1.0",
                 "guzzlehttp/guzzle": "^6.3",
-                "jms/serializer": "^2.1",
+                "jms/serializer": "^3.2",
                 "php": "^7.2",
                 "symfony/yaml": "^4.2",
                 "zendframework/zend-servicemanager": "^3.0"
@@ -1251,7 +1251,7 @@
                 "api",
                 "client"
             ],
-            "time": "2019-10-26T20:19:09+00:00"
+            "time": "2019-10-27T09:02:42+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
@@ -1431,6 +1431,70 @@
                 "common"
             ],
             "time": "2019-05-27T16:30:50+00:00"
+        },
+        {
+            "name": "factorio-item-browser/export-queue-client",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/factorio-item-browser/export-queue-client.git",
+                "reference": "01742536fcc14455b7cbe69e43b174d469b58c1d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/factorio-item-browser/export-queue-client/zipball/01742536fcc14455b7cbe69e43b174d469b58c1d",
+                "reference": "01742536fcc14455b7cbe69e43b174d469b58c1d",
+                "shasum": ""
+            },
+            "require": {
+                "bluepsyduck/zend-autowire-factory": "^1.1",
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^6.3",
+                "jms/serializer": "^3.2",
+                "php": "^7.2",
+                "symfony/yaml": "^4.2",
+                "zendframework/zend-servicemanager": "^3.0"
+            },
+            "require-dev": {
+                "bluepsyduck/test-helper": "^1.0",
+                "phpstan/phpstan": "^0.11",
+                "phpstan/phpstan-phpunit": "^0.11",
+                "phpstan/phpstan-strict-rules": "^0.11",
+                "phpunit/phpunit": "^8.0",
+                "rregeer/phpunit-coverage-check": "^0.2",
+                "squizlabs/php_codesniffer": "^3.3"
+            },
+            "type": "library",
+            "extra": {
+                "zf": {
+                    "config-provider": "FactorioItemBrowser\\ExportQueue\\Client\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FactorioItemBrowser\\ExportQueue\\Client\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "BluePsyduck",
+                    "email": "bluepsyduck@gmx.com"
+                }
+            ],
+            "description": "A client to access the export queue of the Factorio Item Browser.",
+            "homepage": "https://github.com/BluePsyduck/factorio-mod-portal-client",
+            "keywords": [
+                "FIB",
+                "Factorio Item Browser",
+                "client",
+                "export",
+                "queue"
+            ],
+            "time": "2019-10-13T11:47:28+00:00"
         },
         {
             "name": "fig/http-message-util",
@@ -2558,16 +2622,16 @@
         },
         {
             "name": "jms/serializer",
-            "version": "2.3.0",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "beb3f1805c7d22c9be5ff91e0dc7e5a49a8b08ad"
+                "reference": "4c1e4296734385af7718ca71ec0febb4815b4a87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/beb3f1805c7d22c9be5ff91e0dc7e5a49a8b08ad",
-                "reference": "beb3f1805c7d22c9be5ff91e0dc7e5a49a8b08ad",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/4c1e4296734385af7718ca71ec0febb4815b4a87",
+                "reference": "4c1e4296734385af7718ca71ec0febb4815b4a87",
                 "shasum": ""
             },
             "require": {
@@ -2588,7 +2652,7 @@
                 "doctrine/phpcr-odm": "^1.3|^2.0",
                 "ext-pdo_sqlite": "*",
                 "jackalope/jackalope-doctrine-dbal": "^1.1.5",
-                "phpunit/phpunit": "^7.1",
+                "phpunit/phpunit": "^7.5||^8.0",
                 "psr/container": "^1.0",
                 "symfony/dependency-injection": "^3.0|^4.0",
                 "symfony/expression-language": "^3.0|^4.0",
@@ -2597,7 +2661,7 @@
                 "symfony/translation": "^3.0|^4.0",
                 "symfony/validator": "^3.1.9|^4.0",
                 "symfony/yaml": "^3.3|^4.0",
-                "twig/twig": "^1.12|^2.0"
+                "twig/twig": "~1.34|~2.4"
             },
             "suggest": {
                 "doctrine/cache": "Required if you like to use cache functionality.",
@@ -2607,7 +2671,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.3-dev"
+                    "dev-master": "3.3-dev"
                 }
             },
             "autoload": {
@@ -2621,12 +2685,12 @@
             ],
             "authors": [
                 {
-                    "name": "Asmir Mustafic",
-                    "email": "goetas@gmail.com"
-                },
-                {
                     "name": "Johannes M. Schmitt",
                     "email": "schmittjoh@gmail.com"
+                },
+                {
+                    "name": "Asmir Mustafic",
+                    "email": "goetas@gmail.com"
                 }
             ],
             "description": "Library for (de-)serializing data of any complexity; supports XML, JSON, and YAML.",
@@ -2638,7 +2702,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2019-04-17T08:03:38+00:00"
+            "time": "2019-09-20T14:24:07+00:00"
         },
         {
             "name": "mtymek/blast-base-url",
@@ -5269,7 +5333,7 @@
                     "homepage": "https://nette.org/contributors"
                 }
             ],
-            "description": "🍸 Nette NEON: encodes and decodes NEON file format.",
+            "description": "? Nette NEON: encodes and decodes NEON file format.",
             "homepage": "http://ne-on.org",
             "keywords": [
                 "export",
