@@ -33,10 +33,12 @@ class AuthorizationServiceTest extends TestCase
     public function testConstruct(): void
     {
         $authorizationKey = 'abc';
+        $authorizationTokenLifetime = 42;
 
-        $service = new AuthorizationService($authorizationKey);
+        $service = new AuthorizationService($authorizationKey, $authorizationTokenLifetime);
 
         $this->assertSame($authorizationKey, $this->extractProperty($service, 'authorizationKey'));
+        $this->assertSame($authorizationTokenLifetime, $this->extractProperty($service, 'authorizationTokenLifetime'));
     }
 
     /**
@@ -63,7 +65,7 @@ class AuthorizationServiceTest extends TestCase
         /* @var AuthorizationService&MockObject $service */
         $service = $this->getMockBuilder(AuthorizationService::class)
                         ->onlyMethods(['getTokenData'])
-                        ->setConstructorArgs([$authorizationKey])
+                        ->setConstructorArgs([$authorizationKey, 42])
                         ->getMock();
         $service->expects($this->once())
                 ->method('getTokenData')
@@ -91,7 +93,7 @@ class AuthorizationServiceTest extends TestCase
               ->setCombinationId($combinationId)
               ->setModNames($modNames);
 
-        $service = new AuthorizationService('foo');
+        $service = new AuthorizationService('foo', 42);
         $result = $this->invokeMethod($service, 'getTokenData', $token);
 
         $this->assertIsArray($result);
@@ -189,7 +191,7 @@ class AuthorizationServiceTest extends TestCase
             $this->expectException(InvalidAuthorizationTokenException::class);
         }
 
-        $service = new AuthorizationService($authorizationKey);
+        $service = new AuthorizationService($authorizationKey, 42);
         $result = $this->invokeMethod($service, 'decodeSerializedToken', $serializedToken);
 
         $this->assertEquals($expectedResult, $result);

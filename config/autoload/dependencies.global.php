@@ -78,6 +78,8 @@ return [
             'array $mapRouteToRequest' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
             'array $searchDecorators' => injectAliasArray(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::SEARCH_DECORATORS),
 
+            'int $authorizationTokenLifetime' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_TOKEN_LIFETIME),
+
             'string $authorizationKey' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_KEY),
             'string $version' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::VERSION),
         ],

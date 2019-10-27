@@ -25,23 +25,26 @@ class AuthorizationService
     protected const AUTH_TOKEN_ALGORITHM = 'HS256';
 
     /**
-     * The lifetime of the auth tokens.
-     */
-    protected const AUTH_TOKEN_LIFETIME = 3600;
-
-    /**
      * The key to use for the authorization.
      * @var string
      */
     protected $authorizationKey;
 
     /**
+     * The lifetime of the authorization token, in seconds.
+     * @var int
+     */
+    protected $authorizationTokenLifetime;
+
+    /**
      * Initializes the helper.
      * @param string $authorizationKey
+     * @param int $authorizationTokenLifetime
      */
-    public function __construct(string $authorizationKey)
+    public function __construct(string $authorizationKey, int $authorizationTokenLifetime)
     {
         $this->authorizationKey = $authorizationKey;
+        $this->authorizationTokenLifetime = $authorizationTokenLifetime;
     }
 
     /**
@@ -66,7 +69,7 @@ class AuthorizationService
     protected function getTokenData(AuthorizationToken $token): array
     {
         return [
-            'exp' => time() + self::AUTH_TOKEN_LIFETIME,
+            'exp' => time() + $this->authorizationTokenLifetime,
             'agt' => $token->getAgentName(),
             'cmb' => $token->getCombinationId()->toString(),
             'mds' => $token->getModNames(),

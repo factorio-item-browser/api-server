@@ -25,6 +25,7 @@ return [
             ],
             ConfigKey::AUTHORIZATION => [
                 ConfigKey::AUTHORIZATION_KEY => 'factorio-item-browser',
+                ConfigKey::AUTHORIZATION_TOKEN_LIFETIME => 86400,
             ],
         ],
     ],

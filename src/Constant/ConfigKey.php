@@ -53,6 +53,11 @@ interface ConfigKey
     public const AUTHORIZATION_KEY = 'key';
 
     /**
+     * The key holding the lifetime of authorization tokens.
+     */
+    public const AUTHORIZATION_TOKEN_LIFETIME = 'token-lifetime';
+
+    /**
      * The key holding the map of the routes to their corresponding requests.
      */
     public const MAP_ROUTE_TO_REQUEST = 'map-route-to-request';
