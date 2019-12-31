@@ -14,6 +14,6 @@ namespace FactorioItemBrowser\Api\Server;
 use Zend\ConfigAggregator\ConfigAggregator;
 
 return [
-    ConfigAggregator::ENABLE_CACHE => false,
-    'debug' => true,
+    ConfigAggregator::ENABLE_CACHE => true,
+    'debug' => false,
 ];
