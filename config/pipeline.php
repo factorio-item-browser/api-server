@@ -31,7 +31,6 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(BaseUrlMiddleware::class);
     $app->pipe(ServerUrlMiddleware::class);
     $app->pipe(RouteMiddleware::class);
-    $app->pipe(Middleware\DocumentationRedirectMiddleware::class);
     $app->pipe(MethodNotAllowedMiddleware::class);
     $app->pipe(ImplicitHeadMiddleware::class);
     $app->pipe(ImplicitOptionsMiddleware::class);

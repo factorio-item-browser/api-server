@@ -52,7 +52,6 @@ return [
             Middleware\TranslationMiddleware::class => AutoWireFactory::class,
             Middleware\AuthorizationMiddleware::class => AutoWireFactory::class,
             Middleware\CleanupMiddleware::class => AutoWireFactory::class,
-            Middleware\DocumentationRedirectMiddleware::class => AutoWireFactory::class,
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
