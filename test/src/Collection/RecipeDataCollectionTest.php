@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Collection;
 
-use ArrayIterator;
 use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
@@ -371,27 +370,5 @@ class RecipeDataCollectionTest extends TestCase
 
         $result = $collection->getFirstValue();
         $this->assertNull($result);
-    }
-
-    /**
-     * Tests the getIterator method.
-     * @throws ReflectionException
-     * @covers ::getIterator
-     */
-    public function testGetIterator(): void
-    {
-        /* @var RecipeData&MockObject $recipeData1 */
-        $recipeData1 = $this->createMock(RecipeData::class);
-        /* @var RecipeData&MockObject $recipeData2 */
-        $recipeData2 = $this->createMock(RecipeData::class);
-
-        $values = [$recipeData1, $recipeData2];
-        $expectedResult = new ArrayIterator($values);
-
-        $collection = new RecipeDataCollection();
-        $this->injectProperty($collection, 'values', $values);
-
-        $result = $collection->getIterator();
-        $this->assertEquals($expectedResult, $result);
     }
 }

@@ -13,7 +13,6 @@ use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the DatabaseRecipeToGenericEntityMapper class.
@@ -32,7 +31,6 @@ class DatabaseRecipeToGenericEntityMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -43,8 +41,7 @@ class DatabaseRecipeToGenericEntityMapperTest extends TestCase
 
     /**
      * Provides the data for the supports test.
-     * @return array
-     * @throws ReflectionException
+     * @return array<mixed>
      */
     public function provideSupports(): array
     {
@@ -83,7 +80,6 @@ class DatabaseRecipeToGenericEntityMapperTest extends TestCase
 
     /**
      * Tests the map method.
-     * @throws ReflectionException
      * @covers ::map
      */
     public function testMap(): void

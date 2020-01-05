@@ -303,7 +303,7 @@ class MachineServiceTest extends TestCase
 
     /**
      * Provides the data for the isMachineValid test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideIsMachineValid(): array
     {
@@ -408,7 +408,7 @@ class MachineServiceTest extends TestCase
 
     /**
      * Provides the data for the compareMachines test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCompareMachines(): array
     {

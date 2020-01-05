@@ -49,7 +49,7 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
     /**
      * Provides the data for the supports test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideSupports(): array
     {
@@ -88,7 +88,6 @@ class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 
     /**
      * Tests the map method.
-     * @throws ReflectionException
      * @covers ::map
      */
     public function testMap(): void

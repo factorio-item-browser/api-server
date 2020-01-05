@@ -346,7 +346,7 @@ class RecipeDecoratorTest extends TestCase
 
     /**
      * Provides the data for the getRecipeIdFromResult test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideGetRecipeIdFromResult(): array
     {

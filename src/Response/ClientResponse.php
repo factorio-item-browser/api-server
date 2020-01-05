@@ -29,7 +29,7 @@ class ClientResponse extends Response
      * Initializes the response.
      * @param ResponseInterface $response
      * @param int $status
-     * @param array $headers
+     * @param array|string[] $headers
      */
     public function __construct(ResponseInterface $response, $status = 200, array $headers = [])
     {

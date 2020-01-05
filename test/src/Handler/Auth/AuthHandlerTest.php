@@ -306,7 +306,7 @@ class AuthHandlerTest extends TestCase
 
     /**
      * Provides the data for the calculateCombinationId test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCalculateCombinationId(): array
     {

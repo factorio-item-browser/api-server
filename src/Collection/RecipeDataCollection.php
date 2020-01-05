@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Collection;
 
-use ArrayIterator;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
-use IteratorAggregate;
 use Ramsey\Uuid\UuidInterface;
-use Traversable;
 
 /**
  * The collection holding recipe data entities and offering multiple filters.
@@ -16,7 +13,7 @@ use Traversable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeDataCollection implements IteratorAggregate
+class RecipeDataCollection
 {
     /**
      * The values of the collection.
@@ -140,14 +137,5 @@ class RecipeDataCollection implements IteratorAggregate
     {
         $result = reset($this->values);
         return $result instanceof RecipeData ? $result : null;
-    }
-
-    /**
-     * Returns an iterator for the collection.
-     * @return Traversable
-     */
-    public function getIterator()
-    {
-        return new ArrayIterator($this->values);
     }
 }

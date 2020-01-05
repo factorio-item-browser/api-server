@@ -105,7 +105,7 @@ class TranslationService
     /**
      * Returns the criteria to sort the translation.
      * @param Translation $translation
-     * @return array
+     * @return array<mixed>
      */
     protected function getSortCriteria(Translation $translation): array
     {
@@ -119,7 +119,7 @@ class TranslationService
     /**
      * Prepares the translations for matching to the entities.
      * @param array|Translation[] $translations
-     * @return array
+     * @return array|Translation[]
      */
     protected function prepareTranslations(array $translations): array
     {

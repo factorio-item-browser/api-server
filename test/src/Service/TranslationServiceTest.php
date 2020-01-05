@@ -212,7 +212,7 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Provides the data for the compareTranslations test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCompareTranslations(): array
     {
@@ -247,8 +247,8 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Tests the compareTranslations method.
-     * @param array $leftCriteria
-     * @param array $rightCriteria
+     * @param array<mixed> $leftCriteria
+     * @param array<mixed> $rightCriteria
      * @param int $expectedResult
      * @throws ReflectionException
      * @covers ::compareTranslations
@@ -373,7 +373,7 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Provides the data for the getTypesForTranslation test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideGetTypesForTranslation(): array
     {
@@ -429,7 +429,7 @@ class TranslationServiceTest extends TestCase
     /**
      * Tests the getTypesForTranslation method.
      * @param Translation $translation
-     * @param array $expectedResult
+     * @param array|string[] $expectedResult
      * @throws ReflectionException
      * @covers ::getTypesForTranslation
      * @dataProvider provideGetTypesForTranslation

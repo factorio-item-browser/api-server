@@ -86,7 +86,7 @@ class ErrorResponseGenerator
      * Creates the error response data.
      * @param string $message
      * @param Throwable $exception
-     * @return array
+     * @return array<mixed>
      */
     protected function createResponseError(string $message, Throwable $exception): array
     {

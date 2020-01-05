@@ -27,7 +27,6 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Tests the invoking.
-     * @throws ReflectionException
      * @covers ::__invoke
      */
     public function testInvoke(): void
@@ -70,7 +69,7 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Provides the data for the createAgent test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCreateAgent(): array
     {
@@ -104,7 +103,7 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Tests the createAgent method.
-     * @param array $agentConfig
+     * @param array<mixed> $agentConfig
      * @param Agent $expectedResult
      * @throws ReflectionException
      * @covers ::createAgent

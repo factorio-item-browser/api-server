@@ -15,7 +15,7 @@ return [
     'doctrine' => [
         'migrations_configuration' => [
             'orm_default' => [
-                'directory' => __DIR__ . '/../../data/migrations',
+                'directory' => 'data/migrations',
                 'name'      => 'API Server Database Migrations',
                 'namespace' => 'FactorioItemBrowser\Api\Server\Migrations',
                 'table'     => '_Migrations',

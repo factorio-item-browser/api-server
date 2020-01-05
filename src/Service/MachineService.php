@@ -82,7 +82,7 @@ class MachineService
 
     /**
      * Counts the item with a type.
-     * @param Collection $entities
+     * @param Collection<int,RecipeIngredient|RecipeProduct> $entities
      * @param string $type
      * @return int
      */

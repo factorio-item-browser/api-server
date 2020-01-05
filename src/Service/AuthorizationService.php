@@ -64,7 +64,7 @@ class AuthorizationService
     /**
      * Returns the token data to use.
      * @param AuthorizationToken $token
-     * @return array
+     * @return array<mixed>
      */
     protected function getTokenData(AuthorizationToken $token): array
     {

@@ -38,7 +38,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -54,7 +53,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $mapRouteToRequest = ['abc' => 'def'];
+        $mapRouteToRequest = ['abc' => RequestInterface::class];
 
         $middleware = new RequestDeserializerMiddleware($this->serializer, $mapRouteToRequest);
 
@@ -65,7 +64,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
     /**
      * Tests the process method.
      * @throws ApiServerException
-     * @throws ReflectionException
      * @covers ::process
      */
     public function testProcess(): void
@@ -117,7 +115,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
     /**
      * Tests the process method without a match for deserializing the request.
      * @throws ApiServerException
-     * @throws ReflectionException
      * @covers ::process
      */
     public function testProcessWithoutMatch(): void

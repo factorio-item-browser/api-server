@@ -143,7 +143,7 @@ class AuthorizationServiceTest extends TestCase
 
     /**
      * Provides the data for the decodeSerializedToken test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideDecodeSerializedToken(): array
     {
