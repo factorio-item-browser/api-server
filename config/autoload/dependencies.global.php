@@ -25,6 +25,7 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'dependencies' => [
         'aliases' => [
+            ErrorResponseGenerator::class => Response\ErrorResponseGenerator::class,
             SerializerInterface::class => ServiceName::SERIALIZER,
         ],
         'factories'  => [
@@ -56,6 +57,8 @@ return [
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
 
+            Response\ErrorResponseGenerator::class => AutoWireFactory::class,
+
             SearchDecorator\ItemDecorator::class => AutoWireFactory::class,
             SearchDecorator\RecipeDecorator::class => AutoWireFactory::class,
 
@@ -69,13 +72,14 @@ return [
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => AutoWireFactory::class,
-            ErrorResponseGenerator::class => Response\ErrorResponseGeneratorFactory::class,
 
             'doctrine.migrations.orm_default' => MigrationsConfigurationFactory::class,
 
             // Auto-wire helpers
             'array $mapRouteToRequest' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
             'array $searchDecorators' => injectAliasArray(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::SEARCH_DECORATORS),
+
+            'bool $isDebug' => readConfig('debug'),
 
             'int $authorizationTokenLifetime' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_TOKEN_LIFETIME),
 

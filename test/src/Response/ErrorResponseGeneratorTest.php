@@ -145,8 +145,6 @@ class ErrorResponseGeneratorTest extends TestCase
         $this->assertEquals($expectedPayload, $result->getPayload());
     }
 
-
-
     /**
      * Tests the logException method.
      * @throws ReflectionException
@@ -182,23 +180,6 @@ class ErrorResponseGeneratorTest extends TestCase
 
         $generator = new ErrorResponseGenerator($this->logger, true);
         $this->invokeMethod($generator, 'logException', $statusCode, $exception);
-    }
-
-    /**
-     * Tests the logException method without an actual logger.
-     * @throws ReflectionException
-     * @covers ::logException
-     */
-    public function testLogExceptionWithoutLogger(): void
-    {
-        $statusCode = 500;
-        /* @var Exception&MockObject $exception */
-        $exception = $this->createMock(Exception::class);
-
-        $generator = new ErrorResponseGenerator(null, true);
-        $this->invokeMethod($generator, 'logException', $statusCode, $exception);
-
-        $this->expectNotToPerformAssertions();
     }
 
     /**
