@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * The configuration of the Zend log.
+ * The configuration of the Laminas log.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
@@ -11,9 +11,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Zend\Log\Logger;
-use Zend\Log\LoggerInterface;
-use Zend\Log\Writer\Stream;
+use Laminas\Log\Logger;
+use Laminas\Log\LoggerInterface;
+use Laminas\Log\Writer\Stream;
 
 return [
     'log' => [

@@ -12,9 +12,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server;
 
 use FactorioItemBrowser\Api\Server\Constant\RouteName;
+use Mezzio\Application;
+use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
-use Zend\Expressive\Application;
-use Zend\Expressive\MiddlewareFactory;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->post('/auth', Handler\Auth\AuthHandler::class, RouteName::AUTH);

@@ -7,7 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Service;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * The factory of the agent service.

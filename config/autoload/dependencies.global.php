@@ -12,15 +12,15 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server;
 
 use BluePsyduck\ContainerInteropDoctrineMigrations\MigrationsConfigurationFactory;
-use BluePsyduck\ZendAutoWireFactory\AutoWireFactory;
-use function BluePsyduck\ZendAutoWireFactory\injectAliasArray;
-use function BluePsyduck\ZendAutoWireFactory\readConfig;
+use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
 use FactorioItemBrowser\Api\Client\Constant\ServiceName;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use JMS\Serializer\SerializerInterface;
-use Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware;
-use Zend\Expressive\Middleware\ErrorResponseGenerator;
-use Zend\ServiceManager\Factory\InvokableFactory;
+use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
+use Mezzio\Middleware\ErrorResponseGenerator;
+
+use function BluePsyduck\LaminasAutoWireFactory\injectAliasArray;
+use function BluePsyduck\LaminasAutoWireFactory\readConfig;
 
 return [
     'dependencies' => [
@@ -36,7 +36,7 @@ return [
             Handler\Item\ItemProductHandler::class => AutoWireFactory::class,
             Handler\Item\ItemRandomHandler::class => AutoWireFactory::class,
             Handler\Mod\ModListHandler::class => AutoWireFactory::class,
-            Handler\NotFoundHandler::class => InvokableFactory::class,
+            Handler\NotFoundHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeMachinesHandler::class => AutoWireFactory::class,
             Handler\Search\SearchQueryHandler::class => AutoWireFactory::class,

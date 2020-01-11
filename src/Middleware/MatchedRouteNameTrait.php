@@ -6,8 +6,8 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Exception\InternalServerException;
+use Mezzio\Router\RouteResult;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Expressive\Router\RouteResult;
 
 /**
  * The trait helping with fetching the matched route name from the request.

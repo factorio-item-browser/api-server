@@ -11,9 +11,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Zend\ConfigAggregator\ArrayProvider;
-use Zend\ConfigAggregator\ConfigAggregator;
-use Zend\ConfigAggregator\PhpFileProvider;
+use Laminas\ConfigAggregator\ArrayProvider;
+use Laminas\ConfigAggregator\ConfigAggregator;
+use Laminas\ConfigAggregator\PhpFileProvider;
 
 $cacheConfig = [
     'config_cache_path' => 'data/cache/config-cache.php',
@@ -29,12 +29,12 @@ $aggregator = new ConfigAggregator([
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,
     \FactorioItemBrowser\Api\Search\ConfigProvider::class,
     \FactorioItemBrowser\ExportQueue\Client\ConfigProvider::class,
-    \Zend\Expressive\Helper\ConfigProvider::class,
-    \Zend\Expressive\ConfigProvider::class,
-    \Zend\Expressive\Router\ConfigProvider::class,
-    \Zend\Expressive\Router\FastRouteRouter\ConfigProvider::class,
-    \Zend\HttpHandlerRunner\ConfigProvider::class,
-    \Zend\Log\ConfigProvider::class,
+    \Laminas\HttpHandlerRunner\ConfigProvider::class,
+    \Laminas\Log\ConfigProvider::class,
+    \Mezzio\ConfigProvider::class,
+    \Mezzio\Helper\ConfigProvider::class,
+    \Mezzio\Router\ConfigProvider::class,
+    \Mezzio\Router\FastRouteRouter\ConfigProvider::class,
 
     // Load application config in a pre-defined order in such a way that local settings
     // overwrite global settings. (Loaded as first to last):
