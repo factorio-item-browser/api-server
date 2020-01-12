@@ -32,7 +32,8 @@
     "mezzio/mezzio-fastroute": "^3.0",
     "mezzio/mezzio-helpers": "^5.0",
     "mtymek/blast-base-url": "^1.0",
-    "ramsey/uuid": "^3.8"
+    "ramsey/uuid": "^3.8",
+    "symfony/console": "^4.0 || ^5.0"
   },
   "require-dev": {
     "bluepsyduck/test-helper": "^1.0",

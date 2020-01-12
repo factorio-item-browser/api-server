@@ -5,6 +5,7 @@
 ### Added
 
 - Attribute `size` to the generic icon response.
+- Command for clearing the caches from out-dated entries.
 
 ### Changed
 

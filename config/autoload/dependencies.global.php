@@ -29,6 +29,8 @@ return [
             SerializerInterface::class => ServiceName::SERIALIZER,
         ],
         'factories'  => [
+            Command\CleanCacheCommand::class => AutoWireFactory::class,
+
             Handler\Auth\AuthHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericDetailsHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericIconHandler::class => AutoWireFactory::class,
