@@ -8,6 +8,7 @@ info:
     name: BluePsyduck
     email: bluepsyduck@gmx.com
   version: 1.2.0
+
 servers:
   - url: https://www.factorio-item-browser.com/api
     description: Live API server
@@ -15,8 +16,8 @@ servers:
 tags:
   - name: Authorization
     description: Requests to authorize against the API.
-  - name: Export
-    description: Requests related to the export of mod data to the browser.
+  - name: Combination
+    description: Requests related to the combinations of mods.
   - name: Generic
     description: Requests providing generic data to entities.
   - name: Items
@@ -52,6 +53,46 @@ paths:
           $ref: "#/components/responses/badRequest"
         "403":
           $ref: "#/components/responses/accessDenied"
+
+  /combination/status:
+    post:
+      summary: Provides the current status of data of the combination of mods from the authorization token.
+      description:
+        This request provides information on how far the export process has progressed to make the data of the mods
+        available. If data is not available yet, the API will fall back to the Vanilla combination in all other
+        requests.
+      operationId: combination.status
+      tags:
+        - Combination
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      responses:
+        "200":
+          $ref: "#/components/responses/combinationStatus"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /combination/export:
+    post:
+      summary: Requests the combination of mods from the authorization token to be exported from the Factorio game.
+      description:
+        This request will trigger a new export of the combination of mods specified in the authorization token to be
+        exported from the Factorio game and imported into the database. This process will take some time. The current
+        status of the process can be accessed through the /combination/status endpoint.
+      operationId: combination.export
+      tags:
+        - Combination
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      responses:
+        "200":
+          $ref: "#/components/responses/combinationStatus"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
 
   /generic/details:
     post:
@@ -195,8 +236,6 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/modList"
-        "400":
-          $ref: "#/components/responses/badRequest"
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
@@ -466,6 +505,28 @@ components:
                 description: The authorization token to use in the other requests.
                 example: <token value>
 
+    combinationStatus:
+      description: The combination status.
+      content:
+        application/json:
+          schema:
+            properties:
+              id:
+                type: string
+                description: The ID of the combination.
+                example: 2f4a45fa-a509-a9d1-aae6-ffcf984a7a76
+              modNames:
+                type: array
+                description: The names of the mods in the combination.
+                items:
+                  type: string
+                example:
+                  - base
+              latestExportJob:
+                $ref: "#/components/schemas/ExportJob"
+              latestSuccessfulExportJob:
+                $ref: "#/components/schemas/ExportJob"
+
     genericDetails:
       description: The generic details of entities.
       content:
@@ -665,9 +726,9 @@ components:
           description: The message of the error which occurred.
           example: An unexpected error occured.
 
-    Export:
+    ExportJob:
       type: object
-      description: An export with its current status.
+      description: The information to an actual export job.
       properties:
         status:
           type: string
@@ -680,18 +741,26 @@ components:
             - done
             - error
           description: The current status of the export process.
+          example: done
         creationTime:
           type: string
           format: datetime
           description: The time when the export was triggered and put into the queue.
+          example: "2038-01-19T03:10:07+00:00"
         exportTime:
           type: string
           format: datetime
           description: The time when the actual export was processed.
+          example: "2038-01-19T03:12:07+00:00"
         importTime:
           type: string
           format: datetime
           description: The time when the exported data has been imported to the browser database.
+          example: "2038-01-19T03:14:07+00:00"
+        errorMessage:
+          type: string
+          description: The error message in case the status is "error".
+          example: ""
 
     GenericEntity:
       type: object
