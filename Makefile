@@ -10,7 +10,7 @@ build-cache: ## Cleans and re-nuilds the cache.
 	docker-compose run php composer build-cache
 
 install: ## Installs the dependencies of the project.
-	docker-compose run php install
+	docker-compose run php composer install
 
 fix: ## Fixes the codestyle in the project.
 	docker-compose run php composer phpcbf

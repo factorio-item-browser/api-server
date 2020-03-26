@@ -32,6 +32,8 @@ return [
             Command\CleanCacheCommand::class => AutoWireFactory::class,
 
             Handler\Auth\AuthHandler::class => AutoWireFactory::class,
+            Handler\Combination\CombinationExportHandler::class => AutoWireFactory::class,
+            Handler\Combination\CombinationStatusHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericDetailsHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericIconHandler::class => AutoWireFactory::class,
             Handler\Item\ItemIngredientHandler::class => AutoWireFactory::class,
@@ -49,6 +51,7 @@ return [
             Mapper\DatabaseModToClientModMapper::class => AutoWireFactory::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class => AutoWireFactory::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class => AutoWireFactory::class,
+            Mapper\ExportJobMapper::class => AutoWireFactory::class,
             Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class => AutoWireFactory::class,
             Mapper\RecipeDataToGenericEntityMapper::class => AutoWireFactory::class,
 
@@ -66,6 +69,7 @@ return [
 
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => AutoWireFactory::class,
+            Service\ExportQueueService::class => AutoWireFactory::class,
             Service\IconService::class => AutoWireFactory::class,
             Service\MachineService::class => AutoWireFactory::class,
             Service\RecipeService::class => AutoWireFactory::class,

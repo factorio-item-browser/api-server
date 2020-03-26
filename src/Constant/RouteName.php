@@ -13,8 +13,8 @@ namespace FactorioItemBrowser\Api\Server\Constant;
 interface RouteName
 {
     public const AUTH = 'auth';
-    public const EXPORT_CREATE = 'export.create';
-    public const EXPORT_STATUS = 'export.status';
+    public const COMBINATION_EXPORT = 'combination.export';
+    public const COMBINATION_STATUS = 'combination.status';
     public const GENERIC_DETAILS = 'generic.details';
     public const GENERIC_ICON = 'generic.icon';
     public const ITEM_INGREDIENT = 'item.ingredient';

@@ -19,6 +19,9 @@ use Psr\Container\ContainerInterface;
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->post('/auth', Handler\Auth\AuthHandler::class, RouteName::AUTH);
 
+    $app->post('/combination/export', Handler\Combination\CombinationExportHandler::class, RouteName::COMBINATION_EXPORT);
+    $app->post('/combination/status', Handler\Combination\CombinationStatusHandler::class, RouteName::COMBINATION_STATUS);
+
     $app->post('/generic/details', Handler\Generic\GenericDetailsHandler::class, RouteName::GENERIC_DETAILS);
     $app->post('/generic/icon', Handler\Generic\GenericIconHandler::class, RouteName::GENERIC_ICON);
 
