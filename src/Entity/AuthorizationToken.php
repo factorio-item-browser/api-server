@@ -33,10 +33,16 @@ class AuthorizationToken
     protected $modNames = [];
 
     /**
+     * Whether the data for the combination is available.
+     * @var bool
+     */
+    protected $isDataAvailable = false;
+
+    /**
      * The locale to use for the request.
      * @var string
      */
-    protected $locale;
+    protected $locale = '';
 
     /**
      * Sets the name of the agent for which the token was issued.
@@ -96,6 +102,26 @@ class AuthorizationToken
     public function getModNames(): array
     {
         return $this->modNames;
+    }
+
+    /**
+     * Returns whether the data for the combination is available.
+     * @return bool
+     */
+    public function getIsDataAvailable(): bool
+    {
+        return $this->isDataAvailable;
+    }
+
+    /**
+     * Sets whether the data for the combination is available.
+     * @param bool $isDataAvailable
+     * @return $this
+     */
+    public function setIsDataAvailable(bool $isDataAvailable): self
+    {
+        $this->isDataAvailable = $isDataAvailable;
+        return $this;
     }
 
     /**

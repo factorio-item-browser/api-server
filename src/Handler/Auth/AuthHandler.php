@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Handler\Auth;
 use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
 use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
@@ -40,16 +41,25 @@ class AuthHandler extends AbstractRequestHandler
     protected $authorizationService;
 
     /**
+     * The combination repository.
+     * @var CombinationRepository
+     */
+    protected $combinationRepository;
+
+    /**
      * Initializes the auth handler.
      * @param AgentService $agentService
      * @param AuthorizationService $authorizationService
+     * @param CombinationRepository $combinationRepository
      */
     public function __construct(
         AgentService $agentService,
-        AuthorizationService $authorizationService
+        AuthorizationService $authorizationService,
+        CombinationRepository $combinationRepository
     ) {
         $this->authorizationService = $authorizationService;
         $this->agentService = $agentService;
+        $this->combinationRepository = $combinationRepository;
     }
 
     /**
@@ -84,11 +94,19 @@ class AuthHandler extends AbstractRequestHandler
     {
         $agent = $this->getAgentFromRequest($request);
         $modNames = $this->getModNamesFromRequest($agent, $request);
+        $combinationId = $this->calculateCombinationId($modNames);
 
         $token = new AuthorizationToken();
         $token->setAgentName($agent->getName())
-              ->setCombinationId($this->calculateCombinationId($modNames))
-              ->setModNames($modNames);
+              ->setCombinationId($combinationId)
+              ->setModNames($modNames)
+              ->setIsDataAvailable(false);
+
+        $combination = $this->combinationRepository->findById($combinationId);
+        if ($combination !== null) {
+            $token->setIsDataAvailable(true);
+            $this->combinationRepository->updateLastUsageTime($combination);
+        }
 
         return $token;
     }

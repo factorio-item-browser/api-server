@@ -7,6 +7,8 @@ namespace FactorioItemBrowserTest\Api\Server\Handler\Auth;
 use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Request\Auth\AuthRequest;
 use FactorioItemBrowser\Api\Client\Response\Auth\AuthResponse;
+use FactorioItemBrowser\Api\Database\Entity\Combination;
+use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
 use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
@@ -46,6 +48,12 @@ class AuthHandlerTest extends TestCase
     protected $authorizationService;
 
     /**
+     * The mocked combination repository.
+     * @var CombinationRepository&MockObject
+     */
+    protected $combinationRepository;
+
+    /**
      * Sets up the test case.
      */
     protected function setUp(): void
@@ -54,6 +62,7 @@ class AuthHandlerTest extends TestCase
 
         $this->agentService = $this->createMock(AgentService::class);
         $this->authorizationService = $this->createMock(AuthorizationService::class);
+        $this->combinationRepository = $this->createMock(CombinationRepository::class);
     }
 
     /**
@@ -63,7 +72,7 @@ class AuthHandlerTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
 
         $this->assertSame($this->agentService, $this->extractProperty($handler, 'agentService'));
         $this->assertSame($this->authorizationService, $this->extractProperty($handler, 'authorizationService'));
@@ -78,7 +87,7 @@ class AuthHandlerTest extends TestCase
     {
         $expectedResult = AuthRequest::class;
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
 
         $this->assertSame($expectedResult, $result);
@@ -101,7 +110,11 @@ class AuthHandlerTest extends TestCase
         /* @var AuthHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AuthHandler::class)
                         ->onlyMethods(['createAuthorizationToken', 'createResponse'])
-                        ->setConstructorArgs([$this->agentService, $this->authorizationService])
+                        ->setConstructorArgs([
+                            $this->agentService,
+                            $this->authorizationService,
+                            $this->combinationRepository,
+                        ])
                         ->getMock();
         $handler->expects($this->once())
                 ->method('createAuthorizationToken')
@@ -129,6 +142,8 @@ class AuthHandlerTest extends TestCase
 
         /* @var UuidInterface&MockObject $combinationId */
         $combinationId = $this->createMock(UuidInterface::class);
+        /* @var Combination&MockObject $combination */
+        $combination = $this->createMock(Combination::class);
         /* @var AuthRequest&MockObject $request */
         $request = $this->createMock(AuthRequest::class);
 
@@ -141,12 +156,86 @@ class AuthHandlerTest extends TestCase
         $expectedResult = new AuthorizationToken();
         $expectedResult->setAgentName($agentName)
                        ->setCombinationId($combinationId)
-                       ->setModNames($modNames);
+                       ->setModNames($modNames)
+                       ->setIsDataAvailable(true);
+
+        $this->combinationRepository->expects($this->once())
+                                    ->method('findById')
+                                    ->with($this->identicalTo($combinationId))
+                                    ->willReturn($combination);
+        $this->combinationRepository->expects($this->once())
+                                    ->method('updateLastUsageTime')
+                                    ->with($this->identicalTo($combination));
+        
+        /* @var AuthHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(AuthHandler::class)
+                        ->onlyMethods(['getAgentFromRequest', 'getModNamesFromRequest', 'calculateCombinationId'])
+                        ->setConstructorArgs([
+                            $this->agentService,
+                            $this->authorizationService,
+                            $this->combinationRepository,
+                        ])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('getAgentFromRequest')
+                ->with($this->identicalTo($request))
+                ->willReturn($agent);
+        $handler->expects($this->once())
+                ->method('getModNamesFromRequest')
+                ->with($this->identicalTo($agent), $this->identicalTo($request))
+                ->willReturn($modNames);
+        $handler->expects($this->once())
+                ->method('calculateCombinationId')
+                ->with($this->identicalTo($modNames))
+                ->willReturn($combinationId);
+
+        $result = $this->invokeMethod($handler, 'createAuthorizationToken', $request);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Tests the createAuthorizationToken method.
+     * @throws ReflectionException
+     * @covers ::createAuthorizationToken
+     */
+    public function testCreateAuthorizationTokenWithoutCombination(): void
+    {
+        $agentName = 'abc';
+        $modNames = ['def', 'ghi'];
+
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
+        /* @var AuthRequest&MockObject $request */
+        $request = $this->createMock(AuthRequest::class);
+
+        /* @var Agent&MockObject $agent */
+        $agent = $this->createMock(Agent::class);
+        $agent->expects($this->once())
+              ->method('getName')
+              ->willReturn($agentName);
+
+        $expectedResult = new AuthorizationToken();
+        $expectedResult->setAgentName($agentName)
+                       ->setCombinationId($combinationId)
+                       ->setModNames($modNames)
+                       ->setIsDataAvailable(false);
+
+        $this->combinationRepository->expects($this->once())
+                                    ->method('findById')
+                                    ->with($this->identicalTo($combinationId))
+                                    ->willReturn(null);
+        $this->combinationRepository->expects($this->never())
+                                    ->method('updateLastUsageTime');
 
         /* @var AuthHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AuthHandler::class)
                         ->onlyMethods(['getAgentFromRequest', 'getModNamesFromRequest', 'calculateCombinationId'])
-                        ->setConstructorArgs([$this->agentService, $this->authorizationService])
+                        ->setConstructorArgs([
+                            $this->agentService,
+                            $this->authorizationService,
+                            $this->combinationRepository,
+                        ])
                         ->getMock();
         $handler->expects($this->once())
                 ->method('getAgentFromRequest')
@@ -189,7 +278,7 @@ class AuthHandlerTest extends TestCase
                            ->with($this->identicalTo($accessKey))
                            ->willReturn($agent);
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'getAgentFromRequest', $request);
 
         $this->assertSame($agent, $result);
@@ -217,7 +306,7 @@ class AuthHandlerTest extends TestCase
 
         $this->expectException(InvalidAccessKeyException::class);
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $this->invokeMethod($handler, 'getAgentFromRequest', $request);
     }
 
@@ -243,7 +332,7 @@ class AuthHandlerTest extends TestCase
                 ->method('getModNames')
                 ->willReturn($modNames);
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
 
         $this->assertSame($modNames, $result);
@@ -270,7 +359,7 @@ class AuthHandlerTest extends TestCase
         $request->expects($this->never())
                 ->method('getModNames');
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
 
         $this->assertSame($expectedResult, $result);
@@ -300,7 +389,7 @@ class AuthHandlerTest extends TestCase
 
         $this->expectException(MissingBaseModException::class);
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
     }
 
@@ -327,7 +416,7 @@ class AuthHandlerTest extends TestCase
      */
     public function testCalculateCombinationId(array $modNames, UuidInterface $expectedResult): void
     {
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'calculateCombinationId', $modNames);
 
         $this->assertEquals($expectedResult, $result);
@@ -353,7 +442,7 @@ class AuthHandlerTest extends TestCase
                                    ->with($this->identicalTo($authorizationToken))
                                    ->willReturn($serializedToken);
 
-        $handler = new AuthHandler($this->agentService, $this->authorizationService);
+        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
         $result = $this->invokeMethod($handler, 'createResponse', $authorizationToken);
 
         $this->assertEquals($expectedResult, $result);
