@@ -156,8 +156,7 @@ class AuthHandlerTest extends TestCase
         $expectedResult = new AuthorizationToken();
         $expectedResult->setAgentName($agentName)
                        ->setCombinationId($combinationId)
-                       ->setModNames($modNames)
-                       ->setIsDataAvailable(true);
+                       ->setModNames($modNames);
 
         $this->combinationRepository->expects($this->once())
                                     ->method('findById')
@@ -218,8 +217,7 @@ class AuthHandlerTest extends TestCase
         $expectedResult = new AuthorizationToken();
         $expectedResult->setAgentName($agentName)
                        ->setCombinationId($combinationId)
-                       ->setModNames($modNames)
-                       ->setIsDataAvailable(false);
+                       ->setModNames($modNames);
 
         $this->combinationRepository->expects($this->once())
                                     ->method('findById')

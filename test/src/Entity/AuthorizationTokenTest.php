@@ -28,7 +28,6 @@ class AuthorizationTokenTest extends TestCase
 
         $this->assertSame('', $authorizationToken->getAgentName());
         $this->assertSame([], $authorizationToken->getModNames());
-        $this->assertFalse($authorizationToken->getIsDataAvailable());
         $this->assertSame('', $authorizationToken->getLocale());
     }
 
@@ -73,19 +72,6 @@ class AuthorizationTokenTest extends TestCase
 
         $this->assertSame($authorizationToken, $authorizationToken->setModNames($modNames));
         $this->assertSame($modNames, $authorizationToken->getModNames());
-    }
-
-    /**
-     * Tests the setting and getting the is data available.
-     * @covers ::getIsDataAvailable
-     * @covers ::setIsDataAvailable
-     */
-    public function testSetAndGetIsDataAvailable(): void
-    {
-        $authorizationToken = new AuthorizationToken();
-
-        $this->assertSame($authorizationToken, $authorizationToken->setIsDataAvailable(true));
-        $this->assertTrue($authorizationToken->getIsDataAvailable());
     }
 
     /**

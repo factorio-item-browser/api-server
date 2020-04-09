@@ -73,7 +73,6 @@ class AuthorizationService
             'agt' => $token->getAgentName(),
             'cmb' => $token->getCombinationId()->toString(),
             'mds' => $token->getModNames(),
-            'avl' => $token->getIsDataAvailable() ? 1 : 0,
         ];
     }
 
@@ -90,8 +89,7 @@ class AuthorizationService
         $result = new AuthorizationToken();
         $result->setAgentName($rawToken->agt)
                ->setCombinationId(Uuid::fromString($rawToken->cmb))
-               ->setModNames($rawToken->mds)
-               ->setIsDataAvailable($rawToken->avl === 1);
+               ->setModNames($rawToken->mds);
 
         return $result;
     }

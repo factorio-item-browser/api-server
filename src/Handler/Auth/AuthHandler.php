@@ -99,12 +99,10 @@ class AuthHandler extends AbstractRequestHandler
         $token = new AuthorizationToken();
         $token->setAgentName($agent->getName())
               ->setCombinationId($combinationId)
-              ->setModNames($modNames)
-              ->setIsDataAvailable(false);
+              ->setModNames($modNames);
 
         $combination = $this->combinationRepository->findById($combinationId);
         if ($combination !== null) {
-            $token->setIsDataAvailable(true);
             $this->combinationRepository->updateLastUsageTime($combination);
         }
 
