@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "835a0632bd9ec1a2e7b6e1101cc141b3",
+    "content-hash": "a9c6cf786a4cc68fc5bae6318d8c102d",
     "packages": [
         {
             "name": "bluepsyduck/container-interop-doctrine-migrations",
@@ -1220,16 +1220,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-project-phoenix",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "79880f695cfaad31f85f5fcd87cf52efbddf8a61"
+                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/79880f695cfaad31f85f5fcd87cf52efbddf8a61",
-                "reference": "79880f695cfaad31f85f5fcd87cf52efbddf8a61",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/cbc0f5d173785d1bd84b8356ce461b91d35e4271",
+                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271",
                 "shasum": ""
             },
             "require": {
@@ -1275,20 +1275,20 @@
                 "api",
                 "client"
             ],
-            "time": "2020-03-30T19:59:02+00:00"
+            "time": "2020-04-15T15:19:53+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
-            "version": "dev-project-phoenix",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "8be71462aa0f40b43720ab1bde2118b3828dd06b"
+                "reference": "fbc5ba2f33e8335e48203dcb23155ea78ec968df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/8be71462aa0f40b43720ab1bde2118b3828dd06b",
-                "reference": "8be71462aa0f40b43720ab1bde2118b3828dd06b",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/fbc5ba2f33e8335e48203dcb23155ea78ec968df",
+                "reference": "fbc5ba2f33e8335e48203dcb23155ea78ec968df",
                 "shasum": ""
             },
             "require": {
@@ -1336,27 +1336,27 @@
                 "api",
                 "database"
             ],
-            "time": "2020-04-08T11:58:39+00:00"
+            "time": "2020-04-15T14:32:23+00:00"
         },
         {
             "name": "factorio-item-browser/api-search",
-            "version": "dev-project-phoenix",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-search.git",
-                "reference": "547235fc029be6f6675015a55d497546cc543424"
+                "reference": "026abff31ea01b5f5e0696661fd8c4260f70f279"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-search/zipball/547235fc029be6f6675015a55d497546cc543424",
-                "reference": "547235fc029be6f6675015a55d497546cc543424",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-search/zipball/026abff31ea01b5f5e0696661fd8c4260f70f279",
+                "reference": "026abff31ea01b5f5e0696661fd8c4260f70f279",
                 "shasum": ""
             },
             "require": {
                 "bluepsyduck/laminas-autowire-factory": "^1.0",
                 "bluepsyduck/mapper-manager": "^1.0",
                 "ext-json": "*",
-                "factorio-item-browser/api-database": "dev-project-phoenix",
+                "factorio-item-browser/api-database": "^3.0",
                 "php": "^7.3",
                 "psr/container": "^1.0"
             },
@@ -1394,7 +1394,7 @@
                 "api",
                 "search"
             ],
-            "time": "2020-01-10T16:59:20+00:00"
+            "time": "2020-04-15T14:41:44+00:00"
         },
         {
             "name": "factorio-item-browser/common",
@@ -5316,21 +5316,21 @@
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "0.12.6",
+            "version": "0.12.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "26394996368b6d033d012547d3197f4e07e23021"
+                "reference": "a6ff54e1f776fa9489a94855bb488c3ae78df6f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/26394996368b6d033d012547d3197f4e07e23021",
-                "reference": "26394996368b6d033d012547d3197f4e07e23021",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/a6ff54e1f776fa9489a94855bb488c3ae78df6f2",
+                "reference": "a6ff54e1f776fa9489a94855bb488c3ae78df6f2",
                 "shasum": ""
             },
             "require": {
                 "php": "~7.1",
-                "phpstan/phpstan": "^0.12.4"
+                "phpstan/phpstan": "^0.12.6"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.0"
@@ -5368,7 +5368,7 @@
                 "MIT"
             ],
             "description": "PHPUnit extensions and rules for PHPStan",
-            "time": "2020-01-10T12:07:21+00:00"
+            "time": "2020-04-13T14:29:39+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
@@ -6555,11 +6555,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-client": 20,
-        "factorio-item-browser/api-database": 20,
-        "factorio-item-browser/api-search": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
