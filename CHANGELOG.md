@@ -16,8 +16,9 @@
 - Extracted search logic to separate library `factorio-item-browser/api-search`.
 - Extracted import logic to separate project `factorio-item-browser/api-import`. The API server now only reads from the 
   database (with the exception of the CachedSearchResult table).
-- Changed library `factorio-item-browser/client` to latest version 2.1.
+- Changed library `factorio-item-browser/client` to latest version.
 - Use client request and response entities and its serializer to parse requests and build responses.
+- Machine preferred in sorting from "player" to "character" as of in-game change.
 - Dependencies from Zend to Laminas.
 
 ### Removed 
