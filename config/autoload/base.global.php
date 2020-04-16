@@ -17,5 +17,5 @@ return [
     ConfigAggregator::ENABLE_CACHE => true,
     'debug' => false,
     'name' => 'Factorio Item Browser - API Server',
-    'version' => 'project-phoenix',
+    'version' => '2.0.0',
 ];
