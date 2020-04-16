@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\RequestInterface;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
@@ -38,7 +38,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -54,7 +53,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $mapRouteToRequest = ['abc' => 'def'];
+        $mapRouteToRequest = ['abc' => RequestInterface::class];
 
         $middleware = new RequestDeserializerMiddleware($this->serializer, $mapRouteToRequest);
 
@@ -65,7 +64,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
     /**
      * Tests the process method.
      * @throws ApiServerException
-     * @throws ReflectionException
      * @covers ::process
      */
     public function testProcess(): void
@@ -97,7 +95,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
         /* @var RequestDeserializerMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'deserializeRequestBody'])
+                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
                            ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
                            ->getMock();
         $middleware->expects($this->once())
@@ -117,7 +115,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
     /**
      * Tests the process method without a match for deserializing the request.
      * @throws ApiServerException
-     * @throws ReflectionException
      * @covers ::process
      */
     public function testProcessWithoutMatch(): void
@@ -142,7 +139,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
         /* @var RequestDeserializerMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'deserializeRequestBody'])
+                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
                            ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
                            ->getMock();
         $middleware->expects($this->once())

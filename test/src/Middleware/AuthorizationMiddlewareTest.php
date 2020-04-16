@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\RouteName;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
@@ -84,7 +84,7 @@ class AuthorizationMiddlewareTest extends TestCase
 
         /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
+                           ->onlyMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
                            ->disableOriginalConstructor()
                            ->getMock();
         $middleware->expects($this->once())
@@ -125,7 +125,7 @@ class AuthorizationMiddlewareTest extends TestCase
 
         /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
-                           ->setMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
+                           ->onlyMethods(['getMatchedRouteName', 'readAuthorizationFromRequest'])
                            ->disableOriginalConstructor()
                            ->getMock();
         $middleware->expects($this->once())
@@ -173,7 +173,7 @@ class AuthorizationMiddlewareTest extends TestCase
 
         /* @var AuthorizationMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(AuthorizationMiddleware::class)
-                           ->setMethods(['extractSerializedTokenFromHeader'])
+                           ->onlyMethods(['extractSerializedTokenFromHeader'])
                            ->setConstructorArgs([$this->authorizationService])
                            ->getMock();
         $middleware->expects($this->once())

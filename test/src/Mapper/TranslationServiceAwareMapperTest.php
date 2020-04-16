@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Server\Mapper\TranslationServiceAwareMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;

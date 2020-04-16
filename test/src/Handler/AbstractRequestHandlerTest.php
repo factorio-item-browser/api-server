@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Request\RequestInterface as ClientRequestInterface;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
@@ -45,7 +45,7 @@ class AbstractRequestHandlerTest extends TestCase
 
         /* @var AbstractRequestHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AbstractRequestHandler::class)
-                        ->setMethods(['getClientRequest', 'handleRequest'])
+                        ->onlyMethods(['getClientRequest', 'handleRequest'])
                         ->getMockForAbstractClass();
         $handler->expects($this->once())
                 ->method('getClientRequest')
@@ -87,7 +87,7 @@ class AbstractRequestHandlerTest extends TestCase
 
         /* @var AbstractRequestHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AbstractRequestHandler::class)
-                        ->setMethods(['getExpectedRequestClass'])
+                        ->onlyMethods(['getExpectedRequestClass'])
                         ->getMockForAbstractClass();
         $handler->expects($this->once())
                 ->method('getExpectedRequestClass')
@@ -121,7 +121,7 @@ class AbstractRequestHandlerTest extends TestCase
 
         /* @var AbstractRequestHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AbstractRequestHandler::class)
-                        ->setMethods(['getExpectedRequestClass'])
+                        ->onlyMethods(['getExpectedRequestClass'])
                         ->getMockForAbstractClass();
         $handler->expects($this->once())
                 ->method('getExpectedRequestClass')
@@ -150,7 +150,7 @@ class AbstractRequestHandlerTest extends TestCase
 
         /* @var AbstractRequestHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AbstractRequestHandler::class)
-                        ->setMethods(['getExpectedRequestClass'])
+                        ->onlyMethods(['getExpectedRequestClass'])
                         ->getMockForAbstractClass();
         $handler->expects($this->once())
                 ->method('getExpectedRequestClass')

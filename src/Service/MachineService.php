@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use Doctrine\Common\Collections\Collection;
-use FactorioItemBrowser\Api\Database\Data\MachineData;
 use FactorioItemBrowser\Api\Database\Entity\CraftingCategory;
 use FactorioItemBrowser\Api\Database\Entity\Machine;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient;
 use FactorioItemBrowser\Api\Database\Entity\RecipeProduct;
-use FactorioItemBrowser\Api\Database\Filter\DataFilter;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Common\Constant\Constant;
@@ -31,12 +29,6 @@ class MachineService
     protected const PREFERRED_MACHINE_NAME = Constant::ENTITY_NAME_CHARACTER;
 
     /**
-     * The data filter.
-     * @var DataFilter
-     */
-    protected $dataFilter;
-
-    /**
      * The repository of the machines.
      * @var MachineRepository
      */
@@ -44,12 +36,10 @@ class MachineService
 
     /**
      * MachineService constructor.
-     * @param DataFilter $dataFilter
      * @param MachineRepository $machineRepository
      */
-    public function __construct(DataFilter $dataFilter, MachineRepository $machineRepository)
+    public function __construct(MachineRepository $machineRepository)
     {
-        $this->dataFilter = $dataFilter;
         $this->machineRepository = $machineRepository;
     }
 
@@ -63,28 +53,10 @@ class MachineService
         CraftingCategory $craftingCategory,
         AuthorizationToken $authorizationToken
     ): array {
-        $machineData = $this->machineRepository->findDataByCraftingCategories(
-            [$craftingCategory->getName()],
-            $authorizationToken->getEnabledModCombinationIds()
+        return $this->machineRepository->findByCraftingCategoryName(
+            $authorizationToken->getCombinationId(),
+            $craftingCategory->getName()
         );
-        $machineIds = $this->extractIdsFromMachineData($machineData);
-        return $this->machineRepository->findByIds($machineIds);
-    }
-
-    /**
-     * Extracts the machine ids of the machine data array.
-     * @param array|MachineData[] $machineData
-     * @return array|int[]
-     */
-    protected function extractIdsFromMachineData(array $machineData): array
-    {
-        $result = [];
-        foreach ($this->dataFilter->filter($machineData) as $data) {
-            if ($data instanceof MachineData) {
-                $result[] = $data->getId();
-            }
-        }
-        return $result;
     }
 
     /**
@@ -110,7 +82,7 @@ class MachineService
 
     /**
      * Counts the item with a type.
-     * @param Collection $entities
+     * @param Collection<int,RecipeIngredient>|Collection<int,RecipeProduct> $entities
      * @param string $type
      * @return int
      */

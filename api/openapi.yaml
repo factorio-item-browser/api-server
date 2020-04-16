@@ -1,0 +1,1054 @@
+openapi: 3.0.1
+info:
+  title: Factorio Item Browser API
+  description:
+    This API provides access to the mod data of the Factorio Item Browser, including item details, recipe details as
+    well as any translation available from the mods.
+  contact:
+    name: BluePsyduck
+    email: bluepsyduck@gmx.com
+  version: 2.0.0
+
+servers:
+  - url: https://www.factorio-item-browser.com/api
+    description: Live API server
+
+tags:
+  - name: Authorization
+    description: Requests to authorize against the API.
+  - name: Combination
+    description: Requests related to the combinations of mods.
+  - name: Generic
+    description: Requests providing generic data to entities.
+  - name: Items
+    description: Requests providing data to a specific item.
+  - name: Mods
+    description: Requests providing mod related data.
+  - name: Recipes
+    description: Requests providing data to a specific recipe.
+  - name: Search
+    description: Requests to search for items, recipes etc. using queries.
+
+paths:
+  /auth:
+    post:
+      summary: Authorizes the access to the API by specifying the mods.
+      description:
+        This request is used to create an authorization token to be used in all other requests. Part of the
+        authorization is an access key provided by the administrator, as well as the names of mods which should be
+        enabled for the token. The token will last for about an hour. Whenever you encounter a 401 error in the other
+        requests, re-authorize to get a new token.<br />
+        <br />
+        To get a first look into the API, you may use the "demo" access key. This key is restricted to base mod only,
+        though.
+      operationId: auth
+      tags:
+        - Authorization
+      requestBody:
+        $ref: "#/components/requestBodies/auth"
+      responses:
+        "200":
+          $ref: "#/components/responses/auth"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "403":
+          $ref: "#/components/responses/accessDenied"
+
+  /combination/status:
+    post:
+      summary: Provides the current status of data of the combination of mods from the authorization token.
+      description:
+        This request provides information on how far the export process has progressed to make the data of the mods
+        available. If data is not available yet, the API will fall back to the Vanilla combination in all other
+        requests.
+      operationId: combination.status
+      tags:
+        - Combination
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      responses:
+        "200":
+          $ref: "#/components/responses/combinationStatus"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /combination/export:
+    post:
+      summary: Requests the combination of mods from the authorization token to be exported from the Factorio game.
+      description:
+        This request will trigger a new export of the combination of mods specified in the authorization token to be
+        exported from the Factorio game and imported into the database. This process will take some time. The current
+        status of the process can be accessed through the /combination/status endpoint.
+      operationId: combination.export
+      tags:
+        - Combination
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+      responses:
+        "200":
+          $ref: "#/components/responses/combinationStatus"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /generic/details:
+    post:
+      summary: Provides basic data to items and recipes.
+      description:
+        This request provides very basic information to items and recipes, like the translated labels and description.
+        It will NOT provide any additional data like ingredients and products of recipes.
+      operationId: generic.details
+      tags:
+        - Generic
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/genericEntities"
+      responses:
+        "200":
+          $ref: "#/components/responses/genericDetails"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /generic/icon:
+    post:
+      summary: Provides the icon file contents to specific items and recipes.
+      description:
+        This request will return the icon file in base64 encoding. The icons are always provided in PNG format. Make
+        sure to cache the returned icons, and remember to clear the cache when the mods are changed.
+        The response may contain types and names of entities not explicitely requested, but which have the same icon as
+        one of the requested one.
+      operationId: generic.icon
+      tags:
+        - Generic
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/genericEntities"
+      responses:
+        "200":
+          $ref: "#/components/responses/genericIcon"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /item/ingredient:
+    post:
+      summary: Provides all recipes in which a specific item as an ingredient of.
+      description:
+        This request will return all recipes with a specific item as one of its ingredients. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: item.ingredient
+      tags:
+        - Items
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRecipes"
+      responses:
+        "200":
+          $ref: "#/components/responses/itemIngredient"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+        "404":
+          $ref: "#/components/responses/itemNotFound"
+      security:
+        - jwt: []
+
+  /item/product:
+    post:
+      summary: Provides all recipes which produce a specific item.
+      description:
+        This request will return all recipes with a specific item as one of its products. The recipes in the response
+        will be grouped together by their name, so that normal and expensive versions will always be returned together,
+        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
+        not on the recipes itself.
+      operationId: item.product
+      tags:
+        - Items
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRecipes"
+      responses:
+        "200":
+          $ref: "#/components/responses/itemProduct"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+        "404":
+          $ref: "#/components/responses/itemNotFound"
+      security:
+        - jwt: []
+
+  /item/random:
+    post:
+      summary: Provides random items of the currently enabled mods.
+      operationId: item.random
+      tags:
+        - Items
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemRandom"
+      responses:
+        "200":
+          $ref: "#/components/responses/itemRandom"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /mod/list:
+    post:
+      summary: Lists the mods available in the browser.
+      description:
+        This request will list all mods known to the browser, including whether they are enabled for the current token
+        or not.
+      operationId: mod.list
+      tags:
+        - Mods
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          $ref: "#/components/responses/modList"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /recipe/details:
+    post:
+      summary: Returns the details of specific recipes, including the ingredients and products.
+      description:
+        This request will return all details to specific recipes. If the recipe has a normal and an expensive version,
+        then both are returned. The order of the returned recipes must be assumed to be random.
+      operationId: recipe.details
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/recipeDetails"
+      responses:
+        "200":
+          $ref: "#/components/responses/recipeDetails"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /recipe/machines:
+    post:
+      summary: Returns the details of all machines able to craft the recipe.
+      description:
+        This request will return all machines with their details which are able to craft the recipe specified in the
+        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
+        present, the player will be at the very first position of the results.
+      operationId: recipe.machines
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/recipeMachines"
+      responses:
+        "200":
+          $ref: "#/components/responses/recipeMachines"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+        "404":
+          $ref: "#/components/responses/recipeNotFound"
+      security:
+        - jwt: []
+
+  /search/query:
+    post:
+      summary: Searches for items, recipes etc. using a query string.
+      operationId: search.query
+      tags:
+        - Search
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/searchQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/searchQuery"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+components:
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      description: The token received from the auth request.
+      schema:
+        type: string
+      example: Bearer {TOKEN}
+      required: true
+
+    Accept-Language:
+      name: Accept-Language
+      in: header
+      description: The language code to use for translating labels and descriptions.
+      schema:
+        type: string
+      example: en
+
+  requestBodies:
+    auth:
+      content:
+        application/json:
+          schema:
+            properties:
+              accessKey:
+                type: string
+                description: The access key to the API.
+                example: demo
+              modNames:
+                type: array
+                description: The names of the mods to enable.
+                items:
+                  type: string
+                example:
+                  - base
+            required:
+              - accessKey
+              - modNames
+      required: true
+
+    genericEntities:
+      content:
+        application/json:
+          schema:
+            properties:
+              entities:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: The type of the entity.
+                      enum:
+                        - fluid
+                        - item
+                        - recipe
+                    name:
+                      type: string
+                      description: The name of the entity.
+                  required:
+                    - type
+                    - name
+            required:
+              - entities
+            example:
+              entities:
+                - type: item
+                  name: sulfur
+                - type: fluid
+                  name: sulfuric-acid
+                - type: recipe
+                  name: fill-sulfuric-acid-barrel
+      required: true
+
+    itemRandom:
+      content:
+        application/json:
+          schema:
+            properties:
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              numberOfRecipesPerResult:
+                type: integer
+                description: The number of recipes to return for each result.
+                example: 3
+
+    itemRecipes:
+      content:
+        application/json:
+          schema:
+            properties:
+              type:
+                type: string
+                description: The type of the item.
+                example: item
+              name:
+                type: string
+                description: The name of the item.
+                example: electronic-circuit
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              indexOfFirstResult:
+                type: integer
+                description: The 0-based index of the first result to return.
+                example: 0
+            required:
+              - type
+              - name
+      required: true
+
+    recipeDetails:
+      content:
+        application/json:
+          schema:
+            properties:
+              names:
+                type: array
+                description: The internal names of the recipe to return the details of.
+                items:
+                  type: string
+                example:
+                  - electronic-circuit
+                  - advanced-circuit
+            required:
+              - names
+      required: true
+
+    recipeMachines:
+      content:
+        application/json:
+          schema:
+            properties:
+              name:
+                type: string
+                description: The internal name of the recipe to return the machines of.
+                example: uranium-processing
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              indexOfFirstResult:
+                type: integer
+                description: The 0-based index of the first result to return.
+                example: 0
+            required:
+              - name
+      required: true
+
+    searchQuery:
+      content:
+        application/json:
+          schema:
+            properties:
+              query:
+                type: string
+                description: The query to search for.
+                example: oil
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              indexOfFirstResult:
+                type: integer
+                description: The 0-based index of the first result to return.
+                example: 0
+              numberOfRecipesPerResult:
+                type: integer
+                description: The number of recipes to return for each result.
+                example: 3
+            required:
+              - query
+      required: true
+
+  responses:
+    # 200 responses
+    auth:
+      description: Authorization succeeded.
+      content:
+        application/json:
+          schema:
+            properties:
+              authorizationToken:
+                type: string
+                description: The authorization token to use in the other requests.
+                example: <token value>
+
+    combinationStatus:
+      description: The combination status.
+      content:
+        application/json:
+          schema:
+            properties:
+              id:
+                type: string
+                description: The ID of the combination.
+                example: 2f4a45fa-a509-a9d1-aae6-ffcf984a7a76
+              modNames:
+                type: array
+                description: The names of the mods in the combination.
+                items:
+                  type: string
+                example:
+                  - base
+              latestExportJob:
+                $ref: "#/components/schemas/ExportJob"
+              latestSuccessfulExportJob:
+                $ref: "#/components/schemas/ExportJob"
+
+    genericDetails:
+      description: The generic details of entities.
+      content:
+        application/json:
+          schema:
+            properties:
+              entities:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericEntity"
+            example:
+              entities:
+                - type: item
+                  name: sulfur
+                  label: Sulfur
+                  description: ""
+                - type: fluid
+                  name: sulfuric-acid
+                  label: Sulfuric acid
+                  description: ""
+                - type: recipe
+                  name: fill-sulfuric-acid-barrel
+                  label: Fill Sulfuric acid barrel
+                  description: ""
+
+    genericIcon:
+      description: The icons of the entities.
+      content:
+        application/json:
+          schema:
+            properties:
+              icons:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Icon"
+
+    itemIngredient:
+      description: The recipes using the item as ingredient.
+      content:
+        application/json:
+          schema:
+            properties:
+              item:
+                description: The item with the recipes containing it as an ingredient.
+                $ref: "#/components/schemas/GenericEntityWithRecipes"
+
+    itemProduct:
+      description: The recipes having the item as product.
+      content:
+        application/json:
+          schema:
+            properties:
+              item:
+                description: The item with the recipes containing it as a product.
+                $ref: "#/components/schemas/GenericEntityWithRecipes"
+
+    itemRandom:
+      description: The random items.
+      content:
+        application/json:
+          schema:
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+
+    modList:
+      description: The list of mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              mods:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mod"
+
+    recipeDetails:
+      description: The details of the requested recipe.
+      content:
+        application/json:
+          schema:
+            properties:
+              recipes:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeWithExpensiveVersion"
+
+    recipeMachines:
+      description: The machines able to craft the recipe.
+      content:
+        application/json:
+          schema:
+            properties:
+              machines:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Machine"
+              totalNumberOfResults:
+                type: integer
+                description: The total number of available results.
+                example: 1
+
+    searchQuery:
+      description: The found items, recipes etc.
+      content:
+        application/json:
+          schema:
+            properties:
+              results:
+                type: array
+                description: The results returned by the search.
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+              totalNumberOfResults:
+                type: integer
+                description: The total number of results of the search.
+                example: 1
+
+    # 400 responses
+    badRequest:
+      description:
+        The request was not valid. Please make sure the "Content-Type" is set to "application/json", the request body
+        is a valid JSON string, and all required parameters are present.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: Request validation failed.
+
+    # 401 responses
+    unauthorized:
+      description:
+        Authorization token is missing or was invalid. Use the /auth request to get a new token.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: Authorization token is invalid.
+
+    # 403 responses
+    accessDenied:
+      description:
+        Access denied. Either the specified access key is invalid, or it is not allowed to actually access this 
+        endpoint.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: Invalid access key.
+
+    # 404 responses
+    itemNotFound:
+      description: The requested item is not known to the browser, or not available in the enabled mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: Item not found or not available in the enabled mods.
+
+    recipeNotFound:
+      description: The requested recipe is not known to the browser, or not available in the enabled mods.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: Recipe not found or not available in the enabled mods.
+
+  schemas:
+    Error:
+      type: object
+      description: An error which occurred during handling the request.
+      properties:
+        message:
+          type: string
+          description: The message of the error which occurred.
+          example: An unexpected error occured.
+
+    ExportJob:
+      type: object
+      description: The information to an actual export job.
+      properties:
+        status:
+          type: string
+          enum:
+            - queued
+            - downloading
+            - processing
+            - uploading
+            - uploaded
+            - done
+            - error
+          description: The current status of the export process.
+          example: done
+        creationTime:
+          type: string
+          format: datetime
+          description: The time when the export was triggered and put into the queue.
+          example: "2038-01-19T03:10:07+00:00"
+        exportTime:
+          type: string
+          format: datetime
+          description: The time when the actual export was processed.
+          example: "2038-01-19T03:12:07+00:00"
+        importTime:
+          type: string
+          format: datetime
+          description: The time when the exported data has been imported to the browser database.
+          example: "2038-01-19T03:14:07+00:00"
+        errorMessage:
+          type: string
+          description: The error message in case the status is "error".
+          example: ""
+
+    GenericEntity:
+      type: object
+      description: A generic entity with basic information.
+      properties:
+        type:
+          type: string
+          description: The type of the entity
+          enum:
+            - fluid
+            - item
+            - recipe
+          example: item
+        name:
+          type: string
+          description: The internal name of the entity.
+          example: electronic-circuit
+        label:
+          type: string
+          description: The translated label of the entity.
+          example: Elektronischer Schaltkreis
+        description:
+          type: string
+          description: The translated description of the entity.
+          example: ""
+
+    GenericEntityWithRecipes:
+      description: A generic entity with basic information, including recipes.
+      allOf:
+        - $ref: "#/components/schemas/GenericEntity"
+        - type: object
+          properties:
+            recipes:
+              type: array
+              description: The recipes related to the entity.
+              items:
+                $ref: "#/components/schemas/RecipeWithExpensiveVersion"
+            totalNumberOfRecipes:
+              type: integer
+              description: The total number of recipes available for the entity.
+              example: 7
+
+    Icon:
+      type: object
+      description: An icon of an item or recipe.
+      properties:
+        entities:
+          type: array
+          description: The entities using the icon file with the current enabled mods.
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: The type of the entity using this icon.
+              name:
+                type: string
+                description: The name of the entity using this icon.
+            example:
+              - type: item
+                name: iron-plate
+              - type: item
+                name: bob-iron-plate
+              - type: recipe
+                name: irom-plate
+        content:
+          type: string
+          description: The base64 encoded contents of the icon file.
+          example: <base64 encoded string>
+        size:
+          type: integer
+          description: The size of the icon in pixels.
+          example: 64
+
+    Item:
+      type: object
+      description: An actual item or fluid.
+      properties:
+        type:
+          type: string
+          description: The type of the item.
+          enum:
+            - fluid
+            - item
+        name:
+          type: string
+          description: The name of the item.
+        label:
+          type: string
+          description: The translated label of the item.
+        description:
+          type: string
+          description: The translated description of the item, if available.
+        amount:
+          type: number
+          description: The amount of the item as ingredient or product.
+
+    Machine:
+      type: object
+      description: A machine required to craft recipes.
+      properties:
+        name:
+          type: string
+          description: The name of the machine.
+          example: centrifuge
+        label:
+          type: string
+          description: The translated label of the machine.
+          example: Zentrifuge
+        description:
+          type: string
+          description: The translated description of the machine, if available.
+          example: Verarbeitet verschiedene uranbasierte Baupläne.
+        craftingSpeed:
+          type: number
+          description: The crafting speed of the machine.
+          example: 1
+        numberOfItemSlots:
+          type: integer
+          description: The number of ingredient slots available in the machine, or 255 if unlimited.
+          example: 255
+        numberOfFluidInputSlots:
+          type: integer
+          description: The number of fluid input slots available in the machine.
+          example: 0
+        numberOfFluidOutputSlots:
+          type: integer
+          description: The number of fluid output slots available in the machine.
+          example: 0
+        numberOfModuleSlots:
+          type: integer
+          description: The number of module slots available in the machine.
+          example: 2
+        energyUsage:
+          type: number
+          description: The energy usage of the machine.
+          example: 350
+        energyUsageUnit:
+          type: string
+          description: The unit of the energy usage.
+          enum:
+            - W
+            - kW
+            - MW
+            - GW
+            - TW
+            - PW
+            - EW
+            - ZW
+            - YW
+          example: kW
+
+    Mod:
+      type: object
+      description: A mod supported by the API.
+      properties:
+        name:
+          type: string
+          description: The internal name of the mod.
+          example: base
+        label:
+          type: string
+          description: The translated label of the mod.
+          example: Basis-Mod
+        description:
+          type: string
+          description: The translated description of the mod.
+          example: Grundlegende Mod mit allen Standard-Spieldaten und den Standard-Kampagnen.
+        author:
+          type: string
+          description: The author of the mod.
+          example: Factorio team
+        version:
+          type: string
+          description: The version of the mod.
+          example: 1.2.3
+
+    Recipe:
+      type: object
+      description: A recipe to craft items into other ones.
+      properties:
+        name:
+          type: string
+          description: The name of the recipe.
+          example: electronic-circuit
+        mode:
+          type: string
+          description: The mode of the recipe.
+          enum:
+            - normal
+            - expensive
+          example: normal
+        label:
+          type: string
+          description: The translated label of the recipe.
+          example: Elektronischer Schaltkreis
+        description:
+          type: string
+          description: The translated description of the recipe, if available.
+          example: Lorem ipsum dolor sit amet.
+        ingredients:
+          type: array
+          description: The ingredients of the recipe.
+          items:
+            $ref: "#/components/schemas/Item"
+          example:
+            - type: item
+              name: iron-plate
+              label: Eisenplatte
+              description: ""
+              amount: 1
+            - type: item
+              name: copper-cable
+              label: Kupferkabel
+              description: ""
+              amount: 3
+        products:
+          type: array
+          description: The products of the recipe.
+          items:
+            $ref: "#/components/schemas/Item"
+          example:
+            - type: item
+              name: electronic-circuit
+              label: Elektronischer Schaltkreis
+              description: ""
+              amount: 1
+        craftingTime:
+          type: number
+          description: The crafting time of the recipe.
+          example: 0.5
+
+    RecipeWithExpensiveVersion:
+      description: A recipe to craft items into other ones, including an expensive version of it, if existing.
+      allOf:
+        - $ref: "#/components/schemas/Recipe"
+        - type: object
+          properties:
+            expensiveVersion:
+              $ref: "#/components/schemas/Recipe"
+          example:
+            name: electronic-circuit
+            label: Elektronischer Schaltkreis
+            description: ""
+            ingredients:
+              - type: item
+                name: iron-plate
+                label: Eisenplatte
+                description: ""
+                amount: 1
+              - type: item
+                name: copper-cable
+                label: Kupferkabel
+                description: ""
+                amount: 3
+            products:
+              - type: item
+                name: electronic-circuit
+                label: Elektronischer Schaltkreis
+                description: ""
+                amount: 1
+            craftingTime: 0.5
+            expensiveVersion:
+              name: electronic-circuit
+              label: Elektronischer Schaltkreis
+              description: ""
+              ingredients:
+                - type: item
+                  name: iron-plate
+                  label: Eisenplatte
+                  description: ""
+                  amount: 2
+                - type: item
+                  name: copper-cable
+                  label: Kupferkabel
+                  description: ""
+                  amount: 8
+              products:
+                - type: item
+                  name: electronic-circuit
+                  label: Elektronischer Schaltkreis
+                  description: ""
+                  amount: 1
+              craftingTime: 0.5
+
+  securitySchemes:
+    jwt:
+      description: JWT Token for the Factorio Item Browser API. Use the /auth request to receive a token.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

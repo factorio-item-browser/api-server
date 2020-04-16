@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Search\SearchCacheClearInterface;
 use FactorioItemBrowser\Api\Server\Middleware\CleanupMiddleware;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -33,7 +33,6 @@ class CleanupMiddlewareTest extends TestCase
 
     /**
      * Seats up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -56,7 +55,6 @@ class CleanupMiddlewareTest extends TestCase
 
     /**
      * Tests the process method.
-     * @throws ReflectionException
      * @covers ::process
      */
     public function testProcess(): void
@@ -74,11 +72,11 @@ class CleanupMiddlewareTest extends TestCase
                 ->willReturn($response);
 
         $this->searchCacheClearer->expects($this->once())
-                                 ->method('cleanCache');
+                                 ->method('clearExpiredResults');
 
         /* @var CleanupMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(CleanupMiddleware::class)
-                           ->setMethods(['getRandomNumber'])
+                           ->onlyMethods(['getRandomNumber'])
                            ->setConstructorArgs([$this->searchCacheClearer])
                            ->getMock();
         $middleware->expects($this->once())
@@ -111,11 +109,11 @@ class CleanupMiddlewareTest extends TestCase
                 ->willReturn($response);
 
         $this->searchCacheClearer->expects($this->never())
-                                 ->method('cleanCache');
+                                 ->method('clearExpiredResults');
 
         /* @var CleanupMiddleware&MockObject $middleware */
         $middleware = $this->getMockBuilder(CleanupMiddleware::class)
-                           ->setMethods(['getRandomNumber'])
+                           ->onlyMethods(['getRandomNumber'])
                            ->setConstructorArgs([$this->searchCacheClearer])
                            ->getMock();
         $middleware->expects($this->once())

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use PHPUnit\Framework\TestCase;
@@ -28,94 +28,46 @@ class AgentServiceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $agent1 = new Agent();
-        $agent1->setName('abc');
-        $agent2 = new Agent();
-        $agent2->setName('def');
-        $expectedAgents = ['abc' => $agent1, 'def' => $agent2];
-
-        $service = new AgentService([$agent1, $agent2]);
-
-        $this->assertSame($expectedAgents, $this->extractProperty($service, 'agentsByName'));
-    }
-
-    /**
-     * Provides the data for the getByName test.
-     * @return array
-     */
-    public function provideGetByName(): array
-    {
-        $agent1 = new Agent();
-        $agent1->setName('abc')
-               ->setAccessKey('def');
-        $agent2 = new Agent();
-        $agent2->setName('ghi')
-               ->setAccessKey('jkl');
-
         $agents = [
-            'abc' => $agent1,
-            'ghi' => $agent2,
+            $this->createMock(Agent::class),
+            $this->createMock(Agent::class),
         ];
-
-        return [
-            [$agents, 'abc', $agent1],
-            [$agents, 'foo', null],
-        ];
-    }
-
-    /**
-     * Tests the getByName method.
-     * @param array|Agent[] $agents
-     * @param string $name
-     * @param Agent|null $expectedResult
-     * @covers ::getByName
-     * @dataProvider provideGetByName
-     */
-    public function testGetByName(array $agents, string $name, ?Agent $expectedResult): void
-    {
         $service = new AgentService($agents);
-        $result = $service->getByName($name);
 
-        $this->assertSame($expectedResult, $result);
+        $this->assertSame($agents, $this->extractProperty($service, 'agents'));
     }
 
     /**
      * Provides the data for the getByAccessKey test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideGetByAccessKey(): array
     {
         $agent1 = new Agent();
-        $agent1->setName('abc')
-               ->setAccessKey('def');
+        $agent1->setAccessKey('abc');
         $agent2 = new Agent();
-        $agent2->setName('ghi')
-               ->setAccessKey('jkl');
-        $agents = [
-            'abc' => $agent1,
-            'ghi' => $agent2,
-        ];
+        $agent2->setAccessKey('def');
+        $agents = [$agent1, $agent2];
 
         return [
-            [$agents, 'abc', 'def', $agent1],
-            [$agents, 'ghi', 'foo', null],
-            [$agents, 'foo', 'bar', null],
+            [$agents, 'abc', $agent1],
+            [$agents, 'foo', null],
+            [$agents, '', null],
         ];
     }
 
     /**
      * Tests the getByAccessKey method.
      * @param array|Agent[] $agents
-     * @param string $name
      * @param string $accessKey
      * @param Agent|null $expectedResult
      * @covers ::getByAccessKey
      * @dataProvider provideGetByAccessKey
      */
-    public function testGetByAccessKey(array $agents, string $name, string $accessKey, ?Agent $expectedResult): void
+    public function testGetByAccessKey(array $agents, string $accessKey, ?Agent $expectedResult): void
     {
         $service = new AgentService($agents);
-        $result = $service->getByAccessKey($name, $accessKey);
+        $result = $service->getByAccessKey($accessKey);
 
         $this->assertSame($expectedResult, $result);
     }

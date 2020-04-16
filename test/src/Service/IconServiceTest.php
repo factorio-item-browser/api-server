@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
-use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Database\Entity\IconFile;
-use FactorioItemBrowser\Api\Database\Filter\DataFilter;
-use FactorioItemBrowser\Api\Database\Repository\IconFileRepository;
+use BluePsyduck\TestHelper\ReflectionTrait;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Entity\Icon;
+use FactorioItemBrowser\Api\Database\Entity\IconImage;
+use FactorioItemBrowser\Api\Database\Repository\IconImageRepository;
 use FactorioItemBrowser\Api\Database\Repository\IconRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -29,16 +30,10 @@ class IconServiceTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * The mocked data filter.
-     * @var DataFilter&MockObject
+     * The mocked icon image repository.
+     * @var IconImageRepository&MockObject
      */
-    protected $dataFilter;
-
-    /**
-     * The mocked icon file repository.
-     * @var IconFileRepository&MockObject
-     */
-    protected $iconFileRepository;
+    protected $iconImageRepository;
 
     /**
      * The mocked icon repository.
@@ -48,14 +43,12 @@ class IconServiceTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->dataFilter = $this->createMock(DataFilter::class);
-        $this->iconFileRepository = $this->createMock(IconFileRepository::class);
+        $this->iconImageRepository = $this->createMock(IconImageRepository::class);
         $this->iconRepository = $this->createMock(IconRepository::class);
     }
 
@@ -66,10 +59,9 @@ class IconServiceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
+        $service = new IconService($this->iconImageRepository, $this->iconRepository);
 
-        $this->assertSame($this->dataFilter, $this->extractProperty($service, 'dataFilter'));
-        $this->assertSame($this->iconFileRepository, $this->extractProperty($service, 'iconFileRepository'));
+        $this->assertSame($this->iconImageRepository, $this->extractProperty($service, 'iconImageRepository'));
         $this->assertSame($this->iconRepository, $this->extractProperty($service, 'iconRepository'));
     }
 
@@ -80,104 +72,114 @@ class IconServiceTest extends TestCase
      */
     public function testInjectAuthorizationToken(): void
     {
-        $enabledModCombinationIds = [42, 1337];
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
-                           ->method('getEnabledModCombinationIds')
-                           ->willReturn($enabledModCombinationIds);
+                           ->method('getCombinationId')
+                           ->willReturn($combinationId);
 
-        $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
+        $service = new IconService($this->iconImageRepository, $this->iconRepository);
         $service->injectAuthorizationToken($authorizationToken);
 
-        $this->assertSame($enabledModCombinationIds, $this->extractProperty($service, 'enabledModCombinationIds'));
+        $this->assertSame($combinationId, $this->extractProperty($service, 'combinationId'));
     }
 
     /**
-     * Tests the getHashesByTypesAndNames method.
+     * Tests the getImageIdsByTypesAndNames method.
      * @throws ReflectionException
-     * @covers ::getHashesByTypesAndNames
+     * @covers ::getImageIdsByTypesAndNames
      */
-    public function testGetHashesByTypesAndNames(): void
+    public function testGetImageIdsByTypesAndNames(): void
     {
-        $enabledModCombinationIds = [42, 1337];
-        $namesByTypesArray = [
-            'abc' => ['def', 'ghi'],
-            'jkl' => ['mno'],
-        ];
-
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
         /* @var NamesByTypes&MockObject $namesByTypes */
         $namesByTypes = $this->createMock(NamesByTypes::class);
-        $namesByTypes->expects($this->once())
-                     ->method('toArray')
-                     ->willReturn($namesByTypesArray);
 
-        /* @var IconData&MockObject $iconData1 */
-        $iconData1 = $this->createMock(IconData::class);
-        $iconData1->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('abc');
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
 
-        /* @var IconData&MockObject $iconData2 */
-        $iconData2 = $this->createMock(IconData::class);
-        $iconData2->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('def');
+        /* @var IconImage&MockObject $image1 */
+        $image1 = $this->createMock(IconImage::class);
+        $image1->expects($this->any())
+               ->method('getId')
+               ->willReturn($id1);
 
-        /* @var IconData&MockObject $iconData3 */
-        $iconData3 = $this->createMock(IconData::class);
-        $iconData3->expects($this->once())
-                  ->method('getHash')
-                  ->willReturn('abc');
+        /* @var IconImage&MockObject $image2 */
+        $image2 = $this->createMock(IconImage::class);
+        $image2->expects($this->any())
+               ->method('getId')
+               ->willReturn($id2);
 
+        /* @var Icon&MockObject $icon1 */
+        $icon1 = $this->createMock(Icon::class);
+        $icon1->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image1);
 
-        $iconData = [$iconData1, $iconData2, $iconData3];
-        $expectedResult = ['abc', 'def'];
+        /* @var Icon&MockObject $icon2 */
+        $icon2 = $this->createMock(Icon::class);
+        $icon2->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image2);
+
+        /* @var Icon&MockObject $icon3 */
+        $icon3 = $this->createMock(Icon::class);
+        $icon3->expects($this->any())
+              ->method('getImage')
+              ->willReturn($image1);
+
+        $icons = [$icon1, $icon2, $icon3];
+        $expectedResult = [$id1, $id2];
 
         $this->iconRepository->expects($this->once())
-                             ->method('findDataByTypesAndNames')
+                             ->method('findByTypesAndNames')
                              ->with(
-                                 $this->identicalTo($namesByTypesArray),
-                                 $this->identicalTo($enabledModCombinationIds)
+                                 $this->identicalTo($combinationId),
+                                 $this->identicalTo($namesByTypes)
                              )
-                             ->willReturn($iconData);
+                             ->willReturn($icons);
 
-        $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
-        $this->injectProperty($service, 'enabledModCombinationIds', $enabledModCombinationIds);
+        $service = new IconService($this->iconImageRepository, $this->iconRepository);
+        $this->injectProperty($service, 'combinationId', $combinationId);
 
-        $result = $service->getHashesByTypesAndNames($namesByTypes);
+        $result = $service->getImageIdsByTypesAndNames($namesByTypes);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the getTypesAndNamesByHashes method.
-     * @throws ReflectionException
-     * @covers ::getTypesAndNamesByHashes
+     * Tests the getTypesAndNamesByImageIds method.
+     * @covers ::getTypesAndNamesByImageIds
      */
-    public function testGetTypesAndNamesByHashes(): void
+    public function testGetTypesAndNamesByImageIds(): void
     {
-        /* @var IconData&MockObject $iconData1 */
-        $iconData1 = $this->createMock(IconData::class);
-        $iconData1->expects($this->once())
-                  ->method('getType')
-                  ->willReturn('abc');
-        $iconData1->expects($this->once())
-                  ->method('getName')
-                  ->willReturn('def');
+        /* @var Icon&MockObject $icon1 */
+        $icon1 = $this->createMock(Icon::class);
+        $icon1->expects($this->once())
+              ->method('getType')
+              ->willReturn('abc');
+        $icon1->expects($this->once())
+              ->method('getName')
+              ->willReturn('def');
         
-        /* @var IconData&MockObject $iconData2 */
-        $iconData2 = $this->createMock(IconData::class);
-        $iconData2->expects($this->once())
-                  ->method('getType')
-                  ->willReturn('ghi');
-        $iconData2->expects($this->once())
-                  ->method('getName')
-                  ->willReturn('jkl');
+        /* @var Icon&MockObject $icon2 */
+        $icon2 = $this->createMock(Icon::class);
+        $icon2->expects($this->once())
+              ->method('getType')
+              ->willReturn('ghi');
+        $icon2->expects($this->once())
+              ->method('getName')
+              ->willReturn('jkl');
 
-        $hashes = ['mno', 'pqr'];
-        $iconData = [$iconData1, $iconData2];
+        $imageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
+        $icons = [$icon1, $icon2];
         
         $expectedResult = new NamesByTypes();
         $expectedResult->addName('abc', 'def')
@@ -185,76 +187,73 @@ class IconServiceTest extends TestCase
         
         /* @var IconService&MockObject $iconService */
         $iconService = $this->getMockBuilder(IconService::class)
-                            ->setMethods(['getIconDataByHashes'])
+                            ->onlyMethods(['getIconsByImageIds'])
                             ->disableOriginalConstructor()
                             ->getMock();
         $iconService->expects($this->once())
-                    ->method('getIconDataByHashes')
-                    ->with($this->identicalTo($hashes))
-                    ->willReturn($iconData);
+                    ->method('getIconsByImageIds')
+                    ->with($this->identicalTo($imageIds))
+                    ->willReturn($icons);
 
-        $result = $iconService->getTypesAndNamesByHashes($hashes);
+        $result = $iconService->getTypesAndNamesByImageIds($imageIds);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the getIconDataByHashes method.
+     * Tests the getIconsByImageIds method.
      * @throws ReflectionException
-     * @covers ::getIconDataByHashes
+     * @covers ::getIconsByImageIds
      */
-    public function testGetIconDataByHashes(): void
+    public function testGetIconsByImageIds(): void
     {
-        $hashes = ['abc', 'def'];
-        $enabledModCombinationIds = [42, 1337];
+        $imageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
+        $icons = [
+            $this->createMock(Icon::class),
+            $this->createMock(Icon::class),
+        ];
 
-        $iconData = [
-            $this->createMock(IconData::class),
-            $this->createMock(IconData::class),
-        ];
-        $filteredIconData = [
-            $this->createMock(IconData::class),
-            $this->createMock(IconData::class),
-        ];
-        
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
+
         $this->iconRepository->expects($this->once())
-                             ->method('findDataByHashes')
-                             ->with($this->identicalTo($hashes), $this->identicalTo($enabledModCombinationIds))
-                             ->willReturn($iconData);
+                             ->method('findByImageIds')
+                             ->with($this->identicalTo($combinationId), $this->identicalTo($imageIds))
+                             ->willReturn($icons);
 
-        $this->dataFilter->expects($this->once())
-                         ->method('filter')
-                         ->with($this->identicalTo($iconData))
-                         ->willReturn($filteredIconData);
+        $service = new IconService($this->iconImageRepository, $this->iconRepository);
+        $this->injectProperty($service, 'combinationId', $combinationId);
 
-        $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
-        $this->injectProperty($service, 'enabledModCombinationIds', $enabledModCombinationIds);
+        $result = $service->getIconsByImageIds($imageIds);
 
-        $result = $service->getIconDataByHashes($hashes);
-
-        $this->assertEquals($filteredIconData, $result);
+        $this->assertEquals($icons, $result);
     }
 
     /**
      * Tests the getIconFilesByHashes method.
-     * @throws ReflectionException
-     * @covers ::getIconFilesByHashes
+     * @covers ::getImagesByIds
      */
     public function testGetIconFilesByHashes(): void
     {
-        $hashes = ['abc', 'def'];
+        $imageIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
+        ];
         $iconFiles = [
-            $this->createMock(IconFile::class),
-            $this->createMock(IconFile::class),
+            $this->createMock(IconImage::class),
+            $this->createMock(IconImage::class),
         ];
         
-        $this->iconFileRepository->expects($this->once())
-                                 ->method('findByHashes')
-                                 ->with($this->identicalTo($hashes))
-                                 ->willReturn($iconFiles);
+        $this->iconImageRepository->expects($this->once())
+                                  ->method('findByIds')
+                                  ->with($this->identicalTo($imageIds))
+                                  ->willReturn($iconFiles);
 
-        $service = new IconService($this->dataFilter, $this->iconFileRepository, $this->iconRepository);
-        $result = $service->getIconFilesByHashes($hashes);
+        $service = new IconService($this->iconImageRepository, $this->iconRepository);
+        $result = $service->getImagesByIds($imageIds);
 
         $this->assertSame($iconFiles, $result);
     }

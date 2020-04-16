@@ -10,15 +10,14 @@ use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericDetailsRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericDetailsResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use FactorioItemBrowser\Common\Constant\EntityType;
-use FactorioItemBrowser\Common\Constant\ItemType;
 
 /**
  * The handler of the /generic/details request.
@@ -106,78 +105,57 @@ class GenericDetailsHandler extends AbstractRequestHandler
     protected function process(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         return array_values(array_merge(
-            $this->processItems($namesByTypes->getNames(EntityType::ITEM), $authorizationToken),
-            $this->processFluids($namesByTypes->getNames(EntityType::FLUID), $authorizationToken),
-            $this->processMachines($namesByTypes->getNames(EntityType::MACHINE), $authorizationToken),
-            $this->processRecipes($namesByTypes->getNames(EntityType::RECIPE), $authorizationToken)
+            $this->processItems($namesByTypes, $authorizationToken),
+            $this->processMachines($namesByTypes, $authorizationToken),
+            $this->processRecipes($namesByTypes, $authorizationToken)
         ));
     }
 
     /**
      * Processes the items.
-     * @param array|string[] $names
+     * @param NamesByTypes $namesByTypes
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processItems(array $names, AuthorizationToken $authorizationToken): array
+    protected function processItems(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $items = $this->itemRepository->findByTypesAndNames(
-            [ItemType::ITEM => $names],
-            $authorizationToken->getEnabledModCombinationIds()
+            $authorizationToken->getCombinationId(),
+            $namesByTypes
         );
-
         return $this->mapObjectsToEntities($items);
     }
 
     /**
-     * Processes the fluids.
-     * @param array|string[] $names
-     * @param AuthorizationToken $authorizationToken
-     * @return array|GenericEntity[]
-     * @throws MapperException
-     */
-    protected function processFluids(array $names, AuthorizationToken $authorizationToken): array
-    {
-        $fluids = $this->itemRepository->findByTypesAndNames(
-            [ItemType::FLUID => $names],
-            $authorizationToken->getEnabledModCombinationIds()
-        );
-
-        return $this->mapObjectsToEntities($fluids);
-    }
-
-    /**
      * Processes the machines.
-     * @param array|string[] $names
+     * @param NamesByTypes $namesByTypes
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processMachines(array $names, AuthorizationToken $authorizationToken): array
+    protected function processMachines(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
-        $machines = $this->machineRepository->findDataByNames(
-            $names,
-            $authorizationToken->getEnabledModCombinationIds()
+        $machines = $this->machineRepository->findByNames(
+            $authorizationToken->getCombinationId(),
+            $namesByTypes->getNames(EntityType::MACHINE)
         );
-
         return $this->mapObjectsToEntities($machines);
     }
-    
+
     /**
      * Processes the recipes.
-     * @param array|string[] $names
+     * @param NamesByTypes $namesByTypes
      * @param AuthorizationToken $authorizationToken
      * @return array|GenericEntity[]
      * @throws MapperException
      */
-    protected function processRecipes(array $names, AuthorizationToken $authorizationToken): array
+    protected function processRecipes(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
     {
         $recipes = $this->recipeRepository->findDataByNames(
-            $names,
-            $authorizationToken->getEnabledModCombinationIds()
+            $authorizationToken->getCombinationId(),
+            $namesByTypes->getNames(EntityType::RECIPE)
         );
-
         return $this->mapObjectsToEntities($recipes);
     }
 
@@ -199,13 +177,13 @@ class GenericDetailsHandler extends AbstractRequestHandler
     }
 
     /**
-     * Returns the key to match duplicated entities.
+     * Returns the key of the entity.
      * @param GenericEntity $entity
      * @return string
      */
     protected function getEntityKey(GenericEntity $entity): string
     {
-        return implode('|', [$entity->getType(), $entity->getName()]);
+        return "{$entity->getType()}|{$entity->getName()}";
     }
 
     /**

@@ -7,7 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Service;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * The factory of the agent service.
@@ -21,7 +21,7 @@ class AgentServiceFactory implements FactoryInterface
      * Creates the service.
      * @param  ContainerInterface $container
      * @param  string $requestedName
-     * @param  null|array $options
+     * @param  array<mixed>|null $options
      * @return AgentService
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
@@ -39,7 +39,7 @@ class AgentServiceFactory implements FactoryInterface
 
     /**
      * Creates an agent from the specified config.
-     * @param array $agentConfig
+     * @param array<mixed> $agentConfig
      * @return Agent
      */
     protected function createAgent(array $agentConfig): Agent

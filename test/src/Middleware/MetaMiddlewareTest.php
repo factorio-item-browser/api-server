@@ -10,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the MetaMiddleware class.
@@ -23,7 +22,6 @@ class MetaMiddlewareTest extends TestCase
 {
     /**
      * Tests the process method.
-     * @throws ReflectionException
      * @covers ::__construct
      * @covers ::process
      */

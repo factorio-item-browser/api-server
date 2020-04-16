@@ -12,6 +12,7 @@ use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Search\Entity\Result\ItemResult;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The decorator of the item search results.
@@ -47,7 +48,7 @@ class ItemDecorator implements SearchDecoratorInterface
 
     /**
      * The item ids of the announced search results.
-     * @var array|int[]
+     * @var array|UuidInterface[]
      */
     protected $itemIds = [];
 
@@ -99,7 +100,9 @@ class ItemDecorator implements SearchDecoratorInterface
      */
     public function announce($itemResult): void
     {
-        $this->itemIds[] = $itemResult->getId();
+        if ($itemResult->getId() !== null) {
+            $this->itemIds[] = $itemResult->getId();
+        }
         foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
             $this->recipeDecorator->announce($recipeResult);
         }
@@ -114,7 +117,7 @@ class ItemDecorator implements SearchDecoratorInterface
 
         $this->items = [];
         foreach ($this->itemRepository->findByIds($itemIds) as $item) {
-            $this->items[$item->getId()] = $item;
+            $this->items[$item->getId()->toString()] = $item;
         }
     }
 
@@ -126,19 +129,22 @@ class ItemDecorator implements SearchDecoratorInterface
      */
     public function decorate($itemResult): ?GenericEntityWithRecipes
     {
-        $result = null;
-        $itemId = $itemResult->getId();
-        if (isset($this->items[$itemId])) {
-            $result = $this->createEntityForItem($this->items[$itemId]);
-
-            foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
-                $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
-                if ($recipe instanceof ClientRecipe) {
-                    $result->addRecipe($recipe);
-                }
-            }
-            $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
+        if ($itemResult->getId() === null) {
+            return null;
         }
+        $itemId = $itemResult->getId()->toString();
+        if (!isset($this->items[$itemId])) {
+            return null;
+        }
+
+        $result = $this->createEntityForItem($this->items[$itemId]);
+        foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
+            $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
+            if ($recipe instanceof ClientRecipe) {
+                $result->addRecipe($recipe);
+            }
+        }
+        $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
         return $result;
     }
 

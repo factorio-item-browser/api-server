@@ -43,7 +43,7 @@ class DatabaseModToClientModMapper extends TranslationServiceAwareMapper impleme
     {
         $clientMod->setName($databaseMod->getName())
                   ->setAuthor($databaseMod->getAuthor())
-                  ->setVersion($databaseMod->getCurrentVersion());
+                  ->setVersion($databaseMod->getVersion());
 
         $this->addToTranslationService($clientMod);
     }

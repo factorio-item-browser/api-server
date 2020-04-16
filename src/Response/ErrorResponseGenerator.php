@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Response;
 
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Log\LoggerInterface;
 
 /**
  * The class generating the error response.
@@ -21,7 +21,7 @@ class ErrorResponseGenerator
 {
     /**
      * The logger.
-     * @var LoggerInterface|null
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -33,12 +33,12 @@ class ErrorResponseGenerator
 
     /**
      * Initializes the generator.
-     * @param LoggerInterface|null $logger
+     * @param LoggerInterface $errorLogger
      * @param bool $isDebug
      */
-    public function __construct(?LoggerInterface $logger, bool $isDebug)
+    public function __construct(LoggerInterface $errorLogger, bool $isDebug)
     {
-        $this->logger = $logger;
+        $this->logger = $errorLogger;
         $this->isDebug = $isDebug;
     }
 
@@ -77,7 +77,7 @@ class ErrorResponseGenerator
      */
     protected function logException(int $statusCode, Throwable $exception): void
     {
-        if (floor($statusCode / 100) === 5. && $this->logger instanceof LoggerInterface) {
+        if (floor($statusCode / 100) === 5.) {
             $this->logger->crit($exception);
         }
     }
@@ -86,7 +86,7 @@ class ErrorResponseGenerator
      * Creates the error response data.
      * @param string $message
      * @param Throwable $exception
-     * @return array
+     * @return array<mixed>
      */
     protected function createResponseError(string $message, Throwable $exception): array
     {

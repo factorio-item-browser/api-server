@@ -9,11 +9,13 @@ use FactorioItemBrowser\Api\Client\Entity\Icon as ClientIcon;
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
-use FactorioItemBrowser\Api\Database\Data\IconData;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Entity\Icon;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The handler of the /generic/icon request.
@@ -59,9 +61,9 @@ class GenericIconHandler extends AbstractRequestHandler
         $this->iconService->injectAuthorizationToken($this->getAuthorizationToken());
 
         $namesByTypes = $this->extractTypesAndNames($request->getEntities());
-        $iconFileHashes = $this->fetchIconFileHashes($namesByTypes);
+        $imageIds = $this->fetchImageIds($namesByTypes);
 
-        $clientIcons = $this->fetchIcons($iconFileHashes);
+        $clientIcons = $this->fetchIcons($imageIds);
         $filteredClientIcons = $this->filterRequestedIcons($clientIcons, $namesByTypes);
         $this->hydrateContentToIcons($filteredClientIcons);
 
@@ -69,34 +71,34 @@ class GenericIconHandler extends AbstractRequestHandler
     }
 
     /**
-     * Fetches the icon file hashes of the types and names.
+     * Fetches the image ids of the types and names.
      * @param NamesByTypes $namesByTypes
-     * @return array|string[]
+     * @return array|UuidInterface[]
      */
-    protected function fetchIconFileHashes(NamesByTypes $namesByTypes): array
+    protected function fetchImageIds(NamesByTypes $namesByTypes): array
     {
-        $iconFileHashes = $this->iconService->getHashesByTypesAndNames($namesByTypes);
-        $allNamesByTypes = $this->iconService->getTypesAndNamesByHashes($iconFileHashes);
-        return $this->iconService->getHashesByTypesAndNames($allNamesByTypes);
+        $imageIds = $this->iconService->getImageIdsByTypesAndNames($namesByTypes);
+        $allNamesByTypes = $this->iconService->getTypesAndNamesByImageIds($imageIds);
+        return $this->iconService->getImageIdsByTypesAndNames($allNamesByTypes);
     }
 
     /**
      * Fetches the icons to the file hashes.
-     * @param array $iconFileHashes
+     * @param array|UuidInterface[] $imageIds
      * @return array|ClientIcon[]
      */
-    protected function fetchIcons(array $iconFileHashes): array
+    protected function fetchIcons(array $imageIds): array
     {
         /* @var ClientIcon[] $result */
         $result = [];
-        foreach ($this->iconService->getIconDataByHashes($iconFileHashes) as $iconData) {
-            $hash = $iconData->getHash();
-            if (!isset($result[$hash])) {
-                $result[$hash] = $this->createClientIcon();
+        foreach ($this->iconService->getIconsByImageIds($imageIds) as $icon) {
+            $imageId = $icon->getImage()->getId()->toString();
+            if (!isset($result[$imageId])) {
+                $result[$imageId] = $this->createClientIcon();
             }
 
-            $entity = $this->createEntityForIconData($iconData);
-            $result[$hash]->addEntity($entity);
+            $entity = $this->createEntityForIcon($icon);
+            $result[$imageId]->addEntity($entity);
         }
         return $result;
     }
@@ -112,14 +114,14 @@ class GenericIconHandler extends AbstractRequestHandler
 
     /**
      * Creates an entity to assign to an icon.
-     * @param IconData $iconData
+     * @param Icon $icon
      * @return ClientEntity
      */
-    protected function createEntityForIconData(IconData $iconData): ClientEntity
+    protected function createEntityForIcon(Icon $icon): ClientEntity
     {
-        $result= new ClientEntity();
-        $result->setType($iconData->getType())
-               ->setName($iconData->getName());
+        $result = new ClientEntity();
+        $result->setType($icon->getType())
+               ->setName($icon->getName());
         return $result;
     }
 
@@ -158,12 +160,15 @@ class GenericIconHandler extends AbstractRequestHandler
      */
     protected function hydrateContentToIcons(array $clientIcons): void
     {
-        $iconFiles = $this->iconService->getIconFilesByHashes(array_keys($clientIcons));
+        $iconFiles = $this->iconService->getImagesByIds(array_map(function (string $imageId): UuidInterface {
+            return Uuid::fromString($imageId);
+        }, array_keys($clientIcons)));
+
         foreach ($iconFiles as $iconFile) {
-            $iconFileHash = $iconFile->getHash();
-            if (isset($clientIcons[$iconFileHash])) {
-                $clientIcons[$iconFileHash]->setContent($iconFile->getImage())
-                                           ->setSize($iconFile->getSize());
+            $imageId = $iconFile->getId()->toString();
+            if (isset($clientIcons[$imageId])) {
+                $clientIcons[$imageId]->setContent($iconFile->getContents())
+                                      ->setSize($iconFile->getSize());
             }
         }
     }

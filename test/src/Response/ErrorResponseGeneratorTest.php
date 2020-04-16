@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Log\LoggerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Log\LoggerInterface;
 
 /**
  * The PHPUnit test of the ErrorResponseGenerator class.
@@ -83,7 +83,7 @@ class ErrorResponseGeneratorTest extends TestCase
 
         /* @var ErrorResponseGenerator&MockObject $generator */
         $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
-                          ->setMethods(['logException', 'createResponseError'])
+                          ->onlyMethods(['logException', 'createResponseError'])
                           ->setConstructorArgs([$this->logger, true])
                           ->getMock();
         $generator->expects($this->once())
@@ -127,7 +127,7 @@ class ErrorResponseGeneratorTest extends TestCase
 
         /* @var ErrorResponseGenerator&MockObject $generator */
         $generator = $this->getMockBuilder(ErrorResponseGenerator::class)
-                          ->setMethods(['logException', 'createResponseError'])
+                          ->onlyMethods(['logException', 'createResponseError'])
                           ->setConstructorArgs([$this->logger, true])
                           ->getMock();
         $generator->expects($this->once())
@@ -144,8 +144,6 @@ class ErrorResponseGeneratorTest extends TestCase
         /* @var JsonResponse $result */
         $this->assertEquals($expectedPayload, $result->getPayload());
     }
-
-
 
     /**
      * Tests the logException method.
@@ -182,23 +180,6 @@ class ErrorResponseGeneratorTest extends TestCase
 
         $generator = new ErrorResponseGenerator($this->logger, true);
         $this->invokeMethod($generator, 'logException', $statusCode, $exception);
-    }
-
-    /**
-     * Tests the logException method without an actual logger.
-     * @throws ReflectionException
-     * @covers ::logException
-     */
-    public function testLogExceptionWithoutLogger(): void
-    {
-        $statusCode = 500;
-        /* @var Exception&MockObject $exception */
-        $exception = $this->createMock(Exception::class);
-
-        $generator = new ErrorResponseGenerator(null, true);
-        $this->invokeMethod($generator, 'logException', $statusCode, $exception);
-
-        $this->expectNotToPerformAssertions();
     }
 
     /**

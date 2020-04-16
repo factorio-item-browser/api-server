@@ -49,7 +49,7 @@ class CleanupMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
 
         if ($this->getRandomNumber(self::CLEANUP_FACTOR) === 42) {
-            $this->searchCacheClearer->cleanCache();
+            $this->searchCacheClearer->clearExpiredResults();
         }
 
         return $response;

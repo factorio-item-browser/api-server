@@ -16,4 +16,9 @@ interface Config
      * The default locale.
      */
     public const DEFAULT_LOCALE = 'en';
+
+    /**
+     * The default combination id to use as fallback.
+     */
+    public const DEFAULT_COMBINATION_ID = '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76';
 }

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Response;
 
 use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\Response\InjectContentTypeTrait;
-use Zend\Diactoros\Stream;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Response\InjectContentTypeTrait;
+use Laminas\Diactoros\Stream;
 
 /**
  * The wrapper for the client response.
@@ -29,7 +29,7 @@ class ClientResponse extends Response
      * Initializes the response.
      * @param ResponseInterface $response
      * @param int $status
-     * @param array $headers
+     * @param array|string[] $headers
      */
     public function __construct(ResponseInterface $response, $status = 200, array $headers = [])
     {

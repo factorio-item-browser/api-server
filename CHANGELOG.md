@@ -1,10 +1,13 @@
 # Changelog
 
-## 1.2.0 - Unreleased
+## 2.0.0 - 2020-04-16
 
 ### Added
 
 - Attribute `size` to the generic icon response.
+- Command for clearing the caches from out-dated entries.
+- Doctrine Migrations for managing the database structure.
+- New endpoints `/combination/status` and `/combination/export` to trigger new exports and check their status.
 
 ### Changed
 
@@ -13,14 +16,17 @@
 - Extracted search logic to separate library `factorio-item-browser/api-search`.
 - Extracted import logic to separate project `factorio-item-browser/api-import`. The API server now only reads from the 
   database (with the exception of the CachedSearchResult table).
-- Changed library `factorio-item-browser/client` to latest version 2.1.
+- Changed library `factorio-item-browser/client` to latest version.
 - Use client request and response entities and its serializer to parse requests and build responses.
 - Machine preferred in sorting from "player" to "character" as of in-game change.
+- Dependencies from Zend to Laminas.
 
 ### Removed 
 
 - API: Removed `parameters` field from the error response when request validation fails. Error responses now
   always have only the message.
+- Agent name from the `auth` request. The access key is now enough.
+- No longer supported endpoint `mod/meta`.
 
 ## 1.1.0 - 2018-07-22
 

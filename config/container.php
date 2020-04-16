@@ -11,10 +11,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use BluePsyduck\ZendAutoWireFactory\AutoWireFactory;
-use Zend\ConfigAggregator\ConfigAggregator;
-use Zend\ServiceManager\Config;
-use Zend\ServiceManager\ServiceManager;
+use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
+use Laminas\ConfigAggregator\ConfigAggregator;
+use Laminas\ServiceManager\Config;
+use Laminas\ServiceManager\ServiceManager;
 
 // Load configuration
 $config = require(__DIR__ . '/config.php');

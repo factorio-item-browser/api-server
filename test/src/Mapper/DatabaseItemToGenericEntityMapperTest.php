@@ -11,7 +11,6 @@ use FactorioItemBrowser\Api\Server\Mapper\DatabaseItemToGenericEntityMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the DatabaseItemToGenericEntityMapper class.
@@ -30,7 +29,6 @@ class DatabaseItemToGenericEntityMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -41,8 +39,7 @@ class DatabaseItemToGenericEntityMapperTest extends TestCase
 
     /**
      * Provides the data for the supports test.
-     * @return array
-     * @throws ReflectionException
+     * @return array<mixed>
      */
     public function provideSupports(): array
     {
@@ -78,7 +75,6 @@ class DatabaseItemToGenericEntityMapperTest extends TestCase
 
     /**
      * Tests the map method.
-     * @throws ReflectionException
      * @covers ::map
      */
     public function testMap(): void
@@ -105,7 +101,7 @@ class DatabaseItemToGenericEntityMapperTest extends TestCase
 
         /* @var DatabaseItemToGenericEntityMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseItemToGenericEntityMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

@@ -32,14 +32,14 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
 
     /**
      * The map of the routes to their corresponding requests.
-     * @var array|string[]
+     * @var array<class-string<RequestInterface>>
      */
     protected $mapRouteToRequest;
 
     /**
      * Initializes the middleware.
      * @param SerializerInterface $serializer
-     * @param array|string[] $mapRouteToRequest
+     * @param array<string,class-string<RequestInterface>> $mapRouteToRequest
      */
     public function __construct(SerializerInterface $serializer, array $mapRouteToRequest)
     {
@@ -70,11 +70,11 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
     /**
      * Deserializes the request body into a client request entity.
      * @param ServerRequestInterface $request
-     * @param string $requestClass
+     * @param class-string<RequestInterface> $requestClass
      * @return RequestInterface
      * @throws ApiServerException
      */
-    protected function deserializeRequestBody(ServerRequestInterface $request, string $requestClass): RequestInterface
+    protected function deserializeRequestBody(ServerRequestInterface $request, $requestClass): RequestInterface
     {
         try {
             $requestBody = $request->getBody()->getContents();

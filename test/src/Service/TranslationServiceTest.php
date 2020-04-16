@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Database\Data\TranslationData;
+use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
+use FactorioItemBrowser\Api\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
 use FactorioItemBrowser\Common\Constant\EntityType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -35,7 +36,6 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -97,13 +97,13 @@ class TranslationServiceTest extends TestCase
             $this->createMock(GenericEntity::class),
         ];
         $translations =  [
-            $this->createMock(TranslationData::class),
-            $this->createMock(TranslationData::class),
+            $this->createMock(Translation::class),
+            $this->createMock(Translation::class),
         ];
 
         /* @var TranslationService&MockObject $service */
         $service = $this->getMockBuilder(TranslationService::class)
-                        ->setMethods(['fetchTranslations', 'matchTranslationsToEntities'])
+                        ->onlyMethods(['fetchTranslations', 'matchTranslationsToEntities'])
                         ->setConstructorArgs([$this->translationRepository])
                         ->getMock();
         $service->expects($this->once())
@@ -119,6 +119,30 @@ class TranslationServiceTest extends TestCase
     }
 
     /**
+     * Tests the translate method.
+     * @throws ReflectionException
+     * @covers ::translate
+     */
+    public function testTranslateWithoutEntities(): void
+    {
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+
+        /* @var TranslationService&MockObject $service */
+        $service = $this->getMockBuilder(TranslationService::class)
+                        ->onlyMethods(['fetchTranslations', 'matchTranslationsToEntities'])
+                        ->setConstructorArgs([$this->translationRepository])
+                        ->getMock();
+        $service->expects($this->never())
+                ->method('fetchTranslations');
+        $service->expects($this->never())
+                ->method('matchTranslationsToEntities');
+        $this->injectProperty($service, 'entities', []);
+
+        $service->translate($authorizationToken);
+    }
+
+    /**
      * Tests the fetchTranslations method.
      * @throws ReflectionException
      * @covers ::fetchTranslations
@@ -126,52 +150,46 @@ class TranslationServiceTest extends TestCase
     public function testFetchTranslations(): void
     {
         $locale = 'abc';
-        $enabledModCombinationIds = [42, 1337];
-        $namesByTypesArray = [
-            'def' => ['ghi', 'jkl'],
-            'mno' => ['pqr', 'stu'],
-        ];
 
         $entities = [
             $this->createMock(GenericEntity::class),
             $this->createMock(GenericEntity::class),
         ];
         $translations = [
-            $this->createMock(TranslationData::class),
-            $this->createMock(TranslationData::class),
+            $this->createMock(Translation::class),
+            $this->createMock(Translation::class),
         ];
         $preparedTranslations = [
-            'vwx' => $this->createMock(TranslationData::class),
-            'yza' => $this->createMock(TranslationData::class),
+            'def' => $this->createMock(Translation::class),
+            'ghi' => $this->createMock(Translation::class),
         ];
 
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
         /* @var NamesByTypes&MockObject $namesByTypes */
         $namesByTypes = $this->createMock(NamesByTypes::class);
-        $namesByTypes->expects($this->once())
-                     ->method('toArray')
-                     ->willReturn($namesByTypesArray);
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
+                           ->method('getCombinationId')
+                           ->willReturn($combinationId);
+        $authorizationToken->expects($this->once())
                            ->method('getLocale')
                            ->willReturn($locale);
-        $authorizationToken->expects($this->once())
-                           ->method('getEnabledModCombinationIds')
-                           ->willReturn($enabledModCombinationIds);
 
         $this->translationRepository->expects($this->once())
-                                    ->method('findDataByTypesAndNames')
+                                    ->method('findByTypesAndNames')
                                     ->with(
+                                        $this->identicalTo($combinationId),
                                         $this->identicalTo($locale),
-                                        $this->identicalTo($namesByTypesArray),
-                                        $this->identicalTo($enabledModCombinationIds)
+                                        $this->identicalTo($namesByTypes)
                                     )
                                     ->willReturn($translations);
 
         /* @var TranslationService&MockObject $service */
         $service = $this->getMockBuilder(TranslationService::class)
-                        ->setMethods(['extractTypesAndNames', 'compareTranslations', 'prepareTranslations'])
+                        ->onlyMethods(['extractTypesAndNames', 'compareTranslations', 'prepareTranslations'])
                         ->setConstructorArgs([$this->translationRepository])
                         ->getMock();
         $service->expects($this->once())
@@ -180,7 +198,7 @@ class TranslationServiceTest extends TestCase
                 ->willReturn($namesByTypes);
         $service->expects($this->any())
                 ->method('compareTranslations')
-                ->with($this->isInstanceOf(TranslationData::class), $this->isInstanceOf(TranslationData::class))
+                ->with($this->isInstanceOf(Translation::class), $this->isInstanceOf(Translation::class))
                 ->willReturn(-1);
         $service->expects($this->once())
                 ->method('prepareTranslations')
@@ -194,7 +212,7 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Provides the data for the compareTranslations test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCompareTranslations(): array
     {
@@ -229,8 +247,8 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Tests the compareTranslations method.
-     * @param array $leftCriteria
-     * @param array $rightCriteria
+     * @param array<mixed> $leftCriteria
+     * @param array<mixed> $rightCriteria
      * @param int $expectedResult
      * @throws ReflectionException
      * @covers ::compareTranslations
@@ -238,14 +256,14 @@ class TranslationServiceTest extends TestCase
      */
     public function testCompareTranslations(array $leftCriteria, array $rightCriteria, int $expectedResult): void
     {
-        /* @var TranslationData&MockObject $left */
-        $left = $this->createMock(TranslationData::class);
-        /* @var TranslationData&MockObject $right */
-        $right = $this->createMock(TranslationData::class);
+        /* @var Translation&MockObject $left */
+        $left = $this->createMock(Translation::class);
+        /* @var Translation&MockObject $right */
+        $right = $this->createMock(Translation::class);
 
         /* @var TranslationService&MockObject $service */
         $service = $this->getMockBuilder(TranslationService::class)
-                        ->setMethods(['getSortCriteria'])
+                        ->onlyMethods(['getSortCriteria'])
                         ->setConstructorArgs([$this->translationRepository])
                         ->getMock();
         $service->expects($this->exactly(2))
@@ -273,21 +291,17 @@ class TranslationServiceTest extends TestCase
     {
         $locale = 'abc';
         $type = 'def';
-        $order = 42;
         $name = 'ghi';
-        $expectedResult = [true, 'def', 42, 'ghi'];
+        $expectedResult = [true, 'def', 'ghi'];
 
-        /* @var TranslationData&MockObject $translation */
-        $translation = $this->createMock(TranslationData::class);
+        /* @var Translation&MockObject $translation */
+        $translation = $this->createMock(Translation::class);
         $translation->expects($this->once())
                     ->method('getLocale')
                     ->willReturn($locale);
         $translation->expects($this->once())
                     ->method('getType')
                     ->willReturn($type);
-        $translation->expects($this->once())
-                    ->method('getOrder')
-                    ->willReturn($order);
         $translation->expects($this->once())
                     ->method('getName')
                     ->willReturn($name);
@@ -305,15 +319,15 @@ class TranslationServiceTest extends TestCase
      */
     public function testPrepareTranslations(): void
     {
-        /* @var TranslationData&MockObject $translation1 */
-        $translation1 = $this->createMock(TranslationData::class);
-        $translation1->expects($this->exactly(2))
+        /* @var Translation&MockObject $translation1 */
+        $translation1 = $this->createMock(Translation::class);
+        $translation1->expects($this->any())
                      ->method('getName')
                      ->willReturn('abc');
 
-        /* @var TranslationData&MockObject $translation2 */
-        $translation2 = $this->createMock(TranslationData::class);
-        $translation2->expects($this->once())
+        /* @var Translation&MockObject $translation2 */
+        $translation2 = $this->createMock(Translation::class);
+        $translation2->expects($this->any())
                      ->method('getName')
                      ->willReturn('def');
 
@@ -326,7 +340,7 @@ class TranslationServiceTest extends TestCase
 
         /* @var TranslationService&MockObject $service */
         $service = $this->getMockBuilder(TranslationService::class)
-                        ->setMethods(['getTypesForTranslation', 'getTranslationKey'])
+                        ->onlyMethods(['getTypesForTranslation', 'getTranslationKey'])
                         ->setConstructorArgs([$this->translationRepository])
                         ->getMock();
         $service->expects($this->exactly(2))
@@ -359,44 +373,44 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Provides the data for the getTypesForTranslation test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideGetTypesForTranslation(): array
     {
         // Generic translations
-        $translation1 = new TranslationData();
+        $translation1 = new Translation();
         $translation1->setType('abc')
                      ->setIsDuplicatedByMachine(true)
                      ->setIsDuplicatedByRecipe(true);
         $result1 = ['abc', EntityType::MACHINE, EntityType::RECIPE];
 
-        $translation2 = new TranslationData();
+        $translation2 = new Translation();
         $translation2->setType('def')
                      ->setIsDuplicatedByMachine(true)
                      ->setIsDuplicatedByRecipe(false);
         $result2 = ['def', EntityType::MACHINE];
 
-        $translation3 = new TranslationData();
+        $translation3 = new Translation();
         $translation3->setType('ghi')
                      ->setIsDuplicatedByMachine(false)
                      ->setIsDuplicatedByRecipe(true);
         $result3 = ['ghi', EntityType::RECIPE];
 
-        $translation4 = new TranslationData();
+        $translation4 = new Translation();
         $translation4->setType('jkl')
                      ->setIsDuplicatedByMachine(false)
                      ->setIsDuplicatedByRecipe(false);
         $result4 = ['jkl'];
 
         // Machine-only translation
-        $translation5 = new TranslationData();
+        $translation5 = new Translation();
         $translation5->setType(EntityType::MACHINE)
                      ->setIsDuplicatedByMachine(false)
                      ->setIsDuplicatedByRecipe(false);
         $result5 = [EntityType::MACHINE];
 
         // Recipe-only translation
-        $translation6 = new TranslationData();
+        $translation6 = new Translation();
         $translation6->setType(EntityType::RECIPE)
                      ->setIsDuplicatedByMachine(false)
                      ->setIsDuplicatedByRecipe(false);
@@ -414,13 +428,13 @@ class TranslationServiceTest extends TestCase
 
     /**
      * Tests the getTypesForTranslation method.
-     * @param TranslationData $translation
-     * @param array $expectedResult
+     * @param Translation $translation
+     * @param array|string[] $expectedResult
      * @throws ReflectionException
      * @covers ::getTypesForTranslation
      * @dataProvider provideGetTypesForTranslation
      */
-    public function testGetTypesForTranslation(TranslationData $translation, array $expectedResult): void
+    public function testGetTypesForTranslation(Translation $translation, array $expectedResult): void
     {
         $service = new TranslationService($this->translationRepository);
         $result = $this->invokeMethod($service, 'getTypesForTranslation', $translation);
@@ -435,8 +449,8 @@ class TranslationServiceTest extends TestCase
      */
     public function testMatchTranslationsToEntities(): void
     {
-        /* @var TranslationData&MockObject $translation1 */
-        $translation1 = $this->createMock(TranslationData::class);
+        /* @var Translation&MockObject $translation1 */
+        $translation1 = $this->createMock(Translation::class);
         $translation1->expects($this->once())
                      ->method('getValue')
                      ->willReturn('ghi');
@@ -444,8 +458,8 @@ class TranslationServiceTest extends TestCase
                      ->method('getDescription')
                      ->willReturn('jkl');
 
-        /* @var TranslationData&MockObject $translation1 */
-        $translation2 = $this->createMock(TranslationData::class);
+        /* @var Translation&MockObject $translation1 */
+        $translation2 = $this->createMock(Translation::class);
         $translation2->expects($this->never())
                      ->method('getValue');
         $translation2->expects($this->never())
@@ -489,7 +503,7 @@ class TranslationServiceTest extends TestCase
 
         /* @var TranslationService&MockObject $service */
         $service = $this->getMockBuilder(TranslationService::class)
-                        ->setMethods(['getTranslationKey'])
+                        ->onlyMethods(['getTranslationKey'])
                         ->setConstructorArgs([$this->translationRepository])
                         ->getMock();
         $service->expects($this->exactly(2))

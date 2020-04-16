@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
@@ -27,7 +27,6 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Tests the invoking.
-     * @throws ReflectionException
      * @covers ::__invoke
      */
     public function testInvoke(): void
@@ -52,7 +51,7 @@ class AgentServiceFactoryTest extends TestCase
 
         /* @var AgentServiceFactory&MockObject $factory */
         $factory = $this->getMockBuilder(AgentServiceFactory::class)
-                        ->setMethods(['createAgent'])
+                        ->onlyMethods(['createAgent'])
                         ->getMock();
         $factory->expects($this->exactly(2))
                 ->method('createAgent')
@@ -70,7 +69,7 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Provides the data for the createAgent test.
-     * @return array
+     * @return array<mixed>
      */
     public function provideCreateAgent(): array
     {
@@ -104,7 +103,7 @@ class AgentServiceFactoryTest extends TestCase
 
     /**
      * Tests the createAgent method.
-     * @param array $agentConfig
+     * @param array<mixed> $agentConfig
      * @param Agent $expectedResult
      * @throws ReflectionException
      * @covers ::createAgent

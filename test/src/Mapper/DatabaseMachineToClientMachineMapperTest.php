@@ -137,7 +137,7 @@ class DatabaseMachineToClientMachineMapperTest extends TestCase
 
         /* @var DatabaseMachineToClientMachineMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(DatabaseMachineToClientMachineMapper::class)
-                       ->setMethods(['addToTranslationService'])
+                       ->onlyMethods(['addToTranslationService'])
                        ->setConstructorArgs([$this->translationService])
                        ->getMock();
         $mapper->expects($this->once())

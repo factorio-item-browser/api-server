@@ -21,19 +21,20 @@ return [
             ConfigKey::AGENTS => [
                 [
                     ConfigKey::AGENT_NAME => 'demo',
-                    ConfigKey::AGENT_ACCESS_KEY => 'factorio-item-browser',
+                    ConfigKey::AGENT_ACCESS_KEY => 'demo',
                     ConfigKey::AGENT_DEMO => true,
                 ],
             ],
             ConfigKey::MAP_ROUTE_TO_REQUEST => [
                 RouteName::AUTH => Request\Auth\AuthRequest::class,
+                RouteName::COMBINATION_EXPORT => Request\Combination\CombinationExportRequest::class,
+                RouteName::COMBINATION_STATUS => Request\Combination\CombinationStatusRequest::class,
                 RouteName::GENERIC_DETAILS => Request\Generic\GenericDetailsRequest::class,
                 RouteName::GENERIC_ICON => Request\Generic\GenericIconRequest::class,
                 RouteName::ITEM_INGREDIENT => Request\Item\ItemIngredientRequest::class,
                 RouteName::ITEM_PRODUCT => Request\Item\ItemProductRequest::class,
                 RouteName::ITEM_RANDOM => Request\Item\ItemRandomRequest::class,
                 RouteName::MOD_LIST => Request\Mod\ModListRequest::class,
-                RouteName::MOD_META => Request\Mod\ModMetaRequest::class,
                 RouteName::RECIPE_DETAILS => Request\Recipe\RecipeDetailsRequest::class,
                 RouteName::RECIPE_MACHINES => Request\Recipe\RecipeMachinesRequest::class,
                 RouteName::SEARCH_QUERY => Request\Search\SearchQueryRequest::class,

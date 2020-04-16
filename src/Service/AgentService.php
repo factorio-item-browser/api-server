@@ -15,10 +15,10 @@ use FactorioItemBrowser\Api\Server\Entity\Agent;
 class AgentService
 {
     /**
-     * The known agents by their names.
+     * The known agents.
      * @var array|Agent[]
      */
-    protected $agentsByName;
+    protected $agents;
 
     /**
      * Initializes the service.
@@ -26,37 +26,25 @@ class AgentService
      */
     public function __construct(array $agents)
     {
-        $this->agentsByName = [];
-        foreach ($agents as $agent) {
-            $this->agentsByName[$agent->getName()] = $agent;
-        }
-    }
-
-    /**
-     * Returns the agent with the name.
-     * @param string $name
-     * @return Agent|null
-     */
-    public function getByName(string $name): ?Agent
-    {
-        return $this->agentsByName[$name] ?? null;
+        $this->agents = $agents;
     }
 
     /**
      * Returns the agent with the access key, if it actually matches.
-     * @param string $name
      * @param string $accessKey
      * @return Agent|null
      */
-    public function getByAccessKey(string $name, string $accessKey): ?Agent
+    public function getByAccessKey(string $accessKey): ?Agent
     {
-        $result = null;
-        if ($name !== '' && $accessKey !== ''
-            && isset($this->agentsByName[$name])
-            && $this->agentsByName[$name]->getAccessKey() === $accessKey
-        ) {
-            $result = $this->agentsByName[$name];
+        if ($accessKey === '') {
+            return null;
         }
-        return $result;
+
+        foreach ($this->agents as $agent) {
+            if ($agent->getAccessKey() === $accessKey) {
+                return $agent;
+            }
+        }
+        return null;
     }
 }

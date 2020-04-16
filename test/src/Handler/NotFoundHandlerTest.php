@@ -10,7 +10,6 @@ use FactorioItemBrowser\Api\Server\Handler\NotFoundHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the NotFoundHandler class.
@@ -25,7 +24,6 @@ class NotFoundHandlerTest extends TestCase
      * Tests the handle method.
      * @covers ::handle
      * @throws ApiServerException
-     * @throws ReflectionException
      */
     public function testHandle(): void
     {

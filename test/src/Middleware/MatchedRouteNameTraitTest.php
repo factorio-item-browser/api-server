@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Server\Exception\InternalServerException;
 use FactorioItemBrowser\Api\Server\Middleware\MatchedRouteNameTrait;
+use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
-use Zend\Expressive\Router\RouteResult;
 
 /**
  * The PHPUnit test of the MatchedRouteNameTrait class.

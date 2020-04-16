@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use Exception;
-use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAuthorizationTokenException;
 use Firebase\JWT\JWT;
+use Ramsey\Uuid\Uuid;
 use stdClass;
 
 /**
@@ -25,37 +25,26 @@ class AuthorizationService
     protected const AUTH_TOKEN_ALGORITHM = 'HS256';
 
     /**
-     * The lifetime of the auth tokens.
-     */
-    protected const AUTH_TOKEN_LIFETIME = 86400;
-
-    /**
      * The key to use for the authorization.
      * @var string
      */
     protected $authorizationKey;
 
     /**
-     * Initializes the helper.
-     * @param string $authorizationKey
+     * The lifetime of the authorization token, in seconds.
+     * @var int
      */
-    public function __construct(string $authorizationKey)
-    {
-        $this->authorizationKey = $authorizationKey;
-    }
+    protected $authorizationTokenLifetime;
 
     /**
-     * Creates an authorization token with the specified values.
-     * @param Agent $agent
-     * @param array $enabledModCombinationIds
-     * @return AuthorizationToken
+     * Initializes the helper.
+     * @param string $authorizationKey
+     * @param int $authorizationTokenLifetime
      */
-    public function createToken(Agent $agent, array $enabledModCombinationIds): AuthorizationToken
+    public function __construct(string $authorizationKey, int $authorizationTokenLifetime)
     {
-        $result = new AuthorizationToken();
-        $result->setAgentName($agent->getName())
-               ->setEnabledModCombinationIds($enabledModCombinationIds);
-        return $result;
+        $this->authorizationKey = $authorizationKey;
+        $this->authorizationTokenLifetime = $authorizationTokenLifetime;
     }
 
     /**
@@ -75,14 +64,15 @@ class AuthorizationService
     /**
      * Returns the token data to use.
      * @param AuthorizationToken $token
-     * @return array
+     * @return array<mixed>
      */
     protected function getTokenData(AuthorizationToken $token): array
     {
         return [
-            'exp' => time() + self::AUTH_TOKEN_LIFETIME,
+            'exp' => time() + $this->authorizationTokenLifetime,
             'agt' => $token->getAgentName(),
-            'mds' => $token->getEnabledModCombinationIds(),
+            'cmb' => $token->getCombinationId()->toString(),
+            'mds' => $token->getModNames(),
         ];
     }
 
@@ -97,8 +87,9 @@ class AuthorizationService
         $rawToken = $this->decodeSerializedToken($serializedToken);
 
         $result = new AuthorizationToken();
-        $result->setAgentName((string) ($rawToken->agt ?? ''))
-               ->setEnabledModCombinationIds(array_map('intval', $rawToken->mds ?? []));
+        $result->setAgentName($rawToken->agt)
+               ->setCombinationId(Uuid::fromString($rawToken->cmb))
+               ->setModNames($rawToken->mds);
 
         return $result;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
-use BluePsyduck\Common\Test\ReflectionTrait;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
@@ -17,6 +17,7 @@ use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Common\Constant\RecipeMode;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -44,7 +45,6 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
 
     /**
      * Sets up the test case.
-     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -154,7 +154,7 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
 
         /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->setMethods(['mapNormalRecipes', 'mapExpensiveRecipes'])
+                       ->onlyMethods(['mapNormalRecipes', 'mapExpensiveRecipes'])
                        ->setConstructorArgs([$this->recipeService])
                        ->getMock();
         $mapper->setMapperManager($this->mapperManager);
@@ -179,23 +179,27 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
      */
     public function testMapNormalRecipes(): void
     {
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
+        $id3 = Uuid::fromString('56ebd60d-1852-45a5-abf5-2b31bbcb148d');
+
         /* @var RecipeData&MockObject $recipeData1 */
         $recipeData1 = $this->createMock(RecipeData::class);
-        $recipeData1->expects($this->atLeastOnce())
+        $recipeData1->expects($this->any())
                     ->method('getId')
-                    ->willReturn(42);
+                    ->willReturn($id1);
 
         /* @var RecipeData&MockObject $recipeData2 */
         $recipeData2 = $this->createMock(RecipeData::class);
-        $recipeData2->expects($this->atLeastOnce())
+        $recipeData2->expects($this->any())
                     ->method('getId')
-                    ->willReturn(1337);
+                    ->willReturn($id2);
 
         /* @var RecipeData&MockObject $recipeData3 */
         $recipeData3 = $this->createMock(RecipeData::class);
-        $recipeData3->expects($this->atLeastOnce())
+        $recipeData3->expects($this->any())
                     ->method('getId')
-                    ->willReturn(21);
+                    ->willReturn($id3);
 
         /* @var RecipeDataCollection&MockObject $recipeDataCollection */
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
@@ -209,8 +213,8 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
         $databaseRecipe2 = $this->createMock(DatabaseRecipe::class);
 
         $databaseRecipes = [
-            42 => $databaseRecipe1,
-            21 => $databaseRecipe2,
+            $id1->toString() => $databaseRecipe1,
+            $id3->toString() => $databaseRecipe2,
         ];
 
         /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe1 */
@@ -232,7 +236,7 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
 
         /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->setMethods(['mapDatabaseRecipe'])
+                       ->onlyMethods(['mapDatabaseRecipe'])
                        ->setConstructorArgs([$this->recipeService])
                        ->getMock();
         $mapper->setMapperManager($this->mapperManager);
@@ -260,23 +264,27 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
      */
     public function testMapExpensiveRecipes(): void
     {
+        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
+        $id3 = Uuid::fromString('56ebd60d-1852-45a5-abf5-2b31bbcb148d');
+
         /* @var RecipeData&MockObject $recipeData1 */
         $recipeData1 = $this->createMock(RecipeData::class);
         $recipeData1->expects($this->atLeastOnce())
                     ->method('getId')
-                    ->willReturn(42);
+                    ->willReturn($id1);
 
         /* @var RecipeData&MockObject $recipeData2 */
         $recipeData2 = $this->createMock(RecipeData::class);
         $recipeData2->expects($this->atLeastOnce())
                     ->method('getId')
-                    ->willReturn(1337);
+                    ->willReturn($id2);
 
         /* @var RecipeData&MockObject $recipeData3 */
         $recipeData3 = $this->createMock(RecipeData::class);
         $recipeData3->expects($this->atLeastOnce())
                     ->method('getId')
-                    ->willReturn(21);
+                    ->willReturn($id3);
 
         /* @var RecipeDataCollection&MockObject $recipeDataCollection */
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
@@ -290,8 +298,8 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
         $databaseRecipe2 = $this->createMock(DatabaseRecipe::class);
 
         $databaseRecipes = [
-            42 => $databaseRecipe1,
-            21 => $databaseRecipe2,
+            $id1->toString() => $databaseRecipe1,
+            $id3->toString() => $databaseRecipe2,
         ];
 
         /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe1 */
@@ -314,7 +322,7 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
 
         /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
         $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->setMethods(['mapDatabaseRecipe', 'addExpensiveRecipe'])
+                       ->onlyMethods(['mapDatabaseRecipe', 'addExpensiveRecipe'])
                        ->setConstructorArgs([$this->recipeService])
                        ->getMock();
         $mapper->setMapperManager($this->mapperManager);

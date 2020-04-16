@@ -63,9 +63,9 @@ class SearchQueryHandler extends AbstractRequestHandler
         $authorizationToken = $this->getAuthorizationToken();
 
         $searchQuery = $this->searchManager->parseQuery(
-            $request->getQuery(),
-            $authorizationToken->getEnabledModCombinationIds(),
-            $authorizationToken->getLocale()
+            $authorizationToken->getCombinationId(),
+            $authorizationToken->getLocale(),
+            $request->getQuery()
         );
         $searchResults = $this->searchManager->search($searchQuery);
         $currentSearchResults = $searchResults->getResults(

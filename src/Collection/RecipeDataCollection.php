@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Collection;
 
-use ArrayIterator;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
-use IteratorAggregate;
-use Traversable;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The collection holding recipe data entities and offering multiple filters.
@@ -15,7 +13,7 @@ use Traversable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeDataCollection implements IteratorAggregate
+class RecipeDataCollection
 {
     /**
      * The values of the collection.
@@ -36,15 +34,15 @@ class RecipeDataCollection implements IteratorAggregate
 
     /**
      * Returns all the recipe ids currently known to the collection.
-     * @return array|int[]
+     * @return array|UuidInterface[]
      */
     public function getAllIds(): array
     {
         $result = [];
         foreach ($this->values as $recipeData) {
-            $result[] = $recipeData->getId();
+            $result[$recipeData->getId()->toString()] = $recipeData->getId();
         }
-        return array_values(array_unique(array_filter($result)));
+        return array_values($result);
     }
 
     /**
@@ -74,13 +72,13 @@ class RecipeDataCollection implements IteratorAggregate
 
     /**
      * Returns a new instance with the item id filtered.
-     * @param int $itemId
+     * @param UuidInterface $itemId
      * @return self
      */
-    public function filterItemId(int $itemId): self
+    public function filterItemId(UuidInterface $itemId): self
     {
         return $this->filter(function (RecipeData $recipeData) use ($itemId): bool {
-            return $recipeData->getItemId() === $itemId;
+            return $recipeData->getItemId() !== null && $itemId->equals($recipeData->getItemId());
         });
     }
 
@@ -139,14 +137,5 @@ class RecipeDataCollection implements IteratorAggregate
     {
         $result = reset($this->values);
         return $result instanceof RecipeData ? $result : null;
-    }
-
-    /**
-     * Returns an iterator for the collection.
-     * @return Traversable
-     */
-    public function getIterator()
-    {
-        return new ArrayIterator($this->values);
     }
 }

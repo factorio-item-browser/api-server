@@ -39,13 +39,13 @@ class DatabaseRecipeToClientRecipeMapper extends TranslationServiceAwareMapper i
     {
         $this->mapRecipe($databaseRecipe, $clientRecipe);
 
-        foreach ($databaseRecipe->getOrderedIngredients() as $databaseIngredient) {
+        foreach ($databaseRecipe->getIngredients() as $databaseIngredient) {
             $clientItem = new ClientItem();
             $this->mapIngredient($databaseIngredient, $clientItem);
             $clientRecipe->addIngredient($clientItem);
         }
 
-        foreach ($databaseRecipe->getOrderedProducts() as $databaseProduct) {
+        foreach ($databaseRecipe->getProducts() as $databaseProduct) {
             $clientItem = new ClientItem();
             $this->mapProduct($databaseProduct, $clientItem);
             $clientRecipe->addProduct($clientItem);
