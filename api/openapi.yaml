@@ -10,7 +10,7 @@ info:
   version: 2.0.0
 
 servers:
-  - url: https://www.factorio-item-browser.com/api
+  - url: https://api.factorio-item-browser.com/
     description: Live API server
 
 tags:
