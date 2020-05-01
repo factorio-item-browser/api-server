@@ -23,6 +23,9 @@ return [
                     ConfigKey::AGENT_DEMO => false,
                 ],
             ],
+            ConfigKey::ALLOWED_ORIGINS => [
+                '#^https?://localhost(:\d+)?$#',
+            ],
             ConfigKey::AUTHORIZATION => [
                 ConfigKey::AUTHORIZATION_KEY => 'factorio-item-browser',
                 ConfigKey::AUTHORIZATION_TOKEN_LIFETIME => 86400,

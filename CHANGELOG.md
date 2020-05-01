@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- CORS headers.
+
 ### Changed
 
 - Allow "base" mod to be absent in `/auth` request as of FFF #343.

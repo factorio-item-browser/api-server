@@ -43,6 +43,11 @@ interface ConfigKey
     public const AGENT_DEMO = 'demo';
 
     /**
+     * The origins allowed to access the API server.
+     */
+    public const ALLOWED_ORIGINS = 'allowed-origins';
+
+    /**
      * The key holding the authorization config.
      */
     public const AUTHORIZATION = 'authorization';

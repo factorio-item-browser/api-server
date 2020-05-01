@@ -17,6 +17,7 @@ use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use JMS\Serializer\SerializerInterface;
 use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
+use Mezzio\Router\Middleware\ImplicitOptionsMiddleware;
 use Roave\PsrContainerDoctrine\MigrationsConfigurationFactory;
 
 use function BluePsyduck\LaminasAutoWireFactory\injectAliasArray;
@@ -55,12 +56,13 @@ return [
             Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class => AutoWireFactory::class,
             Mapper\RecipeDataToGenericEntityMapper::class => AutoWireFactory::class,
 
-            Middleware\TranslationMiddleware::class => AutoWireFactory::class,
             Middleware\AuthorizationMiddleware::class => AutoWireFactory::class,
             Middleware\CleanupMiddleware::class => AutoWireFactory::class,
+            Middleware\CorsHeaderMiddleware::class => AutoWireFactory::class,
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
+            Middleware\TranslationMiddleware::class => AutoWireFactory::class,
 
             Response\ErrorResponseGenerator::class => AutoWireFactory::class,
 
@@ -78,10 +80,11 @@ return [
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => AutoWireFactory::class,
-
+            ImplicitOptionsMiddleware::class => Middleware\ImplicitOptionsMiddlewareFactory::class,
             'doctrine.migrations.orm_default' => MigrationsConfigurationFactory::class,
 
             // Auto-wire helpers
+            'array $allowedOrigins' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::ALLOWED_ORIGINS),
             'array $mapRouteToRequest' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::MAP_ROUTE_TO_REQUEST),
             'array $searchDecorators' => injectAliasArray(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::SEARCH_DECORATORS),
 
