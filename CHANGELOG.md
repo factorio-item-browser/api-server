@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Allow "base" mod to be absent in `/auth` request as of FFF #343.
+
 ## 2.0.0 - 2020-04-16
 
 ### Added
