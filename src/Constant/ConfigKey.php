@@ -66,9 +66,4 @@ interface ConfigKey
      * The key holding the search decorators to use.
      */
     public const SEARCH_DECORATORS = 'search-decorators';
-
-    /**
-     * The key holding the version of the API server.
-     */
-    public const VERSION = 'version';
 }

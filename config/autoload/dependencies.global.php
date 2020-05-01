@@ -90,7 +90,7 @@ return [
             'int $authorizationTokenLifetime' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_TOKEN_LIFETIME),
 
             'string $authorizationKey' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_KEY),
-            'string $version' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::VERSION),
+            'string $version' => readConfig('version'),
         ],
     ],
 ];

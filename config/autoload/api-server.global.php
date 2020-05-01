@@ -43,7 +43,6 @@ return [
                 SearchDecorator\ItemDecorator::class,
                 SearchDecorator\RecipeDecorator::class,
             ],
-            ConfigKey::VERSION => '1.2.0',
         ],
     ],
 ];
