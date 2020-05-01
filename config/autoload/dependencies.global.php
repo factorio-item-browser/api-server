@@ -11,13 +11,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use BluePsyduck\ContainerInteropDoctrineMigrations\MigrationsConfigurationFactory;
 use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
 use FactorioItemBrowser\Api\Client\Constant\ServiceName;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use JMS\Serializer\SerializerInterface;
 use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
+use Roave\PsrContainerDoctrine\MigrationsConfigurationFactory;
 
 use function BluePsyduck\LaminasAutoWireFactory\injectAliasArray;
 use function BluePsyduck\LaminasAutoWireFactory\readConfig;
