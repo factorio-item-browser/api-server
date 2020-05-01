@@ -26,12 +26,14 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->post('/generic/icon', Handler\Generic\GenericIconHandler::class, RouteName::GENERIC_ICON);
 
     $app->post('/item/ingredient', Handler\Item\ItemIngredientHandler::class, RouteName::ITEM_INGREDIENT);
+    $app->post('/item/list', Handler\Item\ItemListHandler::class, RouteName::ITEM_LIST);
     $app->post('/item/product', Handler\Item\ItemProductHandler::class, RouteName::ITEM_PRODUCT);
     $app->post('/item/random', Handler\Item\ItemRandomHandler::class, RouteName::ITEM_RANDOM);
 
     $app->post('/mod/list', Handler\Mod\ModListHandler::class, RouteName::MOD_LIST);
 
     $app->post('/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, RouteName::RECIPE_DETAILS);
+    $app->post('/recipe/list', Handler\Recipe\RecipeListHandler::class, RouteName::RECIPE_LIST);
     $app->post('/recipe/machines', Handler\Recipe\RecipeMachinesHandler::class, RouteName::RECIPE_MACHINES);
 
     $app->post('/search/query', Handler\Search\SearchQueryHandler::class, RouteName::SEARCH_QUERY);
