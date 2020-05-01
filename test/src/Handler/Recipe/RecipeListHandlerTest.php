@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Recipe;
 
-use BluePsyduck\TestHelper\ReflectionTrait;
 use BluePsyduck\MapperManager\MapperManagerInterface;
+use BluePsyduck\TestHelper\ReflectionTrait;
 use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
-use FactorioItemBrowser\Api\Client\Request\Recipe\RecipeDetailsRequest;
-use FactorioItemBrowser\Api\Client\Response\Recipe\RecipeDetailsResponse;
+use FactorioItemBrowser\Api\Client\Request\Recipe\RecipeListRequest;
+use FactorioItemBrowser\Api\Client\Response\Recipe\RecipeListResponse;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Handler\Recipe\RecipeDetailsHandler;
+use FactorioItemBrowser\Api\Server\Handler\Recipe\RecipeListHandler;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 
 /**
- * The PHPUnit test of the RecipeDetailsHandler class.
+ * The PHPUnit test of the RecipeListHandler class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Handler\Recipe\RecipeDetailsHandler
+ * @coversDefaultClass \FactorioItemBrowser\Api\Server\Handler\Recipe\RecipeListHandler
  */
-class RecipeDetailsHandlerTest extends TestCase
+class RecipeListHandlerTest extends TestCase
 {
     use ReflectionTrait;
 
@@ -59,7 +59,7 @@ class RecipeDetailsHandlerTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $handler = new RecipeDetailsHandler($this->mapperManager, $this->recipeService);
+        $handler = new RecipeListHandler($this->mapperManager, $this->recipeService);
 
         $this->assertSame($this->mapperManager, $this->extractProperty($handler, 'mapperManager'));
         $this->assertSame($this->recipeService, $this->extractProperty($handler, 'recipeService'));
@@ -72,9 +72,9 @@ class RecipeDetailsHandlerTest extends TestCase
      */
     public function testGetExpectedRequestClass(): void
     {
-        $expectedResult = RecipeDetailsRequest::class;
+        $expectedResult = RecipeListRequest::class;
 
-        $handler = new RecipeDetailsHandler($this->mapperManager, $this->recipeService);
+        $handler = new RecipeListHandler($this->mapperManager, $this->recipeService);
         $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
 
         $this->assertSame($expectedResult, $result);
@@ -87,33 +87,48 @@ class RecipeDetailsHandlerTest extends TestCase
      */
     public function testHandleRequest(): void
     {
-        $names = ['abc', 'def'];
+        $numberOfResults = 42;
+        $indexOfFirstResult = 21;
+        $numberOfRecipes = 1337;
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
-        /* @var RecipeDataCollection&MockObject $recipeData */
-        $recipeData = $this->createMock(RecipeDataCollection::class);
-        /* @var RecipeDetailsResponse&MockObject $response */
-        $response = $this->createMock(RecipeDetailsResponse::class);
+        /* @var RecipeDataCollection&MockObject $limitedRecipeData */
+        $limitedRecipeData = $this->createMock(RecipeDataCollection::class);
+        /* @var RecipeListResponse&MockObject $response */
+        $response = $this->createMock(RecipeListResponse::class);
 
         $mappedRecipes = [
             $this->createMock(RecipeWithExpensiveVersion::class),
             $this->createMock(RecipeWithExpensiveVersion::class),
         ];
 
-        /* @var RecipeDetailsRequest&MockObject $request */
-        $request = $this->createMock(RecipeDetailsRequest::class);
+        /* @var RecipeDataCollection&MockObject $recipeData */
+        $recipeData = $this->createMock(RecipeDataCollection::class);
+        $recipeData->expects($this->once())
+                   ->method('limitNames')
+                   ->with($this->identicalTo($numberOfResults), $this->identicalTo($indexOfFirstResult))
+                   ->willReturn($limitedRecipeData);
+        $recipeData->expects($this->once())
+                   ->method('countNames')
+                   ->willReturn($numberOfRecipes);
+
+        /* @var RecipeListRequest&MockObject $request */
+        $request = $this->createMock(RecipeListRequest::class);
         $request->expects($this->once())
-                ->method('getNames')
-                ->willReturn($names);
+                ->method('getNumberOfResults')
+                ->willReturn($numberOfResults);
+        $request->expects($this->once())
+                ->method('getIndexOfFirstResult')
+                ->willReturn($indexOfFirstResult);
 
         $this->recipeService->expects($this->once())
-                            ->method('getDataWithNames')
-                            ->with($this->identicalTo($names), $this->identicalTo($authorizationToken))
+                            ->method('getAllData')
+                            ->with($this->identicalTo($authorizationToken))
                             ->willReturn($recipeData);
 
-        /* @var RecipeDetailsHandler&MockObject $handler */
-        $handler = $this->getMockBuilder(RecipeDetailsHandler::class)
+        /* @var RecipeListHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(RecipeListHandler::class)
                         ->onlyMethods(['getAuthorizationToken', 'mapRecipes', 'createResponse'])
                         ->setConstructorArgs([$this->mapperManager, $this->recipeService])
                         ->getMock();
@@ -122,11 +137,11 @@ class RecipeDetailsHandlerTest extends TestCase
                 ->willReturn($authorizationToken);
         $handler->expects($this->once())
                 ->method('mapRecipes')
-                ->with($this->identicalTo($recipeData))
+                ->with($this->identicalTo($limitedRecipeData))
                 ->willReturn($mappedRecipes);
         $handler->expects($this->once())
                 ->method('createResponse')
-                ->with($this->identicalTo($mappedRecipes))
+                ->with($this->identicalTo($mappedRecipes), $this->identicalTo($numberOfRecipes))
                 ->willReturn($response);
 
         $result = $this->invokeMethod($handler, 'handleRequest', $request);
@@ -151,7 +166,7 @@ class RecipeDetailsHandlerTest extends TestCase
                                 $this->isInstanceOf(GenericEntityWithRecipes::class)
                             );
 
-        $handler = new RecipeDetailsHandler($this->mapperManager, $this->recipeService);
+        $handler = new RecipeListHandler($this->mapperManager, $this->recipeService);
         $result = $this->invokeMethod($handler, 'mapRecipes', $recipeData);
 
         $this->assertSame([], $result);
@@ -168,11 +183,14 @@ class RecipeDetailsHandlerTest extends TestCase
             $this->createMock(RecipeWithExpensiveVersion::class),
             $this->createMock(RecipeWithExpensiveVersion::class),
         ];
-        $expectedResult = new RecipeDetailsResponse();
-        $expectedResult->setRecipes($recipes);
+        $numberOfRecipes = 42;
 
-        $handler = new RecipeDetailsHandler($this->mapperManager, $this->recipeService);
-        $result = $this->invokeMethod($handler, 'createResponse', $recipes);
+        $expectedResult = new RecipeListResponse();
+        $expectedResult->setRecipes($recipes)
+                       ->setTotalNumberOfResults($numberOfRecipes);
+
+        $handler = new RecipeListHandler($this->mapperManager, $this->recipeService);
+        $result = $this->invokeMethod($handler, 'createResponse', $recipes, $numberOfRecipes);
 
         $this->assertEquals($expectedResult, $result);
     }

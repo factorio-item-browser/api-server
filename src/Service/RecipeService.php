@@ -57,6 +57,17 @@ class RecipeService
     }
 
     /**
+     * Returns all recipe data.
+     * @param AuthorizationToken $authorizationToken
+     * @return RecipeDataCollection
+     */
+    public function getAllData(AuthorizationToken $authorizationToken): RecipeDataCollection
+    {
+        $recipeData = $this->recipeRepository->findAllData($authorizationToken->getCombinationId());
+        return $this->createDataCollection($recipeData);
+    }
+
+    /**
      * Returns the recipe data having any of the items as ingredient.
      * @param array|Item[] $items
      * @param AuthorizationToken $authorizationToken
