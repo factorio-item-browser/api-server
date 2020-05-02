@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e0db2b269b14a0758be4c2ce8b5f78d9",
+    "content-hash": "9440440f26a22e8b1af4c6e68691674b",
     "packages": [
         {
             "name": "bluepsyduck/laminas-autowire-factory",
@@ -1136,16 +1136,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-feature/list-endpoints",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "72e6f80b0eb89e9b39b2da9902c1970ffc01aca6"
+                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/72e6f80b0eb89e9b39b2da9902c1970ffc01aca6",
-                "reference": "72e6f80b0eb89e9b39b2da9902c1970ffc01aca6",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/cbc0f5d173785d1bd84b8356ce461b91d35e4271",
+                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271",
                 "shasum": ""
             },
             "require": {
@@ -1191,20 +1191,20 @@
                 "api",
                 "client"
             ],
-            "time": "2020-05-01T16:27:36+00:00"
+            "time": "2020-04-15T15:19:53+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
-            "version": "dev-feature/list-endpoints",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "2fb7938a569c0463f169204ca10f8b563514ac7d"
+                "reference": "ee4114588a6f11e041a353a3044d830d2bf47432"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/2fb7938a569c0463f169204ca10f8b563514ac7d",
-                "reference": "2fb7938a569c0463f169204ca10f8b563514ac7d",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/ee4114588a6f11e041a353a3044d830d2bf47432",
+                "reference": "ee4114588a6f11e041a353a3044d830d2bf47432",
                 "shasum": ""
             },
             "require": {
@@ -1252,7 +1252,7 @@
                 "api",
                 "database"
             ],
-            "time": "2020-05-01T19:04:49+00:00"
+            "time": "2020-05-02T07:20:32+00:00"
         },
         {
             "name": "factorio-item-browser/api-search",
@@ -6692,25 +6692,9 @@
             "time": "2020-04-18T12:12:48+00:00"
         }
     ],
-    "aliases": [
-        {
-            "alias": "3.1.0",
-            "alias_normalized": "3.1.0.0",
-            "version": "dev-feature/list-endpoints",
-            "package": "factorio-item-browser/api-client"
-        },
-        {
-            "alias": "3.1.0",
-            "alias_normalized": "3.1.0.0",
-            "version": "dev-feature/list-endpoints",
-            "package": "factorio-item-browser/api-database"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-client": 20,
-        "factorio-item-browser/api-database": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

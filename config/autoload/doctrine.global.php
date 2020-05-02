@@ -13,7 +13,7 @@ namespace FactorioItemBrowser\Api\Server;
 
 return [
     'doctrine' => [
-        'migrations_configuration' => [
+        'migrations' => [
             'orm_default' => [
                 'directory' => 'data/migrations',
                 'name'      => 'API Server Database Migrations',

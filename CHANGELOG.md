@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- CORS headers.
+
+### Changed
+
+- Allow "base" mod to be absent in `/auth` request as of FFF #343.
+- Indirect dependency `dasprid/container-interop-doctrine` to `roave/psr-container-doctrine`.
+
 ## 2.0.0 - 2020-04-16
 
 ### Added

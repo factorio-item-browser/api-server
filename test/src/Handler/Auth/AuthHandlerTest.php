@@ -13,7 +13,6 @@ use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAccessKeyException;
-use FactorioItemBrowser\Api\Server\Exception\MissingBaseModException;
 use FactorioItemBrowser\Api\Server\Handler\Auth\AuthHandler;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
@@ -316,7 +315,7 @@ class AuthHandlerTest extends TestCase
     public function testGetModNamesFromRequest(): void
     {
         $isDemo = false;
-        $modNames = ['abc', Constant::MOD_NAME_BASE, 'def'];
+        $modNames = ['abc', 'def'];
 
         /* @var Agent&MockObject $agent */
         $agent = $this->createMock(Agent::class);
@@ -361,34 +360,6 @@ class AuthHandlerTest extends TestCase
         $result = $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
 
         $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the getModNamesFromRequest method.
-     * @throws ReflectionException
-     * @covers ::getModNamesFromRequest
-     */
-    public function testGetModNamesFromRequestWithoutBaseMod(): void
-    {
-        $isDemo = false;
-        $modNames = ['abc', 'def'];
-
-        /* @var Agent&MockObject $agent */
-        $agent = $this->createMock(Agent::class);
-        $agent->expects($this->once())
-              ->method('getIsDemo')
-              ->willReturn($isDemo);
-
-        /* @var AuthRequest&MockObject $request */
-        $request = $this->createMock(AuthRequest::class);
-        $request->expects($this->once())
-                ->method('getModNames')
-                ->willReturn($modNames);
-
-        $this->expectException(MissingBaseModException::class);
-
-        $handler = new AuthHandler($this->agentService, $this->authorizationService, $this->combinationRepository);
-        $this->invokeMethod($handler, 'getModNamesFromRequest', $agent, $request);
     }
 
     /**

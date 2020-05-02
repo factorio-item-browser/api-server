@@ -43,6 +43,11 @@ interface ConfigKey
     public const AGENT_DEMO = 'demo';
 
     /**
+     * The origins allowed to access the API server.
+     */
+    public const ALLOWED_ORIGINS = 'allowed-origins';
+
+    /**
      * The key holding the authorization config.
      */
     public const AUTHORIZATION = 'authorization';
@@ -66,9 +71,4 @@ interface ConfigKey
      * The key holding the search decorators to use.
      */
     public const SEARCH_DECORATORS = 'search-decorators';
-
-    /**
-     * The key holding the version of the API server.
-     */
-    public const VERSION = 'version';
 }

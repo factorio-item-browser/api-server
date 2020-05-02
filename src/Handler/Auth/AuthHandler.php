@@ -11,7 +11,6 @@ use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
 use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\MissingBaseModException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidAccessKeyException;
 use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
 use FactorioItemBrowser\Api\Server\Service\AgentService;
@@ -130,18 +129,13 @@ class AuthHandler extends AbstractRequestHandler
      * @param Agent $agent
      * @param AuthRequest $request
      * @return array|string[]
-     * @throws ApiServerException
      */
     protected function getModNamesFromRequest(Agent $agent, AuthRequest $request): array
     {
         if ($agent->getIsDemo()) {
             return [Constant::MOD_NAME_BASE];
         }
-        $modNames = $request->getModNames();
-        if (!in_array(Constant::MOD_NAME_BASE, $modNames, true)) {
-            throw new MissingBaseModException();
-        }
-        return $modNames;
+        return $request->getModNames();
     }
 
     /**
