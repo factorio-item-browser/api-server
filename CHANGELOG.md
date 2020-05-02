@@ -5,6 +5,7 @@
 ### Added
 
 - CORS headers.
+- New endpoints `/item/list` and `/recipe/list` to get a full list of items or recipes respectively.
 
 ### Changed
 
