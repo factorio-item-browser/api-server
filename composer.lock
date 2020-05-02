@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9440440f26a22e8b1af4c6e68691674b",
+    "content-hash": "28ca08c7f98ab68ac065bf8d1f054a7c",
     "packages": [
         {
             "name": "bluepsyduck/laminas-autowire-factory",
@@ -1136,16 +1136,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "3.0.0",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271"
+                "reference": "0419636bc2f48739372d98bf9e75486e9e9c2437"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/cbc0f5d173785d1bd84b8356ce461b91d35e4271",
-                "reference": "cbc0f5d173785d1bd84b8356ce461b91d35e4271",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/0419636bc2f48739372d98bf9e75486e9e9c2437",
+                "reference": "0419636bc2f48739372d98bf9e75486e9e9c2437",
                 "shasum": ""
             },
             "require": {
@@ -1191,7 +1191,7 @@
                 "api",
                 "client"
             ],
-            "time": "2020-04-15T15:19:53+00:00"
+            "time": "2020-05-02T07:58:37+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
