@@ -38,11 +38,13 @@ return [
             Handler\Generic\GenericDetailsHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericIconHandler::class => AutoWireFactory::class,
             Handler\Item\ItemIngredientHandler::class => AutoWireFactory::class,
+            Handler\Item\ItemListHandler::class => AutoWireFactory::class,
             Handler\Item\ItemProductHandler::class => AutoWireFactory::class,
             Handler\Item\ItemRandomHandler::class => AutoWireFactory::class,
             Handler\Mod\ModListHandler::class => AutoWireFactory::class,
             Handler\NotFoundHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => AutoWireFactory::class,
+            Handler\Recipe\RecipeListHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeMachinesHandler::class => AutoWireFactory::class,
             Handler\Search\SearchQueryHandler::class => AutoWireFactory::class,
 

@@ -103,6 +103,48 @@ class RecipeServiceTest extends TestCase
     }
 
     /**
+     * Tests the getAllData method.
+     * @covers ::getAllData
+     */
+    public function testGetAllData(): void
+    {
+        $recipeData = [
+            $this->createMock(RecipeData::class),
+            $this->createMock(RecipeData::class),
+        ];
+
+        /* @var UuidInterface&MockObject $combinationId */
+        $combinationId = $this->createMock(UuidInterface::class);
+        /* @var RecipeDataCollection&MockObject $recipeDataCollection */
+        $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getCombinationId')
+                           ->willReturn($combinationId);
+
+        $this->recipeRepository->expects($this->once())
+                               ->method('findAllData')
+                               ->with($this->identicalTo($combinationId))
+                               ->willReturn($recipeData);
+
+        /* @var RecipeService&MockObject $service */
+        $service = $this->getMockBuilder(RecipeService::class)
+                        ->onlyMethods(['createDataCollection'])
+                        ->setConstructorArgs([$this->recipeRepository])
+                        ->getMock();
+        $service->expects($this->once())
+                ->method('createDataCollection')
+                ->with($this->identicalTo($recipeData))
+                ->willReturn($recipeDataCollection);
+
+        $result = $service->getAllData($authorizationToken);
+
+        $this->assertSame($recipeDataCollection, $result);
+    }
+
+    /**
      * Tests the getDataWithIngredients method.
      * @covers ::getDataWithIngredients
      */

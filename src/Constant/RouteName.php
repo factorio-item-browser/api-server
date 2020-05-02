@@ -18,10 +18,12 @@ interface RouteName
     public const GENERIC_DETAILS = 'generic.details';
     public const GENERIC_ICON = 'generic.icon';
     public const ITEM_INGREDIENT = 'item.ingredient';
+    public const ITEM_LIST = 'item.list';
     public const ITEM_PRODUCT = 'item.product';
     public const ITEM_RANDOM = 'item.random';
     public const MOD_LIST = 'mod.list';
     public const RECIPE_DETAILS = 'recipe.details';
+    public const RECIPE_LIST = 'recipe.list';
     public const RECIPE_MACHINES = 'recipe.machines';
     public const SEARCH_QUERY = 'search.query';
 }

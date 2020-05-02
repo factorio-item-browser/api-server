@@ -144,6 +144,30 @@ paths:
       security:
         - jwt: []
 
+  /item/list:
+    post:
+      summary: Returns a list of all items.
+      description:
+        This request will return a paginated list of all items available in the current combination of mods. The items
+        are sorted by their name.
+      operationId: item.list
+      tags:
+        - Items
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/itemList"
+      responses:
+        "200":
+          $ref: "#/components/responses/itemList"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
   /item/ingredient:
     post:
       summary: Provides all recipes in which a specific item as an ingredient of.
@@ -236,6 +260,32 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/modList"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
+  /recipe/list:
+    post:
+      summary: Returns a list of all available recipes.
+      description:
+        This request will return a paginated list of all recipes available with the current combination of mods. Normal
+        and expensive variant will be grouped together. The recipes are sorted by their name.
+      operationId: recipe.list
+      tags:
+        - Recipes
+      parameters:
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Accept-Language"
+      requestBody:
+        $ref: "#/components/requestBodies/recipeList"
+      responses:
+        "200":
+          $ref: "#/components/responses/recipeList"
+        "400":
+          $ref: "#/components/responses/badRequest"
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
@@ -389,6 +439,25 @@ components:
                   name: fill-sulfuric-acid-barrel
       required: true
 
+    itemList:
+      content:
+        application/json:
+          schema:
+            properties:
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              indexOfFirstResult:
+                type: integer
+                description: The 0-based index of the first result to return.
+                example: 0
+              numberOfRecipesPerResult:
+                type: integer
+                description: The number of recipes to return for each result.
+                example: 3
+      required: true
+
     itemRandom:
       content:
         application/json:
@@ -444,6 +513,21 @@ components:
                   - advanced-circuit
             required:
               - names
+      required: true
+
+    recipeList:
+      content:
+        application/json:
+          schema:
+            properties:
+              numberOfResults:
+                type: integer
+                description: The number of results to return.
+                example: 10
+              indexOfFirstResult:
+                type: integer
+                description: The 0-based index of the first result to return.
+                example: 0
       required: true
 
     recipeMachines:
@@ -573,6 +657,33 @@ components:
                 description: The item with the recipes containing it as an ingredient.
                 $ref: "#/components/schemas/GenericEntityWithRecipes"
 
+    itemList:
+      description: The list of all items.
+      content:
+        application/json:
+          schema:
+            properties:
+              items:
+                type: array
+                description: The items.
+                items:
+                  $ref: "#/components/schemas/GenericEntityWithRecipes"
+                example:
+                  - type: item
+                    name: electronic-circuit
+                    label: Elektronischer Schaltkreis
+                    description: ""
+                    recipes: []
+                  - type: fluid
+                    name: crude-oil
+                    label: Rohöl
+                    description: ""
+                    recipes: []
+              totalNumberOfResults:
+                type: integer
+                description: The total number of available results.
+                example: 42
+
     itemProduct:
       description: The recipes having the item as product.
       content:
@@ -615,6 +726,22 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/RecipeWithExpensiveVersion"
+
+    recipeList:
+      description: The list of all recipes.
+      content:
+        application/json:
+          schema:
+            properties:
+              recipes:
+                type: array
+                description: The recipes.
+                items:
+                  $ref: "#/components/schemas/RecipeWithExpensiveVersion"
+              totalNumberOfResults:
+                type: integer
+                description: The total number of available results.
+                example: 42
 
     recipeMachines:
       description: The machines able to craft the recipe.
