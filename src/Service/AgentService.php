@@ -47,4 +47,19 @@ class AgentService
         }
         return null;
     }
+
+    /**
+     * Returns the agent with the specified name.
+     * @param string $name
+     * @return Agent|null
+     */
+    public function getByName(string $name): ?Agent
+    {
+        foreach ($this->agents as $agent) {
+            if ($agent->getName() === $name) {
+                return $agent;
+            }
+        }
+        return null;
+    }
 }

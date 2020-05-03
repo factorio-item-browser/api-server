@@ -9,8 +9,11 @@ use FactorioItemBrowser\Api\Client\Entity\ExportJob;
 use FactorioItemBrowser\Api\Client\Request\Combination\CombinationExportRequest;
 use FactorioItemBrowser\Api\Client\Request\Combination\CombinationStatusRequest;
 use FactorioItemBrowser\Api\Client\Response\Combination\CombinationStatusResponse;
+use FactorioItemBrowser\Api\Server\Entity\Agent;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Exception\ActionNotAllowedException;
 use FactorioItemBrowser\Api\Server\Handler\Combination\CombinationExportHandler;
+use FactorioItemBrowser\Api\Server\Service\AgentService;
 use FactorioItemBrowser\Api\Server\Service\ExportQueueService;
 use FactorioItemBrowser\ExportQueue\Client\Constant\JobStatus;
 use FactorioItemBrowser\ExportQueue\Client\Request\Job\ListRequest;
@@ -33,6 +36,12 @@ class CombinationExportHandlerTest extends TestCase
     use ReflectionTrait;
 
     /**
+     * The mocked agent service.
+     * @var AgentService&MockObject
+     */
+    protected $agentService;
+
+    /**
      * The mocked export queue service.
      * @var ExportQueueService&MockObject
      */
@@ -45,6 +54,7 @@ class CombinationExportHandlerTest extends TestCase
     {
         parent::setUp();
 
+        $this->agentService = $this->createMock(AgentService::class);
         $this->exportQueueService = $this->createMock(ExportQueueService::class);
     }
 
@@ -55,8 +65,9 @@ class CombinationExportHandlerTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $handler = new CombinationExportHandler($this->exportQueueService);
+        $handler = new CombinationExportHandler($this->agentService, $this->exportQueueService);
 
+        $this->assertSame($this->agentService, $this->extractProperty($handler, 'agentService'));
         $this->assertSame($this->exportQueueService, $this->extractProperty($handler, 'exportQueueService'));
     }
 
@@ -69,7 +80,7 @@ class CombinationExportHandlerTest extends TestCase
     {
         $expectedResult = CombinationExportRequest::class;
 
-        $handler = new CombinationExportHandler($this->exportQueueService);
+        $handler = new CombinationExportHandler($this->agentService, $this->exportQueueService);
         $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
 
         $this->assertSame($expectedResult, $result);
@@ -152,12 +163,16 @@ class CombinationExportHandlerTest extends TestCase
 
         /* @var CombinationExportHandler&MockObject $handler */
         $handler = $this->getMockBuilder(CombinationExportHandler::class)
-                        ->onlyMethods(['getAuthorizationToken', 'isNewExportRequired'])
-                        ->setConstructorArgs([$this->exportQueueService])
+                        ->onlyMethods(['getAuthorizationToken', 'isAgentAllowed', 'isNewExportRequired'])
+                        ->setConstructorArgs([$this->agentService, $this->exportQueueService])
                         ->getMock();
         $handler->expects($this->once())
                 ->method('getAuthorizationToken')
                 ->willReturn($authorizationToken);
+        $handler->expects($this->once())
+                ->method('isAgentAllowed')
+                ->with($this->identicalTo($authorizationToken))
+                ->willReturn(true);
         $handler->expects($this->once())
                 ->method('isNewExportRequired')
                 ->with($this->identicalTo($exportJob1))
@@ -237,12 +252,16 @@ class CombinationExportHandlerTest extends TestCase
 
         /* @var CombinationExportHandler&MockObject $handler */
         $handler = $this->getMockBuilder(CombinationExportHandler::class)
-                        ->onlyMethods(['getAuthorizationToken', 'isNewExportRequired'])
-                        ->setConstructorArgs([$this->exportQueueService])
+                        ->onlyMethods(['getAuthorizationToken', 'isAgentAllowed', 'isNewExportRequired'])
+                        ->setConstructorArgs([$this->agentService, $this->exportQueueService])
                         ->getMock();
         $handler->expects($this->once())
                 ->method('getAuthorizationToken')
                 ->willReturn($authorizationToken);
+        $handler->expects($this->once())
+                ->method('isAgentAllowed')
+                ->with($this->identicalTo($authorizationToken))
+                ->willReturn(true);
         $handler->expects($this->once())
                 ->method('isNewExportRequired')
                 ->with($this->identicalTo($exportJob1))
@@ -251,6 +270,100 @@ class CombinationExportHandlerTest extends TestCase
         $result = $this->invokeMethod($handler, 'handleRequest', $clientRequest);
 
         $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Tests the handleRequest method.
+     * @throws ReflectionException
+     * @covers ::handleRequest
+     */
+    public function testHandleRequestWithDemoAgent(): void
+    {
+        /* @var CombinationStatusRequest&MockObject $clientRequest */
+        $clientRequest = $this->createMock(CombinationStatusRequest::class);
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->never())
+                           ->method('getCombinationId');
+        $authorizationToken->expects($this->never())
+                           ->method('getModNames');
+
+        $this->exportQueueService->expects($this->never())
+                                 ->method('createListRequest');
+        $this->exportQueueService->expects($this->never())
+                                 ->method('executeListRequests');
+        $this->exportQueueService->expects($this->never())
+                                 ->method('mapResponseToExportJob');
+        $this->exportQueueService->expects($this->never())
+                                 ->method('createExport');
+
+        $this->expectException(ActionNotAllowedException::class);
+
+        /* @var CombinationExportHandler&MockObject $handler */
+        $handler = $this->getMockBuilder(CombinationExportHandler::class)
+                        ->onlyMethods(['getAuthorizationToken', 'isAgentAllowed', 'isNewExportRequired'])
+                        ->setConstructorArgs([$this->agentService, $this->exportQueueService])
+                        ->getMock();
+        $handler->expects($this->once())
+                ->method('getAuthorizationToken')
+                ->willReturn($authorizationToken);
+        $handler->expects($this->once())
+                ->method('isAgentAllowed')
+                ->with($this->identicalTo($authorizationToken))
+                ->willReturn(false);
+        $handler->expects($this->never())
+                ->method('isNewExportRequired');
+
+        $this->invokeMethod($handler, 'handleRequest', $clientRequest);
+    }
+
+    /**
+     * Provides the data for the isAgentAllowed test.
+     * @return array<mixed>
+     */
+    public function provideIsAgentAllowed(): array
+    {
+        $agent1 = new Agent();
+        $agent1->setIsDemo(false);
+
+        $agent2 = new Agent();
+        $agent2->setIsDemo(true);
+
+        return [
+            [$agent1, true],
+            [$agent2, false],
+            [null, false],
+        ];
+    }
+
+    /**
+     * Tests the isAgentAllowed method.
+     * @param Agent|null $agent
+     * @param bool $expectedResult
+     * @throws ReflectionException
+     * @covers ::isAgentAllowed
+     * @dataProvider provideIsAgentAllowed
+     */
+    public function testIsAgentAllowed(?Agent $agent, bool $expectedResult): void
+    {
+        $name = 'abc';
+
+        /* @var AuthorizationToken&MockObject $authorizationToken */
+        $authorizationToken = $this->createMock(AuthorizationToken::class);
+        $authorizationToken->expects($this->once())
+                           ->method('getAgentName')
+                           ->willReturn($name);
+
+        $this->agentService->expects($this->once())
+                           ->method('getByName')
+                           ->with($this->identicalTo($name))
+                           ->willReturn($agent);
+
+        $handler = new CombinationExportHandler($this->agentService, $this->exportQueueService);
+        $result = $this->invokeMethod($handler, 'isAgentAllowed', $authorizationToken);
+
+        $this->assertSame($expectedResult, $result);
     }
 
     /**
@@ -283,7 +396,7 @@ class CombinationExportHandlerTest extends TestCase
      */
     public function testIsNewExportRequired(?ExportJob $exportJob, bool $expectedResult): void
     {
-        $handler = new CombinationExportHandler($this->exportQueueService);
+        $handler = new CombinationExportHandler($this->agentService, $this->exportQueueService);
         $result = $this->invokeMethod($handler, 'isNewExportRequired', $exportJob);
 
         $this->assertSame($expectedResult, $result);
