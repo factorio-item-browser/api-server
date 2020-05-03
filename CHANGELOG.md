@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Missing CORS headers.
+
 ## 2.1.0 - 2020-05-02
 
 ### Added

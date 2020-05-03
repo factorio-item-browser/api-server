@@ -18,6 +18,17 @@ use Psr\Http\Server\RequestHandlerInterface;
 class CorsHeaderMiddleware implements MiddlewareInterface
 {
     /**
+     * The headers which are allowed in the requests.
+     */
+    protected const ALLOWED_HEADERS = [
+        'Accept',
+        'Accept-Language',
+        'Authorization',
+        'Content-Language',
+        'Content-Type',
+    ];
+
+    /**
      * The allowed origins to access the Portal API server.
      * @var array<string>
      */
@@ -73,7 +84,7 @@ class CorsHeaderMiddleware implements MiddlewareInterface
      */
     protected function addHeaders(ResponseInterface $response, string $origin): ResponseInterface
     {
-        $response = $response->withHeader('Access-Control-Allow-Headers', 'Content-Type')
+        $response = $response->withHeader('Access-Control-Allow-Headers', implode(',', self::ALLOWED_HEADERS))
                              ->withHeader('Access-Control-Allow-Origin', $origin);
 
         if ($response->hasHeader('Allow')) {

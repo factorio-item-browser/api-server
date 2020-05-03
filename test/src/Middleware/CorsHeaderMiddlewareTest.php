@@ -176,6 +176,7 @@ class CorsHeaderMiddlewareTest extends TestCase
     {
         $origin = 'abc';
         $allow = 'def';
+        $expectedAllowedHeaders = 'Accept,Accept-Language,Authorization,Content-Language,Content-Type';
 
         /* @var ResponseInterface&MockObject $response4 */
         $response4 = $this->createMock(ResponseInterface::class);
@@ -206,7 +207,10 @@ class CorsHeaderMiddlewareTest extends TestCase
         $response1 = $this->createMock(ResponseInterface::class);
         $response1->expects($this->once())
                   ->method('withHeader')
-                  ->with($this->identicalTo('Access-Control-Allow-Headers'), $this->identicalTo('Content-Type'))
+                  ->with(
+                      $this->identicalTo('Access-Control-Allow-Headers'),
+                      $this->identicalTo($expectedAllowedHeaders)
+                  )
                   ->willReturn($response2);
 
         $middleware = new CorsHeaderMiddleware(['foo', 'bar']);
