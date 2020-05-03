@@ -71,4 +71,39 @@ class AgentServiceTest extends TestCase
 
         $this->assertSame($expectedResult, $result);
     }
+
+    /**
+     * Provides the data for the getByName test.
+     * @return array<mixed>
+     */
+    public function provideGetByName(): array
+    {
+        $agent1 = new Agent();
+        $agent1->setName('abc');
+        $agent2 = new Agent();
+        $agent2->setName('def');
+        $agents = [$agent1, $agent2];
+
+        return [
+            [$agents, 'abc', $agent1],
+            [$agents, 'foo', null],
+            [$agents, '', null],
+        ];
+    }
+
+    /**
+     * Tests the getByName method.
+     * @param array|Agent[] $agents
+     * @param string $name
+     * @param Agent|null $expectedResult
+     * @covers ::getByName
+     * @dataProvider provideGetByName
+     */
+    public function testGetByName(array $agents, string $name, ?Agent $expectedResult): void
+    {
+        $service = new AgentService($agents);
+        $result = $service->getByName($name);
+
+        $this->assertSame($expectedResult, $result);
+    }
 }

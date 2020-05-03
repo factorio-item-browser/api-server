@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Demo agent is no longer allowed to create exports.
+
 ### Fixed
 
 - Missing CORS headers.

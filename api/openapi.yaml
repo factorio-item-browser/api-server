@@ -91,6 +91,8 @@ paths:
           $ref: "#/components/responses/combinationStatus"
         "401":
           $ref: "#/components/responses/unauthorized"
+        "403":
+          $ref: "#/components/responses/actionNotAllowed"
       security:
         - jwt: []
 
@@ -817,6 +819,19 @@ components:
             example:
               error:
                 message: Invalid access key.
+
+    actionNotAllowed:
+      description:
+        The requested action is not allowed with the current agent.
+      content:
+        application/json:
+          schema:
+            properties:
+              error:
+                $ref: "#/components/schemas/Error"
+            example:
+              error:
+                message: The requested action is not allowed with the current agent.
 
     # 404 responses
     itemNotFound:
