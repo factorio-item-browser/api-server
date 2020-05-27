@@ -13,7 +13,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": "^7.3",
+    "php": "^7.4",
     "ext-json": "*",
     "ext-PDO": "*",
     "bluepsyduck/mapper-manager": "^1.0",

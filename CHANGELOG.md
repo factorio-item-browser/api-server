@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- Support for PHP 7.3. The project must now run with at least PHP 7.4.
+
 ## 2.1.1 - 2020-05-03
 
 ### Changed
