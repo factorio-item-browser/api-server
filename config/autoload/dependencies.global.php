@@ -31,6 +31,9 @@ return [
         ],
         'factories'  => [
             Command\CleanCacheCommand::class => AutoWireFactory::class,
+            Command\UpdateCombinationsCommand::class => AutoWireFactory::class,
+
+            Console\Console::class => AutoWireFactory::class,
 
             Handler\Auth\AuthHandler::class => AutoWireFactory::class,
             Handler\Combination\CombinationExportHandler::class => AutoWireFactory::class,
@@ -73,9 +76,11 @@ return [
 
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => AutoWireFactory::class,
+            Service\CombinationUpdateService::class => AutoWireFactory::class,
             Service\ExportQueueService::class => AutoWireFactory::class,
             Service\IconService::class => AutoWireFactory::class,
             Service\MachineService::class => AutoWireFactory::class,
+            Service\ModPortalService::class => AutoWireFactory::class,
             Service\RecipeService::class => AutoWireFactory::class,
             Service\SearchDecoratorService::class => AutoWireFactory::class,
             Service\TranslationService::class => AutoWireFactory::class,
@@ -93,8 +98,10 @@ return [
             'bool $isDebug' => readConfig('debug'),
 
             'int $authorizationTokenLifetime' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_TOKEN_LIFETIME),
+            'int $maxNumberOfUpdates' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTO_UPDATE, ConfigKey::AUTO_UPDATE_MAX_UPDATES),
 
             'string $authorizationKey' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTHORIZATION, ConfigKey::AUTHORIZATION_KEY),
+            'string $lastUsageInterval' => readConfig(ConfigKey::PROJECT, ConfigKey::API_SERVER, ConfigKey::AUTO_UPDATE, ConfigKey::AUTO_UPDATE_LAST_USAGE_INTERVAL),
             'string $version' => readConfig('version'),
         ],
     ],

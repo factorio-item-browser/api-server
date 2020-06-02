@@ -93,7 +93,8 @@ class CombinationExportHandlerTest extends TestCase
      */
     public function testHandleRequest(): void
     {
-        $combinationId = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationIdString = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationId = Uuid::fromString($combinationIdString);
         $modNames = ['abc', 'def'];
 
         /* @var ListRequest&MockObject $listRequest1 */
@@ -117,15 +118,15 @@ class CombinationExportHandlerTest extends TestCase
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
-        $authorizationToken->expects($this->once())
+        $authorizationToken->expects($this->any())
                            ->method('getCombinationId')
-                           ->willReturn(Uuid::fromString($combinationId));
+                           ->willReturn($combinationId);
         $authorizationToken->expects($this->once())
                            ->method('getModNames')
                            ->willReturn($modNames);
 
         $expectedResult = new CombinationStatusResponse();
-        $expectedResult->setId($combinationId)
+        $expectedResult->setId($combinationIdString)
                        ->setModNames($modNames)
                        ->setLatestExportJob($newExportJob)
                        ->setLatestSuccessfulExportJob($exportJob2);
@@ -133,8 +134,8 @@ class CombinationExportHandlerTest extends TestCase
         $this->exportQueueService->expects($this->exactly(2))
                                  ->method('createListRequest')
                                  ->withConsecutive(
-                                     [$this->identicalTo($authorizationToken), $this->identicalTo('')],
-                                     [$this->identicalTo($authorizationToken), $this->identicalTo(JobStatus::DONE)]
+                                     [$this->identicalTo($combinationId), $this->identicalTo('')],
+                                     [$this->identicalTo($combinationId), $this->identicalTo(JobStatus::DONE)]
                                  )
                                  ->willReturnOnConsecutiveCalls(
                                      $listRequest1,
@@ -157,7 +158,7 @@ class CombinationExportHandlerTest extends TestCase
                                      $newExportJob
                                  );
         $this->exportQueueService->expects($this->once())
-                                 ->method('createExport')
+                                 ->method('createExportForAuthorizationToken')
                                  ->with($this->identicalTo($authorizationToken))
                                  ->willReturn($detailsResponse);
 
@@ -190,7 +191,8 @@ class CombinationExportHandlerTest extends TestCase
      */
     public function testHandleRequestWithoutNewExport(): void
     {
-        $combinationId = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationIdString = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationId = Uuid::fromString($combinationIdString);
         $modNames = ['abc', 'def'];
 
         /* @var ListRequest&MockObject $listRequest1 */
@@ -210,15 +212,15 @@ class CombinationExportHandlerTest extends TestCase
 
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
-        $authorizationToken->expects($this->once())
+        $authorizationToken->expects($this->any())
                            ->method('getCombinationId')
-                           ->willReturn(Uuid::fromString($combinationId));
+                           ->willReturn($combinationId);
         $authorizationToken->expects($this->once())
                            ->method('getModNames')
                            ->willReturn($modNames);
 
         $expectedResult = new CombinationStatusResponse();
-        $expectedResult->setId($combinationId)
+        $expectedResult->setId($combinationIdString)
                        ->setModNames($modNames)
                        ->setLatestExportJob($exportJob1)
                        ->setLatestSuccessfulExportJob($exportJob2);
@@ -226,8 +228,8 @@ class CombinationExportHandlerTest extends TestCase
         $this->exportQueueService->expects($this->exactly(2))
                                  ->method('createListRequest')
                                  ->withConsecutive(
-                                     [$this->identicalTo($authorizationToken), $this->identicalTo('')],
-                                     [$this->identicalTo($authorizationToken), $this->identicalTo(JobStatus::DONE)]
+                                     [$this->identicalTo($combinationId), $this->identicalTo('')],
+                                     [$this->identicalTo($combinationId), $this->identicalTo(JobStatus::DONE)]
                                  )
                                  ->willReturnOnConsecutiveCalls(
                                      $listRequest1,
@@ -248,7 +250,7 @@ class CombinationExportHandlerTest extends TestCase
                                      $exportJob2
                                  );
         $this->exportQueueService->expects($this->never())
-                                 ->method('createExport');
+                                 ->method('createExportForAuthorizationToken');
 
         /* @var CombinationExportHandler&MockObject $handler */
         $handler = $this->getMockBuilder(CombinationExportHandler::class)
@@ -296,7 +298,7 @@ class CombinationExportHandlerTest extends TestCase
         $this->exportQueueService->expects($this->never())
                                  ->method('mapResponseToExportJob');
         $this->exportQueueService->expects($this->never())
-                                 ->method('createExport');
+                                 ->method('createExportForAuthorizationToken');
 
         $this->expectException(ActionNotAllowedException::class);
 

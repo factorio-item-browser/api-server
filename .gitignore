@@ -4,4 +4,5 @@
 /test/coverage
 /vendor
 
+/config/autoload/development/factorio-mod-portal-client.local.php
 /.phpunit.result.cache

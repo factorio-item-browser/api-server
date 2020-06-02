@@ -15,6 +15,8 @@ use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ServiceManager\Config;
 use Laminas\ServiceManager\ServiceManager;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 // Load configuration
 $config = require(__DIR__ . '/config.php');
@@ -25,6 +27,7 @@ $container = new ServiceManager();
 
 // Inject config
 $container->setService('config', $config);
+$container->setService(OutputInterface::class, new ConsoleOutput(ConsoleOutput::VERBOSITY_NORMAL, true));
 
 if ($config[ConfigAggregator::ENABLE_CACHE] ?? false) {
     AutoWireFactory::setCacheFile(__DIR__ . '/../data/cache/autowire-factory-cache.php');

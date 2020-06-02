@@ -56,8 +56,8 @@ class CombinationStatusHandler extends AbstractRequestHandler
         $authorizationToken = $this->getAuthorizationToken();
 
         [$latestJobResponse, $latestSuccessfulJobResponse] = $this->exportQueueService->executeListRequests([
-            $this->exportQueueService->createListRequest($authorizationToken),
-            $this->exportQueueService->createListRequest($authorizationToken, JobStatus::DONE),
+            $this->exportQueueService->createListRequest($authorizationToken->getCombinationId()),
+            $this->exportQueueService->createListRequest($authorizationToken->getCombinationId(), JobStatus::DONE),
         ]);
 
         $latestExportJob = $this->exportQueueService->mapResponseToExportJob($latestJobResponse);
