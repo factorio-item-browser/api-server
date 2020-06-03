@@ -24,6 +24,7 @@ $aggregator = new ConfigAggregator([
     new ArrayProvider($cacheConfig),
 
     \Blast\BaseUrl\ConfigProvider::class,
+    \BluePsyduck\FactorioModPortalClient\ConfigProvider::class,
     \BluePsyduck\MapperManager\ConfigProvider::class,
     \FactorioItemBrowser\Api\Client\ConfigProvider::class,
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,

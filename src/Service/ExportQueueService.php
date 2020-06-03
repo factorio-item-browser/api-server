@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Service;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Entity\ExportJob;
+use FactorioItemBrowser\Api\Database\Entity\Combination;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\ExportQueue\Client\Client\Client;
 use FactorioItemBrowser\ExportQueue\Client\Constant\ListOrder;
@@ -18,6 +19,7 @@ use FactorioItemBrowser\ExportQueue\Client\Response\Job\DetailsResponse;
 use FactorioItemBrowser\ExportQueue\Client\Response\Job\ListResponse;
 use FactorioItemBrowser\ExportQueue\Client\Response\ResponseInterface;
 use GuzzleHttp\Promise\PromiseInterface;
+use Ramsey\Uuid\UuidInterface;
 
 use function GuzzleHttp\Promise\all;
 
@@ -54,14 +56,14 @@ class ExportQueueService
 
     /**
      * Create a list request to the specified authorization token.
-     * @param AuthorizationToken $authorizationToken
+     * @param UuidInterface $combinationId
      * @param string $jobStatus
      * @return ListRequest
      */
-    public function createListRequest(AuthorizationToken $authorizationToken, string $jobStatus = ''): ListRequest
+    public function createListRequest(UuidInterface $combinationId, string $jobStatus = ''): ListRequest
     {
         $request = new ListRequest();
-        $request->setCombinationId($authorizationToken->getCombinationId()->toString())
+        $request->setCombinationId($combinationId->toString())
                 ->setStatus($jobStatus)
                 ->setOrder(ListOrder::LATEST)
                 ->setLimit(1);
@@ -110,11 +112,33 @@ class ExportQueueService
      * @return DetailsResponse
      * @throws ClientException
      */
-    public function createExport(AuthorizationToken $authorizationToken): DetailsResponse
+    public function createExportForAuthorizationToken(AuthorizationToken $authorizationToken): DetailsResponse
     {
         $request = new CreateRequest();
         $request->setCombinationId($authorizationToken->getCombinationId()->toString())
                 ->setModNames($authorizationToken->getModNames());
+
+        return $this->client->sendRequest($request)->wait();
+    }
+
+    /**
+     * Creates an export for the combination in the export queue.
+     * @param Combination $combination
+     * @param string $priority
+     * @return DetailsResponse
+     * @throws ClientException
+     */
+    public function createExportForCombination(Combination $combination, string $priority): DetailsResponse
+    {
+        $modNames = [];
+        foreach ($combination->getMods() as $mod) {
+            $modNames[] = $mod->getName();
+        }
+
+        $request = new CreateRequest();
+        $request->setCombinationId($combination->getId()->toString())
+                ->setModNames($modNames)
+                ->setPriority($priority);
 
         return $this->client->sendRequest($request)->wait();
     }

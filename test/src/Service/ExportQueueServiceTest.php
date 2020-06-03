@@ -7,7 +7,10 @@ namespace FactorioItemBrowserTest\Api\Server\Service;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use BluePsyduck\TestHelper\ReflectionTrait;
+use Doctrine\Common\Collections\ArrayCollection;
 use FactorioItemBrowser\Api\Client\Entity\ExportJob;
+use FactorioItemBrowser\Api\Database\Entity\Combination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
 use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Service\ExportQueueService;
 use FactorioItemBrowser\ExportQueue\Client\Client\Client;
@@ -77,23 +80,18 @@ class ExportQueueServiceTest extends TestCase
      */
     public function testCreateListRequest(): void
     {
-        $combinationId = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationIdString = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $combinationId = Uuid::fromString($combinationIdString);
         $jobStatus = 'abc';
 
         $expectedResult = new ListRequest();
-        $expectedResult->setCombinationId($combinationId)
+        $expectedResult->setCombinationId($combinationIdString)
                        ->setStatus($jobStatus)
                        ->setOrder(ListOrder::LATEST)
                        ->setLimit(1);
 
-        /* @var AuthorizationToken&MockObject $authorizationToken */
-        $authorizationToken = $this->createMock(AuthorizationToken::class);
-        $authorizationToken->expects($this->once())
-                           ->method('getCombinationId')
-                           ->willReturn(Uuid::fromString($combinationId));
-
         $service = new ExportQueueService($this->client, $this->mapperManager);
-        $result = $service->createListRequest($authorizationToken, $jobStatus);
+        $result = $service->createListRequest($combinationId, $jobStatus);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -206,11 +204,11 @@ class ExportQueueServiceTest extends TestCase
     }
 
     /**
-     * Tests the createExport method.
+     * Tests the createExportForAuthorizationToken method.
      * @throws ClientException
-     * @covers ::createExport
+     * @covers ::createExportForAuthorizationToken
      */
-    public function testCreateExport(): void
+    public function testCreateExportForAuthorizationToken(): void
     {
         $combinationId = '79d41bb3-a6b8-4264-b88f-3308db993348';
         $modNames = ['abc', 'def'];
@@ -239,7 +237,52 @@ class ExportQueueServiceTest extends TestCase
                      ->willReturn($promise);
 
         $service = new ExportQueueService($this->client, $this->mapperManager);
-        $result = $service->createExport($authorizationToken);
+        $result = $service->createExportForAuthorizationToken($authorizationToken);
+
+        $this->assertSame($response, $result);
+    }
+
+    /**
+     * Tests the createExportForCombination method.
+     * @throws ClientException
+     * @covers ::createExportForCombination
+     */
+    public function testCreateExportForCombination(): void
+    {
+        $combinationId = '79d41bb3-a6b8-4264-b88f-3308db993348';
+        $priority = 'abc';
+
+        $mod1 = new Mod();
+        $mod1->setName('def');
+        $mod2 = new Mod();
+        $mod2->setName('ghi');
+
+        $expectedRequest = new CreateRequest();
+        $expectedRequest->setCombinationId($combinationId)
+                        ->setModNames(['def', 'ghi'])
+                        ->setPriority('abc');
+
+        /* @var Combination&MockObject $combination */
+        $combination = $this->createMock(Combination::class);
+        $combination->expects($this->once())
+                    ->method('getId')
+                    ->willReturn(Uuid::fromString($combinationId));
+        $combination->expects($this->once())
+                    ->method('getMods')
+                    ->willReturn(new ArrayCollection([$mod1, $mod2]));
+
+        /* @var DetailsResponse&MockObject $response */
+        $response = $this->createMock(DetailsResponse::class);
+
+        $promise = new FulfilledPromise($response);
+
+        $this->client->expects($this->once())
+                     ->method('sendRequest')
+                     ->with($this->equalTo($expectedRequest))
+                     ->willReturn($promise);
+
+        $service = new ExportQueueService($this->client, $this->mapperManager);
+        $result = $service->createExportForCombination($combination, $priority);
 
         $this->assertSame($response, $result);
     }

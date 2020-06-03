@@ -30,6 +30,10 @@ return [
                 ConfigKey::AUTHORIZATION_KEY => 'factorio-item-browser',
                 ConfigKey::AUTHORIZATION_TOKEN_LIFETIME => 86400,
             ],
+            ConfigKey::AUTO_UPDATE => [
+                ConfigKey::AUTO_UPDATE_LAST_USAGE_INTERVAL => '-1 month',
+                ConfigKey::AUTO_UPDATE_MAX_UPDATES => 100,
+            ],
         ],
     ],
 ];

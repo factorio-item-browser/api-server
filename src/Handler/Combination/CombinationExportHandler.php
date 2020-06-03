@@ -74,15 +74,15 @@ class CombinationExportHandler extends AbstractRequestHandler
         }
 
         [$latestJobResponse, $latestSuccessfulJobResponse] = $this->exportQueueService->executeListRequests([
-            $this->exportQueueService->createListRequest($authorizationToken),
-            $this->exportQueueService->createListRequest($authorizationToken, JobStatus::DONE),
+            $this->exportQueueService->createListRequest($authorizationToken->getCombinationId()),
+            $this->exportQueueService->createListRequest($authorizationToken->getCombinationId(), JobStatus::DONE),
         ]);
 
         $latestExportJob = $this->exportQueueService->mapResponseToExportJob($latestJobResponse);
         $latestSuccessfulExportJob = $this->exportQueueService->mapResponseToExportJob($latestSuccessfulJobResponse);
 
         if ($this->isNewExportRequired($latestExportJob)) {
-            $newJobResponse = $this->exportQueueService->createExport($authorizationToken);
+            $newJobResponse = $this->exportQueueService->createExportForAuthorizationToken($authorizationToken);
             $latestExportJob = $this->exportQueueService->mapResponseToExportJob($newJobResponse);
         }
 

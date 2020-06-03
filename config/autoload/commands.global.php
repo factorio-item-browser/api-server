@@ -16,5 +16,6 @@ use FactorioItemBrowser\Api\Server\Constant\CommandName;
 return [
     'commands' => [
         CommandName::CLEAN_CACHE => Command\CleanCacheCommand::class,
+        CommandName::UPDATE_COMBINATIONS => Command\UpdateCombinationsCommand::class,
     ],
 ];

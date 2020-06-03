@@ -63,6 +63,21 @@ interface ConfigKey
     public const AUTHORIZATION_TOKEN_LIFETIME = 'token-lifetime';
 
     /**
+     * The key holding the config for the auto update.
+     */
+    public const AUTO_UPDATE = 'auto-update';
+
+    /**
+     * The key holding the interval of the last usage time to check.
+     */
+    public const AUTO_UPDATE_LAST_USAGE_INTERVAL = 'last-usage-interval';
+
+    /**
+     * The key holding the maximum number of updates to trigger per run.
+     */
+    public const AUTO_UPDATE_MAX_UPDATES = 'max-updates';
+
+    /**
      * The key holding the map of the routes to their corresponding requests.
      */
     public const MAP_ROUTE_TO_REQUEST = 'map-route-to-request';
