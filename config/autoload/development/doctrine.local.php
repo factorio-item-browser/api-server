@@ -26,7 +26,7 @@ return [
                     'password' => 'docker',
                     'dbname'   => 'docker',
                     'driverOptions' => [
-                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
                     ],
                 ],
             ],

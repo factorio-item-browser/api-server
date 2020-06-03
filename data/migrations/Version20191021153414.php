@@ -5,14 +5,15 @@ namespace FactorioItemBrowser\Api\Server\Migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Initial setup of the database.
- */
 final class Version20191021153414 extends AbstractMigration
 {
+    public function getDescription() : string
+    {
+        return 'Initial setup of the database.';
+    }
+
     public function up(Schema $schema) : void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE Recipe ( id BINARY(16) NOT NULL COMMENT \'The internal id of the recipe.(DC2Type:uuid_binary)\', name VARCHAR(255) NOT NULL COMMENT \'The name of the recipe.\', mode ENUM(\'normal\', \'expensive\') NOT NULL COMMENT \'The mode of the recipe.(DC2Type:enum_recipe_mode)\', craftingTime INT UNSIGNED NOT NULL COMMENT \'The required time in milliseconds to craft the recipe.\', craftingCategoryId BINARY(16) NOT NULL COMMENT \'The internal id of the crafting category.(DC2Type:uuid_binary)\', INDEX IDX_DD24B401DFFAB95E (craftingCategoryId), INDEX IDX_DD24B4015E237E06 (name), PRIMARY KEY(id) ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB COMMENT = \'The table holding the recipes to craft the items.\'');
@@ -56,7 +57,6 @@ final class Version20191021153414 extends AbstractMigration
 
     public function down(Schema $schema) : void
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE RecipeIngredient DROP FOREIGN KEY FK_69908F266DCBA54');

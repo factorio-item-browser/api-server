@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "621103cb3d009a5be232c06ebb18f748",
+    "content-hash": "2cd2af0b6e77ffdbf7251ab7f436aaa7",
     "packages": [
         {
             "name": "bluepsyduck/factorio-mod-portal-client",
@@ -1359,16 +1359,16 @@
         },
         {
             "name": "factorio-item-browser/api-database",
-            "version": "dev-feature/auto-update",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "f862e1ee0c8aa675381f14aecd6fa6d8cda253fd"
+                "reference": "98495c5d6d15ee9b12a9df09c627dcf3dafaf84a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/f862e1ee0c8aa675381f14aecd6fa6d8cda253fd",
-                "reference": "f862e1ee0c8aa675381f14aecd6fa6d8cda253fd",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/98495c5d6d15ee9b12a9df09c627dcf3dafaf84a",
+                "reference": "98495c5d6d15ee9b12a9df09c627dcf3dafaf84a",
                 "shasum": ""
             },
             "require": {
@@ -1416,7 +1416,7 @@
                 "api",
                 "database"
             ],
-            "time": "2020-05-29T10:54:44+00:00"
+            "time": "2020-06-03T13:36:44+00:00"
         },
         {
             "name": "factorio-item-browser/api-search",
@@ -6123,16 +6123,16 @@
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "0.12.10",
+            "version": "0.12.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "74c1c5f00312e23533fdf579aea71a8343dd3e78"
+                "reference": "ab783a8ea634ea23305a8818c4750603e714489b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/74c1c5f00312e23533fdf579aea71a8343dd3e78",
-                "reference": "74c1c5f00312e23533fdf579aea71a8343dd3e78",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/ab783a8ea634ea23305a8818c4750603e714489b",
+                "reference": "ab783a8ea634ea23305a8818c4750603e714489b",
                 "shasum": ""
             },
             "require": {
@@ -6175,7 +6175,7 @@
                 "MIT"
             ],
             "description": "PHPUnit extensions and rules for PHPStan",
-            "time": "2020-05-31T06:33:59+00:00"
+            "time": "2020-06-01T16:43:31+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
@@ -7370,18 +7370,9 @@
             "time": "2020-04-18T12:12:48+00:00"
         }
     ],
-    "aliases": [
-        {
-            "alias": "3.2",
-            "alias_normalized": "3.2.0.0",
-            "version": "dev-feature/auto-update",
-            "package": "factorio-item-browser/api-database"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-database": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
