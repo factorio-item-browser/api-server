@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 2.2.0 - 2020-06-03
+
+### Added
+
+- Command `update-combinations` to look for combinations needing an update.
+
+### Changed
+
+- Charset of all tables to utf8mb4 to actually be UTF-8.
+- All identifying columns' collation to utf8mb4_bin to make them case-sensitive, as they are in the game.
 
 ### Removed
 
