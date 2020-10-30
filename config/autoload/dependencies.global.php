@@ -38,6 +38,7 @@ return [
             Handler\Auth\AuthHandler::class => AutoWireFactory::class,
             Handler\Combination\CombinationExportHandler::class => AutoWireFactory::class,
             Handler\Combination\CombinationStatusHandler::class => AutoWireFactory::class,
+            Handler\Combination\CombinationValidateHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericDetailsHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericIconHandler::class => AutoWireFactory::class,
             Handler\Item\ItemIngredientHandler::class => AutoWireFactory::class,
@@ -76,7 +77,9 @@ return [
 
             Service\AgentService::class => Service\AgentServiceFactory::class,
             Service\AuthorizationService::class => AutoWireFactory::class,
+            Service\CombinationService::class => AutoWireFactory::class,
             Service\CombinationUpdateService::class => AutoWireFactory::class,
+            Service\CombinationValidationService::class => AutoWireFactory::class,
             Service\ExportQueueService::class => AutoWireFactory::class,
             Service\IconService::class => AutoWireFactory::class,
             Service\MachineService::class => AutoWireFactory::class,

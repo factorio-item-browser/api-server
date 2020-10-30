@@ -79,7 +79,7 @@ class DatabaseRecipeToClientRecipeMapper extends TranslationServiceAwareMapper i
 
         $this->addToTranslationService($clientItem);
     }
-    
+
     /**
      * Maps the specified database product into the client item.
      * @param DatabaseProduct $databaseProduct

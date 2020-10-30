@@ -19,9 +19,8 @@ use FactorioItemBrowser\ExportQueue\Client\Response\Job\DetailsResponse;
 use FactorioItemBrowser\ExportQueue\Client\Response\Job\ListResponse;
 use FactorioItemBrowser\ExportQueue\Client\Response\ResponseInterface;
 use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\Utils;
 use Ramsey\Uuid\UuidInterface;
-
-use function GuzzleHttp\Promise\all;
 
 /**
  * The service handling requests to the export queue.
@@ -74,10 +73,11 @@ class ExportQueueService
      * Executes the specified list requests, waiting for all their responses.
      * @param array<ListRequest> $listRequests
      * @return array<ListResponse>
+     * @throws ClientException
      */
     public function executeListRequests(array $listRequests): array
     {
-        return all(array_map(function (ListRequest $request): PromiseInterface {
+        return Utils::all(array_map(function (ListRequest $request): PromiseInterface {
             return $this->client->sendRequest($request);
         }, $listRequests))->wait();
     }

@@ -38,7 +38,7 @@ class AgentTest extends TestCase
     {
         $name = 'abc';
         $agent = new Agent();
-        
+
         $this->assertSame($agent, $agent->setName($name));
         $this->assertSame($name, $agent->getName());
     }

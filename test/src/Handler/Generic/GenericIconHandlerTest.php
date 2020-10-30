@@ -428,7 +428,7 @@ class GenericIconHandlerTest extends TestCase
         $entity1->expects($this->once())
                 ->method('getName')
                 ->willReturn('def');
-        
+
         /* @var Entity&MockObject $entity2 */
         $entity2 = $this->createMock(Entity::class);
         $entity2->expects($this->once())

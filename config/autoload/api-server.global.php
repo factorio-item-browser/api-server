@@ -29,6 +29,7 @@ return [
                 RouteName::AUTH => Request\Auth\AuthRequest::class,
                 RouteName::COMBINATION_EXPORT => Request\Combination\CombinationExportRequest::class,
                 RouteName::COMBINATION_STATUS => Request\Combination\CombinationStatusRequest::class,
+                RouteName::COMBINATION_VALIDATE => Request\Combination\CombinationValidateRequest::class,
                 RouteName::GENERIC_DETAILS => Request\Generic\GenericDetailsRequest::class,
                 RouteName::GENERIC_ICON => Request\Generic\GenericIconRequest::class,
                 RouteName::ITEM_INGREDIENT => Request\Item\ItemIngredientRequest::class,

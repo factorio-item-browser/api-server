@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use BluePsyduck\FactorioModPortalClient\Client\Facade;
+use BluePsyduck\FactorioModPortalClient\Client\ClientInterface;
 use BluePsyduck\FactorioModPortalClient\Entity\Mod;
+use BluePsyduck\FactorioModPortalClient\Entity\Release;
+use BluePsyduck\FactorioModPortalClient\Entity\Version;
 use BluePsyduck\FactorioModPortalClient\Exception\ClientException;
-use BluePsyduck\FactorioModPortalClient\Request\ModListRequest;
+use BluePsyduck\FactorioModPortalClient\Request\FullModRequest;
+use BluePsyduck\FactorioModPortalClient\Utils\ModUtils;
 use FactorioItemBrowser\Api\Database\Entity\Combination;
+use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\Utils;
 
 /**
  * The service for accessing the Mod Portal API.
@@ -18,62 +24,88 @@ use FactorioItemBrowser\Api\Database\Entity\Combination;
  */
 class ModPortalService
 {
-    protected Facade $modPortalFacade;
+    protected ClientInterface $modPortalClient;
 
     /**
-     * @var array<string,Mod>|Mod[]
+     * @var array<string,Mod|null>|Mod[]|null[]
      */
     protected array $requestedMods = [];
 
-    public function __construct(Facade $modPortalFacade)
+    public function __construct(ClientInterface $modPortalClient)
     {
-        $this->modPortalFacade = $modPortalFacade;
+        $this->modPortalClient = $modPortalClient;
+    }
+
+    /**
+     * @param array<string> $modNames
+     * @return array<string,Mod>|Mod[]
+     * @throws ClientException
+     */
+    public function getMods(array $modNames): array
+    {
+        $missingModNames = $this->selectMissingModNames($modNames);
+        $this->requestMods($missingModNames);
+
+        return array_filter(array_intersect_key($this->requestedMods, array_flip($modNames)));
     }
 
     /**
      * @param Combination $combination
-     * @return array<Mod>|Mod[]
+     * @return array<string,Mod>|Mod[]
      * @throws ClientException
      */
-    public function requestModsOfCombination(Combination $combination): array
+    public function getModsOfCombination(Combination $combination): array
     {
-        $modNames = [];
-        foreach ($combination->getMods() as $mod) {
-            $modNames[] = $mod->getName();
-        }
-
-        return $this->requestMods($modNames);
+        $modNames = array_map(fn(DatabaseMod $mod) => $mod->getName(), $combination->getMods()->toArray());
+        return $this->getMods($modNames);
     }
 
     /**
-     * @param array<string>|string[] $modNames
-     * @return array<Mod>|Mod[]
-     * @throws ClientException
+     * @param array<string> $modNames
+     * @return array<string>
      */
-    public function requestMods(array $modNames): array
+    protected function selectMissingModNames(array $modNames): array
     {
-        $this->requestMissingMods($modNames);
-        return array_intersect_key($this->requestedMods, array_flip($modNames));
+        return array_values(array_diff($modNames, array_keys($this->requestedMods)));
     }
 
     /**
      * @param array<string>|string[] $modNames
      * @throws ClientException
      */
-    protected function requestMissingMods(array $modNames): void
+    protected function requestMods(array $modNames): void
     {
-        $missingModNames = array_values(array_diff($modNames, array_keys($this->requestedMods)));
-        if (count($missingModNames) === 0) {
-            return;
+        $promises = [];
+        foreach ($modNames as $modName) {
+            $request = new FullModRequest();
+            $request->setName($modName);
+
+            $promises[$modName] = $this->modPortalClient->sendRequest($request);
         }
 
-        $request = new ModListRequest();
-        $request->setNameList($missingModNames)
-                ->setPageSize(count($missingModNames));
-
-        $response = $this->modPortalFacade->getModList($request);
-        foreach ($response->getResults() as $mod) {
-            $this->requestedMods[$mod->getName()] = $mod;
+        $responses = Utils::settle($promises)->wait();
+        foreach ($responses as $modName => $response) {
+            if ($response['state'] === PromiseInterface::FULFILLED) {
+                $this->requestedMods[$modName] = $response['value'];
+            } else {
+                $this->requestedMods[$modName] = null;
+            }
         }
+    }
+
+    /**
+     * @param array<string>|string[] $modNames
+     * @param string $baseVersion
+     * @return array<string,Release>|Release[]
+     * @throws ClientException
+     */
+    public function getLatestReleases(array $modNames, string $baseVersion): array
+    {
+        $gameVersion = new Version($baseVersion);
+        $latestReleases = [];
+        foreach ($this->getMods($modNames) as $mod) {
+            $latestReleases[$mod->getName()] = ModUtils::selectLatestRelease($mod, $gameVersion);
+        }
+        return array_filter($latestReleases);
     }
 }

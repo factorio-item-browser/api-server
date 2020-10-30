@@ -164,7 +164,7 @@ class AuthHandlerTest extends TestCase
         $this->combinationRepository->expects($this->once())
                                     ->method('updateLastUsageTime')
                                     ->with($this->identicalTo($combination));
-        
+
         /* @var AuthHandler&MockObject $handler */
         $handler = $this->getMockBuilder(AuthHandler::class)
                         ->onlyMethods(['getAgentFromRequest', 'getModNamesFromRequest', 'calculateCombinationId'])

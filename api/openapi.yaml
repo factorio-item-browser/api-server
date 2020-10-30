@@ -96,6 +96,24 @@ paths:
       security:
         - jwt: []
 
+  /combination/validate:
+    post:
+      summary: Validates the combination of mods from the authorization token against the mod portal.
+      description:
+        This requests will validate the combination of mods specified in the authorization token against the Factorio
+        Mod Portal, checking that all mandatory dependencies are in the list of mods, as well as that no conflicts are
+        present.
+      operationId: combination.validate
+      tags:
+        - Combination
+      responses:
+        "200":
+          $ref: "#/components/responses/combinationValidation"
+        "401":
+          $ref: "#/components/responses/unauthorized"
+      security:
+        - jwt: []
+
   /generic/details:
     post:
       summary: Provides basic data to items and recipes.
@@ -613,6 +631,22 @@ components:
               latestSuccessfulExportJob:
                 $ref: "#/components/schemas/ExportJob"
 
+    combinationValidation:
+      description: The result of the combination validation.
+      content:
+        application/json:
+          schema:
+            properties:
+              isValid:
+                type: boolean
+                description: Whether the combination of mods is valid.
+                example: true
+              mods:
+                type: array
+                description: The list of validated mods.
+                items:
+                  $ref: "#/components/schemas/ValidatedMod"
+
     genericDetails:
       description: The generic details of entities.
       content:
@@ -656,7 +690,6 @@ components:
           schema:
             properties:
               item:
-                description: The item with the recipes containing it as an ingredient.
                 $ref: "#/components/schemas/GenericEntityWithRecipes"
 
     itemList:
@@ -693,7 +726,6 @@ components:
           schema:
             properties:
               item:
-                description: The item with the recipes containing it as a product.
                 $ref: "#/components/schemas/GenericEntityWithRecipes"
 
     itemRandom:
@@ -1187,6 +1219,32 @@ components:
                   description: ""
                   amount: 1
               craftingTime: 0.5
+
+    ValidatedMod:
+      type: object
+      description: A mod with its validation data.
+      properties:
+        name:
+          type: string
+          description: The name of the mod.
+          example: Foo
+        version:
+          type: string
+          description: The version of the mod used for validation.
+          example: 1.2.3
+        issueType:
+          type: string
+          description: The type of issue this mod has.
+          enum:
+            - none
+            - conflict
+            - missing-dependency
+            - missing-mod
+            - missing-release
+        issueDependency:
+          type: string
+          description: The dependency which triggered the "missing-dependency" or "conflict" issue.
+          example: Bar >= 2.3.4
 
   securitySchemes:
     jwt:

@@ -165,7 +165,7 @@ class IconServiceTest extends TestCase
         $icon1->expects($this->once())
               ->method('getName')
               ->willReturn('def');
-        
+
         /* @var Icon&MockObject $icon2 */
         $icon2 = $this->createMock(Icon::class);
         $icon2->expects($this->once())
@@ -180,11 +180,11 @@ class IconServiceTest extends TestCase
             $this->createMock(UuidInterface::class),
         ];
         $icons = [$icon1, $icon2];
-        
+
         $expectedResult = new NamesByTypes();
         $expectedResult->addName('abc', 'def')
                        ->addName('ghi', 'jkl');
-        
+
         /* @var IconService&MockObject $iconService */
         $iconService = $this->getMockBuilder(IconService::class)
                             ->onlyMethods(['getIconsByImageIds'])
@@ -246,7 +246,7 @@ class IconServiceTest extends TestCase
             $this->createMock(IconImage::class),
             $this->createMock(IconImage::class),
         ];
-        
+
         $this->iconImageRepository->expects($this->once())
                                   ->method('findByIds')
                                   ->with($this->identicalTo($imageIds))

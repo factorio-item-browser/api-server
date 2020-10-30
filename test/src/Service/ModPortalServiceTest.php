@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\FactorioModPortalClient\Client\Facade;
+use BluePsyduck\FactorioModPortalClient\Client\Client;
 use BluePsyduck\FactorioModPortalClient\Entity\Mod as PortalMod;
+use BluePsyduck\FactorioModPortalClient\Entity\Release;
+use BluePsyduck\FactorioModPortalClient\Entity\Version;
 use BluePsyduck\FactorioModPortalClient\Exception\ClientException;
-use BluePsyduck\FactorioModPortalClient\Request\ModListRequest;
-use BluePsyduck\FactorioModPortalClient\Response\ModListResponse;
+use BluePsyduck\FactorioModPortalClient\Request\FullModRequest;
 use BluePsyduck\TestHelper\ReflectionTrait;
-use Doctrine\Common\Collections\ArrayCollection;
 use FactorioItemBrowser\Api\Database\Entity\Combination;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Service\ModPortalService;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Promise\RejectedPromise;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -30,10 +32,10 @@ class ModPortalServiceTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * The mocked mod portal facade.
-     * @var Facade&MockObject
+     * The mocked mod portal client.
+     * @var Client&MockObject
      */
-    protected $modPortalFacade;
+    protected $modPortalClient;
 
     /**
      * Sets up the test case.
@@ -42,7 +44,7 @@ class ModPortalServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->modPortalFacade = $this->createMock(Facade::class);
+        $this->modPortalClient = $this->createMock(Client::class);
     }
 
     /**
@@ -52,170 +54,211 @@ class ModPortalServiceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $service = new ModPortalService($this->modPortalFacade);
+        $service = new ModPortalService($this->modPortalClient);
 
-        $this->assertSame($this->modPortalFacade, $this->extractProperty($service, 'modPortalFacade'));
+        $this->assertSame($this->modPortalClient, $this->extractProperty($service, 'modPortalClient'));
         $this->assertSame([], $this->extractProperty($service, 'requestedMods'));
     }
 
     /**
-     * Tests the requestModsOfCombination method.
+     * Tests the getMods method.
+     * @throws ReflectionException
      * @throws ClientException
-     * @covers ::requestModsOfCombination
+     * @covers ::getMods
      */
-    public function testRequestModsOfCombination(): void
+    public function testGetMods(): void
     {
-        $databaseMod1 = new DatabaseMod();
-        $databaseMod1->setName('abc');
-        $databaseMod2 = new DatabaseMod();
-        $databaseMod2->setName('def');
+        $modNames = ['abc', 'def', 'ghi'];
+        $missingModNames = ['ghi'];
 
-        $expectedModNames = ['abc', 'def'];
-        $portalMods = [
-            $this->createMock(PortalMod::class),
-            $this->createMock(PortalMod::class),
+        $mod1 = $this->createMock(PortalMod::class);
+        $mod2 = $this->createMock(PortalMod::class);
+
+        $requestedMods = [
+            'abc' => $mod1,
+            'def' => null,
+            'ghi' => $mod2,
+        ];
+        $expectedResult = [
+            'abc' => $mod1,
+            'ghi' => $mod2,
         ];
 
-        /* @var Combination&MockObject $combination */
-        $combination = $this->createMock(Combination::class);
-        $combination->expects($this->once())
-                    ->method('getMods')
-                    ->willReturn(new ArrayCollection([$databaseMod1, $databaseMod2]));
-
-        /* @var ModPortalService&MockObject $service */
         $service = $this->getMockBuilder(ModPortalService::class)
-                        ->onlyMethods(['requestMods'])
-                        ->setConstructorArgs([$this->modPortalFacade])
+                        ->onlyMethods(['selectMissingModNames', 'requestMods'])
+                        ->setConstructorArgs([$this->modPortalClient])
                         ->getMock();
         $service->expects($this->once())
+                ->method('selectMissingModNames')
+                ->with($this->identicalTo($modNames))
+                ->willReturn($missingModNames);
+        $service->expects($this->once())
                 ->method('requestMods')
+                ->with($this->identicalTo($missingModNames));
+        $this->injectProperty($service, 'requestedMods', $requestedMods);
+
+        $result = $service->getMods($modNames);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Tests the getModsOfCombination method.
+     * @throws ClientException
+     * @covers ::getModsOfCombination
+     */
+    public function testGetModsOfCombination(): void
+    {
+        $mod1 = new DatabaseMod();
+        $mod1->setName('abc');
+        $mod2 = new DatabaseMod();
+        $mod2->setName('def');
+
+        $combination = new Combination();
+        $combination->getMods()->add($mod1);
+        $combination->getMods()->add($mod2);
+
+        $expectedModNames = ['abc', 'def'];
+        $mods = [
+            'abc' => $this->createMock(PortalMod::class),
+            'def' => $this->createMock(PortalMod::class),
+        ];
+
+        $service = $this->getMockBuilder(ModPortalService::class)
+                        ->onlyMethods(['getMods'])
+                        ->setConstructorArgs([$this->modPortalClient])
+                        ->getMock();
+        $service->expects($this->once())
+                ->method('getMods')
                 ->with($this->identicalTo($expectedModNames))
-                ->willReturn($portalMods);
+                ->willReturn($mods);
 
-        $result = $service->requestModsOfCombination($combination);
+        $result = $service->getModsOfCombination($combination);
 
-        $this->assertSame($portalMods, $result);
+        $this->assertSame($mods, $result);
+    }
+
+    /**
+     * Tests the selectMissingModNames method.
+     * @throws ReflectionException
+     * @covers ::selectMissingModNames
+     */
+    public function testSelectMissingModNames(): void
+    {
+        $modNames = ['abc', 'def', 'ghi', 'jkl'];
+        $requestedMods = [
+            'def' => $this->createMock(PortalMod::class),
+            'jkl' => null,
+        ];
+        $expectedResult = ['abc', 'ghi'];
+
+        $service = new ModPortalService($this->modPortalClient);
+        $this->injectProperty($service, 'requestedMods', $requestedMods);
+
+        $result = $this->invokeMethod($service, 'selectMissingModNames', $modNames);
+
+        $this->assertEquals($expectedResult, $result);
     }
 
     /**
      * Tests the requestMods method.
-     * @throws ClientException
      * @throws ReflectionException
      * @covers ::requestMods
      */
     public function testRequestMods(): void
     {
-        $modNames = ['abc', 'def'];
-
-        /* @var PortalMod&MockObject $portalMod1 */
-        $portalMod1 = $this->createMock(PortalMod::class);
-        /* @var PortalMod&MockObject $portalMod2 */
-        $portalMod2 = $this->createMock(PortalMod::class);
-
-        $requestedMods = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
-            'foo' => $this->createMock(PortalMod::class),
-        ];
-        $expectedResult = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
-        ];
-
-        /* @var ModPortalService&MockObject $service */
-        $service = $this->getMockBuilder(ModPortalService::class)
-                        ->onlyMethods(['requestMissingMods'])
-                        ->setConstructorArgs([$this->modPortalFacade])
-                        ->getMock();
-        $service->expects($this->once())
-                ->method('requestMissingMods')
-                ->with($this->identicalTo($modNames));
-        $this->injectProperty($service, 'requestedMods', $requestedMods);
-
-        $result = $service->requestMods($modNames);
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the requestMissingMods method.
-     * @throws ReflectionException
-     * @covers ::requestMissingMods
-     */
-    public function testRequestMissingMods(): void
-    {
         $modNames = ['abc', 'def', 'ghi'];
 
-        /* @var PortalMod&MockObject $portalMod1 */
-        $portalMod1 = $this->createMock(PortalMod::class);
+        $mod0 = $this->createMock(PortalMod::class);
+        $mod1 = $this->createMock(PortalMod::class);
+        $mod2 = $this->createMock(PortalMod::class);
 
-        /* @var PortalMod&MockObject $portalMod2 */
-        $portalMod2 = $this->createMock(PortalMod::class);
-        $portalMod2->expects($this->once())
-                   ->method('getName')
-                   ->willReturn('def');
+        $request1 = new FullModRequest();
+        $request1->setName('abc');
+        $request2 = new FullModRequest();
+        $request2->setName('def');
+        $request3 = new FullModRequest();
+        $request3->setName('ghi');
 
-        /* @var PortalMod&MockObject $portalMod3 */
-        $portalMod3 = $this->createMock(PortalMod::class);
-        $portalMod3->expects($this->once())
-                   ->method('getName')
-                   ->willReturn('ghi');
-
-        $expectedRequest = new ModListRequest();
-        $expectedRequest->setNameList(['def', 'ghi'])
-                        ->setPageSize(2);
+        $promise1 = new FulfilledPromise($mod1);
+        $promise2 = new RejectedPromise('fail');
+        $promise3 = new FulfilledPromise($mod2);
 
         $requestedMods = [
-            'abc' => $portalMod1,
+            'foo' => $mod0,
         ];
         $expectedRequestedMods = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
-            'ghi' => $portalMod3,
+            'foo' => $mod0,
+            'abc' => $mod1,
+            'def' => null,
+            'ghi' => $mod2,
         ];
 
-        /* @var ModListResponse&MockObject $response */
-        $response = $this->createMock(ModListResponse::class);
-        $response->expects($this->once())
-                 ->method('getResults')
-                 ->willReturn([$portalMod2, $portalMod3]);
+        $this->modPortalClient->expects($this->exactly(3))
+                              ->method('sendRequest')
+                              ->withConsecutive(
+                                  [$this->equalTo($request1)],
+                                  [$this->equalTo($request2)],
+                                  [$this->equalTo($request3)],
+                              )
+                              ->willReturnOnConsecutiveCalls(
+                                  $promise1,
+                                  $promise2,
+                                  $promise3,
+                              );
 
-        $this->modPortalFacade->expects($this->once())
-                              ->method('getModList')
-                              ->with($this->equalTo($expectedRequest))
-                              ->willReturn($response);
-
-        $service = new ModPortalService($this->modPortalFacade);
+        $service = new ModPortalService($this->modPortalClient);
         $this->injectProperty($service, 'requestedMods', $requestedMods);
 
-        $this->invokeMethod($service, 'requestMissingMods', $modNames);
+        $this->invokeMethod($service, 'requestMods', $modNames);
 
-        $this->assertSame($expectedRequestedMods, $this->extractProperty($service, 'requestedMods'));
+        $this->assertEquals($expectedRequestedMods, $this->extractProperty($service, 'requestedMods'));
     }
 
     /**
-     * Tests the requestMissingMods method.
-     * @throws ReflectionException
-     * @covers ::requestMissingMods
+     * Tests the getLatestReleases method.
+     * @throws ClientException
+     * @covers ::getLatestReleases
      */
-    public function testRequestMissingModsWithoutMissingMods(): void
+    public function testGetLatestReleases(): void
     {
-        $modNames = ['abc'];
+        $modNames = ['abc', 'def'];
+        $baseVersion = '1.2.3';
 
-        /* @var PortalMod&MockObject $portalMod1 */
-        $portalMod1 = $this->createMock(PortalMod::class);
+        $release1 = new Release();
+        $release1->setFileName('abc');
+        $release1->getInfoJson()->setFactorioVersion(new Version('1.2.3'));
+        $mod1 = new PortalMod();
+        $mod1->setName('abc')
+             ->setReleases([$release1]);
 
-        $requestedMods = [
-            'abc' => $portalMod1,
+        $release2 = new Release();
+        $release2->setFileName('def');
+        $release2->getInfoJson()->setFactorioVersion(new Version('1.2.3'));
+        $mod2 = new PortalMod();
+        $mod2->setName('def')
+             ->setReleases([$release2]);
+
+        $mods = [
+            'abc' => $mod1,
+            'def' => $mod2,
+        ];
+        $expectedResult = [
+            'abc' => $release1,
+            'def' => $release2,
         ];
 
-        $this->modPortalFacade->expects($this->never())
-                              ->method('getModList');
+        $service = $this->getMockBuilder(ModPortalService::class)
+                        ->onlyMethods(['getMods'])
+                        ->setConstructorArgs([$this->modPortalClient])
+                        ->getMock();
+        $service->expects($this->once())
+                ->method('getMods')
+                ->with($this->identicalTo($modNames))
+                ->willReturn($mods);
 
-        $service = new ModPortalService($this->modPortalFacade);
-        $this->injectProperty($service, 'requestedMods', $requestedMods);
+        $result = $service->getLatestReleases($modNames, $baseVersion);
 
-        $this->invokeMethod($service, 'requestMissingMods', $modNames);
-
-        $this->assertSame($requestedMods, $this->extractProperty($service, 'requestedMods'));
+        $this->assertEquals($expectedResult, $result);
     }
 }

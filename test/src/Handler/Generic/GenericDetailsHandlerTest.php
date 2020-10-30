@@ -262,7 +262,7 @@ class GenericDetailsHandlerTest extends TestCase
         $authorizationToken->expects($this->once())
                            ->method('getCombinationId')
                            ->willReturn($combinationId);
-        
+
         $this->itemRepository->expects($this->once())
                              ->method('findByTypesAndNames')
                              ->with(
@@ -270,7 +270,7 @@ class GenericDetailsHandlerTest extends TestCase
                                  $this->identicalTo($namesByTypes)
                              )
                              ->willReturn($items);
-        
+
         /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
                         ->onlyMethods(['mapObjectsToEntities'])
@@ -290,7 +290,7 @@ class GenericDetailsHandlerTest extends TestCase
 
         $this->assertSame($mappedItems, $result);
     }
-    
+
     /**
      * Tests the processMachines method.
      * @throws ReflectionException
@@ -325,7 +325,7 @@ class GenericDetailsHandlerTest extends TestCase
         $authorizationToken->expects($this->once())
                            ->method('getCombinationId')
                            ->willReturn($combinationId);
-        
+
         $this->machineRepository->expects($this->once())
                              ->method('findByNames')
                              ->with(
@@ -333,7 +333,7 @@ class GenericDetailsHandlerTest extends TestCase
                                  $this->identicalTo($names)
                              )
                              ->willReturn($machines);
-        
+
         /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
                         ->onlyMethods(['mapObjectsToEntities'])
@@ -353,7 +353,7 @@ class GenericDetailsHandlerTest extends TestCase
 
         $this->assertSame($mappedMachines, $result);
     }
-    
+
     /**
      * Tests the processRecipes method.
      * @throws ReflectionException
@@ -387,7 +387,7 @@ class GenericDetailsHandlerTest extends TestCase
         $authorizationToken->expects($this->once())
                            ->method('getCombinationId')
                            ->willReturn($combinationId);
-        
+
         $this->recipeRepository->expects($this->once())
                              ->method('findDataByNames')
                              ->with(
@@ -395,7 +395,7 @@ class GenericDetailsHandlerTest extends TestCase
                                  $this->identicalTo($names)
                              )
                              ->willReturn($recipes);
-        
+
         /* @var GenericDetailsHandler&MockObject $handler */
         $handler = $this->getMockBuilder(GenericDetailsHandler::class)
                         ->onlyMethods(['mapObjectsToEntities'])

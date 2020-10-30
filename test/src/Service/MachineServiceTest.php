@@ -83,13 +83,13 @@ class MachineServiceTest extends TestCase
         $craftingCategory->expects($this->once())
                          ->method('getName')
                          ->willReturn($craftingCategoryName);
-        
+
         /* @var AuthorizationToken&MockObject $authorizationToken */
         $authorizationToken = $this->createMock(AuthorizationToken::class);
         $authorizationToken->expects($this->once())
                            ->method('getCombinationId')
                            ->willReturn($combinationId);
-        
+
         $this->machineRepository->expects($this->once())
                                 ->method('findByCraftingCategoryName')
                                 ->with(

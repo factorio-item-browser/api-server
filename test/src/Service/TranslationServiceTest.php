@@ -485,7 +485,7 @@ class TranslationServiceTest extends TestCase
         $entity1->expects($this->once())
                 ->method('setDescription')
                 ->with($this->identicalTo('jkl'));
-        
+
         /* @var GenericEntity&MockObject $entity2 */
         $entity2 = $this->createMock(GenericEntity::class);
         $entity2->expects($this->once())

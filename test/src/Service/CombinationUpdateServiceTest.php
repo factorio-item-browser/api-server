@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Service;
 
-use BluePsyduck\FactorioModPortalClient\Entity\Mod as PortalMod;
-use BluePsyduck\FactorioModPortalClient\Entity\Release;
 use BluePsyduck\FactorioModPortalClient\Exception\ClientException;
 use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\TestHelper\ReflectionTrait;
 use DateTime;
 use FactorioItemBrowser\Api\Client\Entity\ExportJob;
+use FactorioItemBrowser\Api\Client\Entity\ValidatedMod;
 use FactorioItemBrowser\Api\Database\Entity\Combination;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
-use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
-use FactorioItemBrowser\Api\Server\Constant\Config;
 use FactorioItemBrowser\Api\Server\Entity\CombinationUpdate;
+use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Service\CombinationUpdateService;
+use FactorioItemBrowser\Api\Server\Service\CombinationValidationService;
 use FactorioItemBrowser\Api\Server\Service\ExportQueueService;
 use FactorioItemBrowser\Api\Server\Service\ModPortalService;
-use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\ExportQueue\Client\Constant\JobPriority;
 use FactorioItemBrowser\ExportQueue\Client\Constant\JobStatus;
 use FactorioItemBrowser\ExportQueue\Client\Exception\ClientException as ExportQueueClientException;
@@ -42,11 +40,10 @@ class CombinationUpdateServiceTest extends TestCase
     use ReflectionTrait;
 
     /**
-     * The mocked combination repository.
-     * @var CombinationRepository&MockObject
+     * The mocked combination validation service.
+     * @var CombinationValidationService&MockObject
      */
-    protected $combinationRepository;
-
+    protected $combinationValidationService;
     /**
      * The mocked export queue service.
      * @var ExportQueueService&MockObject
@@ -66,28 +63,9 @@ class CombinationUpdateServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->combinationRepository = $this->createMock(CombinationRepository::class);
+        $this->combinationValidationService = $this->createMock(CombinationValidationService::class);
         $this->exportQueueService = $this->createMock(ExportQueueService::class);
         $this->modPortalService = $this->createMock(ModPortalService::class);
-    }
-
-    /**
-     * @param array<string>|string[] $methods
-     * @param string $baseVersion
-     * @return CombinationUpdateService&MockObject
-     */
-    protected function createService(array $methods = [], string $baseVersion = '1.2.3')
-    {
-        $service = $this->getMockBuilder(CombinationUpdateService::class)
-                        ->onlyMethods(array_merge($methods, ['fetchBaseVersion']))
-                        ->disableOriginalConstructor()
-                        ->getMock();
-        $service->expects($this->once())
-                ->method('fetchBaseVersion')
-                ->willReturn($baseVersion);
-
-        $service->__construct($this->combinationRepository, $this->exportQueueService, $this->modPortalService);
-        return $service;
     }
 
     /**
@@ -97,188 +75,201 @@ class CombinationUpdateServiceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $baseVersion = 'abc';
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
 
-        $service = $this->getMockBuilder(CombinationUpdateService::class)
-                        ->onlyMethods(['fetchBaseVersion'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
-        $service->expects($this->once())
-                ->method('fetchBaseVersion')
-                ->willReturn($baseVersion);
-
-        $service->__construct($this->combinationRepository, $this->exportQueueService, $this->modPortalService);
-
-        $this->assertSame($this->combinationRepository, $this->extractProperty($service, 'combinationRepository'));
+        $this->assertSame(
+            $this->combinationValidationService,
+            $this->extractProperty($service, 'combinationValidationService'),
+        );
         $this->assertSame($this->exportQueueService, $this->extractProperty($service, 'exportQueueService'));
         $this->assertSame($this->modPortalService, $this->extractProperty($service, 'modPortalService'));
-        $this->assertSame($baseVersion, $this->extractProperty($service, 'baseVersion'));
     }
 
-    /**
-     * Tests the fetchBaseVersion method.
-     * @throws ReflectionException
-     * @covers ::fetchBaseVersion
-     */
-    public function testFetchBaseVersion(): void
-    {
-        $baseVersion = '1.2.3';
-
-        $baseMod = new DatabaseMod();
-        $baseMod->setName('base')
-                ->setVersion($baseVersion);
-
-        $baseCombination = new Combination();
-        $baseCombination->getMods()->add($baseMod);
-
-        $this->combinationRepository->expects($this->once())
-                                    ->method('findById')
-                                    ->with($this->equalTo(Uuid::fromString(Config::DEFAULT_COMBINATION_ID)))
-                                    ->willReturn($baseCombination);
-
-        /* @var CombinationUpdateService&MockObject $service */
-        $service = $this->getMockBuilder(CombinationUpdateService::class)
-                        ->onlyMethods(['__construct'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
-        $this->injectProperty($service, 'combinationRepository', $this->combinationRepository);
-
-        $result = $this->invokeMethod($service, 'fetchBaseVersion');
-
-        $this->assertSame($baseVersion, $result);
-    }
-
-    /**
-     * Tests the fetchBaseVersion method.
-     * @throws ReflectionException
-     * @covers ::fetchBaseVersion
-     */
-    public function testFetchBaseVersionWithoutCombination(): void
-    {
-        $this->combinationRepository->expects($this->once())
-                                    ->method('findById')
-                                    ->with($this->equalTo(Uuid::fromString(Config::DEFAULT_COMBINATION_ID)))
-                                    ->willReturn(null);
-
-        /* @var CombinationUpdateService&MockObject $service */
-        $service = $this->getMockBuilder(CombinationUpdateService::class)
-                        ->onlyMethods(['__construct'])
-                        ->disableOriginalConstructor()
-                        ->getMock();
-        $this->injectProperty($service, 'combinationRepository', $this->combinationRepository);
-
-        $result = $this->invokeMethod($service, 'fetchBaseVersion');
-
-        $this->assertSame('', $result);
-    }
-    
     /**
      * Tests the checkCombination method.
+     * @throws ApiServerException
      * @throws ClientException
      * @covers ::checkCombination
      */
     public function testCheckCombination(): void
     {
-        $baseVersion = '4.2';
-        
-        $baseMod = new DatabaseMod();
-        $baseMod->setName(Constant::MOD_NAME_BASE)
-                ->setVersion('2.1');
-        
-        $databaseMod1 = new DatabaseMod();
-        $databaseMod1->setName('abc')
-                     ->setVersion('1.2.3');
-
-        $databaseMod2 = new DatabaseMod();
-        $databaseMod2->setName('def')
-                     ->setVersion('2.3.4');
-        
-        $databaseMod3 = new DatabaseMod();
-        $databaseMod3->setName('ghi')
-                     ->setVersion('3.4.5');
-        
-        $combination = new Combination();
-        $combination->getMods()->add($baseMod);
-        $combination->getMods()->add($databaseMod1);
-        $combination->getMods()->add($databaseMod2);
-        $combination->getMods()->add($databaseMod3);
-        
         $combinationUpdate = new CombinationUpdate();
-        $combinationUpdate->secondsSinceLastUsage = 42;
-        $combinationUpdate->secondsSinceLastImport = 1337;
-        
-        $portalMod1 = $this->createMock(PortalMod::class);
-        $portalMod2 = $this->createMock(PortalMod::class);
-        $portalMod3 = $this->createMock(PortalMod::class);
-        
-        $portalMods = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
-            'ghi' => $portalMod3,
+        $combinationUpdate->secondsSinceLastImport = 42;
+        $combinationUpdate->secondsSinceLastUsage = 21;
+
+        $mod1 = new DatabaseMod();
+        $mod1->setName('abc')
+             ->setVersion('1.2.3');
+        $mod2 = new DatabaseMod();
+        $mod2->setName('def')
+             ->setVersion('2.3.4');
+        $mod3 = new DatabaseMod();
+        $mod3->setName('ghi')
+             ->setVersion('3.4.5');
+
+        $combination = new Combination();
+        $combination->getMods()->add($mod1);
+        $combination->getMods()->add($mod2);
+        $combination->getMods()->add($mod3);
+
+        $expectedModNames = ['abc', 'def', 'ghi'];
+
+        $validatedMod1 = new ValidatedMod();
+        $validatedMod1->setVersion('1.2.4');
+        $validatedMod2 = new ValidatedMod();
+        $validatedMod2->setVersion('2.3.4');
+        $validatedMod3 = new ValidatedMod();
+        $validatedMod3->setVersion('4.5.6');
+
+        $validatedMods = [
+            'abc' => $validatedMod1,
+            'def' => $validatedMod2,
+            'ghi' => $validatedMod3,
         ];
-        
-        $release1 = new Release();
-        $release1->setVersion('1.2.4');
-        $release2 = new Release();
-        $release2->setVersion('2.3.4');
-        $release3 = new Release();
-        $release3->setVersion('4.5.6');
-        
-        $this->modPortalService->expects($this->once())
-                               ->method('requestModsOfCombination')
-                               ->with($this->identicalTo($combination))
-                               ->willReturn($portalMods);
-        
-        $service = $this->createService(['createCombinationUpdate', 'selectLatestRelease'], $baseVersion);
+
+        $expectedResult = new CombinationUpdate();
+        $expectedResult->secondsSinceLastImport = 42;
+        $expectedResult->secondsSinceLastUsage = 21;
+        $expectedResult->numberOfModUpdates = 2;
+        $expectedResult->hasBaseModUpdate = false;
+
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('validate')
+                                           ->with($this->equalTo($expectedModNames))
+                                           ->willReturn($validatedMods);
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('areModsValid')
+                                           ->with($this->identicalTo($validatedMods))
+                                           ->willReturn(true);
+
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['createCombinationUpdate'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
         $service->expects($this->once())
                 ->method('createCombinationUpdate')
                 ->with($this->identicalTo($combination))
                 ->willReturn($combinationUpdate);
-        $service->expects($this->exactly(3))
-                ->method('selectLatestRelease')
-                ->withConsecutive(
-                    [$this->identicalTo($portalMod1)],
-                    [$this->identicalTo($portalMod2)],
-                    [$this->identicalTo($portalMod3)],
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $release1,
-                    $release2,
-                    $release3,
-                );
-        
+
         $result = $service->checkCombination($combination);
-        
-        $this->assertSame($combinationUpdate, $result);
-        $this->assertSame(2, $result->numberOfModUpdates);
-        $this->assertTrue($result->hasBaseModUpdate);
+
+        $this->assertEquals($expectedResult, $result);
     }
 
     /**
      * Tests the checkCombination method.
+     * @throws ApiServerException
      * @throws ClientException
      * @covers ::checkCombination
      */
-    public function testCheckCombinationWithUnusedCombination(): void
+    public function testCheckCombinationWithBaseUpdate(): void
     {
-        $baseVersion = '4.2';
+        $combinationUpdate = new CombinationUpdate();
+        $combinationUpdate->secondsSinceLastImport = 42;
+        $combinationUpdate->secondsSinceLastUsage = 21;
+
+        $mod1 = new DatabaseMod();
+        $mod1->setName('base')
+             ->setVersion('1.2.3');
+        $mod2 = new DatabaseMod();
+        $mod2->setName('def')
+             ->setVersion('2.3.4');
+        $mod3 = new DatabaseMod();
+        $mod3->setName('ghi')
+             ->setVersion('3.4.5');
 
         $combination = new Combination();
+        $combination->getMods()->add($mod1);
+        $combination->getMods()->add($mod2);
+        $combination->getMods()->add($mod3);
 
-        $combinationUpdate = new CombinationUpdate();
-        $combinationUpdate->secondsSinceLastUsage = 42;
-        $combinationUpdate->secondsSinceLastImport = 0;
+        $expectedModNames = ['base', 'def', 'ghi'];
 
-        $this->modPortalService->expects($this->never())
-                               ->method('requestModsOfCombination');
+        $validatedMod1 = new ValidatedMod();
+        $validatedMod1->setVersion('1.2.4');
+        $validatedMod2 = new ValidatedMod();
+        $validatedMod2->setVersion('2.3.4');
+        $validatedMod3 = new ValidatedMod();
+        $validatedMod3->setVersion('4.5.6');
 
-        $service = $this->createService(['createCombinationUpdate', 'selectLatestRelease'], $baseVersion);
+        $validatedMods = [
+            'base' => $validatedMod1,
+            'def' => $validatedMod2,
+            'ghi' => $validatedMod3,
+        ];
+
+        $expectedResult = new CombinationUpdate();
+        $expectedResult->secondsSinceLastImport = 42;
+        $expectedResult->secondsSinceLastUsage = 21;
+        $expectedResult->numberOfModUpdates = 2;
+        $expectedResult->hasBaseModUpdate = true;
+
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('validate')
+                                           ->with($this->equalTo($expectedModNames))
+                                           ->willReturn($validatedMods);
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('areModsValid')
+                                           ->with($this->identicalTo($validatedMods))
+                                           ->willReturn(true);
+
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['createCombinationUpdate'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
         $service->expects($this->once())
                 ->method('createCombinationUpdate')
                 ->with($this->identicalTo($combination))
                 ->willReturn($combinationUpdate);
-        $service->expects($this->never())
-                ->method('selectLatestRelease');
+
+        $result = $service->checkCombination($combination);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Tests the checkCombination method.
+     * @throws ApiServerException
+     * @throws ClientException
+     * @covers ::checkCombination
+     */
+    public function testCheckCombinationWithRecentImport(): void
+    {
+        $combinationUpdate = new CombinationUpdate();
+        $combinationUpdate->secondsSinceLastImport = 21;
+        $combinationUpdate->secondsSinceLastUsage = 42;
+
+        $combination = $this->createMock(Combination::class);
+
+        $this->combinationValidationService->expects($this->never())
+                                           ->method('validate');
+        $this->combinationValidationService->expects($this->never())
+                                           ->method('areModsValid');
+
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['createCombinationUpdate'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
+        $service->expects($this->once())
+                ->method('createCombinationUpdate')
+                ->with($this->identicalTo($combination))
+                ->willReturn($combinationUpdate);
 
         $result = $service->checkCombination($combination);
 
@@ -287,56 +278,53 @@ class CombinationUpdateServiceTest extends TestCase
 
     /**
      * Tests the checkCombination method.
+     * @throws ApiServerException
      * @throws ClientException
      * @covers ::checkCombination
      */
-    public function testCheckCombinationWithMissingPortalMod(): void
+    public function testCheckCombinationWithInvalidMods(): void
     {
-        $baseVersion = '4.2';
+        $combinationUpdate = new CombinationUpdate();
+        $combinationUpdate->secondsSinceLastImport = 42;
+        $combinationUpdate->secondsSinceLastUsage = 21;
 
-        $databaseMod1 = new DatabaseMod();
-        $databaseMod1->setName('abc')
-                     ->setVersion('1.2.3');
-
-        $databaseMod2 = new DatabaseMod();
-        $databaseMod2->setName('def')
-                     ->setVersion('2.3.4');
+        $mod1 = new DatabaseMod();
+        $mod1->setName('abc');
+        $mod2 = new DatabaseMod();
+        $mod2->setName('def');
 
         $combination = new Combination();
-        $combination->getMods()->add($databaseMod1);
-        $combination->getMods()->add($databaseMod2);
+        $combination->getMods()->add($mod1);
+        $combination->getMods()->add($mod2);
 
-        $combinationUpdate = new CombinationUpdate();
-        $combinationUpdate->secondsSinceLastUsage = 42;
-        $combinationUpdate->secondsSinceLastImport = 1337;
+        $expectedModNames = ['abc', 'def'];
 
-        $portalMod1 = $this->createMock(PortalMod::class);
-
-        $portalMods = [
-            'abc' => $portalMod1,
+        $validatedMods = [
+            'abc' => $this->createMock(ValidatedMod::class),
+            'def' => $this->createMock(ValidatedMod::class),
         ];
 
-        $release1 = new Release();
-        $release1->setVersion('1.2.4');
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('validate')
+                                           ->with($this->equalTo($expectedModNames))
+                                           ->willReturn($validatedMods);
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('areModsValid')
+                                           ->with($this->identicalTo($validatedMods))
+                                           ->willReturn(false);
 
-        $this->modPortalService->expects($this->once())
-                               ->method('requestModsOfCombination')
-                               ->with($this->identicalTo($combination))
-                               ->willReturn($portalMods);
-
-        $service = $this->createService(['createCombinationUpdate', 'selectLatestRelease'], $baseVersion);
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['createCombinationUpdate'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
         $service->expects($this->once())
                 ->method('createCombinationUpdate')
                 ->with($this->identicalTo($combination))
                 ->willReturn($combinationUpdate);
-        $service->expects($this->exactly(1))
-                ->method('selectLatestRelease')
-                ->withConsecutive(
-                    [$this->identicalTo($portalMod1)],
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $release1,
-                );
 
         $result = $service->checkCombination($combination);
 
@@ -345,124 +333,60 @@ class CombinationUpdateServiceTest extends TestCase
 
     /**
      * Tests the checkCombination method.
-     * @throws ClientException
-     * @covers ::checkCombination
-     */
-    public function testCheckCombinationWithoutRelease(): void
-    {
-        $baseVersion = '4.2';
-
-        $databaseMod1 = new DatabaseMod();
-        $databaseMod1->setName('abc')
-                     ->setVersion('1.2.3');
-
-        $databaseMod2 = new DatabaseMod();
-        $databaseMod2->setName('def')
-                     ->setVersion('2.3.4');
-
-        $combination = new Combination();
-        $combination->getMods()->add($databaseMod1);
-        $combination->getMods()->add($databaseMod2);
-
-        $combinationUpdate = new CombinationUpdate();
-        $combinationUpdate->secondsSinceLastUsage = 42;
-        $combinationUpdate->secondsSinceLastImport = 1337;
-
-        $portalMod1 = $this->createMock(PortalMod::class);
-        $portalMod2 = $this->createMock(PortalMod::class);
-
-        $portalMods = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
-        ];
-
-        $release1 = new Release();
-        $release1->setVersion('1.2.4');
-
-        $this->modPortalService->expects($this->once())
-                               ->method('requestModsOfCombination')
-                               ->with($this->identicalTo($combination))
-                               ->willReturn($portalMods);
-
-        $service = $this->createService(['createCombinationUpdate', 'selectLatestRelease'], $baseVersion);
-        $service->expects($this->once())
-                ->method('createCombinationUpdate')
-                ->with($this->identicalTo($combination))
-                ->willReturn($combinationUpdate);
-        $service->expects($this->exactly(2))
-                ->method('selectLatestRelease')
-                ->withConsecutive(
-                    [$this->identicalTo($portalMod1)],
-                    [$this->identicalTo($portalMod2)],
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $release1,
-                    null,
-                );
-
-        $result = $service->checkCombination($combination);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * Tests the checkCombination method.
+     * @throws ApiServerException
      * @throws ClientException
      * @covers ::checkCombination
      */
     public function testCheckCombinationWithoutActualUpdate(): void
     {
-        $baseVersion = '4.2';
+        $combinationUpdate = new CombinationUpdate();
+        $combinationUpdate->secondsSinceLastImport = 42;
+        $combinationUpdate->secondsSinceLastUsage = 21;
 
-        $databaseMod1 = new DatabaseMod();
-        $databaseMod1->setName('abc')
-                     ->setVersion('1.2.3');
-
-        $databaseMod2 = new DatabaseMod();
-        $databaseMod2->setName('def')
-                     ->setVersion('2.3.4');
+        $mod1 = new DatabaseMod();
+        $mod1->setName('abc')
+             ->setVersion('1.2.3');
+        $mod2 = new DatabaseMod();
+        $mod2->setName('def')
+             ->setVersion('2.3.4');
 
         $combination = new Combination();
-        $combination->getMods()->add($databaseMod1);
-        $combination->getMods()->add($databaseMod2);
+        $combination->getMods()->add($mod1);
+        $combination->getMods()->add($mod2);
 
-        $combinationUpdate = new CombinationUpdate();
-        $combinationUpdate->secondsSinceLastUsage = 42;
-        $combinationUpdate->secondsSinceLastImport = 1337;
+        $expectedModNames = ['abc', 'def'];
 
-        $portalMod1 = $this->createMock(PortalMod::class);
-        $portalMod2 = $this->createMock(PortalMod::class);
+        $validatedMod1 = new ValidatedMod();
+        $validatedMod1->setVersion('1.2.3');
+        $validatedMod2 = new ValidatedMod();
+        $validatedMod2->setVersion('2.3.4');
 
-        $portalMods = [
-            'abc' => $portalMod1,
-            'def' => $portalMod2,
+        $validatedMods = [
+            'abc' => $validatedMod1,
+            'def' => $validatedMod2,
         ];
 
-        $release1 = new Release();
-        $release1->setVersion('1.2.3');
-        $release2 = new Release();
-        $release2->setVersion('2.3.4');
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('validate')
+                                           ->with($this->equalTo($expectedModNames))
+                                           ->willReturn($validatedMods);
+        $this->combinationValidationService->expects($this->once())
+                                           ->method('areModsValid')
+                                           ->with($this->identicalTo($validatedMods))
+                                           ->willReturn(true);
 
-        $this->modPortalService->expects($this->once())
-                               ->method('requestModsOfCombination')
-                               ->with($this->identicalTo($combination))
-                               ->willReturn($portalMods);
-
-        $service = $this->createService(['createCombinationUpdate', 'selectLatestRelease'], $baseVersion);
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['createCombinationUpdate'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
         $service->expects($this->once())
                 ->method('createCombinationUpdate')
                 ->with($this->identicalTo($combination))
                 ->willReturn($combinationUpdate);
-        $service->expects($this->exactly(2))
-                ->method('selectLatestRelease')
-                ->withConsecutive(
-                    [$this->identicalTo($portalMod1)],
-                    [$this->identicalTo($portalMod2)],
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $release1,
-                    $release2,
-                );
 
         $result = $service->checkCombination($combination);
 
@@ -480,7 +404,11 @@ class CombinationUpdateServiceTest extends TestCase
         $combination->setImportTime(new DateTime('-1 week'))
                     ->setLastUsageTime(new DateTime('-1 day'));
 
-        $service = $this->createService();
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
 
         /* @var CombinationUpdate $result */
         $result = $this->invokeMethod($service, 'createCombinationUpdate', $combination);
@@ -491,134 +419,8 @@ class CombinationUpdateServiceTest extends TestCase
     }
 
     /**
-     * Tests the selectLatestRelease method.
-     * @throws ReflectionException
-     * @covers ::selectLatestRelease
-     */
-    public function testSelectLatestRelease(): void
-    {
-        $baseVersion = '4.2.0';
-
-        $release1 = new Release();
-        $release1->setVersion('1.2.3');
-        $release1->getInfoJson()->setFactorioVersion('4.2');
-
-        $release2 = new Release();
-        $release2->setVersion('9.9.9');
-        $release2->getInfoJson()->setFactorioVersion('2.1');
-
-        $release3 = new Release();
-        $release3->setVersion('2.3.4');
-        $release3->getInfoJson()->setFactorioVersion('4.2');
-
-        $release4 = new Release();
-        $release4->setVersion('0.1.2');
-        $release4->getInfoJson()->setFactorioVersion('4.2');
-
-        $mod = new PortalMod();
-        $mod->setReleases([$release1, $release2, $release3, $release4]);
-
-        $expectedResult = $release3;
-
-        $service = $this->createService([], $baseVersion);
-        $result = $this->invokeMethod($service, 'selectLatestRelease', $mod);
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the selectLatestRelease method.
-     * @throws ReflectionException
-     * @covers ::selectLatestRelease
-     */
-    public function testSelectLatestReleaseWithoutMatch(): void
-    {
-        $baseVersion = '4.2.0';
-
-        $release1 = new Release();
-        $release1->setVersion('9.9.9');
-        $release1->getInfoJson()->setFactorioVersion('2.1');
-
-        $mod = new PortalMod();
-        $mod->setReleases([$release1]);
-
-        $service = $this->createService([], $baseVersion);
-        $result = $this->invokeMethod($service, 'selectLatestRelease', $mod);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * Provides the data for the compareVersions test.
-     * @return array<mixed>
-     */
-    public function provideCompareVersions(): array
-    {
-        return [
-            ['1.2.3', '2.3.4', 3, -1],
-            ['2.3.4', '1.2.3', 3, 1],
-            ['1.2.3', '1.2.4', 3, -1],
-            ['1.2.3', '1.2.2', 3, 1],
-            ['1.2.3', '1.2.4', 2, 0],
-        ];
-    }
-
-    /**
-     * Tests the compareVersions method.
-     * @param string $leftVersion
-     * @param string $rightVersion
-     * @param int $numberOfParts
-     * @param int $expectedResult
-     * @throws ReflectionException
-     * @covers ::compareVersions
-     * @dataProvider provideCompareVersions
-     */
-    public function testCompareVersions(
-        string $leftVersion,
-        string $rightVersion,
-        int $numberOfParts,
-        int $expectedResult
-    ): void {
-        $service = $this->createService();
-        $result = $this->invokeMethod($service, 'compareVersions', $leftVersion, $rightVersion, $numberOfParts);
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Provides the data for the splitVersion test.
-     * @return array<mixed>
-     */
-    public function provideSplitVersion(): array
-    {
-        return [
-            ['1.2.3', 3, [1, 2, 3]],
-            ['1.2.3', 2, [1, 2]],
-            ['1.2.3', 4, [1, 2, 3, 0]],
-
-            ['', 3, [0, 0, 0]],
-        ];
-    }
-
-    /**
-     * Tests the splitVersion method.
-     * @param string $version
-     * @param int $numberOfParts
-     * @param array<int> $expectedResult
-     * @throws ReflectionException
-     * @covers ::splitVersion
-     * @dataProvider provideSplitVersion
-     */
-    public function testSplitVersion(string $version, int $numberOfParts, array $expectedResult): void
-    {
-        $service = $this->createService();
-        $result = $this->invokeMethod($service, 'splitVersion', $version, $numberOfParts);
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
      * Tests the requestExportStatus method.
+     * @throws ExportQueueClientException
      * @throws MapperException
      * @covers ::requestExportStatus
      */
@@ -681,7 +483,11 @@ class CombinationUpdateServiceTest extends TestCase
                                      $exportJob2
                                  );
 
-        $service = $this->createService();
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
         $service->requestExportStatus($combinationUpdates);
 
         $this->assertSame($combinationUpdate1->exportStatus, 'abc');
@@ -716,7 +522,11 @@ class CombinationUpdateServiceTest extends TestCase
         $updates = [$update1, $update2, $update3, $update4, $update5, $update6, $update7, $update8, $update9];
         $expectedResult = [$update1, $update2, $update4];
 
-        $service = $this->createService();
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
         $result = $service->filter($updates);
 
         $this->assertSame($expectedResult, $result);
@@ -736,7 +546,14 @@ class CombinationUpdateServiceTest extends TestCase
         $combinationUpdates = [$update1, $update2, $update3, $update4];
         $expectedResult = [$update3, $update1, $update2, $update4];
 
-        $service = $this->createService(['calculateScore']);
+        $service = $this->getMockBuilder(CombinationUpdateService::class)
+                        ->onlyMethods(['calculateScore'])
+                        ->setConstructorArgs([
+                            $this->combinationValidationService,
+                            $this->exportQueueService,
+                            $this->modPortalService,
+                        ])
+                        ->getMock();
         $service->expects($this->exactly(4))
                 ->method('calculateScore')
                 ->withConsecutive(
@@ -772,7 +589,11 @@ class CombinationUpdateServiceTest extends TestCase
 
         $expectedResult = 19;
 
-        $service = $this->createService();
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
         $result = $this->invokeMethod($service, 'calculateScore', $combinationUpdate);
 
         $this->assertSame($expectedResult, $result);
@@ -803,7 +624,11 @@ class CombinationUpdateServiceTest extends TestCase
                                      [$this->identicalTo($combination2), $this->identicalTo(JobPriority::SCRIPT)],
                                  );
 
-        $service = $this->createService();
+        $service = new CombinationUpdateService(
+            $this->combinationValidationService,
+            $this->exportQueueService,
+            $this->modPortalService,
+        );
         $service->triggerExports($combinationUpdates);
     }
 }
