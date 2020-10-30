@@ -18,6 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -96,9 +97,11 @@ class UpdateCombinationsCommandTest extends TestCase
      */
     public function testConfigure(): void
     {
-        /* @var UpdateCombinationsCommand&MockObject $command */
+        $lastUsageInterval = 'abc';
+        $maxNumberOfUpdates = 42;
+
         $command = $this->getMockBuilder(UpdateCombinationsCommand::class)
-                        ->onlyMethods(['setName', 'setDescription'])
+                        ->onlyMethods(['setName', 'setDescription', 'addOption'])
                         ->disableOriginalConstructor()
                         ->getMock();
         $command->expects($this->once())
@@ -107,6 +110,26 @@ class UpdateCombinationsCommandTest extends TestCase
         $command->expects($this->once())
                 ->method('setDescription')
                 ->with($this->isType('string'));
+        $command->expects($this->exactly(2))
+                ->method('addOption')
+                ->withConsecutive(
+                    [
+                        $this->identicalTo('last-usage'),
+                        $this->isNull(),
+                        $this->identicalTo(InputOption::VALUE_REQUIRED),
+                        $this->isType('string'),
+                        $this->identicalTo($lastUsageInterval),
+                    ],
+                    [
+                        $this->identicalTo('max-updates'),
+                        $this->isNull(),
+                        $this->identicalTo(InputOption::VALUE_REQUIRED),
+                        $this->isType('string'),
+                        $this->identicalTo($maxNumberOfUpdates),
+                    ],
+                );
+        $this->injectProperty($command, 'lastUsageInterval', $lastUsageInterval);
+        $this->injectProperty($command, 'maxNumberOfUpdates', $maxNumberOfUpdates);
 
         $this->invokeMethod($command, 'configure');
     }
@@ -122,6 +145,16 @@ class UpdateCombinationsCommandTest extends TestCase
         $maxNumberOfUpdates = 2;
 
         $input = $this->createMock(InputInterface::class);
+        $input->expects($this->exactly(2))
+              ->method('getOption')
+              ->withConsecutive(
+                  [$this->identicalTo('last-usage')],
+                  [$this->identicalTo('max-updates')],
+              )
+              ->willReturnOnConsecutiveCalls(
+                  $lastUsageInterval,
+                  $maxNumberOfUpdates
+              );
         $output = $this->createMock(OutputInterface::class);
 
         $combination1 = $this->createMock(Combination::class);
@@ -187,8 +220,8 @@ class UpdateCombinationsCommandTest extends TestCase
             $this->combinationRepository,
             $this->combinationUpdateService,
             $this->console,
-            $lastUsageInterval,
-            $maxNumberOfUpdates,
+            '',
+            0,
         );
         $result = $this->invokeMethod($command, 'execute', $input, $output);
 

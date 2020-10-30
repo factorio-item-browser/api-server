@@ -13,6 +13,7 @@ use FactorioItemBrowser\Api\Server\Constant\CommandName;
 use FactorioItemBrowser\Api\Server\Service\CombinationUpdateService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -36,13 +37,13 @@ class UpdateCombinationsCommand extends Command
         string $lastUsageInterval,
         int $maxNumberOfUpdates
     ) {
-        parent::__construct();
-
         $this->combinationRepository = $combinationRepository;
         $this->combinationUpdateService = $combinationUpdateService;
         $this->console = $console;
         $this->lastUsageInterval = $lastUsageInterval;
         $this->maxNumberOfUpdates = $maxNumberOfUpdates;
+
+        parent::__construct();
     }
 
     protected function configure(): void
@@ -51,15 +52,33 @@ class UpdateCombinationsCommand extends Command
 
         $this->setName(CommandName::UPDATE_COMBINATIONS);
         $this->setDescription('Checks if any combinations need an update.');
+
+        $this->addOption(
+            'last-usage',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'The interval in which the combination must have been used to be considered for an update.',
+            $this->lastUsageInterval,
+        );
+        $this->addOption(
+            'max-updates',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'The maximal number of updates to trigger.',
+            $this->maxNumberOfUpdates,
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+            $lastUsageInterval = strval($input->getOption('last-usage'));
+            $maxNumberOfUpdates = intval($input->getOption('max-updates'));
+
             $this->console->writeAction(
-                sprintf('Fetching combinations with usage within %s', $this->lastUsageInterval)
+                sprintf('Fetching combinations with usage within %s', $lastUsageInterval)
             );
-            $combinations = $this->combinationRepository->findByLastUsageTime(new DateTime($this->lastUsageInterval));
+            $combinations = $this->combinationRepository->findByLastUsageTime(new DateTime($lastUsageInterval));
             $this->console->writeMessage(sprintf('Found %d combinations of interest.', count($combinations)));
 
             $this->console->writeAction('Fetching meta data from mod portal');
@@ -83,7 +102,7 @@ class UpdateCombinationsCommand extends Command
             );
 
             $combinationUpdates = $this->combinationUpdateService->sort($combinationUpdates);
-            $combinationUpdates = array_slice($combinationUpdates, 0, $this->maxNumberOfUpdates);
+            $combinationUpdates = array_slice($combinationUpdates, 0, $maxNumberOfUpdates);
 
             $this->console->writeAction(sprintf('Triggering %d exports', count($combinationUpdates)));
             $this->combinationUpdateService->triggerExports($combinationUpdates);
