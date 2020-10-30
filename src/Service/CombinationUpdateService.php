@@ -32,16 +32,13 @@ class CombinationUpdateService
 
     protected CombinationValidationService $combinationValidationService;
     protected ExportQueueService $exportQueueService;
-    protected ModPortalService $modPortalService;
 
     public function __construct(
         CombinationValidationService $combinationValidationService,
-        ExportQueueService $exportQueueService,
-        ModPortalService $modPortalService
+        ExportQueueService $exportQueueService
     ) {
         $this->combinationValidationService = $combinationValidationService;
         $this->exportQueueService = $exportQueueService;
-        $this->modPortalService = $modPortalService;
     }
 
     /**

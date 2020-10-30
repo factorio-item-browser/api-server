@@ -17,7 +17,6 @@ use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
 use FactorioItemBrowser\Api\Server\Service\CombinationUpdateService;
 use FactorioItemBrowser\Api\Server\Service\CombinationValidationService;
 use FactorioItemBrowser\Api\Server\Service\ExportQueueService;
-use FactorioItemBrowser\Api\Server\Service\ModPortalService;
 use FactorioItemBrowser\ExportQueue\Client\Constant\JobPriority;
 use FactorioItemBrowser\ExportQueue\Client\Constant\JobStatus;
 use FactorioItemBrowser\ExportQueue\Client\Exception\ClientException as ExportQueueClientException;
@@ -51,12 +50,6 @@ class CombinationUpdateServiceTest extends TestCase
     protected $exportQueueService;
 
     /**
-     * The mocked mod portal service.
-     * @var ModPortalService&MockObject
-     */
-    protected $modPortalService;
-
-    /**
      * Sets up the test case.
      */
     protected function setUp(): void
@@ -65,7 +58,6 @@ class CombinationUpdateServiceTest extends TestCase
 
         $this->combinationValidationService = $this->createMock(CombinationValidationService::class);
         $this->exportQueueService = $this->createMock(ExportQueueService::class);
-        $this->modPortalService = $this->createMock(ModPortalService::class);
     }
 
     /**
@@ -78,7 +70,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
 
         $this->assertSame(
@@ -86,7 +77,6 @@ class CombinationUpdateServiceTest extends TestCase
             $this->extractProperty($service, 'combinationValidationService'),
         );
         $this->assertSame($this->exportQueueService, $this->extractProperty($service, 'exportQueueService'));
-        $this->assertSame($this->modPortalService, $this->extractProperty($service, 'modPortalService'));
     }
 
     /**
@@ -151,7 +141,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->once())
@@ -226,7 +215,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->once())
@@ -263,7 +251,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->once())
@@ -318,7 +305,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->once())
@@ -380,7 +366,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->once())
@@ -407,7 +392,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
 
         /* @var CombinationUpdate $result */
@@ -486,7 +470,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
         $service->requestExportStatus($combinationUpdates);
 
@@ -525,7 +508,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
         $result = $service->filter($updates);
 
@@ -551,7 +533,6 @@ class CombinationUpdateServiceTest extends TestCase
                         ->setConstructorArgs([
                             $this->combinationValidationService,
                             $this->exportQueueService,
-                            $this->modPortalService,
                         ])
                         ->getMock();
         $service->expects($this->exactly(4))
@@ -592,7 +573,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
         $result = $this->invokeMethod($service, 'calculateScore', $combinationUpdate);
 
@@ -627,7 +607,6 @@ class CombinationUpdateServiceTest extends TestCase
         $service = new CombinationUpdateService(
             $this->combinationValidationService,
             $this->exportQueueService,
-            $this->modPortalService,
         );
         $service->triggerExports($combinationUpdates);
     }
