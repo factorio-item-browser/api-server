@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.0 - 2020-11-01
+
+### Added
+
+- New endpoint `/combinatio0n/validate` to validate a combination against the Factorio Mod Portal.
+- Parameters `last-usage` and `max-updates` to the `update-combinations` command to overwrite default values from the config.
+
 ## 2.2.0 - 2020-06-03
 
 ### Added
