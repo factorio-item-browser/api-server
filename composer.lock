@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9267f9f5ad34263368018704562f230d",
+    "content-hash": "a45c15505fde29caeec97d79e9996238",
     "packages": [
         {
             "name": "bluepsyduck/factorio-mod-portal-client",
-            "version": "dev-feature/utils",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BluePsyduck/factorio-mod-portal-client.git",
-                "reference": "469205f4ebf0600ba21908a81feef4fb389637ec"
+                "reference": "2fc481d96ec0386aa1be2ea430e2defa986c0c96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BluePsyduck/factorio-mod-portal-client/zipball/469205f4ebf0600ba21908a81feef4fb389637ec",
-                "reference": "469205f4ebf0600ba21908a81feef4fb389637ec",
+                "url": "https://api.github.com/repos/BluePsyduck/factorio-mod-portal-client/zipball/2fc481d96ec0386aa1be2ea430e2defa986c0c96",
+                "reference": "2fc481d96ec0386aa1be2ea430e2defa986c0c96",
                 "shasum": ""
             },
             "require": {
@@ -62,9 +62,9 @@
             ],
             "support": {
                 "issues": "https://github.com/BluePsyduck/factorio-mod-portal-client/issues",
-                "source": "https://github.com/BluePsyduck/factorio-mod-portal-client/tree/feature/utils"
+                "source": "https://github.com/BluePsyduck/factorio-mod-portal-client/tree/1.3.0"
             },
-            "time": "2020-10-27T12:32:31+00:00"
+            "time": "2020-11-01T10:58:44+00:00"
         },
         {
             "name": "bluepsyduck/laminas-autowire-factory",
@@ -1513,16 +1513,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-feature/combination-validation",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "9cceb5fc3c4d16926d567e012538fcd9a6b0cb14"
+                "reference": "91480758b5e2dbd5386aa8fb9b74ffe1371e53c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/9cceb5fc3c4d16926d567e012538fcd9a6b0cb14",
-                "reference": "9cceb5fc3c4d16926d567e012538fcd9a6b0cb14",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/91480758b5e2dbd5386aa8fb9b74ffe1371e53c7",
+                "reference": "91480758b5e2dbd5386aa8fb9b74ffe1371e53c7",
                 "shasum": ""
             },
             "require": {
@@ -1570,9 +1570,9 @@
             ],
             "support": {
                 "issues": "https://github.com/factorio-item-browser/api-client/issues",
-                "source": "https://github.com/factorio-item-browser/api-client/tree/feature/combination-validation"
+                "source": "https://github.com/factorio-item-browser/api-client/tree/3.2.0"
             },
-            "time": "2020-10-29T15:38:49+00:00"
+            "time": "2020-11-01T11:13:14+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
@@ -7271,10 +7271,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "bluepsyduck/factorio-mod-portal-client": 20,
-        "factorio-item-browser/api-client": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
