@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Doctrine\DBAL\Driver\PDOMySql\Driver as PDOMySqlDriver;
+use Doctrine\DBAL\Driver\PDO\MySql\Driver as PDOMySqlDriver;
 use PDO;
 
 return [
@@ -20,11 +20,11 @@ return [
             'orm_default' => [
                 'driverClass' => PDOMySqlDriver::class,
                 'params' => [
-                    'host'     => 'fib-as-mysql',
+                    'host'     => 'fib-mysql',
                     'port'     => '3306',
-                    'user'     => 'docker',
-                    'password' => 'docker',
-                    'dbname'   => 'docker',
+                    'user'     => 'api',
+                    'password' => 'api',
+                    'dbname'   => 'api',
                     'driverOptions' => [
                         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4',
                     ],
