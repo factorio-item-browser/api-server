@@ -14,7 +14,6 @@ use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient;
 use FactorioItemBrowser\Api\Database\Entity\RecipeProduct;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Service\MachineService;
 use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\Common\Constant\ItemType;
@@ -28,44 +27,35 @@ use ReflectionException;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Service\MachineService
+ * @covers \FactorioItemBrowser\Api\Server\Service\MachineService
  */
 class MachineServiceTest extends TestCase
 {
     use ReflectionTrait;
 
-    /**
-     * The mocked machine repository.
-     * @var MachineRepository&MockObject
-     */
-    protected $machineRepository;
+    /** @var MachineRepository&MockObject */
+    private MachineRepository $machineRepository;
 
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->machineRepository = $this->createMock(MachineRepository::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
+     * @param array<string> $mockedMethods
+     * @return MachineService&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): MachineService
     {
-        $service = new MachineService($this->machineRepository);
-
-        $this->assertSame($this->machineRepository, $this->extractProperty($service, 'machineRepository'));
+        return $this->getMockBuilder(MachineService::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->machineRepository,
+                    ])
+                    ->getMock();
     }
 
-    /**
-     * Tests the getMachinesByCraftingCategory method.
-     * @covers ::getMachinesByCraftingCategory
-     */
     public function testGetMachinesByCraftingCategory(): void
     {
         $craftingCategoryName = 'abc';
@@ -75,20 +65,10 @@ class MachineServiceTest extends TestCase
             $this->createMock(Machine::class),
         ];
 
-        /* @var UuidInterface&MockObject $combinationId */
         $combinationId = $this->createMock(UuidInterface::class);
 
-        /* @var CraftingCategory&MockObject $craftingCategory */
-        $craftingCategory = $this->createMock(CraftingCategory::class);
-        $craftingCategory->expects($this->once())
-                         ->method('getName')
-                         ->willReturn($craftingCategoryName);
-
-        /* @var AuthorizationToken&MockObject $authorizationToken */
-        $authorizationToken = $this->createMock(AuthorizationToken::class);
-        $authorizationToken->expects($this->once())
-                           ->method('getCombinationId')
-                           ->willReturn($combinationId);
+        $craftingCategory = new CraftingCategory();
+        $craftingCategory->setName($craftingCategoryName);
 
         $this->machineRepository->expects($this->once())
                                 ->method('findByCraftingCategoryName')
@@ -98,38 +78,28 @@ class MachineServiceTest extends TestCase
                                 )
                                 ->willReturn($machines);
 
-        $service = new MachineService($this->machineRepository);
-        $result = $service->getMachinesByCraftingCategory($craftingCategory, $authorizationToken);
+        $instance = $this->createInstance();
+        $result = $instance->getMachinesByCraftingCategory($craftingCategory, $combinationId);
 
         $this->assertSame($machines, $result);
     }
 
-    /**
-     * Tests the filterMachinesForRecipe method.
-     * @covers ::filterMachinesForRecipe
-     */
     public function testFilterMachinesForRecipe(): void
     {
         $numberOfItems = 42;
         $numberOfInputFluids = 1337;
         $numberOfOutputFluids = 21;
 
-        /* @var Machine&MockObject $machine1 */
         $machine1 = $this->createMock(Machine::class);
-        /* @var Machine&MockObject $machine2 */
         $machine2 = $this->createMock(Machine::class);
-        /* @var Machine&MockObject $machine3 */
         $machine3 = $this->createMock(Machine::class);
 
         $machines = [$machine1, $machine2, $machine3];
         $expectedResult = [$machine1, $machine3];
 
-        /* @var Collection&MockObject $ingredients */
         $ingredients = $this->createMock(Collection::class);
-        /* @var Collection&MockObject $products */
         $products = $this->createMock(Collection::class);
 
-        /* @var Recipe&MockObject $recipe */
         $recipe = $this->createMock(Recipe::class);
         $recipe->expects($this->exactly(2))
                ->method('getIngredients')
@@ -138,199 +108,137 @@ class MachineServiceTest extends TestCase
                ->method('getProducts')
                ->willReturn($products);
 
-        /* @var MachineService&MockObject $service */
-        $service = $this->getMockBuilder(MachineService::class)
-                        ->onlyMethods(['countItemType', 'isMachineValid'])
-                        ->setConstructorArgs([$this->machineRepository])
-                        ->getMock();
-        $service->expects($this->exactly(3))
-                ->method('countItemType')
-                ->withConsecutive(
-                    [$this->identicalTo($ingredients), $this->identicalTo(ItemType::ITEM)],
-                    [$this->identicalTo($ingredients), $this->identicalTo(ItemType::FLUID)],
-                    [$this->identicalTo($products), $this->identicalTo(ItemType::FLUID)]
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $numberOfItems,
-                    $numberOfInputFluids,
-                    $numberOfOutputFluids
-                );
-        $service->expects($this->exactly(3))
-                ->method('isMachineValid')
-                ->withConsecutive(
-                    [
-                        $this->identicalTo($machine1),
-                        $this->identicalTo($numberOfItems),
-                        $this->identicalTo($numberOfInputFluids),
-                        $this->identicalTo($numberOfOutputFluids),
-                    ],
-                    [
-                        $this->identicalTo($machine2),
-                        $this->identicalTo($numberOfItems),
-                        $this->identicalTo($numberOfInputFluids),
-                        $this->identicalTo($numberOfOutputFluids),
-                    ],
-                    [
-                        $this->identicalTo($machine3),
-                        $this->identicalTo($numberOfItems),
-                        $this->identicalTo($numberOfInputFluids),
-                        $this->identicalTo($numberOfOutputFluids),
-                    ]
-                )
-                ->willReturnOnConsecutiveCalls(
-                    true,
-                    false,
-                    true
-                );
+        $instance = $this->createInstance(['countItemType', 'isMachineValid']);
+        $instance->expects($this->exactly(3))
+                 ->method('countItemType')
+                 ->withConsecutive(
+                     [$this->identicalTo($ingredients), $this->identicalTo(ItemType::ITEM)],
+                     [$this->identicalTo($ingredients), $this->identicalTo(ItemType::FLUID)],
+                     [$this->identicalTo($products), $this->identicalTo(ItemType::FLUID)]
+                 )
+                 ->willReturnOnConsecutiveCalls(
+                     $numberOfItems,
+                     $numberOfInputFluids,
+                     $numberOfOutputFluids
+                 );
+        $instance->expects($this->exactly(3))
+                 ->method('isMachineValid')
+                 ->withConsecutive(
+                     [
+                         $this->identicalTo($machine1),
+                         $this->identicalTo($numberOfItems),
+                         $this->identicalTo($numberOfInputFluids),
+                         $this->identicalTo($numberOfOutputFluids),
+                     ],
+                     [
+                         $this->identicalTo($machine2),
+                         $this->identicalTo($numberOfItems),
+                         $this->identicalTo($numberOfInputFluids),
+                         $this->identicalTo($numberOfOutputFluids),
+                     ],
+                     [
+                         $this->identicalTo($machine3),
+                         $this->identicalTo($numberOfItems),
+                         $this->identicalTo($numberOfInputFluids),
+                         $this->identicalTo($numberOfOutputFluids),
+                     ]
+                 )
+                 ->willReturnOnConsecutiveCalls(
+                     true,
+                     false,
+                     true
+                 );
 
-        $result = $service->filterMachinesForRecipe($machines, $recipe);
+        $result = $instance->filterMachinesForRecipe($machines, $recipe);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the countItemType method.
      * @throws ReflectionException
-     * @covers ::countItemType
      */
     public function testCountItemType(): void
     {
         $type = 'abc';
 
-        /* @var RecipeIngredient&MockObject $entity1 */
         $entity1 = $this->createMock(RecipeIngredient::class);
-        /* @var RecipeIngredient&MockObject $entity2 */
         $entity2 = $this->createMock(RecipeIngredient::class);
-        /* @var RecipeIngredient&MockObject $entity3 */
         $entity3 = $this->createMock(RecipeIngredient::class);
-        /* @var RecipeIngredient&MockObject $entity4 */
         $entity4 = $this->createMock(RecipeIngredient::class);
 
         $entities = new ArrayCollection([$entity1, $entity2, $entity3, $entity4]);
         $expectedResult = 2;
 
-        /* @var MachineService&MockObject $service */
-        $service = $this->getMockBuilder(MachineService::class)
-                        ->onlyMethods(['getItemType'])
-                        ->setConstructorArgs([$this->machineRepository])
-                        ->getMock();
-        $service->expects($this->exactly(4))
-                ->method('getItemType')
-                ->withConsecutive(
-                    [$this->identicalTo($entity1)],
-                    [$this->identicalTo($entity2)],
-                    [$this->identicalTo($entity3)],
-                    [$this->identicalTo($entity4)]
-                )
-                ->willReturnOnConsecutiveCalls(
-                    $type,
-                    'foo',
-                    null,
-                    $type
-                );
+        $instance = $this->createInstance(['getItemType']);
+        $instance->expects($this->exactly(4))
+                 ->method('getItemType')
+                 ->withConsecutive(
+                     [$this->identicalTo($entity1)],
+                     [$this->identicalTo($entity2)],
+                     [$this->identicalTo($entity3)],
+                     [$this->identicalTo($entity4)]
+                 )
+                 ->willReturnOnConsecutiveCalls(
+                     $type,
+                     'foo',
+                     null,
+                     $type
+                 );
 
-        $result = $this->invokeMethod($service, 'countItemType', $entities, $type);
+        $result = $this->invokeMethod($instance, 'countItemType', $entities, $type);
 
         $this->assertSame($expectedResult, $result);
     }
 
     /**
-     * Tests the getItemType method with an ingredient as entity.
-     * @throws ReflectionException
-     * @covers ::getItemType
+     * @return array<mixed>
      */
-    public function testGetItemTypeWithIngredient(): void
+    public function provideGetItemType(): array
     {
-        $type = 'abc';
+        $item = new Item();
+        $item->setType('abc');
 
-        /* @var Item&MockObject $item */
-        $item = $this->createMock(Item::class);
-        $item->expects($this->once())
-             ->method('getType')
-             ->willReturn($type);
+        $ingredient = new RecipeIngredient();
+        $ingredient->setItem($item);
 
-        /* @var RecipeIngredient&MockObject $entity */
-        $entity = $this->createMock(RecipeIngredient::class);
-        $entity->expects($this->once())
-               ->method('getItem')
-               ->willReturn($item);
+        $product = new RecipeProduct();
+        $product->setItem($item);
 
-        $service = new MachineService($this->machineRepository);
-        $result = $this->invokeMethod($service, 'getItemType', $entity);
-
-        $this->assertSame($type, $result);
+        return [
+            [$ingredient, 'abc'],
+            [$product, 'abc'],
+            [$item, null],
+        ];
     }
 
     /**
-     * Tests the getItemType method with a product as entity.
+     * @param object $entity
+     * @param string|null $expectedResult
      * @throws ReflectionException
-     * @covers ::getItemType
+     * @dataProvider provideGetItemType
      */
-    public function testGetItemTypeWithProduct(): void
+    public function testGetItemType(object $entity, ?string $expectedResult): void
     {
-        $type = 'abc';
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'getItemType', $entity);
 
-        /* @var Item&MockObject $item */
-        $item = $this->createMock(Item::class);
-        $item->expects($this->once())
-             ->method('getType')
-             ->willReturn($type);
-
-        /* @var RecipeProduct&MockObject $entity */
-        $entity = $this->createMock(RecipeProduct::class);
-        $entity->expects($this->once())
-               ->method('getItem')
-               ->willReturn($item);
-
-        $service = new MachineService($this->machineRepository);
-        $result = $this->invokeMethod($service, 'getItemType', $entity);
-
-        $this->assertSame($type, $result);
+        $this->assertSame($expectedResult, $result);
     }
 
     /**
-     * Tests the getItemType method with an invalid entity
-     * @throws ReflectionException
-     * @covers ::getItemType
-     */
-    public function testGetItemTypeWithInvalidEntity(): void
-    {
-        $service = new MachineService($this->machineRepository);
-        $result = $this->invokeMethod($service, 'getItemType', $this);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * Provides the data for the isMachineValid test.
      * @return array<mixed>
      */
     public function provideIsMachineValid(): array
     {
-        /* @var Machine&MockObject $machine */
-        $machine = $this->createMock(Machine::class);
-        $machine->expects($this->any())
-                ->method('getNumberOfItemSlots')
-                ->willReturn(10);
-        $machine->expects($this->any())
-                ->method('getNumberOfFluidInputSlots')
-                ->willReturn(20);
-        $machine->expects($this->any())
-                ->method('getNumberOfFluidOutputSlots')
-                ->willReturn(30);
+        $machine = new Machine();
+        $machine->setNumberOfItemSlots(10)
+                ->setNumberOfFluidInputSlots(20)
+                ->setNumberOfFluidOutputSlots(30);
 
-        /* @var Machine&MockObject $player */
-        $player = $this->createMock(Machine::class);
-        $player->expects($this->any())
-               ->method('getNumberOfItemSlots')
-               ->willReturn(Machine::VALUE_UNLIMITED_SLOTS);
-        $player->expects($this->any())
-               ->method('getNumberOfFluidInputSlots')
-               ->willReturn(20);
-        $player->expects($this->any())
-               ->method('getNumberOfFluidOutputSlots')
-               ->willReturn(30);
-
+        $character = new Machine();
+        $character->setNumberOfItemSlots(Machine::VALUE_UNLIMITED_SLOTS)
+               ->setNumberOfFluidInputSlots(20)
+               ->setNumberOfFluidOutputSlots(30);
 
         return [
             [$machine, 5, 5, 5, true],
@@ -339,21 +247,19 @@ class MachineServiceTest extends TestCase
             [$machine, 5, 25, 5, false], // Too many input fluids
             [$machine, 5, 5, 35, false], // Too many output fluids
 
-            [$player, 1337, 5, 5, true], // Unlimited items
-            [$player, 5, 25, 5, false], // Too many input fluids
-            [$player, 5, 5, 35, false], // Too many output fluids
+            [$character, 1337, 5, 5, true], // Unlimited items
+            [$character, 5, 25, 5, false], // Too many input fluids
+            [$character, 5, 5, 35, false], // Too many output fluids
         ];
     }
 
     /**
-     * Tests the isMachineValid method.
      * @param Machine $machine
      * @param int $numberOfItems
      * @param int $numberOfFluidInputs
      * @param int $numberOfFluidOutputs
      * @param bool $expectedResult
      * @throws ReflectionException
-     * @covers ::isMachineValid
      * @dataProvider provideIsMachineValid
      */
     public function testIsMachineValid(
@@ -363,10 +269,10 @@ class MachineServiceTest extends TestCase
         int $numberOfFluidOutputs,
         bool $expectedResult
     ): void {
-        $service = new MachineService($this->machineRepository);
+        $instance = $this->createInstance();
 
         $result = $this->invokeMethod(
-            $service,
+            $instance,
             'isMachineValid',
             $machine,
             $numberOfItems,
@@ -377,84 +283,62 @@ class MachineServiceTest extends TestCase
         $this->assertSame($expectedResult, $result);
     }
 
-    /**
-     * Tests the sortMachines method.
-     * @covers ::sortMachines
-     */
     public function testSortMachines(): void
     {
-        /* @var Machine&MockObject $machine1 */
         $machine1 = $this->createMock(Machine::class);
-        /* @var Machine&MockObject $machine2 */
         $machine2 = $this->createMock(Machine::class);
 
         $machines = [$machine1, $machine2];
         $expectedResult = [$machine2, $machine1];
 
-        /* @var MachineService&MockObject $service */
-        $service = $this->getMockBuilder(MachineService::class)
-                        ->onlyMethods(['compareMachines'])
-                        ->setConstructorArgs([$this->machineRepository])
-                        ->getMock();
-        $service->expects($this->once())
-                ->method('compareMachines')
-                ->with($this->identicalTo($machine1), $this->identicalTo($machine2))
-                ->willReturn(1);
+        $instance = $this->createInstance(['compareMachines']);
+        $instance->expects($this->once())
+                 ->method('compareMachines')
+                 ->with($this->identicalTo($machine1), $this->identicalTo($machine2))
+                 ->willReturn(1);
 
-        $result = $service->sortMachines($machines);
+        $result = $instance->sortMachines($machines);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Provides the data for the compareMachines test.
      * @return array<mixed>
      */
     public function provideCompareMachines(): array
     {
-        /* @var Machine&MockObject $machine1 */
-        $machine1 = $this->createMock(Machine::class);
-        $machine1->expects($this->any())
-                 ->method('getName')
-                 ->willReturn('abc');
+        $machine1 = new Machine();
+        $machine1->setName('abc');
+        
+        $machine2 = new Machine();
+        $machine2->setName('zyx');
 
-        /* @var Machine&MockObject $machine2 */
-        $machine2 = $this->createMock(Machine::class);
-        $machine2->expects($this->any())
-                 ->method('getName')
-                 ->willReturn('zyx');
-
-        /* @var Machine&MockObject $player */
-        $player = $this->createMock(Machine::class);
-        $player->expects($this->any())
-               ->method('getName')
-               ->willReturn(Constant::ENTITY_NAME_CHARACTER);
-
+        $character = new Machine();
+        $character->setName(Constant::ENTITY_NAME_CHARACTER);
+        
         return [
             [$machine1, $machine2, -1],
             [$machine2, $machine1, 1],
             [$machine1, $machine1, 0],
 
-            [$player, $machine1, -1],
-            [$player, $machine2, -1],
-            [$machine1, $player, 1],
-            [$machine2, $player, 1],
+            [$character, $machine1, -1],
+            [$character, $machine2, -1],
+            [$machine1, $character, 1],
+            [$machine2, $character, 1],
         ];
     }
 
     /**
-     * Tests the compareMachines method.
      * @param Machine $left
      * @param Machine $right
      * @param int $expectedResult
      * @throws ReflectionException
-     * @covers ::compareMachines
      * @dataProvider provideCompareMachines
      */
     public function testCompareMachines(Machine $left, Machine $right, int $expectedResult): void
     {
-        $service = new MachineService($this->machineRepository);
-        $result = $this->invokeMethod($service, 'compareMachines', $left, $right);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'compareMachines', $left, $right);
 
         $this->assertSame($expectedResult, $result);
     }

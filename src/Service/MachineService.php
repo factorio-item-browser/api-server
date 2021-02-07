@@ -11,9 +11,9 @@ use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient;
 use FactorioItemBrowser\Api\Database\Entity\RecipeProduct;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\Common\Constant\ItemType;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The service class handling machines.
@@ -23,21 +23,10 @@ use FactorioItemBrowser\Common\Constant\ItemType;
  */
 class MachineService
 {
-    /**
-     * The machine names to prefer.
-     */
     protected const PREFERRED_MACHINE_NAME = Constant::ENTITY_NAME_CHARACTER;
 
-    /**
-     * The repository of the machines.
-     * @var MachineRepository
-     */
-    protected $machineRepository;
+    protected MachineRepository $machineRepository;
 
-    /**
-     * MachineService constructor.
-     * @param MachineRepository $machineRepository
-     */
     public function __construct(MachineRepository $machineRepository)
     {
         $this->machineRepository = $machineRepository;
@@ -46,24 +35,21 @@ class MachineService
     /**
      * Returns the machines supporting the specified crafting category.
      * @param CraftingCategory $craftingCategory
-     * @param AuthorizationToken $authorizationToken
-     * @return array|Machine[]
+     * @param UuidInterface $combinationId
+     * @return array<Machine>
      */
     public function getMachinesByCraftingCategory(
         CraftingCategory $craftingCategory,
-        AuthorizationToken $authorizationToken
+        UuidInterface $combinationId
     ): array {
-        return $this->machineRepository->findByCraftingCategoryName(
-            $authorizationToken->getCombinationId(),
-            $craftingCategory->getName()
-        );
+        return $this->machineRepository->findByCraftingCategoryName($combinationId, $craftingCategory->getName());
     }
 
     /**
      * Filters the machines which actually can craft the recipe.
-     * @param array|Machine[] $machines
+     * @param array<Machine> $machines
      * @param Recipe $recipe
-     * @return array|Machine[]
+     * @return array<Machine>
      */
     public function filterMachinesForRecipe(array $machines, Recipe $recipe): array
     {
@@ -82,7 +68,7 @@ class MachineService
 
     /**
      * Counts the item with a type.
-     * @param Collection<int,RecipeIngredient>|Collection<int,RecipeProduct> $entities
+     * @param Collection<int, RecipeIngredient>|Collection<int, RecipeProduct> $entities
      * @param string $type
      * @return int
      */
@@ -102,7 +88,7 @@ class MachineService
      * @param object $entity
      * @return string|null
      */
-    protected function getItemType($entity): ?string
+    protected function getItemType(object $entity): ?string
     {
         $result = null;
         if (($entity instanceof RecipeIngredient || $entity instanceof RecipeProduct)) {
@@ -133,8 +119,8 @@ class MachineService
 
     /**
      * Sorts the machines, preferring the player in the front.
-     * @param array|Machine[] $machines
-     * @return array|Machine[]
+     * @param array<Machine> $machines
+     * @return array<Machine>
      */
     public function sortMachines(array $machines): array
     {
