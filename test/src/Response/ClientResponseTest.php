@@ -4,64 +4,41 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Response;
 
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
-use PHPUnit\Framework\MockObject\MockObject;
+use JMS\Serializer\SerializerInterface;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * The PHPUnit test of the ClientResponse class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Response\ClientResponse
+ * @covers \FactorioItemBrowser\Api\Server\Response\ClientResponse
  */
 class ClientResponseTest extends TestCase
 {
-    /**
-     * Tests the constructing.
-     * @covers ::__construct
-     * @covers ::getResponse
-     */
-    public function testConstruct(): void
+    public function testWithSerializer(): void
     {
-        /* @var ResponseInterface&MockObject $clientResponse */
-        $clientResponse = $this->createMock(ResponseInterface::class);
-        $statusCode = 123;
-        $headers = [
-            'abc' => 'def',
-        ];
+        $payload = new stdClass();
+        $payload->foo = 'bar';
+        $statusCode = 512;
+        $headers = ['abc' => 'def'];
+        $body = 'ghi';
 
-        $response = new ClientResponse($clientResponse, $statusCode, $headers);
+        $serializer = $this->createMock(SerializerInterface::class);
+        $serializer->expects($this->once())
+                   ->method('serialize')
+                   ->with($this->identicalTo($payload), $this->identicalTo('json'))
+                   ->willReturn($body);
 
-        $this->assertSame($statusCode, $response->getStatusCode());
-        $this->assertSame('def', $response->getHeaderLine('abc'));
-        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
-        $this->assertSame($clientResponse, $response->getResponse());
-    }
+        $instance = new ClientResponse($payload, $statusCode, $headers);
+        $result = $instance->withSerializer($serializer);
 
-    /**
-     * Tests the withSerializedResponse method.
-     * @covers ::withSerializedResponse
-     */
-    public function testWithSerializedResponse(): void
-    {
-        /* @var ResponseInterface&MockObject $clientResponse */
-        $clientResponse = $this->createMock(ResponseInterface::class);
-        $statusCode = 123;
-        $headers = [
-            'abc' => 'def',
-        ];
-        $serializedResponse = 'ghi';
-
-        $response = new ClientResponse($clientResponse, $statusCode, $headers);
-        $result = $response->withSerializedResponse($serializedResponse);
-
-        $this->assertNotSame($response, $result);
+        $this->assertSame($payload, $instance->getPayload());
         $this->assertSame($statusCode, $result->getStatusCode());
         $this->assertSame('def', $result->getHeaderLine('abc'));
         $this->assertSame('application/json', $result->getHeaderLine('Content-Type'));
-        $this->assertSame($clientResponse, $result->getResponse());
-        $this->assertSame($serializedResponse, $result->getBody()->getContents());
+        $this->assertSame($body, $result->getBody()->getContents());
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use JMS\Serializer\SerializerInterface;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\InjectContentTypeTrait;
 use Laminas\Diactoros\Stream;
 
 /**
- * The wrapper for the client response.
+ * The response wrapping around the client response object.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
@@ -19,43 +19,28 @@ class ClientResponse extends Response
 {
     use InjectContentTypeTrait;
 
-    /**
-     * The actual response entity.
-     * @var ResponseInterface
-     */
-    protected $response;
+    private object $payload;
 
     /**
-     * Initializes the response.
-     * @param ResponseInterface $response
-     * @param int $status
-     * @param array|string[] $headers
+     * @param object $payload
+     * @param int $statusCode
+     * @param array<string, string> $headers
      */
-    public function __construct(ResponseInterface $response, $status = 200, array $headers = [])
+    public function __construct(object $payload, int $statusCode = 200, array $headers = [])
     {
-        parent::__construct('php://memory', $status, $this->injectContentType('application/json', $headers));
-
-        $this->response = $response;
+        parent::__construct('php://memory', $statusCode, $this->injectContentType('application/json', $headers));
+        $this->payload = $payload;
     }
 
-    /**
-     * Returns the actual response entity.
-     * @return ResponseInterface
-     */
-    public function getResponse(): ResponseInterface
+    public function getPayload(): object
     {
-        return $this->response;
+        return $this->payload;
     }
 
-    /**
-     * Returns a client response with the serialized response as body.
-     * @param string $serializedResponse
-     * @return ClientResponse
-     */
-    public function withSerializedResponse(string $serializedResponse): self
+    public function withSerializer(SerializerInterface $serializer): self
     {
         $stream = new Stream('php://temp', 'wb+');
-        $stream->write($serializedResponse);
+        $stream->write($serializer->serialize($this->payload, 'json'));
         $stream->rewind();
         return $this->withBody($stream);
     }
