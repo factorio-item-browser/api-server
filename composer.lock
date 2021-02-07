@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1c9907de6d1102b75bdff9f90faaeb3",
+    "content-hash": "b5b343bf89bf64ca2f187e1f8c75b856",
     "packages": [
         {
             "name": "bluepsyduck/factorio-mod-portal-client",
@@ -65,6 +65,66 @@
                 "source": "https://github.com/BluePsyduck/factorio-mod-portal-client/tree/1.3.0"
             },
             "time": "2020-11-01T10:58:44+00:00"
+        },
+        {
+            "name": "bluepsyduck/jms-serializer-factory",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BluePsyduck/jms-serializer-factory.git",
+                "reference": "010f7b01a86b1f62f8532a9324d675392c913a26"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BluePsyduck/jms-serializer-factory/zipball/010f7b01a86b1f62f8532a9324d675392c913a26",
+                "reference": "010f7b01a86b1f62f8532a9324d675392c913a26",
+                "shasum": ""
+            },
+            "require": {
+                "jms/serializer": "^3.0",
+                "php": "^7.4 | ^8.0",
+                "psr/container": "^1.0"
+            },
+            "require-dev": {
+                "bluepsyduck/test-helper": "^1.0",
+                "mikey179/vfsstream": "^1.6",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpstan/phpstan-strict-rules": "^0.12",
+                "phpunit/phpunit": "^9.0",
+                "rregeer/phpunit-coverage-check": "^0.3",
+                "squizlabs/php_codesniffer": "^3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BluePsyduck\\JmsSerializerFactory\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "BluePsyduck",
+                    "email": "bluepsyduck@gmx.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laminas factory to initialize the JMS serializer through the config.",
+            "homepage": "https://github.com/BluePsyduck/jms-serializer-factory",
+            "keywords": [
+                "BluePsyduck",
+                "factory",
+                "jms",
+                "serializer"
+            ],
+            "support": {
+                "issues": "https://github.com/BluePsyduck/jms-serializer-factory/issues",
+                "source": "https://github.com/BluePsyduck/jms-serializer-factory/tree/1.0.0"
+            },
+            "time": "2020-12-31T16:18:39+00:00"
         },
         {
             "name": "bluepsyduck/laminas-autowire-factory",
@@ -1510,33 +1570,34 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "3.2.0",
+            "version": "dev-feature/refactor-api",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "91480758b5e2dbd5386aa8fb9b74ffe1371e53c7"
+                "reference": "87eee1b1afe0881d877f29c7db0491d1fb87101b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/91480758b5e2dbd5386aa8fb9b74ffe1371e53c7",
-                "reference": "91480758b5e2dbd5386aa8fb9b74ffe1371e53c7",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/87eee1b1afe0881d877f29c7db0491d1fb87101b",
+                "reference": "87eee1b1afe0881d877f29c7db0491d1fb87101b",
                 "shasum": ""
             },
             "require": {
+                "bluepsyduck/jms-serializer-factory": "^1.0",
+                "ext-json": "*",
                 "factorio-item-browser/common": "^1.0",
                 "guzzlehttp/guzzle": "^6.3",
                 "jms/serializer": "^3.2",
                 "laminas/laminas-servicemanager": "^3.0",
-                "php": "^7.3",
-                "symfony/yaml": "^4.2"
+                "php": "^7.4 | ^8.0",
+                "symfony/yaml": "^5.0"
             },
             "require-dev": {
-                "bluepsyduck/test-helper": "^1.0",
-                "ext-json": "*",
+                "bluepsyduck/test-helper": "^2.0",
                 "phpstan/phpstan": "^0.12",
                 "phpstan/phpstan-phpunit": "^0.12",
                 "phpstan/phpstan-strict-rules": "^0.12",
-                "phpunit/phpunit": "^8.0",
+                "phpunit/phpunit": "^9.0",
                 "rregeer/phpunit-coverage-check": "^0.3",
                 "squizlabs/php_codesniffer": "^3.3"
             },
@@ -1566,10 +1627,9 @@
                 "client"
             ],
             "support": {
-                "issues": "https://github.com/factorio-item-browser/api-client/issues",
-                "source": "https://github.com/factorio-item-browser/api-client/tree/3.2.0"
+                "source": "https://github.com/factorio-item-browser/api-client/tree/feature/refactor-api"
             },
-            "time": "2020-11-01T11:13:14+00:00"
+            "time": "2021-02-06T15:54:15+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
@@ -4453,6 +4513,73 @@
             "time": "2021-01-28T22:06:19+00:00"
         },
         {
+            "name": "symfony/deprecation-contracts",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/deprecation-contracts.git",
+                "reference": "5fa56b4074d1ae755beb55617ddafe6f5d78f665"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/5fa56b4074d1ae755beb55617ddafe6f5d78f665",
+                "reference": "5fa56b4074d1ae755beb55617ddafe6f5d78f665",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev"
+                },
+                "thanks": {
+                    "name": "symfony/contracts",
+                    "url": "https://github.com/symfony/contracts"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "function.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "A generic function and convention to trigger deprecation notices",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/deprecation-contracts/tree/master"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-09-07T11:33:47+00:00"
+        },
+        {
             "name": "symfony/filesystem",
             "version": "v5.2.3",
             "source": {
@@ -5389,31 +5516,35 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v4.4.19",
+            "version": "v5.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "17ed9f14c1aa05b1a5cf2e2c5ef2d0be28058ef9"
+                "reference": "338cddc6d74929f6adf19ca5682ac4b8e109cdb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/17ed9f14c1aa05b1a5cf2e2c5ef2d0be28058ef9",
-                "reference": "17ed9f14c1aa05b1a5cf2e2c5ef2d0be28058ef9",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/338cddc6d74929f6adf19ca5682ac4b8e109cdb0",
+                "reference": "338cddc6d74929f6adf19ca5682ac4b8e109cdb0",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.3",
+                "php": ">=7.2.5",
+                "symfony/deprecation-contracts": "^2.1",
                 "symfony/polyfill-ctype": "~1.8"
             },
             "conflict": {
-                "symfony/console": "<3.4"
+                "symfony/console": "<4.4"
             },
             "require-dev": {
-                "symfony/console": "^3.4|^4.0|^5.0"
+                "symfony/console": "^4.4|^5.0"
             },
             "suggest": {
                 "symfony/console": "For validating YAML files using the lint command"
             },
+            "bin": [
+                "Resources/bin/yaml-lint"
+            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -5440,7 +5571,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v4.4.19"
+                "source": "https://github.com/symfony/yaml/tree/v5.2.3"
             },
             "funding": [
                 {
@@ -5456,7 +5587,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-27T09:09:26+00:00"
+            "time": "2021-02-03T04:42:09+00:00"
         },
         {
             "name": "webimpress/safe-writer",
@@ -7462,7 +7593,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "factorio-item-browser/api-client": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

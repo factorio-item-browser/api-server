@@ -22,7 +22,6 @@ return [
             Mapper\DatabaseModToClientModMapper::class,
             Mapper\DatabaseRecipeToClientRecipeMapper::class,
             Mapper\DatabaseRecipeToGenericEntityMapper::class,
-            Mapper\ExportJobMapper::class,
             Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper::class,
             Mapper\RecipeDataToGenericEntityMapper::class,
         ],

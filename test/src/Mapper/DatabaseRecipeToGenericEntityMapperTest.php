@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Server\Mapper\DatabaseRecipeToGenericEntityMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
@@ -19,39 +19,41 @@ use PHPUnit\Framework\TestCase;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Mapper\DatabaseRecipeToGenericEntityMapper
+ * @covers \FactorioItemBrowser\Api\Server\Mapper\DatabaseRecipeToGenericEntityMapper
  */
 class DatabaseRecipeToGenericEntityMapperTest extends TestCase
 {
-    /**
-     * The mocked translation service.
-     * @var TranslationService&MockObject
-     */
-    protected $translationService;
+    /** @var TranslationService&MockObject */
+    private TranslationService $translationService;
 
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->translationService = $this->createMock(TranslationService::class);
     }
 
     /**
-     * Provides the data for the supports test.
+     * @param array<string> $mockedMethods
+     * @return DatabaseRecipeToGenericEntityMapper&MockObject
+     */
+    private function createInstance(array $mockedMethods = []): DatabaseRecipeToGenericEntityMapper
+    {
+        return $this->getMockBuilder(DatabaseRecipeToGenericEntityMapper::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->translationService,
+                    ])
+                    ->getMock();
+    }
+
+    /**
      * @return array<mixed>
      */
     public function provideSupports(): array
     {
-        /* @var DatabaseRecipe&MockObject $databaseRecipe */
         $databaseRecipe = $this->createMock(DatabaseRecipe::class);
-        /* @var GenericEntity&MockObject $genericEntity */
         $genericEntity = $this->createMock(GenericEntity::class);
-        /* @var GenericEntityWithRecipes&MockObject $genericEntityWithRecipes */
         $genericEntityWithRecipes = $this->createMock(GenericEntityWithRecipes::class);
-        /* @var ClientRecipe&MockObject $clientRecipe */
         $clientRecipe = $this->createMock(ClientRecipe::class);
 
         return [
@@ -63,53 +65,37 @@ class DatabaseRecipeToGenericEntityMapperTest extends TestCase
     }
 
     /**
-     * Tests the supports method.
      * @param object $source
      * @param object $destination
      * @param bool $expectedResult
-     * @covers ::supports
      * @dataProvider provideSupports
      */
     public function testSupports(object $source, object $destination, bool $expectedResult): void
     {
-        $mapper = new DatabaseRecipeToGenericEntityMapper($this->translationService);
-        $result = $mapper->supports($source, $destination);
+        $instance = $this->createInstance();
+        $result = $instance->supports($source, $destination);
 
         $this->assertSame($expectedResult, $result);
     }
 
-    /**
-     * Tests the map method.
-     * @covers ::map
-     */
     public function testMap(): void
     {
-        /* @var DatabaseRecipe&MockObject $databaseRecipe */
-        $databaseRecipe = $this->createMock(DatabaseRecipe::class);
-        $databaseRecipe->expects($this->once())
-                       ->method('getName')
-                       ->willReturn('abc');
-
-        /* @var GenericEntity&MockObject $genericEntity */
-        $genericEntity = $this->createMock(GenericEntity::class);
-        $genericEntity->expects($this->once())
-                      ->method('setType')
-                      ->with($this->identicalTo(EntityType::RECIPE))
-                      ->willReturnSelf();
-        $genericEntity->expects($this->once())
-                      ->method('setName')
-                      ->with($this->identicalTo('abc'))
-                      ->willReturnSelf();
-
-        /* @var DatabaseRecipeToGenericEntityMapper&MockObject $mapper */
-        $mapper = $this->getMockBuilder(DatabaseRecipeToGenericEntityMapper::class)
-                       ->onlyMethods(['addToTranslationService'])
-                       ->setConstructorArgs([$this->translationService])
-                       ->getMock();
-        $mapper->expects($this->once())
-               ->method('addToTranslationService')
-               ->with($this->identicalTo($genericEntity));
-
-        $mapper->map($databaseRecipe, $genericEntity);
+        $source = new DatabaseRecipe();
+        $source->setName('abc');
+        
+        $expectedDestination = new GenericEntity();
+        $expectedDestination->type = EntityType::RECIPE;
+        $expectedDestination->name = 'abc';
+        
+        $destination = new GenericEntity();
+        
+        $instance = $this->createInstance(['addToTranslationService']);
+        $instance->expects($this->once())
+                 ->method('addToTranslationService')
+                 ->with($this->equalTo($expectedDestination));
+        
+        $instance->map($source, $destination);
+        
+        $this->assertEquals($expectedDestination, $destination);
     }
 }

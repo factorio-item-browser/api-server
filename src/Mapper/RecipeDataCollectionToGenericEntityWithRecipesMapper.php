@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\Mapper\StaticMapperInterface;
 use BluePsyduck\MapperManager\MapperManagerAwareInterface;
-use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
+use BluePsyduck\MapperManager\MapperManagerAwareTrait;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
@@ -20,145 +19,93 @@ use FactorioItemBrowser\Common\Constant\RecipeMode;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements StaticMapperInterface<RecipeDataCollection, GenericEntityWithRecipes>
  */
 class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapperInterface, MapperManagerAwareInterface
 {
-    /**
-     * The recipe service.
-     * @var RecipeService
-     */
-    protected $recipeService;
+    use MapperManagerAwareTrait;
 
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    private RecipeService $recipeService;
 
-    /**
-     * The database recipes.
-     * @var array|DatabaseRecipe[]
-     */
-    protected $databaseRecipes = [];
-
-    /**
-     * Initializes the mapper.
-     * @param RecipeService $recipeService
-     */
     public function __construct(RecipeService $recipeService)
     {
         $this->recipeService = $recipeService;
     }
 
-    /**
-     * Sets the mapper manager.
-     * @param MapperManagerInterface $mapperManager
-     */
-    public function setMapperManager(MapperManagerInterface $mapperManager): void
-    {
-        $this->mapperManager = $mapperManager;
-    }
-
-    /**
-     * Returns the source class supported by this mapper.
-     * @return string
-     */
     public function getSupportedSourceClass(): string
     {
         return RecipeDataCollection::class;
     }
 
-    /**
-     * Returns the destination class supported by this mapper.
-     * @return string
-     */
     public function getSupportedDestinationClass(): string
     {
         return GenericEntityWithRecipes::class;
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param RecipeDataCollection $recipeData
-     * @param GenericEntityWithRecipes $entity
-     * @throws MapperException
+     * @param RecipeDataCollection $source
+     * @param GenericEntityWithRecipes $destination
      */
-    public function map($recipeData, $entity): void
+    public function map(object $source, object $destination): void
     {
-        $this->databaseRecipes = $this->recipeService->getDetailsByIds($recipeData->getAllIds());
-        $recipes = $this->mapNormalRecipes($recipeData->filterMode(RecipeMode::NORMAL));
-        $recipes = $this->mapExpensiveRecipes($recipes, $recipeData->filterMode(RecipeMode::EXPENSIVE));
-        $entity->setRecipes($recipes);
+        $databaseRecipes = $this->recipeService->getDetailsByIds($source->getAllIds());
+
+        $normalRecipes = $this->mapNormalRecipes($databaseRecipes, $source->filterMode(RecipeMode::NORMAL));
+        $destination->recipes = $this->mapExpensiveRecipes(
+            $databaseRecipes,
+            $normalRecipes,
+            $source->filterMode(RecipeMode::EXPENSIVE),
+        );
     }
 
     /**
-     * Maps the normal recipes.
+     * @param array<string, DatabaseRecipe> $databaseRecipes
      * @param RecipeDataCollection $recipeData
-     * @return array|RecipeWithExpensiveVersion[]
-     * @throws MapperException
+     * @return array<string, RecipeWithExpensiveVersion>
      */
-    protected function mapNormalRecipes(RecipeDataCollection $recipeData): array
+    protected function mapNormalRecipes(array $databaseRecipes, RecipeDataCollection $recipeData): array
     {
-        $result = [];
+        $recipes = [];
         foreach ($recipeData->getValues() as $data) {
-            $databaseRecipe = $this->databaseRecipes[$data->getId()->toString()] ?? null;
+            $databaseRecipe = $databaseRecipes[$data->getId()->toString()] ?? null;
             if ($databaseRecipe === null) {
                 continue;
             }
 
-            $normalRecipe = $this->mapDatabaseRecipe($databaseRecipe);
-            $result[$normalRecipe->getName()] = $normalRecipe;
-        }
-        return $result;
-    }
-
-    /**
-     * Maps the expensive recipes, adding them to the already mapped normal ones.
-     * @param array|RecipeWithExpensiveVersion[] $recipes
-     * @param RecipeDataCollection $recipeData
-     * @return array|RecipeWithExpensiveVersion[]
-     * @throws MapperException
-     */
-    protected function mapExpensiveRecipes(array $recipes, RecipeDataCollection $recipeData): array
-    {
-        foreach ($recipeData->getValues() as $data) {
-            $databaseRecipe = $this->databaseRecipes[$data->getId()->toString()] ?? null;
-            if ($databaseRecipe === null) {
-                continue;
-            }
-
-            $expensiveRecipe = $this->mapDatabaseRecipe($databaseRecipe);
-            $recipes = $this->addExpensiveRecipe($recipes, $expensiveRecipe);
+            $recipe = $this->mapperManager->map($databaseRecipe, new RecipeWithExpensiveVersion());
+            $recipes[$recipe->name] = $recipe;
         }
         return $recipes;
     }
 
     /**
-     * Adds the expensive recipe to the recipe array.
-     * @param array|RecipeWithExpensiveVersion[] $recipes
-     * @param RecipeWithExpensiveVersion $expensiveRecipe
-     * @return array|RecipeWithExpensiveVersion[]
+     * @param array<string, DatabaseRecipe> $databaseRecipes
+     * @param array<string, RecipeWithExpensiveVersion> $normalRecipes
+     * @param RecipeDataCollection $recipeData
+     * @return array<string, RecipeWithExpensiveVersion>
      */
-    protected function addExpensiveRecipe(array $recipes, RecipeWithExpensiveVersion $expensiveRecipe): array
-    {
-        if (isset($recipes[$expensiveRecipe->getName()])) {
-            $recipes[$expensiveRecipe->getName()]->setExpensiveVersion($expensiveRecipe);
-        } else {
-            $recipes[$expensiveRecipe->getName()] = $expensiveRecipe;
+    protected function mapExpensiveRecipes(
+        array $databaseRecipes,
+        array $normalRecipes,
+        RecipeDataCollection $recipeData
+    ): array {
+        $recipes = [];
+        foreach ($recipeData->getValues() as $data) {
+            $databaseRecipe = $databaseRecipes[$data->getId()->toString()] ?? null;
+            if ($databaseRecipe === null) {
+                continue;
+            }
+
+            $expensiveRecipe = $this->mapperManager->map($databaseRecipe, new RecipeWithExpensiveVersion());
+            if (isset($normalRecipes[$expensiveRecipe->name])) {
+                $recipe = $normalRecipes[$expensiveRecipe->name];
+                $recipe->expensiveVersion = $expensiveRecipe;
+                $recipes[$expensiveRecipe->name] = $recipe;
+            } else {
+                $recipes[$expensiveRecipe->name] = $expensiveRecipe;
+            }
         }
         return $recipes;
-    }
-
-    /**
-     * Maps a database recipe to a client one.
-     * @param DatabaseRecipe $recipe
-     * @return RecipeWithExpensiveVersion
-     * @throws MapperException
-     */
-    protected function mapDatabaseRecipe(DatabaseRecipe $recipe): RecipeWithExpensiveVersion
-    {
-        $result = new RecipeWithExpensiveVersion();
-        $this->mapperManager->map($recipe, $result);
-        return $result;
     }
 }
