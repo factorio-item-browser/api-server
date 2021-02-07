@@ -12,7 +12,7 @@ use Throwable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class InvalidApiKeyException extends ApiServerException
+class InvalidApiKeyException extends ServerException
 {
     private const MESSAGE = 'Invalid or missing API key.';
 

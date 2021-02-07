@@ -6,7 +6,7 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
 use FactorioItemBrowser\Common\Constant\Defaults;
 use JMS\Serializer\SerializerInterface;
@@ -43,7 +43,7 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws ApiServerException
+     * @throws ServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

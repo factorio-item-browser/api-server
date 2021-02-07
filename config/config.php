@@ -24,12 +24,10 @@ $aggregator = new ConfigAggregator([
     new ArrayProvider($cacheConfig),
 
     \Blast\BaseUrl\ConfigProvider::class,
-    \BluePsyduck\FactorioModPortalClient\ConfigProvider::class,
     \BluePsyduck\MapperManager\ConfigProvider::class,
     \FactorioItemBrowser\Api\Client\ConfigProvider::class,
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,
     \FactorioItemBrowser\Api\Search\ConfigProvider::class,
-    \FactorioItemBrowser\ExportQueue\Client\ConfigProvider::class,
     \Laminas\HttpHandlerRunner\ConfigProvider::class,
     \Laminas\Log\ConfigProvider::class,
     \Mezzio\ConfigProvider::class,
@@ -42,7 +40,7 @@ $aggregator = new ConfigAggregator([
     //   - `*.global.php`
     //   - `[FIB_ENV]/*.local.php`
     new PhpFileProvider(
-        realpath(__DIR__) . sprintf('/autoload/{*.global.php,%s/*.local.php}', getenv('FIB_ENV') ?: 'production')
+        realpath(__DIR__) . sprintf('/autoload/{*.global.php,%s/*.local.php}', getenv('FIB_ENV') ?? 'production'),
     ),
 ], $cacheConfig['config_cache_path']);
 

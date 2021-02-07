@@ -12,18 +12,10 @@ use Throwable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ApiEndpointNotFoundException extends ApiServerException
+class ApiEndpointNotFoundException extends ServerException
 {
-    /**
-     * The message template of the exception.
-     */
-    protected const MESSAGE = 'API endpoint not found: %s';
+    private const MESSAGE = 'API endpoint not found: %s';
 
-    /**
-     * Initializes the exception.
-     * @param string $endpoint
-     * @param Throwable|null $previous
-     */
     public function __construct(string $endpoint, ?Throwable $previous = null)
     {
         parent::__construct(sprintf(self::MESSAGE, $endpoint), 404, $previous);

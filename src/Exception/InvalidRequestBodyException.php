@@ -12,7 +12,7 @@ use Throwable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class InvalidRequestBodyException extends ApiServerException
+class InvalidRequestBodyException extends ServerException
 {
     private const MESSAGE = 'Invalid request body: %s';
 

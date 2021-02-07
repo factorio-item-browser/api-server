@@ -4,68 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5b343bf89bf64ca2f187e1f8c75b856",
+    "content-hash": "6c9cd7cdd046ba7b96163053fb84511c",
     "packages": [
-        {
-            "name": "bluepsyduck/factorio-mod-portal-client",
-            "version": "1.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/BluePsyduck/factorio-mod-portal-client.git",
-                "reference": "2fc481d96ec0386aa1be2ea430e2defa986c0c96"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/BluePsyduck/factorio-mod-portal-client/zipball/2fc481d96ec0386aa1be2ea430e2defa986c0c96",
-                "reference": "2fc481d96ec0386aa1be2ea430e2defa986c0c96",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^6.3",
-                "jms/serializer": "^3.2",
-                "php": "^7.2",
-                "psr/container": "^1.0",
-                "symfony/yaml": "^4.2 | ^5.0"
-            },
-            "require-dev": {
-                "bluepsyduck/test-helper": "^1.0",
-                "phpstan/phpstan": "^0.12",
-                "phpstan/phpstan-phpunit": "^0.12",
-                "phpstan/phpstan-strict-rules": "^0.12",
-                "phpunit/phpunit": "^8.0",
-                "rregeer/phpunit-coverage-check": "^0.3",
-                "squizlabs/php_codesniffer": "^3.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "BluePsyduck\\FactorioModPortalClient\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "BluePsyduck",
-                    "email": "bluepsyduck@gmx.com"
-                }
-            ],
-            "description": "A client to access the Factorio mod portal.",
-            "homepage": "https://github.com/BluePsyduck/factorio-mod-portal-client",
-            "keywords": [
-                "Factorio",
-                "client",
-                "mod portal"
-            ],
-            "support": {
-                "issues": "https://github.com/BluePsyduck/factorio-mod-portal-client/issues",
-                "source": "https://github.com/BluePsyduck/factorio-mod-portal-client/tree/1.3.0"
-            },
-            "time": "2020-11-01T10:58:44+00:00"
-        },
         {
             "name": "bluepsyduck/jms-serializer-factory",
             "version": "1.0.0",
@@ -128,21 +68,21 @@
         },
         {
             "name": "bluepsyduck/laminas-autowire-factory",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BluePsyduck/laminas-autowire-factory.git",
-                "reference": "6fff1b67fc0862dbe86044fd29611cfb26944b23"
+                "reference": "ceb063703127ceaa5a973508d9b2be0017069fa7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BluePsyduck/laminas-autowire-factory/zipball/6fff1b67fc0862dbe86044fd29611cfb26944b23",
-                "reference": "6fff1b67fc0862dbe86044fd29611cfb26944b23",
+                "url": "https://api.github.com/repos/BluePsyduck/laminas-autowire-factory/zipball/ceb063703127ceaa5a973508d9b2be0017069fa7",
+                "reference": "ceb063703127ceaa5a973508d9b2be0017069fa7",
                 "shasum": ""
             },
             "require": {
                 "laminas/laminas-servicemanager": "^3.0",
-                "php": "^7.4 | 8.0"
+                "php": "^7.4 | ^8.0"
             },
             "require-dev": {
                 "bluepsyduck/test-helper": "^2.0",
@@ -185,9 +125,9 @@
             ],
             "support": {
                 "issues": "https://github.com/BluePsyduck/laminas-autowire-factory/issues",
-                "source": "https://github.com/BluePsyduck/laminas-autowire-factory/tree/1.1.0"
+                "source": "https://github.com/BluePsyduck/laminas-autowire-factory/tree/1.1.1"
             },
-            "time": "2021-01-12T13:22:46+00:00"
+            "time": "2021-02-07T08:23:34+00:00"
         },
         {
             "name": "bluepsyduck/mapper-manager",
@@ -1808,69 +1748,6 @@
             "time": "2021-01-27T10:03:27+00:00"
         },
         {
-            "name": "factorio-item-browser/export-queue-client",
-            "version": "1.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/factorio-item-browser/export-queue-client.git",
-                "reference": "6c16ccd9e47851c796f432138aa60f6ff5845701"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/export-queue-client/zipball/6c16ccd9e47851c796f432138aa60f6ff5845701",
-                "reference": "6c16ccd9e47851c796f432138aa60f6ff5845701",
-                "shasum": ""
-            },
-            "require": {
-                "bluepsyduck/laminas-autowire-factory": "^1.0",
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^6.3",
-                "jms/serializer": "^3.2",
-                "laminas/laminas-servicemanager": "^3.0",
-                "php": "^7.3",
-                "symfony/yaml": "^4.2 | ^5.0"
-            },
-            "require-dev": {
-                "bluepsyduck/test-helper": "^1.0",
-                "phpstan/phpstan": "^0.12",
-                "phpstan/phpstan-phpunit": "^0.12",
-                "phpstan/phpstan-strict-rules": "^0.12",
-                "phpunit/phpunit": "^8.0",
-                "rregeer/phpunit-coverage-check": "^0.3",
-                "squizlabs/php_codesniffer": "^3.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "FactorioItemBrowser\\ExportQueue\\Client\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "BluePsyduck",
-                    "email": "bluepsyduck@gmx.com"
-                }
-            ],
-            "description": "A client to access the export queue of the Factorio Item Browser.",
-            "homepage": "https://github.com/BluePsyduck/factorio-mod-portal-client",
-            "keywords": [
-                "FIB",
-                "Factorio Item Browser",
-                "client",
-                "export",
-                "queue"
-            ],
-            "support": {
-                "issues": "https://github.com/factorio-item-browser/export-queue-client/issues",
-                "source": "https://github.com/factorio-item-browser/export-queue-client/tree/master"
-            },
-            "time": "2020-05-27T08:14:54+00:00"
-        },
-        {
             "name": "fig/http-message-util",
             "version": "1.1.5",
             "source": {
@@ -1925,60 +1802,6 @@
                 "source": "https://github.com/php-fig/http-message-util/tree/1.1.5"
             },
             "time": "2020-11-24T22:02:12+00:00"
-        },
-        {
-            "name": "firebase/php-jwt",
-            "version": "v5.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "feb0e820b8436873675fd3aca04f3728eb2185cb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/feb0e820b8436873675fd3aca04f3728eb2185cb",
-                "reference": "feb0e820b8436873675fd3aca04f3728eb2185cb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": ">=4.8 <=9"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Firebase\\JWT\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Neuman Vong",
-                    "email": "neuman+pear@twilio.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Anant Narayanan",
-                    "email": "anant@php.net",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
-            "homepage": "https://github.com/firebase/php-jwt",
-            "keywords": [
-                "jwt",
-                "php"
-            ],
-            "support": {
-                "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/master"
-            },
-            "time": "2020-03-25T18:49:23+00:00"
         },
         {
             "name": "friendsofphp/proxy-manager-lts",
@@ -6098,16 +5921,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.71",
+            "version": "0.12.72",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "d508fa3b0ecc5fc91ac70c6c7ac2862f968ba2b5"
+                "reference": "ae32fb1c5e97979f424c3ccec4ee435a35754769"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d508fa3b0ecc5fc91ac70c6c7ac2862f968ba2b5",
-                "reference": "d508fa3b0ecc5fc91ac70c6c7ac2862f968ba2b5",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ae32fb1c5e97979f424c3ccec4ee435a35754769",
+                "reference": "ae32fb1c5e97979f424c3ccec4ee435a35754769",
                 "shasum": ""
             },
             "require": {
@@ -6138,7 +5961,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.71"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.72"
             },
             "funding": [
                 {
@@ -6154,7 +5977,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-01T18:24:00+00:00"
+            "time": "2021-02-06T18:34:03+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -54,7 +54,7 @@ class ErrorResponseGenerator
         ServerRequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
-        if ($exception instanceof ApiServerException) {
+        if ($exception instanceof ServerException) {
             $statusCode = $exception->getCode();
             $message = $exception->getMessage();
         } else {

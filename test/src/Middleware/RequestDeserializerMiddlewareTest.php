@@ -7,7 +7,7 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
 use FactorioItemBrowser\Api\Server\Middleware\RequestDeserializerMiddleware;
 use JMS\Serializer\SerializerInterface;
@@ -55,7 +55,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
     }
 
     /**
-     * @throws ApiServerException
+     * @throws ServerException
      */
     public function testProcess(): void
     {
@@ -134,7 +134,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
     }
 
     /**
-     * @throws ApiServerException
+     * @throws ServerException
      */
     public function testProcessWithMissingContentType(): void
     {
