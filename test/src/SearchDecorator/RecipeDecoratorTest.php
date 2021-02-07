@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\SearchDecorator;
 
 use BluePsyduck\TestHelper\ReflectionTrait;
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
@@ -30,597 +29,328 @@ class RecipeDecoratorTest extends TestCase
 {
     use ReflectionTrait;
 
-    /**
-     * The mocked mapper manager.
-     * @var MapperManagerInterface&MockObject
-     */
-    protected $mapperManager;
+    /** @var MapperManagerInterface&MockObject */
+    private MapperManagerInterface $mapperManager;
+    /** @var RecipeService&MockObject */
+    private RecipeService $recipeService;
 
-    /**
-     * The mocked recipe service.
-     * @var RecipeService&MockObject
-     */
-    protected $recipeService;
-
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->mapperManager = $this->createMock(MapperManagerInterface::class);
         $this->recipeService = $this->createMock(RecipeService::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
+     * @param array<string> $mockedMethods
+     * @return RecipeDecorator&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): RecipeDecorator
     {
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-
-        $this->assertSame($this->mapperManager, $this->extractProperty($decorator, 'mapperManager'));
-        $this->assertSame($this->recipeService, $this->extractProperty($decorator, 'recipeService'));
+        return $this->getMockBuilder(RecipeDecorator::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->mapperManager,
+                        $this->recipeService,
+                    ])
+                    ->getMock();
     }
 
-    /**
-     * Tests the getSupportedResultClass method.
-     * @covers ::getSupportedResultClass
-     */
     public function testGetSupportedResultClass(): void
     {
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $result = $decorator->getSupportedResultClass();
+        $instance = $this->createInstance();
 
-        $this->assertSame(RecipeResult::class, $result);
+        $this->assertSame(RecipeResult::class, $instance->getSupportedResultClass());
     }
 
     /**
-     * Tests the initialize method.
      * @throws ReflectionException
-     * @covers ::initialize
      */
     public function testInitialize(): void
     {
-        $numberOfRecipesPerResult = 42;
+        $instance = $this->createInstance();
+        $this->injectProperty($instance, 'announcedRecipeIds', [$this->createMock(UuidInterface::class)]);
+        $this->injectProperty($instance, 'databaseRecipes', [$this->createMock(RecipeResult::class)]);
 
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipeIds', [$this->createMock(UuidInterface::class)]);
-        $this->injectProperty($decorator, 'recipes', [$this->createMock(RecipeResult::class)]);
+        $instance->initialize(42);
 
-        $decorator->initialize($numberOfRecipesPerResult);
-
-        $this->assertSame([], $this->extractProperty($decorator, 'recipeIds'));
-        $this->assertSame([], $this->extractProperty($decorator, 'recipes'));
+        $this->assertSame([], $this->extractProperty($instance, 'announcedRecipeIds'));
+        $this->assertSame([], $this->extractProperty($instance, 'databaseRecipes'));
     }
 
     /**
-     * Tests the announce method.
      * @throws ReflectionException
-     * @covers ::announce
      */
     public function testAnnounce(): void
     {
-        /* @var UuidInterface&MockObject $normalRecipeId */
-        $normalRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $expensiveRecipeId */
-        $expensiveRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $existingRecipeId */
-        $existingRecipeId = $this->createMock(UuidInterface::class);
+        $announcedRecipeIds = [
+            '04041eb4-cb94-4c47-8b17-90a5f5b28cae' => Uuid::fromString('04041eb4-cb94-4c47-8b17-90a5f5b28cae'),
+        ];
+        $expectedAnnouncedRecipeIds = [
+            '04041eb4-cb94-4c47-8b17-90a5f5b28cae' => Uuid::fromString('04041eb4-cb94-4c47-8b17-90a5f5b28cae'),
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'),
+            '2a098339-f069-4941-a0f8-1f9518dc036b' => Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'),
+        ];
 
-        $recipeIds = [$expensiveRecipeId];
-        $expectedRecipeIds = [$existingRecipeId, $normalRecipeId, $expensiveRecipeId];
+        $recipeResult = new RecipeResult();
+        $recipeResult->setNormalRecipeId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'))
+                     ->setExpensiveRecipeId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
 
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->any())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->any())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
+        $instance = $this->createInstance();
+        $this->injectProperty($instance, 'announcedRecipeIds', $announcedRecipeIds);
 
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipeIds', $recipeIds);
+        $instance->announce($recipeResult);
 
-        $decorator->announce($recipeResult);
-
-        $this->assertEquals($expectedRecipeIds, $this->extractProperty($decorator, 'recipeIds'));
+        $this->assertEquals($expectedAnnouncedRecipeIds, $this->extractProperty($instance, 'announcedRecipeIds'));
     }
 
     /**
-     * Tests the prepare method.
      * @throws ReflectionException
-     * @covers ::prepare
      */
     public function testPrepare(): void
     {
-        $recipeIds = [42, 1337, 42, 0];
-        $expectedRecipeIds = [42, 1337];
-
-        $recipes = [
-            $this->createMock(DatabaseRecipe::class),
-            $this->createMock(DatabaseRecipe::class),
+        $announcedRecipeIds = [
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'),
+            '2a098339-f069-4941-a0f8-1f9518dc036b' => Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'),
+        ];
+        $databaseRecipes = [
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => $this->createMock(DatabaseRecipe::class),
+            '2a098339-f069-4941-a0f8-1f9518dc036b' => $this->createMock(DatabaseRecipe::class),
         ];
 
         $this->recipeService->expects($this->once())
                             ->method('getDetailsByIds')
-                            ->with($this->identicalTo($expectedRecipeIds))
-                            ->willReturn($recipes);
+                            ->with($this->identicalTo($announcedRecipeIds))
+                            ->willReturn($databaseRecipes);
 
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipeIds', $recipeIds);
+        $instance = $this->createInstance();
+        $this->injectProperty($instance, 'announcedRecipeIds', $announcedRecipeIds);
 
-        $decorator->prepare();
+        $instance->prepare();
 
-        $this->assertEquals($recipes, $this->extractProperty($decorator, 'recipes'));
+        $this->assertSame($databaseRecipes, $this->extractProperty($instance, 'databaseRecipes'));
     }
 
+
+
     /**
-     * Tests the decorate method.
-     * @throws MapperException
-     * @throws ReflectionException
-     * @covers ::decorate
+     * @return array<mixed>
      */
-    public function testDecorate(): void
+    public function provideDecorate(): array
     {
-        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $recipe1 = new RecipeResult();
+        $recipe1->setNormalRecipeId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'))
+                ->setExpensiveRecipeId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
 
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        /* @var RecipeWithExpensiveVersion&MockObject $decoratedRecipe */
-        $decoratedRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-        /* @var DatabaseRecipe&MockObject $recipe */
-        $recipe = $this->createMock(DatabaseRecipe::class);
+        $recipe2 = new RecipeResult();
+        $recipe2->setExpensiveRecipeId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
 
-        $recipes = [
-            $recipeId->toString() => $recipe,
+        $recipe3 = new RecipeResult();
+
+        return [
+            [$recipe1, Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b')],
+            [$recipe2, Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b')],
+            [$recipe3, null],
         ];
-
-        /* @var GenericEntityWithRecipes&MockObject $entity */
-        $entity = $this->createMock(GenericEntityWithRecipes::class);
-        $entity->expects($this->once())
-               ->method('addRecipe')
-               ->with($this->identicalTo($decoratedRecipe))
-               ->willReturnSelf();
-        $entity->expects($this->once())
-               ->method('setTotalNumberOfRecipes')
-               ->with($this->identicalTo(1));
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->once())
-                  ->method('getRecipeIdFromResult')
-                  ->with($this->identicalTo($recipeResult))
-                  ->willReturn($recipeId);
-        $decorator->expects($this->once())
-                  ->method('createEntityForRecipe')
-                  ->with($this->identicalTo($recipe))
-                  ->willReturn($entity);
-        $decorator->expects($this->once())
-                  ->method('decorateRecipe')
-                  ->with($recipeResult)
-                  ->willReturn($decoratedRecipe);
-        $this->injectProperty($decorator, 'recipes', $recipes);
-
-        $result = $decorator->decorate($recipeResult);
-
-        $this->assertSame($entity, $result);
     }
 
     /**
-     * Tests the decorate method without being able to decorate the recipe (should never happen).
-     * @throws MapperException
-     * @throws ReflectionException
-     * @covers ::decorate
+     * @param RecipeResult $searchResult
+     * @param UuidInterface|null $expectedId
+     * @dataProvider provideDecorate
      */
+    public function testDecorate(RecipeResult $searchResult, ?UuidInterface $expectedId): void
+    {
+        $decoratedRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
+
+        $entity = new GenericEntityWithRecipes();
+        $entity->name = 'abc';
+
+        $expectedResult = new GenericEntityWithRecipes();
+        $expectedResult->name = 'abc';
+        $expectedResult->recipes = [$decoratedRecipe];
+        $expectedResult->totalNumberOfRecipes = 1;
+
+        $instance = $this->createInstance(['decorateRecipe', 'mapRecipeWithId']);
+        $instance->expects($this->once())
+                 ->method('mapRecipeWithId')
+                 ->with($this->equalTo($expectedId), $this->isInstanceOf(GenericEntityWithRecipes::class))
+                 ->willReturn($entity);
+        $instance->expects($this->once())
+                 ->method('decorateRecipe')
+                 ->with($this->identicalTo($searchResult))
+                 ->willReturn($decoratedRecipe);
+
+
+        $result = $instance->decorate($searchResult);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
     public function testDecorateWithoutDecoratedRecipe(): void
     {
-        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
+        $searchResult = new RecipeResult();
+        $searchResult->setNormalRecipeId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'));
+        $expectedId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
 
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        /* @var DatabaseRecipe&MockObject $recipe */
-        $recipe = $this->createMock(DatabaseRecipe::class);
+        $entity = new GenericEntityWithRecipes();
+        $entity->name = 'abc';
 
-        $recipes = [
-            $recipeId->toString() => $recipe,
+        $expectedResult = new GenericEntityWithRecipes();
+        $expectedResult->name = 'abc';
+
+        $instance = $this->createInstance(['decorateRecipe', 'mapRecipeWithId']);
+        $instance->expects($this->once())
+                 ->method('mapRecipeWithId')
+                 ->with($this->equalTo($expectedId), $this->isInstanceOf(GenericEntityWithRecipes::class))
+                 ->willReturn($entity);
+        $instance->expects($this->once())
+                 ->method('decorateRecipe')
+                 ->with($this->identicalTo($searchResult))
+                 ->willReturn(null);
+
+        $result = $instance->decorate($searchResult);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    public function testDecorateWithoutEntity(): void
+    {
+        $searchResult = new RecipeResult();
+        $searchResult->setNormalRecipeId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'));
+        $expectedId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
+
+        $instance = $this->createInstance(['decorateRecipe', 'mapRecipeWithId']);
+        $instance->expects($this->once())
+                 ->method('mapRecipeWithId')
+                 ->with($this->equalTo($expectedId), $this->isInstanceOf(GenericEntityWithRecipes::class))
+                 ->willReturn(null);
+        $instance->expects($this->never())
+                 ->method('decorateRecipe');
+
+        $result = $instance->decorate($searchResult);
+
+        $this->assertNull($result);
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function provideDecorateRecipe(): array
+    {
+        $recipe1 = new RecipeWithExpensiveVersion();
+        $recipe1->name = 'abc';
+        $recipe2 = new RecipeWithExpensiveVersion();
+        $recipe2->name = 'def';
+
+        $combinedRecipe = new RecipeWithExpensiveVersion();
+        $combinedRecipe->name = 'abc';
+        $combinedRecipe->expensiveVersion = $recipe2;
+
+        return [
+            [$recipe1, $recipe2, $combinedRecipe],
+            [$recipe1, null, $recipe1],
+            [null, $recipe2, $recipe2],
         ];
-
-        /* @var GenericEntityWithRecipes&MockObject $entity */
-        $entity = $this->createMock(GenericEntityWithRecipes::class);
-        $entity->expects($this->never())
-               ->method('addRecipe');
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->once())
-                  ->method('getRecipeIdFromResult')
-                  ->with($this->identicalTo($recipeResult))
-                  ->willReturn($recipeId);
-        $decorator->expects($this->once())
-                  ->method('createEntityForRecipe')
-                  ->with($this->identicalTo($recipe))
-                  ->willReturn($entity);
-        $decorator->expects($this->once())
-                  ->method('decorateRecipe')
-                  ->with($recipeResult)
-                  ->willReturn(null);
-        $this->injectProperty($decorator, 'recipes', $recipes);
-
-        $result = $decorator->decorate($recipeResult);
-
-        $this->assertSame($entity, $result);
     }
 
     /**
-     * Tests the decorate method without an actual recipe to decorate.
-     * @throws MapperException
+     * @param RecipeWithExpensiveVersion|null $normalRecipe
+     * @param RecipeWithExpensiveVersion|null $expensiveRecipe
+     * @param RecipeWithExpensiveVersion|null $expectedResult
+     * @dataProvider provideDecorateRecipe
+     */
+    public function testDecorateRecipe(
+        ?RecipeWithExpensiveVersion $normalRecipe,
+        ?RecipeWithExpensiveVersion $expensiveRecipe,
+        ?RecipeWithExpensiveVersion $expectedResult
+    ): void {
+        $recipeResult = new RecipeResult();
+        $recipeResult->setNormalRecipeId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'))
+                     ->setExpensiveRecipeId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
+
+        $instance = $this->createInstance(['mapRecipeWithId']);
+        $instance->expects($this->exactly(2))
+                 ->method('mapRecipeWithId')
+                 ->withConsecutive(
+                     [
+                         $this->equalTo(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b')),
+                         $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                     ],
+                     [
+                         $this->equalTo(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b')),
+                         $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                     ],
+                 )
+                 ->willReturnOnConsecutiveCalls(
+                     $normalRecipe,
+                     $expensiveRecipe,
+                 );
+
+        $result = $instance->decorateRecipe($recipeResult);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
      * @throws ReflectionException
-     * @covers ::decorate
      */
-    public function testDecorateWithoutRecipe(): void
+    public function testMapRecipeWithId(): void
     {
-        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
-
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-
-        $recipes = [];
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['getRecipeIdFromResult', 'createEntityForRecipe', 'decorateRecipe'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->once())
-                  ->method('getRecipeIdFromResult')
-                  ->with($this->identicalTo($recipeResult))
-                  ->willReturn($recipeId);
-        $decorator->expects($this->never())
-                  ->method('createEntityForRecipe');
-        $decorator->expects($this->never())
-                  ->method('decorateRecipe');
-        $this->injectProperty($decorator, 'recipes', $recipes);
-
-        $result = $decorator->decorate($recipeResult);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * Tests the decorate method.
-     * @throws MapperException
-     * @covers ::decorate
-     */
-    public function testDecorateWithoutRecipeId(): void
-    {
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['getRecipeIdFromResult'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->once())
-                  ->method('getRecipeIdFromResult')
-                  ->with($this->identicalTo($recipeResult))
-                  ->willReturn(null);
-
-        $result = $decorator->decorate($recipeResult);
-
-        $this->assertNull($result);
-    }
-
-
-    /**
-     * Tests the createEntityForRecipe method.
-     * @throws ReflectionException
-     * @covers ::createEntityForRecipe
-     */
-    public function testCreateEntityForRecipe(): void
-    {
-        /* @var DatabaseRecipe&MockObject $databaseRecipe */
+        $recipeId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
         $databaseRecipe = $this->createMock(DatabaseRecipe::class);
+        $destination = $this->createMock(GenericEntityWithRecipes::class);
+        $mappedRecipe = $this->createMock(GenericEntityWithRecipes::class);
+
+        $databaseRecipes = [
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => $databaseRecipe,
+        ];
 
         $this->mapperManager->expects($this->once())
                             ->method('map')
                             ->with(
                                 $this->identicalTo($databaseRecipe),
-                                $this->isInstanceOf(GenericEntityWithRecipes::class)
-                            );
+                                $this->identicalTo($destination),
+                            )
+                            ->willReturn($mappedRecipe);
 
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->invokeMethod($decorator, 'createEntityForRecipe', $databaseRecipe);
+        $instance = $this->createInstance();
+        $this->injectProperty($instance, 'databaseRecipes', $databaseRecipes);
+
+        $result = $this->invokeMethod($instance, 'mapRecipeWithId', $recipeId, $destination);
+
+        $this->assertSame($mappedRecipe, $result);
     }
 
     /**
-     * Provides the data for the getRecipeIdFromResult test.
-     * @return array<mixed>
-     */
-    public function provideGetRecipeIdFromResult(): array
-    {
-        /* @var UuidInterface&MockObject $id1 */
-        $id1 = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $id2 */
-        $id2 = $this->createMock(UuidInterface::class);
-
-        return [
-            [$id1, $id2, $id1],
-            [null, $id2, $id2],
-            [null, null, null],
-        ];
-    }
-
-    /**
-     * Tests the getRecipeIdFromResult method.
-     * @param UuidInterface|null $normalRecipeId
-     * @param UuidInterface|null $expensiveRecipeId
-     * @param UuidInterface|null $expectedResult
      * @throws ReflectionException
-     * @covers ::getRecipeIdFromResult
-     * @dataProvider provideGetRecipeIdFromResult
      */
-    public function testGetRecipeIdFromResult(
-        ?UuidInterface $normalRecipeId,
-        ?UuidInterface $expensiveRecipeId,
-        ?UuidInterface $expectedResult
-    ): void {
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->any())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
-
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $result = $this->invokeMethod($decorator, 'getRecipeIdFromResult', $recipeResult);
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the decorateRecipe method.
-     * @throws MapperException
-     * @covers ::decorateRecipe
-     */
-    public function testDecorateRecipe(): void
+    public function testMapRecipeWithIdWithoutDatabaseRecipe(): void
     {
-        /* @var UuidInterface&MockObject $normalRecipeId */
-        $normalRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $expensiveRecipeId */
-        $expensiveRecipeId = $this->createMock(UuidInterface::class);
+        $recipeId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
+        $destination = $this->createMock(GenericEntityWithRecipes::class);
 
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->once())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
+        $this->mapperManager->expects($this->never())
+                            ->method('map');
 
-        /* @var RecipeWithExpensiveVersion&MockObject $expensiveRecipe */
-        $expensiveRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-
-        /* @var RecipeWithExpensiveVersion&MockObject $normalRecipe */
-        $normalRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-        $normalRecipe->expects($this->once())
-                     ->method('setExpensiveVersion')
-                     ->with($this->identicalTo($expensiveRecipe));
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['mapRecipeWithId'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->exactly(2))
-                  ->method('mapRecipeWithId')
-                  ->withConsecutive(
-                      [$this->identicalTo($normalRecipeId)],
-                      [$this->identicalTo($expensiveRecipeId)]
-                  )
-                  ->willReturnOnConsecutiveCalls(
-                      $normalRecipe,
-                      $expensiveRecipe
-                  );
-
-        $result = $decorator->decorateRecipe($recipeResult);
-
-        $this->assertSame($normalRecipe, $result);
-    }
-
-    /**
-     * Tests the decorateRecipe method with only having a normal recipe.
-     * @throws MapperException
-     * @covers ::decorateRecipe
-     */
-    public function testDecorateRecipeWithNormalRecipe(): void
-    {
-        /* @var UuidInterface&MockObject $normalRecipeId */
-        $normalRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $expensiveRecipeId */
-        $expensiveRecipeId = $this->createMock(UuidInterface::class);
-
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->once())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
-
-        /* @var RecipeWithExpensiveVersion&MockObject $normalRecipe */
-        $normalRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-        $normalRecipe->expects($this->never())
-                     ->method('setExpensiveVersion');
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['mapRecipeWithId'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->exactly(2))
-                  ->method('mapRecipeWithId')
-                  ->withConsecutive(
-                      [$this->identicalTo($normalRecipeId)],
-                      [$this->identicalTo($expensiveRecipeId)]
-                  )
-                  ->willReturnOnConsecutiveCalls(
-                      $normalRecipe,
-                      null
-                  );
-
-        $result = $decorator->decorateRecipe($recipeResult);
-
-        $this->assertSame($normalRecipe, $result);
-    }
-
-    /**
-     * Tests the decorateRecipe method with only having an expensive recipe.
-     * @throws MapperException
-     * @covers ::decorateRecipe
-     */
-    public function testDecorateRecipeWithExpensiveRecipe(): void
-    {
-        /* @var UuidInterface&MockObject $normalRecipeId */
-        $normalRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $expensiveRecipeId */
-        $expensiveRecipeId = $this->createMock(UuidInterface::class);
-
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->once())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
-
-        /* @var RecipeWithExpensiveVersion&MockObject $expensiveRecipe */
-        $expensiveRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['mapRecipeWithId'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->exactly(2))
-                  ->method('mapRecipeWithId')
-                  ->withConsecutive(
-                      [$this->identicalTo($normalRecipeId)],
-                      [$this->identicalTo($expensiveRecipeId)]
-                  )
-                  ->willReturnOnConsecutiveCalls(
-                      null,
-                      $expensiveRecipe
-                  );
-
-        $result = $decorator->decorateRecipe($recipeResult);
-
-        $this->assertSame($expensiveRecipe, $result);
-    }
-
-    /**
-     * Tests the decorateRecipe method without any actual recipes.
-     * @throws MapperException
-     * @covers ::decorateRecipe
-     */
-    public function testDecorateRecipeWithoutRecipes(): void
-    {
-        /* @var UuidInterface&MockObject $normalRecipeId */
-        $normalRecipeId = $this->createMock(UuidInterface::class);
-        /* @var UuidInterface&MockObject $expensiveRecipeId */
-        $expensiveRecipeId = $this->createMock(UuidInterface::class);
-
-        /* @var RecipeResult&MockObject $recipeResult */
-        $recipeResult = $this->createMock(RecipeResult::class);
-        $recipeResult->expects($this->once())
-                     ->method('getNormalRecipeId')
-                     ->willReturn($normalRecipeId);
-        $recipeResult->expects($this->once())
-                     ->method('getExpensiveRecipeId')
-                     ->willReturn($expensiveRecipeId);
-
-        /* @var RecipeDecorator&MockObject $decorator */
-        $decorator = $this->getMockBuilder(RecipeDecorator::class)
-                          ->onlyMethods(['mapRecipeWithId'])
-                          ->setConstructorArgs([$this->mapperManager, $this->recipeService])
-                          ->getMock();
-        $decorator->expects($this->exactly(2))
-                  ->method('mapRecipeWithId')
-                  ->withConsecutive(
-                      [$this->identicalTo($normalRecipeId)],
-                      [$this->identicalTo($expensiveRecipeId)]
-                  )
-                  ->willReturnOnConsecutiveCalls(
-                      null,
-                      null
-                  );
-
-        $result = $decorator->decorateRecipe($recipeResult);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'mapRecipeWithId', $recipeId, $destination);
 
         $this->assertNull($result);
     }
 
     /**
-     * Tests the mapRecipeWithId method.
      * @throws ReflectionException
-     * @covers ::mapRecipeWithId
      */
-    public function testMapRecipeWithId(): void
+    public function testMapRecipeWithIdWithoutId(): void
     {
-        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
-
-        /* @var DatabaseRecipe&MockObject $recipe */
-        $recipe = $this->createMock(DatabaseRecipe::class);
-
-        $recipes = [
-            $recipeId->toString() => $recipe,
-        ];
-
-        $this->mapperManager->expects($this->once())
-                            ->method('map')
-                            ->with($this->identicalTo($recipe), $this->isInstanceOf(RecipeWithExpensiveVersion::class));
-
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipes', $recipes);
-
-        $result = $this->invokeMethod($decorator, 'mapRecipeWithId', $recipeId);
-
-        $this->assertInstanceOf(RecipeWithExpensiveVersion::class, $result);
-    }
-
-    /**
-     * Tests the mapRecipeWithId method.
-     * @throws ReflectionException
-     * @covers ::mapRecipeWithId
-     */
-    public function testMapRecipeWithIdWithoutRecipe(): void
-    {
-        $recipeId = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
-        $recipes = [];
+        $destination = $this->createMock(GenericEntityWithRecipes::class);
 
         $this->mapperManager->expects($this->never())
                             ->method('map');
 
-        $decorator = new RecipeDecorator($this->mapperManager, $this->recipeService);
-        $this->injectProperty($decorator, 'recipes', $recipes);
-
-        $result = $this->invokeMethod($decorator, 'mapRecipeWithId', $recipeId);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'mapRecipeWithId', null, $destination);
 
         $this->assertNull($result);
     }

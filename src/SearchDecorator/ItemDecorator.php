@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Item as DatabaseItem;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Search\Entity\Result\ItemResult;
-use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
+use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -19,51 +18,21 @@ use Ramsey\Uuid\UuidInterface;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements SearchDecoratorInterface<ItemResult>
  */
 class ItemDecorator implements SearchDecoratorInterface
 {
-    /**
-     * The item repository.
-     * @var ItemRepository
-     */
-    protected $itemRepository;
+    protected ItemRepository $itemRepository;
+    protected MapperManagerInterface $mapperManager;
+    protected RecipeDecorator $recipeDecorator;
 
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    protected int $numberOfRecipesPerResult = 0;
+    /** @var array<string, UuidInterface> */
+    protected array $announcedItemIds = [];
+    /** @var array<string, DatabaseItem> */
+    protected array $databaseItems = [];
 
-    /**
-     * The number of recipes to decorate per result.
-     * @var int
-     */
-    protected $numberOfRecipesPerResult = 0;
-
-    /**
-     * The recipe decorator.
-     * @var RecipeDecorator
-     */
-    protected $recipeDecorator;
-
-    /**
-     * The item ids of the announced search results.
-     * @var array|UuidInterface[]
-     */
-    protected $itemIds = [];
-
-    /**
-     * The items from the database.
-     * @var array|DatabaseItem[];
-     */
-    protected $items = [];
-
-    /**
-     * Initializes the decorator.
-     * @param ItemRepository $itemRepository
-     * @param MapperManagerInterface $mapperManager
-     * @param RecipeDecorator $recipeDecorator
-     */
     public function __construct(
         ItemRepository $itemRepository,
         MapperManagerInterface $mapperManager,
@@ -74,100 +43,75 @@ class ItemDecorator implements SearchDecoratorInterface
         $this->recipeDecorator = $recipeDecorator;
     }
 
-    /**
-     * Returns the result class supported by the decorator.
-     * @return string
-     */
     public function getSupportedResultClass(): string
     {
         return ItemResult::class;
     }
 
-    /**
-     * Initializes the decorator.
-     * @param int $numberOfRecipesPerResult
-     */
     public function initialize(int $numberOfRecipesPerResult): void
     {
         $this->numberOfRecipesPerResult = $numberOfRecipesPerResult;
-        $this->itemIds = [];
-        $this->items = [];
+        $this->announcedItemIds = [];
+        $this->databaseItems = [];
     }
 
     /**
-     * Announces a search result to be decorated.
-     * @param ItemResult $itemResult
+     * @param ItemResult $searchResult
      */
-    public function announce($itemResult): void
+    public function announce(ResultInterface $searchResult): void
     {
-        if ($itemResult->getId() !== null) {
-            $this->itemIds[] = $itemResult->getId();
+        if ($searchResult->getId() !== null) {
+            $this->announcedItemIds[$searchResult->getId()->toString()] = $searchResult->getId();
         }
-        foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
+        foreach (array_slice($searchResult->getRecipes(), 0, $this->numberOfRecipesPerResult) as $recipeResult) {
             $this->recipeDecorator->announce($recipeResult);
         }
     }
 
-    /**
-     * Prepares the data for the actual decoration.
-     */
     public function prepare(): void
     {
-        $itemIds = array_values(array_unique(array_filter($this->itemIds)));
-
-        $this->items = [];
-        foreach ($this->itemRepository->findByIds($itemIds) as $item) {
-            $this->items[$item->getId()->toString()] = $item;
+        $this->databaseItems = [];
+        foreach ($this->itemRepository->findByIds(array_values($this->announcedItemIds)) as $item) {
+            $this->databaseItems[$item->getId()->toString()] = $item;
         }
     }
 
     /**
-     * Actually decorates the search result.
-     * @param ItemResult $itemResult
+     * @param ItemResult $searchResult
      * @return GenericEntityWithRecipes|null
-     * @throws MapperException
      */
-    public function decorate($itemResult): ?GenericEntityWithRecipes
+    public function decorate(ResultInterface $searchResult): ?GenericEntityWithRecipes
     {
-        if ($itemResult->getId() === null) {
-            return null;
-        }
-        $itemId = $itemResult->getId()->toString();
-        if (!isset($this->items[$itemId])) {
+        $entity = $this->mapItemWithId($searchResult->getId());
+        if ($entity === null) {
             return null;
         }
 
-        $result = $this->createEntityForItem($this->items[$itemId]);
-        foreach ($this->getRecipesFromItem($itemResult) as $recipeResult) {
+        foreach (array_slice($searchResult->getRecipes(), 0, $this->numberOfRecipesPerResult) as $recipeResult) {
             $recipe = $this->recipeDecorator->decorateRecipe($recipeResult);
             if ($recipe instanceof ClientRecipe) {
-                $result->addRecipe($recipe);
+                $entity->recipes[] = $recipe;
             }
         }
-        $result->setTotalNumberOfRecipes(count($itemResult->getRecipes()));
-        return $result;
+        $entity->totalNumberOfRecipes = count($searchResult->getRecipes());
+        return $entity;
     }
 
     /**
-     * Creates the entity to the item.
-     * @param DatabaseItem $item
-     * @return GenericEntityWithRecipes
-     * @throws MapperException
+     * Maps the item with the specified id.
+     * @param UuidInterface|null $itemId
+     * @return GenericEntityWithRecipes|null
      */
-    protected function createEntityForItem(DatabaseItem $item): GenericEntityWithRecipes
+    protected function mapItemWithId(?UuidInterface $itemId): ?GenericEntityWithRecipes
     {
-        $result = new GenericEntityWithRecipes();
-        $this->mapperManager->map($item, $result);
-        return $result;
-    }
+        if ($itemId === null) {
+            return null;
+        }
+        $itemId = $itemId->toString();
+        if (!isset($this->databaseItems[$itemId])) {
+            return null;
+        }
 
-    /**
-     * Returns the recipes from the item to process.
-     * @param ItemResult $itemResult
-     * @return array|RecipeResult[]
-     */
-    protected function getRecipesFromItem(ItemResult $itemResult): array
-    {
-        return array_slice($itemResult->getRecipes(), 0, $this->numberOfRecipesPerResult);
+        return $this->mapperManager->map($this->databaseItems[$itemId], new GenericEntityWithRecipes());
     }
 }
