@@ -23,7 +23,7 @@ class CorsHeaderMiddleware implements MiddlewareInterface
     protected const ALLOWED_HEADERS = [
         'Accept',
         'Accept-Language',
-        'Authorization',
+        'Api-Key',
         'Content-Language',
         'Content-Type',
     ];

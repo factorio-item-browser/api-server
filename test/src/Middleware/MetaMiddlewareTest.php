@@ -37,8 +37,8 @@ class MetaMiddlewareTest extends TestCase
         $response->expects($this->exactly(2))
                  ->method('withHeader')
                  ->withConsecutive(
-                     [$this->identicalTo('X-Version'), $this->identicalTo($version)],
-                     [$this->identicalTo('X-Runtime'), $this->isType('string')]
+                     [$this->identicalTo('Version'), $this->identicalTo($version)],
+                     [$this->identicalTo('Runtime'), $this->isType('string')]
                  )
                  ->willReturnSelf();
 
