@@ -25,7 +25,7 @@ class TypeAndNameFromEntityExtractorTraitTest extends TestCase
 
     /**
      * @param array<string> $mockedMethods
-     * @return TypeAndNameFromEntityExtractorTrait&MockObject
+     * @return MockObject
      */
     private function createInstance(array $mockedMethods = []): MockObject
     {

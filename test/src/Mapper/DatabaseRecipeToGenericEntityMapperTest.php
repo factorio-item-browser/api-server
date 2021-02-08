@@ -82,20 +82,20 @@ class DatabaseRecipeToGenericEntityMapperTest extends TestCase
     {
         $source = new DatabaseRecipe();
         $source->setName('abc');
-        
+
         $expectedDestination = new GenericEntity();
         $expectedDestination->type = EntityType::RECIPE;
         $expectedDestination->name = 'abc';
-        
+
         $destination = new GenericEntity();
-        
+
         $instance = $this->createInstance(['addToTranslationService']);
         $instance->expects($this->once())
                  ->method('addToTranslationService')
                  ->with($this->equalTo($expectedDestination));
-        
+
         $instance->map($source, $destination);
-        
+
         $this->assertEquals($expectedDestination, $destination);
     }
 }

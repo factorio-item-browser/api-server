@@ -29,7 +29,7 @@ use ReflectionException;
 class DatabaseRecipeToClientRecipeMapperTest extends TestCase
 {
     use ReflectionTrait;
-    
+
     /** @var TranslationService&MockObject */
     private TranslationService $translationService;
 

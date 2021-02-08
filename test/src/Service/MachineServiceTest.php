@@ -309,13 +309,13 @@ class MachineServiceTest extends TestCase
     {
         $machine1 = new Machine();
         $machine1->setName('abc');
-        
+
         $machine2 = new Machine();
         $machine2->setName('zyx');
 
         $character = new Machine();
         $character->setName(Constant::ENTITY_NAME_CHARACTER);
-        
+
         return [
             [$machine1, $machine2, -1],
             [$machine2, $machine1, 1],
