@@ -74,7 +74,7 @@ class RecipeServiceTest extends TestCase
                  ->with($this->identicalTo($recipeData))
                  ->willReturn($recipeDataCollection);
 
-        $result = $instance->getDataWithNames($names, $combinationId);
+        $result = $instance->getDataWithNames($combinationId, $names);
 
         $this->assertSame($recipeDataCollection, $result);
     }
@@ -136,7 +136,7 @@ class RecipeServiceTest extends TestCase
                  ->with($this->identicalTo($recipeData))
                  ->willReturn($recipeDataCollection);
 
-        $result = $instance->getDataWithIngredients($items, $combinationId);
+        $result = $instance->getDataWithIngredients($combinationId, $items);
 
         $this->assertSame($recipeDataCollection, $result);
     }
@@ -172,7 +172,7 @@ class RecipeServiceTest extends TestCase
                  ->with($this->identicalTo($recipeData))
                  ->willReturn($recipeDataCollection);
 
-        $result = $instance->getDataWithProducts($items, $combinationId);
+        $result = $instance->getDataWithProducts($combinationId, $items);
 
         $this->assertSame($recipeDataCollection, $result);
     }

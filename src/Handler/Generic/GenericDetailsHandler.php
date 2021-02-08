@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericDetailsRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericDetailsResponse;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Database\Repository\ItemRepository;
 use FactorioItemBrowser\Api\Database\Repository\MachineRepository;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use FactorioItemBrowser\Common\Constant\EntityType;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The handler of the /generic/details request.
@@ -25,41 +27,15 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class GenericDetailsHandler extends AbstractRequestHandler
+class GenericDetailsHandler implements RequestHandlerInterface
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    /**
-     * The item repository.
-     * @var ItemRepository
-     */
-    protected $itemRepository;
+    protected ItemRepository $itemRepository;
+    protected MachineRepository $machineRepository;
+    protected MapperManagerInterface $mapperManager;
+    protected RecipeRepository $recipeRepository;
 
-    /**
-     * The machine repository.
-     * @var MachineRepository
-     */
-    protected $machineRepository;
-
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
-
-    /**
-     * The recipe repository.
-     * @var RecipeRepository
-     */
-    protected $recipeRepository;
-
-    /**
-     * Initializes the request handler.
-     * @param ItemRepository $itemRepository
-     * @param MachineRepository $machineRepository
-     * @param MapperManagerInterface $mapperManager
-     * @param RecipeRepository $recipeRepository
-     */
     public function __construct(
         ItemRepository $itemRepository,
         MachineRepository $machineRepository,
@@ -72,129 +48,75 @@ class GenericDetailsHandler extends AbstractRequestHandler
         $this->recipeRepository = $recipeRepository;
     }
 
-    /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return GenericDetailsRequest::class;
-    }
+        /** @var GenericDetailsRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
+        $combinationId = Uuid::fromString($clientRequest->combinationId);
+        $namesByTypes = $this->extractTypesAndNames($clientRequest->entities);
 
-    /**
-     * Creates the response data from the validated request data.
-     * @param GenericDetailsRequest $request
-     * @return ResponseInterface
-     * @throws MapperException
-     */
-    protected function handleRequest($request): ResponseInterface
-    {
-        $namesByTypes = $this->extractTypesAndNames($request->getEntities());
-        $authorizationToken = $this->getAuthorizationToken();
-        $entities = $this->process($namesByTypes, $authorizationToken);
-        return $this->createResponse($entities);
-    }
-
-    /**
-     * Processes the types and names.
-     * @param NamesByTypes $namesByTypes
-     * @param AuthorizationToken $authorizationToken
-     * @return array|GenericEntity[]
-     * @throws MapperException
-     */
-    protected function process(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
-    {
-        return array_values(array_merge(
-            $this->processItems($namesByTypes, $authorizationToken),
-            $this->processMachines($namesByTypes, $authorizationToken),
-            $this->processRecipes($namesByTypes, $authorizationToken)
+        $entities = array_values(array_merge(
+            $this->processItems($combinationId, $namesByTypes),
+            $this->processMachines($combinationId, $namesByTypes),
+            $this->processRecipes($combinationId, $namesByTypes),
         ));
+
+        $response = new GenericDetailsResponse();
+        $response->entities = $entities;
+
+        return new ClientResponse($response);
     }
 
     /**
-     * Processes the items.
+     * @param UuidInterface $combinationId
      * @param NamesByTypes $namesByTypes
-     * @param AuthorizationToken $authorizationToken
-     * @return array|GenericEntity[]
-     * @throws MapperException
+     * @return array<string, GenericEntity>
      */
-    protected function processItems(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
+    protected function processItems(UuidInterface $combinationId, NamesByTypes $namesByTypes): array
     {
-        $items = $this->itemRepository->findByTypesAndNames(
-            $authorizationToken->getCombinationId(),
-            $namesByTypes
-        );
+        $items = $this->itemRepository->findByTypesAndNames($combinationId, $namesByTypes);
         return $this->mapObjectsToEntities($items);
     }
 
     /**
-     * Processes the machines.
+     * @param UuidInterface $combinationId
      * @param NamesByTypes $namesByTypes
-     * @param AuthorizationToken $authorizationToken
-     * @return array|GenericEntity[]
-     * @throws MapperException
+     * @return array<string, GenericEntity>
      */
-    protected function processMachines(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
+    protected function processMachines(UuidInterface $combinationId, NamesByTypes $namesByTypes): array
     {
         $machines = $this->machineRepository->findByNames(
-            $authorizationToken->getCombinationId(),
+            $combinationId,
             $namesByTypes->getNames(EntityType::MACHINE)
         );
         return $this->mapObjectsToEntities($machines);
     }
 
     /**
-     * Processes the recipes.
+     * @param UuidInterface $combinationId
      * @param NamesByTypes $namesByTypes
-     * @param AuthorizationToken $authorizationToken
-     * @return array|GenericEntity[]
-     * @throws MapperException
+     * @return array<string, GenericEntity>
      */
-    protected function processRecipes(NamesByTypes $namesByTypes, AuthorizationToken $authorizationToken): array
+    protected function processRecipes(UuidInterface $combinationId, NamesByTypes $namesByTypes): array
     {
         $recipes = $this->recipeRepository->findDataByNames(
-            $authorizationToken->getCombinationId(),
+            $combinationId,
             $namesByTypes->getNames(EntityType::RECIPE)
         );
         return $this->mapObjectsToEntities($recipes);
     }
 
     /**
-     * Maps an array of objects to client entities.
-     * @param array|object[] $objects
-     * @return array|GenericEntity[]
-     * @throws MapperException
+     * @param array<object> $objects
+     * @return array<string, GenericEntity>
      */
     protected function mapObjectsToEntities(array $objects): array
     {
         $result = [];
         foreach ($objects as $object) {
-            $entity = new GenericEntity();
-            $this->mapperManager->map($object, $entity);
-            $result[$this->getEntityKey($entity)] = $entity;
+            $entity = $this->mapperManager->map($object, new GenericEntity());
+            $result["{$entity->type}|{$entity->name}"] = $entity;
         }
-        return $result;
-    }
-
-    /**
-     * Returns the key of the entity.
-     * @param GenericEntity $entity
-     * @return string
-     */
-    protected function getEntityKey(GenericEntity $entity): string
-    {
-        return "{$entity->getType()}|{$entity->getName()}";
-    }
-
-    /**
-     * Creates the final response of the request.
-     * @param array|GenericEntity[] $entities
-     * @return GenericDetailsResponse
-     */
-    protected function createResponse(array $entities): GenericDetailsResponse
-    {
-        $result = new GenericDetailsResponse();
-        $result->setEntities($entities);
         return $result;
     }
 }

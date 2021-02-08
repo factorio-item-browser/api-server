@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Handler;
 
 use FactorioItemBrowser\Api\Server\Exception\ApiEndpointNotFoundException;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Handler\NotFoundHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +23,7 @@ class NotFoundHandlerTest extends TestCase
     /**
      * Tests the handle method.
      * @covers ::handle
-     * @throws ApiServerException
+     * @throws ServerException
      */
     public function testHandle(): void
     {

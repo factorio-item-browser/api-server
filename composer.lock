@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c9cd7cdd046ba7b96163053fb84511c",
+    "content-hash": "0ee5662e24afa5102de3da9981b97416",
     "packages": [
         {
             "name": "bluepsyduck/jms-serializer-factory",
@@ -186,16 +186,16 @@
         },
         {
             "name": "brick/varexporter",
-            "version": "0.3.3",
+            "version": "0.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/varexporter.git",
-                "reference": "736378d357a189a692390bbc9e0eed835b079805"
+                "reference": "17e03b4afaaf1a97736f2c5a2b4254219790ef47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/varexporter/zipball/736378d357a189a692390bbc9e0eed835b079805",
-                "reference": "736378d357a189a692390bbc9e0eed835b079805",
+                "url": "https://api.github.com/repos/brick/varexporter/zipball/17e03b4afaaf1a97736f2c5a2b4254219790ef47",
+                "reference": "17e03b4afaaf1a97736f2c5a2b4254219790ef47",
                 "shasum": ""
             },
             "require": {
@@ -205,7 +205,7 @@
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2.2",
                 "phpunit/phpunit": "^8.5 || ^9.0",
-                "vimeo/psalm": "^4.3"
+                "vimeo/psalm": "4.4.1"
             },
             "type": "library",
             "autoload": {
@@ -223,9 +223,9 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/varexporter/issues",
-                "source": "https://github.com/brick/varexporter/tree/0.3.3"
+                "source": "https://github.com/brick/varexporter/tree/0.3.4"
             },
-            "time": "2020-12-24T15:04:41+00:00"
+            "time": "2021-02-07T22:52:42+00:00"
         },
         {
             "name": "composer/package-versions-deprecated",
@@ -5475,24 +5475,24 @@
     "packages-dev": [
         {
             "name": "bluepsyduck/test-helper",
-            "version": "1.0.0",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BluePsyduck/test-helper.git",
-                "reference": "177678acbf03e59bc77ebe8846e8aec4c6049981"
+                "reference": "f4c6671fcfe6c156dd40a1be6e048796541f84db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BluePsyduck/test-helper/zipball/177678acbf03e59bc77ebe8846e8aec4c6049981",
-                "reference": "177678acbf03e59bc77ebe8846e8aec4c6049981",
+                "url": "https://api.github.com/repos/BluePsyduck/test-helper/zipball/f4c6671fcfe6c156dd40a1be6e048796541f84db",
+                "reference": "f4c6671fcfe6c156dd40a1be6e048796541f84db",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.0"
+                "php": "^7.4 | ^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.0 || ^7.0 || ^8.0",
-                "rregeer/phpunit-coverage-check": "^0.1",
+                "phpunit/phpunit": "^9.0",
+                "rregeer/phpunit-coverage-check": "^0.3",
                 "squizlabs/php_codesniffer": "^3.4"
             },
             "type": "library",
@@ -5521,9 +5521,9 @@
             ],
             "support": {
                 "issues": "https://github.com/BluePsyduck/test-helper/issues",
-                "source": "https://github.com/BluePsyduck/test-helper/tree/1.0.0"
+                "source": "https://github.com/BluePsyduck/test-helper/tree/2.0.0"
             },
-            "time": "2019-04-23T16:47:27+00:00"
+            "time": "2021-01-12T10:38:21+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -5921,16 +5921,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.72",
+            "version": "0.12.73",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ae32fb1c5e97979f424c3ccec4ee435a35754769"
+                "reference": "a08c2759d132b4247b32e03066401c3232ad99b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ae32fb1c5e97979f424c3ccec4ee435a35754769",
-                "reference": "ae32fb1c5e97979f424c3ccec4ee435a35754769",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a08c2759d132b4247b32e03066401c3232ad99b7",
+                "reference": "a08c2759d132b4247b32e03066401c3232ad99b7",
                 "shasum": ""
             },
             "require": {
@@ -5961,7 +5961,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.72"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.73"
             },
             "funding": [
                 {
@@ -5977,7 +5977,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-06T18:34:03+00:00"
+            "time": "2021-02-07T16:26:54+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",

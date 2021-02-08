@@ -139,30 +139,70 @@ class RequestDeserializerMiddlewareTest extends TestCase
     public function testProcessWithMissingContentType(): void
     {
         $matchedRouteName = 'abc';
+        $combinationId = 'def';
+        $locale = 'ghi';
+        $requestClass = SearchQueryRequest::class;
+
+        $this->requestClassesByRoutes = [
+            'abc' => SearchQueryRequest::class,
+        ];
+
+        $response = $this->createMock(ResponseInterface::class);
+
+        $deserializedRequest = new SearchQueryRequest();
+        $deserializedRequest->query = 'pqr';
+
+        $expectedClientRequest = new SearchQueryRequest();
+        $expectedClientRequest->query = 'pqr';
+        $expectedClientRequest->combinationId = 'def';
+        $expectedClientRequest->locale = 'ghi';
 
         $routeResult = $this->createMock(RouteResult::class);
         $routeResult->expects($this->any())
                     ->method('getMatchedRouteName')
                     ->willReturn($matchedRouteName);
 
+        $request2 = $this->createMock(ServerRequestInterface::class);
+
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->any())
                 ->method('getAttribute')
                 ->willReturnMap([
                     [RouteResult::class, null, $routeResult],
+                    ['combination-id', null, $combinationId],
                 ]);
+        $request->expects($this->any())
+                ->method('getHeaderLine')
+                ->willReturnMap([
+                    ['Accept-Language', $locale],
+                    ['Content-Type', ''],
+                ]);
+        $request->expects($this->never())
+                ->method('getBody');
+        $request->expects($this->once())
+                ->method('withParsedBody')
+                ->with($this->equalTo($expectedClientRequest))
+                ->willReturn($request2);
 
-        $this->serializer->expects($this->never())
-                         ->method('deserialize');
+        $this->serializer->expects($this->once())
+                         ->method('deserialize')
+                         ->with(
+                             $this->identicalTo('{}'),
+                             $this->identicalTo($requestClass),
+                             $this->identicalTo('json'),
+                         )
+                         ->willReturn($deserializedRequest);
 
         $handler = $this->createMock(RequestHandlerInterface::class);
-        $handler->expects($this->never())
-                ->method('handle');
-
-        $this->expectException(InvalidRequestBodyException::class);
+        $handler->expects($this->once())
+                ->method('handle')
+                ->with($this->identicalTo($request2))
+                ->willReturn($response);
 
         $instance = $this->createInstance();
-        $instance->process($request, $handler);
+        $result = $instance->process($request, $handler);
+
+        $this->assertSame($response, $result);
     }
 
     public function testProcessWithSerializerException(): void

@@ -34,13 +34,13 @@ class MachineService
 
     /**
      * Returns the machines supporting the specified crafting category.
-     * @param CraftingCategory $craftingCategory
      * @param UuidInterface $combinationId
+     * @param CraftingCategory $craftingCategory
      * @return array<Machine>
      */
     public function getMachinesByCraftingCategory(
-        CraftingCategory $craftingCategory,
-        UuidInterface $combinationId
+        UuidInterface $combinationId,
+        CraftingCategory $craftingCategory
     ): array {
         return $this->machineRepository->findByCraftingCategoryName($combinationId, $craftingCategory->getName());
     }

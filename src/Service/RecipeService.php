@@ -38,7 +38,7 @@ class RecipeService
      * @param UuidInterface $combinationId
      * @return RecipeDataCollection
      */
-    public function getDataWithNames(array $names, UuidInterface $combinationId): RecipeDataCollection
+    public function getDataWithNames(UuidInterface $combinationId, array $names): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByNames($combinationId, $names);
         return $this->createDataCollection($recipeData);
@@ -61,7 +61,7 @@ class RecipeService
      * @param UuidInterface $combinationId
      * @return RecipeDataCollection
      */
-    public function getDataWithIngredients(array $items, UuidInterface $combinationId): RecipeDataCollection
+    public function getDataWithIngredients(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByIngredientItemIds(
             $combinationId,
@@ -72,11 +72,11 @@ class RecipeService
 
     /**
      * Returns the recipe data having any of the items as product.
-     * @param array<Item> $items
      * @param UuidInterface $combinationId
+     * @param array<Item> $items
      * @return RecipeDataCollection
      */
-    public function getDataWithProducts(array $items, UuidInterface $combinationId): RecipeDataCollection
+    public function getDataWithProducts(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByProductItemIds(
             $combinationId,

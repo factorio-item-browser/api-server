@@ -90,7 +90,6 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
         array $normalRecipes,
         RecipeDataCollection $recipeData
     ): array {
-        $recipes = [];
         foreach ($recipeData->getValues() as $data) {
             $databaseRecipe = $databaseRecipes[$data->getId()->toString()] ?? null;
             if ($databaseRecipe === null) {
@@ -101,11 +100,11 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
             if (isset($normalRecipes[$expensiveRecipe->name])) {
                 $recipe = $normalRecipes[$expensiveRecipe->name];
                 $recipe->expensiveVersion = $expensiveRecipe;
-                $recipes[$expensiveRecipe->name] = $recipe;
+                $normalRecipes[$expensiveRecipe->name] = $recipe;
             } else {
-                $recipes[$expensiveRecipe->name] = $expensiveRecipe;
+                $normalRecipes[$expensiveRecipe->name] = $expensiveRecipe;
             }
         }
-        return $recipes;
+        return $normalRecipes;
     }
 }

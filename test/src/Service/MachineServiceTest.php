@@ -79,7 +79,7 @@ class MachineServiceTest extends TestCase
                                 ->willReturn($machines);
 
         $instance = $this->createInstance();
-        $result = $instance->getMachinesByCraftingCategory($craftingCategory, $combinationId);
+        $result = $instance->getMachinesByCraftingCategory($combinationId, $craftingCategory);
 
         $this->assertSame($machines, $result);
     }

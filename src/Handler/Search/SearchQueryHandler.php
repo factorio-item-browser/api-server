@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Search;
 
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
 use FactorioItemBrowser\Api\Search\SearchManagerInterface;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * The handler of the /search/query request.
@@ -17,25 +20,11 @@ use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class SearchQueryHandler extends AbstractRequestHandler
+class SearchQueryHandler implements RequestHandlerInterface
 {
-    /**
-     * The search decorator service.
-     * @var SearchDecoratorService
-     */
-    protected $searchDecoratorService;
+    private SearchDecoratorService $searchDecoratorService;
+    private SearchManagerInterface $searchManager;
 
-    /**
-     * The search manager.
-     * @var SearchManagerInterface
-     */
-    protected $searchManager;
-
-    /**
-     * Initializes the request handler.
-     * @param SearchDecoratorService $searchDecoratorService
-     * @param SearchManagerInterface $searchManager
-     */
     public function __construct(
         SearchDecoratorService $searchDecoratorService,
         SearchManagerInterface $searchManager
@@ -44,42 +33,29 @@ class SearchQueryHandler extends AbstractRequestHandler
         $this->searchManager = $searchManager;
     }
 
-    /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return SearchQueryRequest::class;
-    }
-
-    /**
-     * Creates the response data from the validated request data.
-     * @param SearchQueryRequest $request
-     * @return ResponseInterface
-     */
-    protected function handleRequest($request): ResponseInterface
-    {
-        $authorizationToken = $this->getAuthorizationToken();
+        /** @var SearchQueryRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
 
         $searchQuery = $this->searchManager->parseQuery(
-            $authorizationToken->getCombinationId(),
-            $authorizationToken->getLocale(),
-            $request->getQuery()
+            Uuid::fromString($clientRequest->combinationId),
+            $clientRequest->locale,
+            $clientRequest->query,
         );
         $searchResults = $this->searchManager->search($searchQuery);
         $currentSearchResults = $searchResults->getResults(
-            $request->getIndexOfFirstResult(),
-            $request->getNumberOfResults()
+            $clientRequest->indexOfFirstResult,
+            $clientRequest->numberOfResults,
         );
         $decoratedSearchResults = $this->searchDecoratorService->decorate(
             $currentSearchResults,
-            $request->getNumberOfRecipesPerResult()
+            $clientRequest->numberOfRecipesPerResult,
         );
 
         $response = new SearchQueryResponse();
-        $response->setResults($decoratedSearchResults)
-                 ->setTotalNumberOfResults($searchResults->count());
-        return $response;
+        $response->results = $decoratedSearchResults;
+        $response->totalNumberOfResults = $searchResults->count();
+        return new ClientResponse($response);
     }
 }

@@ -24,7 +24,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class RequestDeserializerMiddleware implements MiddlewareInterface
 {
-    private SerializerInterface $combinationApiClientSerializer;
+    private SerializerInterface $serializer;
 
     /** @var array<string, class-string<AbstractRequest>> */
     private array $requestClassesByRoutes;
@@ -35,7 +35,7 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
      */
     public function __construct(SerializerInterface $apiClientSerializer, array $requestClassesByRoutes)
     {
-        $this->combinationApiClientSerializer = $apiClientSerializer;
+        $this->serializer = $apiClientSerializer;
         $this->requestClassesByRoutes = $requestClassesByRoutes;
     }
 
@@ -52,18 +52,16 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
         $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()] ?? '';
         $locale = $request->getHeaderLine('Accept-Language');
 
-        if ($request->getHeaderLine('Content-Type') !== 'application/json') {
-            throw new InvalidRequestBodyException('Missing or invalid Content-Type.');
-        }
-
         if ($requestClass !== '') {
             try {
+                if ($request->getHeaderLine('Content-Type') === 'application/json') {
+                    $requestBody = $request->getBody()->getContents();
+                } else {
+                    $requestBody = '{}';
+                }
+
                 /** @var AbstractRequest $clientRequest */
-                $clientRequest = $this->combinationApiClientSerializer->deserialize(
-                    $request->getBody()->getContents(),
-                    $requestClass,
-                    'json',
-                );
+                $clientRequest = $this->serializer->deserialize($requestBody, $requestClass, 'json');
                 $clientRequest->locale = $locale === '' ? Defaults::LOCALE : $locale;
                 $clientRequest->combinationId =  $request->getAttribute('combination-id');
 
