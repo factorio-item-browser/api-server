@@ -660,9 +660,12 @@ components:
           schema:
             type: object
             properties:
-              message:
-                type: string
-                example: Request validation failed.
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Request validation failed.
 
     # 401 responses
     unauthorized:
@@ -672,9 +675,12 @@ components:
           schema:
             type: object
             properties:
-              message:
-                type: string
-                example: Invalid or missing Api-Key.
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or missing Api-Key.
 
     # 404 responses
     itemNotFound:
@@ -684,9 +690,12 @@ components:
           schema:
             type: object
             properties:
-              message:
-                type: string
-                example: Item not found in the combination of mods.
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Item not found in the combination of mods.
 
     recipeNotFound:
       description: The requested recipe is not known in the combiantion of mods.
@@ -695,9 +704,12 @@ components:
           schema:
             type: object
             properties:
-              message:
-                type: string
-                example: Recipe not found in the combination of mods.
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Recipe not found in the combination of mods.
 
   schemas:
     GenericEntity:
