@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * The main configuration file.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
+
+declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
@@ -40,7 +40,7 @@ $aggregator = new ConfigAggregator([
     //   - `*.global.php`
     //   - `[FIB_ENV]/*.local.php`
     new PhpFileProvider(
-        realpath(__DIR__) . sprintf('/autoload/{*.global.php,%s/*.local.php}', getenv('FIB_ENV') ?? 'production'),
+        realpath(__DIR__) . sprintf('/autoload/{*.global.php,%s/*.local.php}', getenv('FIB_ENV') ?: 'production'),
     ),
 ], $cacheConfig['config_cache_path']);
 
