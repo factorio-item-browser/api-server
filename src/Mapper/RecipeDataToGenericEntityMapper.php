@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use BluePsyduck\MapperManager\Mapper\StaticMapperInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Common\Constant\EntityType;
 
@@ -14,37 +14,30 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements StaticMapperInterface<RecipeData, GenericEntity>
  */
 class RecipeDataToGenericEntityMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
 {
-    /**
-     * Returns the source class supported by this mapper.
-     * @return string
-     */
     public function getSupportedSourceClass(): string
     {
         return RecipeData::class;
     }
 
-    /**
-     * Returns the destination class supported by this mapper.
-     * @return string
-     */
     public function getSupportedDestinationClass(): string
     {
         return GenericEntity::class;
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param RecipeData $recipeData
-     * @param GenericEntity $genericEntity
+     * @param RecipeData $source
+     * @param GenericEntity $destination
      */
-    public function map($recipeData, $genericEntity): void
+    public function map(object $source, object $destination): void
     {
-        $genericEntity->setType(EntityType::RECIPE)
-                      ->setName($recipeData->getName());
+        $destination->type = EntityType::RECIPE;
+        $destination->name = $source->getName();
 
-        $this->addToTranslationService($genericEntity);
+        $this->addToTranslationService($destination);
     }
 }

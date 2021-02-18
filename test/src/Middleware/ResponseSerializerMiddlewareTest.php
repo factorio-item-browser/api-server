@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\TestHelper\ReflectionTrait;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface as ClientResponseInterface;
 use FactorioItemBrowser\Api\Server\Middleware\ResponseSerializerMiddleware;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use JMS\Serializer\SerializerInterface;
@@ -14,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the ResponseSerializerMiddleware class.
@@ -25,105 +22,65 @@ use ReflectionException;
  */
 class ResponseSerializerMiddlewareTest extends TestCase
 {
-    use ReflectionTrait;
+    /** @var SerializerInterface&MockObject */
+    private SerializerInterface $serializer;
 
-    /**
-     * The mocked serializer.
-     * @var SerializerInterface&MockObject
-     */
-    protected $serializer;
-
-    /**
-     * Sets up the test case.
-     * @throws ReflectionException
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->serializer = $this->createMock(SerializerInterface::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
+     * @param array<string> $mockedMethods
+     * @return ResponseSerializerMiddleware&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): ResponseSerializerMiddleware
     {
-        $middleware = new ResponseSerializerMiddleware($this->serializer);
-
-        $this->assertSame($this->serializer, $this->extractProperty($middleware, 'serializer'));
+        return $this->getMockBuilder(ResponseSerializerMiddleware::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->serializer,
+                    ])
+                    ->getMock();
     }
 
-    /**
-     * Tests the process method.
-     * @throws ReflectionException
-     * @covers ::process
-     */
     public function testProcess(): void
     {
-        $serializedResponse = 'abc';
-
-        /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
-        /* @var ClientResponseInterface&MockObject $clientResponse */
-        $clientResponse = $this->createMock(ClientResponseInterface::class);
-        /* @var ClientResponse&MockObject $modifiedResponse */
-        $modifiedResponse = $this->createMock(ClientResponse::class);
+        $response2 = $this->createMock(ClientResponse::class);
 
-        /* @var ClientResponse&MockObject $response */
-        $response = $this->createMock(ClientResponse::class);
-        $response->expects($this->once())
-                 ->method('getResponse')
-                 ->willReturn($clientResponse);
-        $response->expects($this->once())
-                 ->method('withSerializedResponse')
-                 ->with($this->identicalTo($serializedResponse))
-                 ->willReturn($modifiedResponse);
+        $response1 = $this->createMock(ClientResponse::class);
+        $response1->expects($this->once())
+                  ->method('withSerializer')
+                  ->with($this->identicalTo($this->serializer))
+                  ->willReturn($response2);
 
-        /* @var RequestHandlerInterface&MockObject $handler */
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
                 ->with($this->identicalTo($request))
-                ->willReturn($response);
+                ->willReturn($response1);
 
-        $this->serializer->expects($this->once())
-                         ->method('serialize')
-                         ->with($this->identicalTo($clientResponse), $this->identicalTo('json'))
-                         ->willReturn($serializedResponse);
+        $instance = $this->createInstance();
+        $result = $instance->process($request, $handler);
 
-        $middleware = new ResponseSerializerMiddleware($this->serializer);
-        $result = $middleware->process($request, $handler);
-
-        $this->assertSame($modifiedResponse, $result);
+        $this->assertSame($response2, $result);
     }
 
-    /**
-     * Tests the process method without an actual ClientResponse.
-     * @throws ReflectionException
-     * @covers ::process
-     */
     public function testProcessWithoutClientResponse(): void
     {
-        /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
-        /* @var ClientResponse&MockObject $response */
         $response = $this->createMock(ResponseInterface::class);
 
-        /* @var RequestHandlerInterface&MockObject $handler */
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
                 ->with($this->identicalTo($request))
                 ->willReturn($response);
 
-        $this->serializer->expects($this->never())
-                         ->method('serialize');
-
-        $middleware = new ResponseSerializerMiddleware($this->serializer);
-        $result = $middleware->process($request, $handler);
+        $instance = $this->createInstance();
+        $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
     }

@@ -12,19 +12,10 @@ use Throwable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class EntityNotFoundException extends ApiServerException
+class EntityNotFoundException extends ServerException
 {
-    /**
-     * The message template of the exception.
-     */
-    protected const MESSAGE = 'The %s %s was not found or is not available in the currently enabled mods.';
+    private const MESSAGE = 'The %s %s was not found or is not available in the current combination of mods.';
 
-    /**
-     * Initializes the exception.
-     * @param string $type
-     * @param string $name
-     * @param Throwable|null $previous
-     */
     public function __construct(string $type, string $name, ?Throwable $previous = null)
     {
         parent::__construct(sprintf(self::MESSAGE, $type, $name), 404, $previous);

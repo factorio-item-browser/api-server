@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Generic;
 
-use FactorioItemBrowser\Api\Client\Entity\Entity as ClientEntity;
-use FactorioItemBrowser\Api\Client\Entity\Icon as ClientIcon;
+use FactorioItemBrowser\Api\Client\Transfer\Entity as ClientEntity;
+use FactorioItemBrowser\Api\Client\Transfer\Icon as ClientIcon;
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericIconRequest;
 use FactorioItemBrowser\Api\Client\Response\Generic\GenericIconResponse;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
-use FactorioItemBrowser\Api\Database\Entity\Icon;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\IconService;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
@@ -23,57 +24,39 @@ use Ramsey\Uuid\UuidInterface;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class GenericIconHandler extends AbstractRequestHandler
+class GenericIconHandler implements RequestHandlerInterface
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    /**
-     * The database icon service.
-     * @var IconService
-     */
-    protected $iconService;
+    protected IconService $iconService;
 
-    /**
-     * Initializes the request handler.
-     * @param IconService $iconService
-     */
     public function __construct(IconService $iconService)
     {
         $this->iconService = $iconService;
     }
 
-    /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return GenericIconRequest::class;
-    }
+        /** @var GenericIconRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
 
-    /**
-     * Creates the response data from the validated request data.
-     * @param GenericIconRequest $request
-     * @return ResponseInterface
-     */
-    protected function handleRequest($request): ResponseInterface
-    {
-        $this->iconService->injectAuthorizationToken($this->getAuthorizationToken());
+        $combinationId = Uuid::fromString($clientRequest->combinationId);
+        $namesByTypes = $this->extractTypesAndNames($clientRequest->entities);
 
-        $namesByTypes = $this->extractTypesAndNames($request->getEntities());
+        $this->iconService->setCombinationId($combinationId);
         $imageIds = $this->fetchImageIds($namesByTypes);
+        $icons = $this->fetchIcons($imageIds);
+        $filteredIcons = $this->filterRequestedIcons($icons, $namesByTypes);
+        $this->hydrateContentToIcons($filteredIcons);
 
-        $clientIcons = $this->fetchIcons($imageIds);
-        $filteredClientIcons = $this->filterRequestedIcons($clientIcons, $namesByTypes);
-        $this->hydrateContentToIcons($filteredClientIcons);
-
-        return $this->createResponse($filteredClientIcons);
+        $response = new GenericIconResponse();
+        $response->icons = $filteredIcons;
+        return new ClientResponse($response);
     }
 
     /**
-     * Fetches the image ids of the types and names.
      * @param NamesByTypes $namesByTypes
-     * @return array|UuidInterface[]
+     * @return array<UuidInterface>
      */
     protected function fetchImageIds(NamesByTypes $namesByTypes): array
     {
@@ -83,105 +66,55 @@ class GenericIconHandler extends AbstractRequestHandler
     }
 
     /**
-     * Fetches the icons to the file hashes.
-     * @param array|UuidInterface[] $imageIds
-     * @return array|ClientIcon[]
+     * @param array<UuidInterface> $imageIds
+     * @return array<string, ClientIcon>
      */
     protected function fetchIcons(array $imageIds): array
     {
-        /* @var ClientIcon[] $result */
-        $result = [];
+        $icons = [];
         foreach ($this->iconService->getIconsByImageIds($imageIds) as $icon) {
             $imageId = $icon->getImage()->getId()->toString();
-            if (!isset($result[$imageId])) {
-                $result[$imageId] = $this->createClientIcon();
+            if (!isset($icons[$imageId])) {
+                $icons[$imageId] = new ClientIcon();
             }
 
-            $entity = $this->createEntityForIcon($icon);
-            $result[$imageId]->addEntity($entity);
+            $entity = new ClientEntity();
+            $entity->type = $icon->getType();
+            $entity->name = $icon->getName();
+            $icons[$imageId]->entities[] = $entity;
         }
-        return $result;
+        return $icons;
     }
 
     /**
-     * Creates a client icon.
-     * @return ClientIcon
-     */
-    protected function createClientIcon(): ClientIcon
-    {
-        return new ClientIcon();
-    }
-
-    /**
-     * Creates an entity to assign to an icon.
-     * @param Icon $icon
-     * @return ClientEntity
-     */
-    protected function createEntityForIcon(Icon $icon): ClientEntity
-    {
-        $result = new ClientEntity();
-        $result->setType($icon->getType())
-               ->setName($icon->getName());
-        return $result;
-    }
-
-    /**
-     * Filters icons from the array which actually have been requested.
-     * @param array|ClientIcon[] $clientIcons
+     * @param array<string, ClientIcon> $icons
      * @param NamesByTypes $namesByTypes
-     * @return array|ClientIcon[]
+     * @return array<string, ClientIcon>
      */
-    protected function filterRequestedIcons(array $clientIcons, NamesByTypes $namesByTypes): array
+    protected function filterRequestedIcons(array $icons, NamesByTypes $namesByTypes): array
     {
-        return array_filter($clientIcons, function (ClientIcon $clientIcon) use ($namesByTypes): bool {
-            return $this->wasIconRequested($clientIcon, $namesByTypes);
+        return array_filter($icons, function (ClientIcon $icon) use ($namesByTypes): bool {
+            foreach ($icon->entities as $entity) {
+                if ($namesByTypes->hasName($entity->type, $entity->name)) {
+                    return true;
+                }
+            }
+            return false;
         });
     }
 
     /**
-     * Checks whether the icon was initially requested.
-     * @param ClientIcon $clientIcon
-     * @param NamesByTypes $namesByTypes
-     * @return bool
+     * @param array<string, ClientIcon> $icons
      */
-    protected function wasIconRequested(ClientIcon $clientIcon, NamesByTypes $namesByTypes): bool
+    protected function hydrateContentToIcons(array $icons): void
     {
-        foreach ($clientIcon->getEntities() as $entity) {
-            if ($namesByTypes->hasName($entity->getType(), $entity->getName())) {
-                return true;
+        $iconIds = array_map(fn($imageId) => Uuid::fromString($imageId), array_keys($icons));
+        foreach ($this->iconService->getImagesByIds($iconIds) as $iconImage) {
+            $imageId = $iconImage->getId()->toString();
+            if (isset($icons[$imageId])) {
+                $icons[$imageId]->content = $iconImage->getContents();
+                $icons[$imageId]->size = $iconImage->getSize();
             }
         }
-        return false;
-    }
-
-    /**
-     * Hydrates the contents into the icons.
-     * @param array|ClientIcon[] $clientIcons
-     */
-    protected function hydrateContentToIcons(array $clientIcons): void
-    {
-        $iconFiles = $this->iconService->getImagesByIds(array_map(function (string $imageId): UuidInterface {
-            return Uuid::fromString($imageId);
-        }, array_keys($clientIcons)));
-
-        foreach ($iconFiles as $iconFile) {
-            $imageId = $iconFile->getId()->toString();
-            if (isset($clientIcons[$imageId])) {
-                $clientIcons[$imageId]->setContent($iconFile->getContents())
-                                      ->setSize($iconFile->getSize());
-            }
-        }
-    }
-
-    /**
-     * Creates the final response of the request.
-     * @param array|ClientIcon[] $clientIcons
-     * @return GenericIconResponse
-     */
-    protected function createResponse(array $clientIcons): GenericIconResponse
-    {
-        $result = new GenericIconResponse();
-        $result->setIcons($clientIcons);
-        return $result;
     }
 }

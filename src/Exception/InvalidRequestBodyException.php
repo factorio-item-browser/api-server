@@ -12,18 +12,10 @@ use Throwable;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class MalformedRequestException extends ApiServerException
+class InvalidRequestBodyException extends ServerException
 {
-    /**
-     * The message template of the exception.
-     */
-    protected const MESSAGE = 'Malformed request: %s';
+    private const MESSAGE = 'Invalid request body: %s';
 
-    /**
-     * Initializes the exception.
-     * @param string $message
-     * @param Throwable|null $previous
-     */
     public function __construct(string $message, ?Throwable $previous = null)
     {
         parent::__construct(sprintf(self::MESSAGE, $message), 400, $previous);

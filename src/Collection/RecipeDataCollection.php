@@ -17,9 +17,9 @@ class RecipeDataCollection
 {
     /**
      * The values of the collection.
-     * @var array|RecipeData[]
+     * @var array<RecipeData>
      */
-    protected $values = [];
+    protected array $values = [];
 
     /**
      * Adds recipe data to the collection.
@@ -34,7 +34,7 @@ class RecipeDataCollection
 
     /**
      * Returns all the recipe ids currently known to the collection.
-     * @return array|UuidInterface[]
+     * @return array<UuidInterface>
      */
     public function getAllIds(): array
     {
@@ -122,7 +122,7 @@ class RecipeDataCollection
 
     /**
      * Returns all the data from the collection.
-     * @return array|RecipeData[]
+     * @return array<RecipeData>
      */
     public function getValues(): array
     {

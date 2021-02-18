@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use BluePsyduck\MapperManager\Mapper\DynamicMapperInterface;
-use FactorioItemBrowser\Api\Client\Entity\Item as ClientItem;
-use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
+use FactorioItemBrowser\Api\Client\Transfer\Item as ClientItem;
+use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Database\Entity\RecipeIngredient as DatabaseIngredient;
 use FactorioItemBrowser\Api\Database\Entity\RecipeProduct as DatabaseProduct;
@@ -16,81 +16,52 @@ use FactorioItemBrowser\Api\Database\Entity\RecipeProduct as DatabaseProduct;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements DynamicMapperInterface<DatabaseRecipe, ClientRecipe>
  */
 class DatabaseRecipeToClientRecipeMapper extends TranslationServiceAwareMapper implements DynamicMapperInterface
 {
-    /**
-     * Returns whether the mapper supports the combination of source and destination object.
-     * @param object $source
-     * @param object $destination
-     * @return bool
-     */
-    public function supports($source, $destination): bool
+    public function supports(object $source, object $destination): bool
     {
         return $source instanceof DatabaseRecipe && $destination instanceof ClientRecipe;
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param DatabaseRecipe $databaseRecipe
-     * @param ClientRecipe $clientRecipe
+     * @param DatabaseRecipe $source
+     * @param ClientRecipe $destination
      */
-    public function map($databaseRecipe, $clientRecipe): void
+    public function map(object $source, object $destination): void
     {
-        $this->mapRecipe($databaseRecipe, $clientRecipe);
+        $destination->name = $source->getName();
+        $destination->mode = $source->getMode();
+        $destination->craftingTime = $source->getCraftingTime();
+        $destination->ingredients = array_map([$this, 'createIngredient'], $source->getIngredients()->toArray());
+        $destination->products = array_map([$this, 'createProduct'], $source->getProducts()->toArray());
 
-        foreach ($databaseRecipe->getIngredients() as $databaseIngredient) {
-            $clientItem = new ClientItem();
-            $this->mapIngredient($databaseIngredient, $clientItem);
-            $clientRecipe->addIngredient($clientItem);
-        }
-
-        foreach ($databaseRecipe->getProducts() as $databaseProduct) {
-            $clientItem = new ClientItem();
-            $this->mapProduct($databaseProduct, $clientItem);
-            $clientRecipe->addProduct($clientItem);
-        }
+        $this->addToTranslationService($destination);
     }
 
-    /**
-     * Maps the database recipe into the specified client recipe.
-     * @param DatabaseRecipe $databaseRecipe
-     * @param ClientRecipe $clientRecipe
-     */
-    protected function mapRecipe(DatabaseRecipe $databaseRecipe, ClientRecipe $clientRecipe): void
+    protected function createIngredient(DatabaseIngredient $ingredient): ClientItem
     {
-        $clientRecipe->setName($databaseRecipe->getName())
-                     ->setMode($databaseRecipe->getMode())
-                     ->setCraftingTime($databaseRecipe->getCraftingTime());
+        $item = new ClientItem();
+        $item->type = $ingredient->getItem()->getType();
+        $item->name = $ingredient->getItem()->getName();
+        $item->amount = $ingredient->getAmount();
 
-        $this->addToTranslationService($clientRecipe);
+        $this->addToTranslationService($item);
+
+        return $item;
     }
 
-    /**
-     * Maps the specified database ingredient into the client item.
-     * @param DatabaseIngredient $databaseIngredient
-     * @param ClientItem $clientItem
-     */
-    protected function mapIngredient(DatabaseIngredient $databaseIngredient, ClientItem $clientItem): void
+    protected function createProduct(DatabaseProduct $product): ClientItem
     {
-        $clientItem->setName($databaseIngredient->getItem()->getName())
-                   ->setType($databaseIngredient->getItem()->getType())
-                   ->setAmount($databaseIngredient->getAmount());
+        $item = new ClientItem();
+        $item->type = $product->getItem()->getType();
+        $item->name = $product->getItem()->getName();
+        $item->amount = $product->getAmount();
 
-        $this->addToTranslationService($clientItem);
-    }
+        $this->addToTranslationService($item);
 
-    /**
-     * Maps the specified database product into the client item.
-     * @param DatabaseProduct $databaseProduct
-     * @param ClientItem $clientItem
-     */
-    protected function mapProduct(DatabaseProduct $databaseProduct, ClientItem $clientItem): void
-    {
-        $clientItem->setName($databaseProduct->getItem()->getName())
-                   ->setType($databaseProduct->getItem()->getType())
-                   ->setAmount($databaseProduct->getAmount());
-
-        $this->addToTranslationService($clientItem);
+        return $item;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
-use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
+use FactorioItemBrowser\Api\Client\Transfer\Mod as ClientMod;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Server\Mapper\DatabaseModToClientModMapper;
 use FactorioItemBrowser\Api\Server\Service\TranslationService;
@@ -16,96 +16,62 @@ use PHPUnit\Framework\TestCase;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Mapper\DatabaseModToClientModMapper
+ * @covers \FactorioItemBrowser\Api\Server\Mapper\DatabaseModToClientModMapper
  */
 class DatabaseModToClientModMapperTest extends TestCase
 {
-    /**
-     * The mocked translation service.
-     * @var TranslationService&MockObject
-     */
-    protected $translationService;
+    /** @var TranslationService&MockObject */
+    private TranslationService $translationService;
 
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->translationService = $this->createMock(TranslationService::class);
     }
 
     /**
-     * Tests the getSupportedSourceClass method.
-     * @covers ::getSupportedSourceClass
+     * @param array<string> $mockedMethods
+     * @return DatabaseModToClientModMapper&MockObject
      */
-    public function testGetSupportedSourceClass(): void
+    private function createInstance(array $mockedMethods = []): DatabaseModToClientModMapper
     {
-        $expectedResult = DatabaseMod::class;
-
-        $mapper = new DatabaseModToClientModMapper($this->translationService);
-        $result = $mapper->getSupportedSourceClass();
-
-        $this->assertSame($expectedResult, $result);
+        return $this->getMockBuilder(DatabaseModToClientModMapper::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->translationService,
+                    ])
+                    ->getMock();
     }
 
-    /**
-     * Tests the getSupportedDestinationClass method.
-     * @covers ::getSupportedDestinationClass
-     */
-    public function testGetSupportedDestinationClass(): void
+    public function testSupports(): void
     {
-        $expectedResult = ClientMod::class;
+        $instance = $this->createInstance();
 
-        $mapper = new DatabaseModToClientModMapper($this->translationService);
-        $result = $mapper->getSupportedDestinationClass();
-
-        $this->assertSame($expectedResult, $result);
+        $this->assertSame(DatabaseMod::class, $instance->getSupportedSourceClass());
+        $this->assertSame(ClientMod::class, $instance->getSupportedDestinationClass());
     }
 
-    /**
-     * Tests the map method.
-     * @covers ::map
-     */
     public function testMap(): void
     {
-        /* @var DatabaseMod&MockObject $databaseMod */
-        $databaseMod = $this->createMock(DatabaseMod::class);
-        $databaseMod->expects($this->once())
-                    ->method('getName')
-                    ->willReturn('abc');
-        $databaseMod->expects($this->once())
-                    ->method('getAuthor')
-                    ->willReturn('def');
-        $databaseMod->expects($this->once())
-                    ->method('getVersion')
-                    ->willReturn('ghi');
+        $source = new DatabaseMod();
+        $source->setName('abc')
+               ->setAuthor('def')
+               ->setVersion('ghi');
 
-        /* @var ClientMod&MockObject $clientMod */
-        $clientMod = $this->createMock(ClientMod::class);
-        $clientMod->expects($this->once())
-                  ->method('setName')
-                  ->with($this->identicalTo('abc'))
-                  ->willReturnSelf();
-        $clientMod->expects($this->once())
-                  ->method('setAuthor')
-                  ->with($this->identicalTo('def'))
-                  ->willReturnSelf();
-        $clientMod->expects($this->once())
-                  ->method('setVersion')
-                  ->with($this->identicalTo('ghi'))
-                  ->willReturnSelf();
+        $expectedDestination = new ClientMod();
+        $expectedDestination->name = 'abc';
+        $expectedDestination->author = 'def';
+        $expectedDestination->version = 'ghi';
 
-        /* @var DatabaseModToClientModMapper&MockObject $mapper */
-        $mapper = $this->getMockBuilder(DatabaseModToClientModMapper::class)
-                       ->onlyMethods(['addToTranslationService'])
-                       ->setConstructorArgs([$this->translationService])
-                       ->getMock();
-        $mapper->expects($this->once())
-               ->method('addToTranslationService')
-               ->with($this->identicalTo($clientMod));
+        $destination = new ClientMod();
 
-        $mapper->map($databaseMod, $clientMod);
+        $instance = $this->createInstance(['addToTranslationService']);
+        $instance->expects($this->once())
+                 ->method('addToTranslationService')
+                 ->with($this->equalTo($expectedDestination));
+
+        $instance->map($source, $destination);
+
+        $this->assertEquals($expectedDestination, $destination);
     }
 }

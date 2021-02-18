@@ -176,7 +176,7 @@ class CorsHeaderMiddlewareTest extends TestCase
     {
         $origin = 'abc';
         $allow = 'def';
-        $expectedAllowedHeaders = 'Accept,Accept-Language,Authorization,Content-Language,Content-Type';
+        $expectedAllowedHeaders = 'Accept,Accept-Language,Api-Key,Content-Language,Content-Type';
 
         /* @var ResponseInterface&MockObject $response4 */
         $response4 = $this->createMock(ResponseInterface::class);

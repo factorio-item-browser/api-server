@@ -13,14 +13,9 @@ namespace FactorioItemBrowser\Api\Server\Constant;
 interface ConfigKey
 {
     /**
-     * The key holding the name of the project.
+     * The main key of the config.
      */
-    public const PROJECT = 'factorio-item-browser';
-
-    /**
-     * The key holding the name of the API server itself.
-     */
-    public const API_SERVER = 'api-server';
+    public const MAIN = 'api-server';
 
     /**
      * The key holding the agents.
@@ -35,12 +30,7 @@ interface ConfigKey
     /**
      * The key holding the access key of the agent.
      */
-    public const AGENT_ACCESS_KEY = 'access-key';
-
-    /**
-     * The key holding the demo flag of the agent.
-     */
-    public const AGENT_DEMO = 'demo';
+    public const AGENT_API_KEY = 'api-key';
 
     /**
      * The origins allowed to access the API server.
@@ -48,39 +38,9 @@ interface ConfigKey
     public const ALLOWED_ORIGINS = 'allowed-origins';
 
     /**
-     * The key holding the authorization config.
-     */
-    public const AUTHORIZATION = 'authorization';
-
-    /**
-     * The key holding the actual authorization key.
-     */
-    public const AUTHORIZATION_KEY = 'key';
-
-    /**
-     * The key holding the lifetime of authorization tokens.
-     */
-    public const AUTHORIZATION_TOKEN_LIFETIME = 'token-lifetime';
-
-    /**
-     * The key holding the config for the auto update.
-     */
-    public const AUTO_UPDATE = 'auto-update';
-
-    /**
-     * The key holding the interval of the last usage time to check.
-     */
-    public const AUTO_UPDATE_LAST_USAGE_INTERVAL = 'last-usage-interval';
-
-    /**
-     * The key holding the maximum number of updates to trigger per run.
-     */
-    public const AUTO_UPDATE_MAX_UPDATES = 'max-updates';
-
-    /**
      * The key holding the map of the routes to their corresponding requests.
      */
-    public const MAP_ROUTE_TO_REQUEST = 'map-route-to-request';
+    public const REQUEST_CLASSES_BY_ROUTES = 'request-classes-by-routes';
 
     /**
      * The key holding the search decorators to use.

@@ -7,22 +7,15 @@ namespace FactorioItemBrowser\Api\Server\Exception;
 use Throwable;
 
 /**
- * The exception thrown when the authorization token is missing.
+ * The exception thrown when an invalid API key has been encountered.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class MissingAuthorizationTokenException extends ApiServerException
+class InvalidApiKeyException extends ServerException
 {
-    /**
-     * The message template of the exception.
-     */
-    protected const MESSAGE = 'The authorization token is missing.';
+    private const MESSAGE = 'Invalid or missing API key.';
 
-    /**
-     * Initializes the exception.
-     * @param Throwable|null $previous
-     */
     public function __construct(?Throwable $previous = null)
     {
         parent::__construct(self::MESSAGE, 401, $previous);

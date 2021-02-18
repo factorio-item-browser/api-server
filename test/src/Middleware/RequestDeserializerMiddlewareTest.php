@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
-use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\MalformedRequestException;
+use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
+use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
+use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
 use FactorioItemBrowser\Api\Server\Middleware\RequestDeserializerMiddleware;
 use JMS\Serializer\SerializerInterface;
+use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use ReflectionException;
 
 /**
  * The PHPUnit test of the RequestDeserializerMiddleware class.
@@ -28,247 +28,248 @@ use ReflectionException;
  */
 class RequestDeserializerMiddlewareTest extends TestCase
 {
-    use ReflectionTrait;
+    /** @var SerializerInterface&MockObject */
+    private SerializerInterface $serializer;
+    /** @var array<string, class-string<AbstractRequest>> */
+    private array $requestClassesByRoutes = [];
 
-    /**
-     * The mocked serializer.
-     * @var SerializerInterface&MockObject
-     */
-    protected $serializer;
-
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->serializer = $this->createMock(SerializerInterface::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
+     * @param array<string> $mockedMethods
+     * @return RequestDeserializerMiddleware&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): RequestDeserializerMiddleware
     {
-        $mapRouteToRequest = ['abc' => RequestInterface::class];
-
-        $middleware = new RequestDeserializerMiddleware($this->serializer, $mapRouteToRequest);
-
-        $this->assertSame($this->serializer, $this->extractProperty($middleware, 'serializer'));
-        $this->assertSame($mapRouteToRequest, $this->extractProperty($middleware, 'mapRouteToRequest'));
+        return $this->getMockBuilder(RequestDeserializerMiddleware::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->serializer,
+                        $this->requestClassesByRoutes,
+                    ])
+                    ->getMock();
     }
 
     /**
-     * Tests the process method.
-     * @throws ApiServerException
-     * @covers ::process
+     * @throws ServerException
      */
     public function testProcess(): void
     {
-        $routeName = 'abc';
-        $mapRouteToRequest = ['abc' => 'def'];
-        $expectedRequestClass = 'def';
+        $matchedRouteName = 'abc';
+        $combinationId = 'def';
+        $locale = 'ghi';
+        $bodyContents = 'jkl';
+        $requestClass = SearchQueryRequest::class;
 
-        /* @var RequestInterface&MockObject $clientRequest */
-        $clientRequest = $this->createMock(RequestInterface::class);
-        /* @var ServerRequestInterface&MockObject $modifiedRequest */
-        $modifiedRequest = $this->createMock(ServerRequestInterface::class);
-        /* @var ResponseInterface&MockObject $response */
+        $this->requestClassesByRoutes = [
+            'abc' => SearchQueryRequest::class,
+        ];
+
         $response = $this->createMock(ResponseInterface::class);
 
-        /* @var ServerRequestInterface&MockObject $request */
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
-                ->method('withAttribute')
-                ->with($this->identicalTo(RequestInterface::class), $this->identicalTo($clientRequest))
-                ->willReturn($modifiedRequest);
+        $deserializedRequest = new SearchQueryRequest();
+        $deserializedRequest->query = 'pqr';
 
-        /* @var RequestHandlerInterface&MockObject $handler */
+        $expectedClientRequest = new SearchQueryRequest();
+        $expectedClientRequest->query = 'pqr';
+        $expectedClientRequest->combinationId = 'def';
+        $expectedClientRequest->locale = 'ghi';
+
+        $routeResult = $this->createMock(RouteResult::class);
+        $routeResult->expects($this->any())
+                    ->method('getMatchedRouteName')
+                    ->willReturn($matchedRouteName);
+
+        $body = $this->createMock(StreamInterface::class);
+        $body->expects($this->any())
+             ->method('getContents')
+             ->willReturn($bodyContents);
+
+        $request2 = $this->createMock(ServerRequestInterface::class);
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->any())
+                ->method('getAttribute')
+                ->willReturnMap([
+                    [RouteResult::class, null, $routeResult],
+                    ['combination-id', null, $combinationId],
+                ]);
+        $request->expects($this->any())
+                ->method('getHeaderLine')
+                ->willReturnMap([
+                    ['Accept-Language', $locale],
+                    ['Content-Type', 'application/json'],
+                ]);
+        $request->expects($this->any())
+                ->method('getBody')
+                ->willReturn($body);
+        $request->expects($this->once())
+                ->method('withParsedBody')
+                ->with($this->equalTo($expectedClientRequest))
+                ->willReturn($request2);
+
+        $this->serializer->expects($this->once())
+                         ->method('deserialize')
+                         ->with(
+                             $this->identicalTo($bodyContents),
+                             $this->identicalTo($requestClass),
+                             $this->identicalTo('json'),
+                         )
+                         ->willReturn($deserializedRequest);
+
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
-                ->with($this->identicalTo($modifiedRequest))
+                ->with($this->identicalTo($request2))
                 ->willReturn($response);
 
-        /* @var RequestDeserializerMiddleware&MockObject $middleware */
-        $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
-                           ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
-                           ->getMock();
-        $middleware->expects($this->once())
-                   ->method('getMatchedRouteName')
-                   ->with($this->identicalTo($request))
-                   ->willReturn($routeName);
-        $middleware->expects($this->once())
-                   ->method('deserializeRequestBody')
-                   ->with($this->identicalTo($request), $this->identicalTo($expectedRequestClass))
-                   ->willReturn($clientRequest);
-
-        $result = $middleware->process($request, $handler);
+        $instance = $this->createInstance();
+        $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
     }
 
     /**
-     * Tests the process method without a match for deserializing the request.
-     * @throws ApiServerException
-     * @covers ::process
+     * @throws ServerException
      */
-    public function testProcessWithoutMatch(): void
+    public function testProcessWithMissingContentType(): void
     {
-        $routeName = 'abc';
-        $mapRouteToRequest = [];
+        $matchedRouteName = 'abc';
+        $combinationId = 'def';
+        $locale = 'ghi';
+        $requestClass = SearchQueryRequest::class;
 
-        /* @var ResponseInterface&MockObject $response */
+        $this->requestClassesByRoutes = [
+            'abc' => SearchQueryRequest::class,
+        ];
+
         $response = $this->createMock(ResponseInterface::class);
 
-        /* @var ServerRequestInterface&MockObject $request */
+        $deserializedRequest = new SearchQueryRequest();
+        $deserializedRequest->query = 'pqr';
+
+        $expectedClientRequest = new SearchQueryRequest();
+        $expectedClientRequest->query = 'pqr';
+        $expectedClientRequest->combinationId = 'def';
+        $expectedClientRequest->locale = 'ghi';
+
+        $routeResult = $this->createMock(RouteResult::class);
+        $routeResult->expects($this->any())
+                    ->method('getMatchedRouteName')
+                    ->willReturn($matchedRouteName);
+
+        $request2 = $this->createMock(ServerRequestInterface::class);
+
         $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->any())
+                ->method('getAttribute')
+                ->willReturnMap([
+                    [RouteResult::class, null, $routeResult],
+                    ['combination-id', null, $combinationId],
+                ]);
+        $request->expects($this->any())
+                ->method('getHeaderLine')
+                ->willReturnMap([
+                    ['Accept-Language', $locale],
+                    ['Content-Type', ''],
+                ]);
         $request->expects($this->never())
-                ->method('withAttribute');
+                ->method('getBody');
+        $request->expects($this->once())
+                ->method('withParsedBody')
+                ->with($this->equalTo($expectedClientRequest))
+                ->willReturn($request2);
 
-        /* @var RequestHandlerInterface&MockObject $handler */
+        $this->serializer->expects($this->once())
+                         ->method('deserialize')
+                         ->with(
+                             $this->identicalTo('{}'),
+                             $this->identicalTo($requestClass),
+                             $this->identicalTo('json'),
+                         )
+                         ->willReturn($deserializedRequest);
+
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($this->once())
                 ->method('handle')
-                ->with($this->identicalTo($request))
+                ->with($this->identicalTo($request2))
                 ->willReturn($response);
 
-        /* @var RequestDeserializerMiddleware&MockObject $middleware */
-        $middleware = $this->getMockBuilder(RequestDeserializerMiddleware::class)
-                           ->onlyMethods(['getMatchedRouteName', 'deserializeRequestBody'])
-                           ->setConstructorArgs([$this->serializer, $mapRouteToRequest])
-                           ->getMock();
-        $middleware->expects($this->once())
-                   ->method('getMatchedRouteName')
-                   ->with($this->identicalTo($request))
-                   ->willReturn($routeName);
-        $middleware->expects($this->never())
-                   ->method('deserializeRequestBody');
-
-        $result = $middleware->process($request, $handler);
+        $instance = $this->createInstance();
+        $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
     }
 
-    /**
-     * Tests the deserializeRequestBody method.
-     * @throws ReflectionException
-     * @covers ::deserializeRequestBody
-     */
-    public function testDeserializeRequestBody(): void
+    public function testProcessWithSerializerException(): void
     {
-        $requestBody = '{"abc":"def"}';
-        $requestClass = 'ghi';
+        $matchedRouteName = 'abc';
+        $combinationId = 'def';
+        $locale = 'ghi';
+        $bodyContents = 'jkl';
+        $requestClass = SearchQueryRequest::class;
 
-        /* @var RequestInterface&MockObject $clientRequest */
-        $clientRequest = $this->createMock(RequestInterface::class);
+        $this->requestClassesByRoutes = [
+            'abc' => SearchQueryRequest::class,
+        ];
 
-        /* @var StreamInterface&MockObject $body */
+        $deserializedRequest = new SearchQueryRequest();
+        $deserializedRequest->query = 'pqr';
+
+        $expectedClientRequest = new SearchQueryRequest();
+        $expectedClientRequest->query = 'pqr';
+        $expectedClientRequest->combinationId = 'def';
+        $expectedClientRequest->locale = 'ghi';
+
+        $routeResult = $this->createMock(RouteResult::class);
+        $routeResult->expects($this->any())
+                    ->method('getMatchedRouteName')
+                    ->willReturn($matchedRouteName);
+
         $body = $this->createMock(StreamInterface::class);
-        $body->expects($this->once())
+        $body->expects($this->any())
              ->method('getContents')
-             ->willReturn($requestBody);
+             ->willReturn($bodyContents);
 
-        /* @var ServerRequestInterface&MockObject $request */
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
+        $request->expects($this->any())
+                ->method('getAttribute')
+                ->willReturnMap([
+                    [RouteResult::class, null, $routeResult],
+                    ['combination-id', null, $combinationId],
+                ]);
+        $request->expects($this->any())
+                ->method('getHeaderLine')
+                ->willReturnMap([
+                    ['Accept-Language', $locale],
+                    ['Content-Type', 'application/json'],
+                ]);
+        $request->expects($this->any())
                 ->method('getBody')
                 ->willReturn($body);
+        $request->expects($this->never())
+                ->method('withParsedBody');
 
         $this->serializer->expects($this->once())
                          ->method('deserialize')
                          ->with(
-                             $this->identicalTo($requestBody),
+                             $this->identicalTo($bodyContents),
                              $this->identicalTo($requestClass),
-                             $this->identicalTo('json')
-                         )
-                         ->willReturn($clientRequest);
-
-        $middleware = new RequestDeserializerMiddleware($this->serializer, []);
-        $result = $this->invokeMethod($middleware, 'deserializeRequestBody', $request, $requestClass);
-
-        $this->assertSame($clientRequest, $result);
-    }
-
-    /**
-     * Tests the deserializeRequestBody method With empty request.
-     * @throws ReflectionException
-     * @covers ::deserializeRequestBody
-     */
-    public function testDeserializeRequestBodyWithEmptyRequest(): void
-    {
-        $requestBody = '';
-        $expectedRequestBody = '{}';
-        $requestClass = 'ghi';
-
-        /* @var RequestInterface&MockObject $clientRequest */
-        $clientRequest = $this->createMock(RequestInterface::class);
-
-        /* @var StreamInterface&MockObject $body */
-        $body = $this->createMock(StreamInterface::class);
-        $body->expects($this->once())
-             ->method('getContents')
-             ->willReturn($requestBody);
-
-        /* @var ServerRequestInterface&MockObject $request */
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
-                ->method('getBody')
-                ->willReturn($body);
-
-        $this->serializer->expects($this->once())
-                         ->method('deserialize')
-                         ->with(
-                             $this->identicalTo($expectedRequestBody),
-                             $this->identicalTo($requestClass),
-                             $this->identicalTo('json')
-                         )
-                         ->willReturn($clientRequest);
-
-        $middleware = new RequestDeserializerMiddleware($this->serializer, []);
-        $result = $this->invokeMethod($middleware, 'deserializeRequestBody', $request, $requestClass);
-
-        $this->assertSame($clientRequest, $result);
-    }
-
-    /**
-     * Tests the deserializeRequestBody method.
-     * @throws ReflectionException
-     * @covers ::deserializeRequestBody
-     */
-    public function testDeserializeRequestBodyWithMalformedRequest(): void
-    {
-        $requestBody = '{"abc":"def"}';
-        $requestClass = 'ghi';
-
-        /* @var StreamInterface&MockObject $body */
-        $body = $this->createMock(StreamInterface::class);
-        $body->expects($this->once())
-             ->method('getContents')
-             ->willReturn($requestBody);
-
-        /* @var ServerRequestInterface&MockObject $request */
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->expects($this->once())
-                ->method('getBody')
-                ->willReturn($body);
-
-        $this->serializer->expects($this->once())
-                         ->method('deserialize')
-                         ->with(
-                             $this->identicalTo($requestBody),
-                             $this->identicalTo($requestClass),
-                             $this->identicalTo('json')
+                             $this->identicalTo('json'),
                          )
                          ->willThrowException($this->createMock(Exception::class));
 
-        $this->expectException(MalformedRequestException::class);
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->never())
+                ->method('handle');
 
-        $middleware = new RequestDeserializerMiddleware($this->serializer, []);
-        $this->invokeMethod($middleware, 'deserializeRequestBody', $request, $requestClass);
+        $this->expectException(InvalidRequestBodyException::class);
+
+        $instance = $this->createInstance();
+        $instance->process($request, $handler);
     }
 }

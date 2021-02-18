@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Factorio Item Browser API
   description:
@@ -7,17 +7,13 @@ info:
   contact:
     name: BluePsyduck
     email: bluepsyduck@gmx.com
-  version: 2.2.0
+  version: 3.0.0
 
 servers:
   - url: https://api.factorio-item-browser.com/
     description: Live API server
 
 tags:
-  - name: Authorization
-    description: Requests to authorize against the API.
-  - name: Combination
-    description: Requests related to the combinations of mods.
   - name: Generic
     description: Requests providing generic data to entities.
   - name: Items
@@ -30,91 +26,7 @@ tags:
     description: Requests to search for items, recipes etc. using queries.
 
 paths:
-  /auth:
-    post:
-      summary: Authorizes the access to the API by specifying the mods.
-      description:
-        This request is used to create an authorization token to be used in all other requests. Part of the
-        authorization is an access key provided by the administrator, as well as the names of mods which should be
-        enabled for the token. The token will last for about an hour. Whenever you encounter a 401 error in the other
-        requests, re-authorize to get a new token.<br />
-        <br />
-        To get a first look into the API, you may use the "demo" access key. This key is restricted to base mod only,
-        though.
-      operationId: auth
-      tags:
-        - Authorization
-      requestBody:
-        $ref: "#/components/requestBodies/auth"
-      responses:
-        "200":
-          $ref: "#/components/responses/auth"
-        "400":
-          $ref: "#/components/responses/badRequest"
-        "403":
-          $ref: "#/components/responses/accessDenied"
-
-  /combination/status:
-    post:
-      summary: Provides the current status of data of the combination of mods from the authorization token.
-      description:
-        This request provides information on how far the export process has progressed to make the data of the mods
-        available. If data is not available yet, the API will fall back to the Vanilla combination in all other
-        requests.
-      operationId: combination.status
-      tags:
-        - Combination
-      parameters:
-        - $ref: "#/components/parameters/Authorization"
-      responses:
-        "200":
-          $ref: "#/components/responses/combinationStatus"
-        "401":
-          $ref: "#/components/responses/unauthorized"
-      security:
-        - jwt: []
-
-  /combination/export:
-    post:
-      summary: Requests the combination of mods from the authorization token to be exported from the Factorio game.
-      description:
-        This request will trigger a new export of the combination of mods specified in the authorization token to be
-        exported from the Factorio game and imported into the database. This process will take some time. The current
-        status of the process can be accessed through the /combination/status endpoint.
-      operationId: combination.export
-      tags:
-        - Combination
-      parameters:
-        - $ref: "#/components/parameters/Authorization"
-      responses:
-        "200":
-          $ref: "#/components/responses/combinationStatus"
-        "401":
-          $ref: "#/components/responses/unauthorized"
-        "403":
-          $ref: "#/components/responses/actionNotAllowed"
-      security:
-        - jwt: []
-
-  /combination/validate:
-    post:
-      summary: Validates the combination of mods from the authorization token against the mod portal.
-      description:
-        This requests will validate the combination of mods specified in the authorization token against the Factorio
-        Mod Portal, checking that all mandatory dependencies are in the list of mods, as well as that no conflicts are
-        present.
-      operationId: combination.validate
-      tags:
-        - Combination
-      responses:
-        "200":
-          $ref: "#/components/responses/combinationValidation"
-        "401":
-          $ref: "#/components/responses/unauthorized"
-      security:
-        - jwt: []
-
-  /generic/details:
+  /{combination-id}/generic/details:
     post:
       summary: Provides basic data to items and recipes.
       description:
@@ -124,8 +36,8 @@ paths:
       tags:
         - Generic
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/genericEntities"
       responses:
@@ -136,9 +48,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /generic/icon:
+  /{combination-id}/generic/icon:
     post:
       summary: Provides the icon file contents to specific items and recipes.
       description:
@@ -150,8 +62,8 @@ paths:
       tags:
         - Generic
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/genericEntities"
       responses:
@@ -162,9 +74,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /item/list:
+  /{combination-id}/item/list:
     post:
       summary: Returns a list of all items.
       description:
@@ -174,8 +86,8 @@ paths:
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/itemList"
       responses:
@@ -186,9 +98,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /item/ingredient:
+  /{combination-id}/item/ingredient:
     post:
       summary: Provides all recipes in which a specific item as an ingredient of.
       description:
@@ -200,8 +112,8 @@ paths:
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/itemRecipes"
       responses:
@@ -214,9 +126,9 @@ paths:
         "404":
           $ref: "#/components/responses/itemNotFound"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /item/product:
+  /{combination-id}/item/product:
     post:
       summary: Provides all recipes which produce a specific item.
       description:
@@ -228,8 +140,8 @@ paths:
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/itemRecipes"
       responses:
@@ -242,17 +154,17 @@ paths:
         "404":
           $ref: "#/components/responses/itemNotFound"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /item/random:
+  /{combination-id}/item/random:
     post:
       summary: Provides random items of the currently enabled mods.
       operationId: item.random
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/itemRandom"
       responses:
@@ -263,9 +175,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /mod/list:
+  /{combination-id}/mod/list:
     post:
       summary: Lists the mods available in the browser.
       description:
@@ -275,8 +187,8 @@ paths:
       tags:
         - Mods
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       responses:
         "200":
           $ref: "#/components/responses/modList"
@@ -285,9 +197,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /recipe/list:
+  /{combination-id}/recipe/list:
     post:
       summary: Returns a list of all available recipes.
       description:
@@ -297,8 +209,8 @@ paths:
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/recipeList"
       responses:
@@ -309,9 +221,9 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /recipe/details:
+  /{combination-id}/recipe/details:
     post:
       summary: Returns the details of specific recipes, including the ingredients and products.
       description:
@@ -321,8 +233,8 @@ paths:
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/recipeDetails"
       responses:
@@ -333,21 +245,21 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /recipe/machines:
+  /{combination-id}/recipe/machines:
     post:
       summary: Returns the details of all machines able to craft the recipe.
       description:
         This request will return all machines with their details which are able to craft the recipe specified in the
-        request. If the recipe supports being crafted by hand, a machine named "player" will appear in the list. When
+        request. If the recipe supports being crafted by hand, a machine named "character" will appear in the list. When
         present, the player will be at the very first position of the results.
       operationId: recipe.machines
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/recipeMachines"
       responses:
@@ -360,17 +272,17 @@ paths:
         "404":
           $ref: "#/components/responses/recipeNotFound"
       security:
-        - jwt: []
+        - apiKey: []
 
-  /search/query:
+  /{combination-id}/search/query:
     post:
       summary: Searches for items, recipes etc. using a query string.
       operationId: search.query
       tags:
         - Search
       parameters:
-        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/combination-id"
       requestBody:
         $ref: "#/components/requestBodies/searchQuery"
       responses:
@@ -381,49 +293,28 @@ paths:
         "401":
           $ref: "#/components/responses/unauthorized"
       security:
-        - jwt: []
+        - apiKey: []
 
 components:
   parameters:
-    Authorization:
-      name: Authorization
-      in: header
-      description: The token received from the auth request.
-      schema:
-        type: string
-      example: Bearer {TOKEN}
-      required: true
-
     Accept-Language:
       name: Accept-Language
       in: header
       description: The language code to use for translating labels and descriptions.
       schema:
         type: string
-      example: en
+        default: en
+
+    combination-id:
+      name: combination-id
+      in: path
+      required: true
+      description: The ID of the combination to use for the request.
+      schema:
+        type: string
+      example: "2f4a45fa-a509-a9d1-aae6-ffcf984a7a76"
 
   requestBodies:
-    auth:
-      content:
-        application/json:
-          schema:
-            properties:
-              accessKey:
-                type: string
-                description: The access key to the API.
-                example: demo
-              modNames:
-                type: array
-                description: The names of the mods to enable.
-                items:
-                  type: string
-                example:
-                  - base
-            required:
-              - accessKey
-              - modNames
-      required: true
-
     genericEntities:
       content:
         application/json:
@@ -598,55 +489,6 @@ components:
 
   responses:
     # 200 responses
-    auth:
-      description: Authorization succeeded.
-      content:
-        application/json:
-          schema:
-            properties:
-              authorizationToken:
-                type: string
-                description: The authorization token to use in the other requests.
-                example: <token value>
-
-    combinationStatus:
-      description: The combination status.
-      content:
-        application/json:
-          schema:
-            properties:
-              id:
-                type: string
-                description: The ID of the combination.
-                example: 2f4a45fa-a509-a9d1-aae6-ffcf984a7a76
-              modNames:
-                type: array
-                description: The names of the mods in the combination.
-                items:
-                  type: string
-                example:
-                  - base
-              latestExportJob:
-                $ref: "#/components/schemas/ExportJob"
-              latestSuccessfulExportJob:
-                $ref: "#/components/schemas/ExportJob"
-
-    combinationValidation:
-      description: The result of the combination validation.
-      content:
-        application/json:
-          schema:
-            properties:
-              isValid:
-                type: boolean
-                description: Whether the combination of mods is valid.
-                example: true
-              mods:
-                type: array
-                description: The list of validated mods.
-                items:
-                  $ref: "#/components/schemas/ValidatedMod"
-
     genericDetails:
       description: The generic details of entities.
       content:
@@ -816,126 +658,60 @@ components:
       content:
         application/json:
           schema:
+            type: object
             properties:
               error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: Request validation failed.
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Request validation failed.
 
     # 401 responses
     unauthorized:
-      description:
-        Authorization token is missing or was invalid. Use the /auth request to get a new token.
+      description: Api-Key is missing in the header or was invalid.
       content:
         application/json:
           schema:
+            type: object
             properties:
               error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: Authorization token is invalid.
-
-    # 403 responses
-    accessDenied:
-      description:
-        Access denied. Either the specified access key is invalid, or it is not allowed to actually access this 
-        endpoint.
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: Invalid access key.
-
-    actionNotAllowed:
-      description:
-        The requested action is not allowed with the current agent.
-      content:
-        application/json:
-          schema:
-            properties:
-              error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: The requested action is not allowed with the current agent.
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or missing Api-Key.
 
     # 404 responses
     itemNotFound:
-      description: The requested item is not known to the browser, or not available in the enabled mods.
+      description: The requested item is not known in the combination of mods.
       content:
         application/json:
           schema:
+            type: object
             properties:
               error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: Item not found or not available in the enabled mods.
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Item not found in the combination of mods.
 
     recipeNotFound:
-      description: The requested recipe is not known to the browser, or not available in the enabled mods.
+      description: The requested recipe is not known in the combiantion of mods.
       content:
         application/json:
           schema:
+            type: object
             properties:
               error:
-                $ref: "#/components/schemas/Error"
-            example:
-              error:
-                message: Recipe not found or not available in the enabled mods.
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Recipe not found in the combination of mods.
 
   schemas:
-    Error:
-      type: object
-      description: An error which occurred during handling the request.
-      properties:
-        message:
-          type: string
-          description: The message of the error which occurred.
-          example: An unexpected error occured.
-
-    ExportJob:
-      type: object
-      description: The information to an actual export job.
-      properties:
-        status:
-          type: string
-          enum:
-            - queued
-            - downloading
-            - processing
-            - uploading
-            - uploaded
-            - done
-            - error
-          description: The current status of the export process.
-          example: done
-        creationTime:
-          type: string
-          format: datetime
-          description: The time when the export was triggered and put into the queue.
-          example: "2038-01-19T03:10:07+00:00"
-        exportTime:
-          type: string
-          format: datetime
-          description: The time when the actual export was processed.
-          example: "2038-01-19T03:12:07+00:00"
-        importTime:
-          type: string
-          format: datetime
-          description: The time when the exported data has been imported to the browser database.
-          example: "2038-01-19T03:14:07+00:00"
-        errorMessage:
-          type: string
-          description: The error message in case the status is "error".
-          example: ""
-
     GenericEntity:
       type: object
       description: A generic entity with basic information.
@@ -1220,35 +996,8 @@ components:
                   amount: 1
               craftingTime: 0.5
 
-    ValidatedMod:
-      type: object
-      description: A mod with its validation data.
-      properties:
-        name:
-          type: string
-          description: The name of the mod.
-          example: Foo
-        version:
-          type: string
-          description: The version of the mod used for validation.
-          example: 1.2.3
-        issueType:
-          type: string
-          description: The type of issue this mod has.
-          enum:
-            - none
-            - conflict
-            - missing-dependency
-            - missing-mod
-            - missing-release
-        issueDependency:
-          type: string
-          description: The dependency which triggered the "missing-dependency" or "conflict" issue.
-          example: Bar >= 2.3.4
-
   securitySchemes:
-    jwt:
-      description: JWT Token for the Factorio Item Browser API. Use the /auth request to receive a token.
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: Api-Key

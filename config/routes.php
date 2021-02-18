@@ -1,13 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * The file providing the routes.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
+// phpcs:ignoreFile
+
+declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
@@ -17,25 +18,19 @@ use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
-    $app->post('/auth', Handler\Auth\AuthHandler::class, RouteName::AUTH);
+    $app->post('/{combination-id}/generic/details', Handler\Generic\GenericDetailsHandler::class, RouteName::GENERIC_DETAILS);
+    $app->post('/{combination-id}/generic/icon', Handler\Generic\GenericIconHandler::class, RouteName::GENERIC_ICON);
 
-    $app->post('/combination/export', Handler\Combination\CombinationExportHandler::class, RouteName::COMBINATION_EXPORT);
-    $app->post('/combination/status', Handler\Combination\CombinationStatusHandler::class, RouteName::COMBINATION_STATUS);
-    $app->post('/combination/validate', Handler\Combination\CombinationValidateHandler::class, RouteName::COMBINATION_VALIDATE);
+    $app->post('/{combination-id}/item/ingredient', Handler\Item\ItemIngredientHandler::class, RouteName::ITEM_INGREDIENT);
+    $app->post('/{combination-id}/item/list', Handler\Item\ItemListHandler::class, RouteName::ITEM_LIST);
+    $app->post('/{combination-id}/item/product', Handler\Item\ItemProductHandler::class, RouteName::ITEM_PRODUCT);
+    $app->post('/{combination-id}/item/random', Handler\Item\ItemRandomHandler::class, RouteName::ITEM_RANDOM);
 
-    $app->post('/generic/details', Handler\Generic\GenericDetailsHandler::class, RouteName::GENERIC_DETAILS);
-    $app->post('/generic/icon', Handler\Generic\GenericIconHandler::class, RouteName::GENERIC_ICON);
+    $app->post('/{combination-id}/mod/list', Handler\Mod\ModListHandler::class, RouteName::MOD_LIST);
 
-    $app->post('/item/ingredient', Handler\Item\ItemIngredientHandler::class, RouteName::ITEM_INGREDIENT);
-    $app->post('/item/list', Handler\Item\ItemListHandler::class, RouteName::ITEM_LIST);
-    $app->post('/item/product', Handler\Item\ItemProductHandler::class, RouteName::ITEM_PRODUCT);
-    $app->post('/item/random', Handler\Item\ItemRandomHandler::class, RouteName::ITEM_RANDOM);
+    $app->post('/{combination-id}/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, RouteName::RECIPE_DETAILS);
+    $app->post('/{combination-id}/recipe/list', Handler\Recipe\RecipeListHandler::class, RouteName::RECIPE_LIST);
+    $app->post('/{combination-id}/recipe/machines', Handler\Recipe\RecipeMachinesHandler::class, RouteName::RECIPE_MACHINES);
 
-    $app->post('/mod/list', Handler\Mod\ModListHandler::class, RouteName::MOD_LIST);
-
-    $app->post('/recipe/details', Handler\Recipe\RecipeDetailsHandler::class, RouteName::RECIPE_DETAILS);
-    $app->post('/recipe/list', Handler\Recipe\RecipeListHandler::class, RouteName::RECIPE_LIST);
-    $app->post('/recipe/machines', Handler\Recipe\RecipeMachinesHandler::class, RouteName::RECIPE_MACHINES);
-
-    $app->post('/search/query', Handler\Search\SearchQueryHandler::class, RouteName::SEARCH_QUERY);
+    $app->post('/{combination-id}/search/query', Handler\Search\SearchQueryHandler::class, RouteName::SEARCH_QUERY);
 };

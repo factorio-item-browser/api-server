@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 
 /**
@@ -12,12 +12,14 @@ use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @template TResult of ResultInterface
  */
 interface SearchDecoratorInterface
 {
     /**
      * Returns the result class supported by the decorator.
-     * @return string
+     * @return class-string<TResult>
      */
     public function getSupportedResultClass(): string;
 
@@ -29,9 +31,9 @@ interface SearchDecoratorInterface
 
     /**
      * Announces a search result to be decorated.
-     * @param ResultInterface $searchResult
+     * @param TResult $searchResult
      */
-    public function announce($searchResult): void;
+    public function announce(ResultInterface $searchResult): void;
 
     /**
      * Prepares the data for the actual decoration.
@@ -40,8 +42,8 @@ interface SearchDecoratorInterface
 
     /**
      * Actually decorates the search result.
-     * @param ResultInterface $searchResult
+     * @param TResult $searchResult
      * @return GenericEntityWithRecipes|null
      */
-    public function decorate($searchResult): ?GenericEntityWithRecipes;
+    public function decorate(ResultInterface $searchResult): ?GenericEntityWithRecipes;
 }

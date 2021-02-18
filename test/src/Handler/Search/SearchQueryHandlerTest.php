@@ -4,102 +4,68 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowserTest\Api\Server\Handler\Search;
 
-use BluePsyduck\TestHelper\ReflectionTrait;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
 use FactorioItemBrowser\Api\Search\Collection\PaginatedResultCollection;
 use FactorioItemBrowser\Api\Search\Entity\Query;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Search\SearchManagerInterface;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\UuidInterface;
-use ReflectionException;
+use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * The PHPUnit test of the SearchQueryHandler class.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler
+ * @covers \FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler
  */
 class SearchQueryHandlerTest extends TestCase
 {
-    use ReflectionTrait;
+    /** @var SearchDecoratorService&MockObject */
+    private SearchDecoratorService $searchDecoratorService;
+    /** @var SearchManagerInterface&MockObject */
+    private SearchManagerInterface $searchManager;
 
-    /**
-     * The mocked search decorator service.
-     * @var SearchDecoratorService&MockObject
-     */
-    protected $searchDecoratorService;
-
-    /**
-     * The mocked search manager.
-     * @var SearchManagerInterface&MockObject
-     */
-    protected $searchManager;
-
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->searchDecoratorService = $this->createMock(SearchDecoratorService::class);
         $this->searchManager = $this->createMock(SearchManagerInterface::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
+     * @param array<string> $mockedMethods
+     * @return SearchQueryHandler&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): SearchQueryHandler
     {
-        $handler = new SearchQueryHandler($this->searchDecoratorService, $this->searchManager);
-
-        $this->assertSame($this->searchDecoratorService, $this->extractProperty($handler, 'searchDecoratorService'));
-        $this->assertSame($this->searchManager, $this->extractProperty($handler, 'searchManager'));
+        return $this->getMockBuilder(SearchQueryHandler::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->setConstructorArgs([
+                        $this->searchDecoratorService,
+                        $this->searchManager,
+                    ])
+                    ->getMock();
     }
 
-    /**
-     * Tests the getExpectedRequestClass method.
-     * @throws ReflectionException
-     * @covers ::getExpectedRequestClass
-     */
-    public function testGetExpectedRequestClass(): void
-    {
-        $expectedResult = SearchQueryRequest::class;
-
-        $handler = new SearchQueryHandler($this->searchDecoratorService, $this->searchManager);
-        $result = $this->invokeMethod($handler, 'getExpectedRequestClass');
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the handleRequest method.
-     * @throws ReflectionException
-     * @covers ::handleRequest
-     */
-    public function testHandleRequest(): void
+    public function testHandle(): void
     {
         $query = 'abc';
         $indexOfFirstResult = 42;
         $numberOfResults = 21;
         $numberOfRecipesPerResult = 1337;
+        $combinationId = '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76';
         $locale = 'def';
         $countResults = 7331;
 
-        /* @var Query&MockObject $searchQuery */
         $searchQuery = $this->createMock(Query::class);
-        /* @var UuidInterface&MockObject $combinationId */
-        $combinationId = $this->createMock(UuidInterface::class);
 
         $currentSearchResults = [
             $this->createMock(ResultInterface::class),
@@ -110,26 +76,18 @@ class SearchQueryHandlerTest extends TestCase
             $this->createMock(GenericEntityWithRecipes::class),
         ];
 
-        $expectedResult = new SearchQueryResponse();
-        $expectedResult->setResults($decoratedSearchResults)
-                       ->setTotalNumberOfResults($countResults);
+        $expectedPayload = new SearchQueryResponse();
+        $expectedPayload->results = $decoratedSearchResults;
+        $expectedPayload->totalNumberOfResults = $countResults;
 
-        /* @var SearchQueryRequest&MockObject $request */
-        $request = $this->createMock(SearchQueryRequest::class);
-        $request->expects($this->once())
-                ->method('getQuery')
-                ->willReturn($query);
-        $request->expects($this->once())
-                ->method('getIndexOfFirstResult')
-                ->willReturn($indexOfFirstResult);
-        $request->expects($this->once())
-                ->method('getNumberOfResults')
-                ->willReturn($numberOfResults);
-        $request->expects($this->once())
-                ->method('getNumberOfRecipesPerResult')
-                ->willReturn($numberOfRecipesPerResult);
+        $clientRequest = new SearchQueryRequest();
+        $clientRequest->combinationId = $combinationId;
+        $clientRequest->locale = $locale;
+        $clientRequest->query = $query;
+        $clientRequest->indexOfFirstResult = $indexOfFirstResult;
+        $clientRequest->numberOfResults = $numberOfResults;
+        $clientRequest->numberOfRecipesPerResult = $numberOfRecipesPerResult;
 
-        /* @var PaginatedResultCollection&MockObject $searchResults */
         $searchResults = $this->createMock(PaginatedResultCollection::class);
         $searchResults->expects($this->once())
                       ->method('getResults')
@@ -139,19 +97,15 @@ class SearchQueryHandlerTest extends TestCase
                       ->method('count')
                       ->willReturn($countResults);
 
-        /* @var AuthorizationToken&MockObject $authorizationToken */
-        $authorizationToken = $this->createMock(AuthorizationToken::class);
-        $authorizationToken->expects($this->once())
-                           ->method('getCombinationId')
-                           ->willReturn($combinationId);
-        $authorizationToken->expects($this->once())
-                           ->method('getLocale')
-                           ->willReturn($locale);
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->expects($this->once())
+                ->method('getParsedBody')
+                ->willReturn($clientRequest);
 
         $this->searchManager->expects($this->once())
                             ->method('parseQuery')
                             ->with(
-                                $this->identicalTo($combinationId),
+                                $this->equalTo(Uuid::fromString($combinationId)),
                                 $this->identicalTo($locale),
                                 $this->identicalTo($query)
                             )
@@ -169,17 +123,11 @@ class SearchQueryHandlerTest extends TestCase
                                      )
                                      ->willReturn($decoratedSearchResults);
 
-        /* @var SearchQueryHandler&MockObject $handler */
-        $handler = $this->getMockBuilder(SearchQueryHandler::class)
-                        ->onlyMethods(['getAuthorizationToken'])
-                        ->setConstructorArgs([$this->searchDecoratorService, $this->searchManager])
-                        ->getMock();
-        $handler->expects($this->once())
-                ->method('getAuthorizationToken')
-                ->willReturn($authorizationToken);
+        $instance = $this->createInstance();
+        $result = $instance->handle($request);
 
-        $result = $this->invokeMethod($handler, 'handleRequest', $request);
-
-        $this->assertEquals($expectedResult, $result);
+        $this->assertInstanceOf(ClientResponse::class, $result);
+        /* @var ClientResponse $result */
+        $this->assertEquals($expectedPayload, $result->getPayload());
     }
 }

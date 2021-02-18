@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Database\Entity\Translation;
 use FactorioItemBrowser\Api\Database\Repository\TranslationRepository;
-use FactorioItemBrowser\Api\Server\Constant\Config;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
+use FactorioItemBrowser\Common\Constant\Defaults;
 use FactorioItemBrowser\Common\Constant\EntityType;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The service handling the translations of client entities.
@@ -22,22 +22,14 @@ class TranslationService
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    /**
-     * The repository of the translations.
-     * @var TranslationRepository
-     */
-    protected $translationRepository;
+    protected TranslationRepository $translationRepository;
 
     /**
      * The entities to be translated.
-     * @var array|GenericEntity[]
+     * @var array<GenericEntity>
      */
-    protected $entities = [];
+    protected array $entities = [];
 
-    /**
-     * Initializes the service.
-     * @param TranslationRepository $translationRepository
-     */
     public function __construct(TranslationRepository $translationRepository)
     {
         $this->translationRepository = $translationRepository;
@@ -54,29 +46,31 @@ class TranslationService
 
     /**
      * Translates the entities which have been added to the service.
-     * @param AuthorizationToken $authorizationToken
+     * @param UuidInterface $combinationId
+     * @param string $locale
      */
-    public function translate(AuthorizationToken $authorizationToken): void
+    public function translate(UuidInterface $combinationId, string $locale): void
     {
         if (count($this->entities) === 0) {
             return;
         }
 
-        $translations = $this->fetchTranslations($this->entities, $authorizationToken);
+        $translations = $this->fetchTranslations($this->entities, $combinationId, $locale);
         $this->matchTranslationsToEntities($translations, $this->entities);
     }
 
     /**
      * Fetches the translations to the entities.
-     * @param array|GenericEntity[] $entities
-     * @param AuthorizationToken $authorizationToken
-     * @return array|Translation[]
+     * @param array<GenericEntity> $entities
+     * @param UuidInterface $combinationId
+     * @param string $locale
+     * @return array<Translation>
      */
-    protected function fetchTranslations(array $entities, AuthorizationToken $authorizationToken): array
+    protected function fetchTranslations(array $entities, UuidInterface $combinationId, string $locale): array
     {
         $translations = $this->translationRepository->findByTypesAndNames(
-            $authorizationToken->getCombinationId(),
-            $authorizationToken->getLocale(),
+            $combinationId,
+            $locale,
             $this->extractTypesAndNames($entities)
         );
 
@@ -110,7 +104,7 @@ class TranslationService
     protected function getSortCriteria(Translation $translation): array
     {
         return [
-            $translation->getLocale() !== Config::DEFAULT_LOCALE,
+            $translation->getLocale() !== Defaults::LOCALE,
             $translation->getType(),
             $translation->getName(),
         ];
@@ -118,8 +112,8 @@ class TranslationService
 
     /**
      * Prepares the translations for matching to the entities.
-     * @param array|Translation[] $translations
-     * @return array|Translation[]
+     * @param array<Translation> $translations
+     * @return array<Translation>
      */
     protected function prepareTranslations(array $translations): array
     {
@@ -135,7 +129,7 @@ class TranslationService
     /**
      * Returns the types the translation can be applied to.
      * @param Translation $translation
-     * @return array|string[]
+     * @return array<string>
      */
     protected function getTypesForTranslation(Translation $translation): array
     {
@@ -151,17 +145,17 @@ class TranslationService
 
     /**
      * Matches the translations to the entities.
-     * @param array|Translation[] $translations
-     * @param array|GenericEntity[] $entities
+     * @param array<Translation> $translations
+     * @param array<GenericEntity> $entities
      */
     protected function matchTranslationsToEntities(array $translations, array $entities): void
     {
         foreach ($entities as $entity) {
-            $translationKey = $this->getTranslationKey($entity->getType(), $entity->getName());
+            $translationKey = $this->getTranslationKey($entity->type, $entity->name);
             if (isset($translations[$translationKey])) {
                 $translation = $translations[$translationKey];
-                $entity->setLabel($translation->getValue())
-                       ->setDescription($translation->getDescription());
+                $entity->label = $translation->getValue();
+                $entity->description = $translation->getDescription();
             }
         }
     }

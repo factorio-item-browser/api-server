@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Recipe\RecipeDetailsRequest;
 use FactorioItemBrowser\Api\Client\Response\Recipe\RecipeDetailsResponse;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
-use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * The handler of the /recipe/details request.
@@ -21,25 +21,11 @@ use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeDetailsHandler extends AbstractRequestHandler
+class RecipeDetailsHandler implements RequestHandlerInterface
 {
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    private MapperManagerInterface $mapperManager;
+    private RecipeService $recipeService;
 
-    /**
-     * The database recipe service.
-     * @var RecipeService
-     */
-    protected $recipeService;
-
-    /**
-     * Initializes the auth handler.
-     * @param MapperManagerInterface $mapperManager
-     * @param RecipeService $recipeService
-     */
     public function __construct(
         MapperManagerInterface $mapperManager,
         RecipeService $recipeService
@@ -48,51 +34,18 @@ class RecipeDetailsHandler extends AbstractRequestHandler
         $this->recipeService = $recipeService;
     }
 
-    /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return RecipeDetailsRequest::class;
-    }
+        /** @var RecipeDetailsRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
+        $recipeData = $this->recipeService->getDataWithNames(
+            Uuid::fromString($clientRequest->combinationId),
+            $clientRequest->names,
+        );
 
-    /**
-     * Creates the response data from the validated request data.
-     * @param RecipeDetailsRequest $request
-     * @return ResponseInterface
-     * @throws MapperException
-     */
-    protected function handleRequest($request): ResponseInterface
-    {
-        $authorizationToken = $this->getAuthorizationToken();
-        $recipeData = $this->recipeService->getDataWithNames($request->getNames(), $authorizationToken);
-        $mappedRecipes = $this->mapRecipes($recipeData);
-        return $this->createResponse($mappedRecipes);
-    }
-
-    /**
-     * Maps the recipes to response entities.
-     * @param RecipeDataCollection $recipeData
-     * @return array|RecipeWithExpensiveVersion[]
-     * @throws MapperException
-     */
-    protected function mapRecipes(RecipeDataCollection $recipeData): array
-    {
-        $entity = new GenericEntityWithRecipes();
-        $this->mapperManager->map($recipeData, $entity);
-        return $entity->getRecipes();
-    }
-
-    /**
-     * Creates the response to send to the client.
-     * @param array|RecipeWithExpensiveVersion[] $recipes
-     * @return RecipeDetailsResponse
-     */
-    protected function createResponse(array $recipes): RecipeDetailsResponse
-    {
         $response = new RecipeDetailsResponse();
-        $response->setRecipes($recipes);
-        return $response;
+        $response->recipes = $this->mapperManager->map($recipeData, new GenericEntityWithRecipes())->recipes;
+
+        return new ClientResponse($response);
     }
 }

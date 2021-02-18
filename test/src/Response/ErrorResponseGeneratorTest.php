@@ -6,7 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Response;
 
 use BluePsyduck\TestHelper\ReflectionTrait;
 use Exception;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Response\ErrorResponseGenerator;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Log\LoggerInterface;
@@ -108,7 +108,7 @@ class ErrorResponseGeneratorTest extends TestCase
      */
     public function testInvokeWithApiServerException(): void
     {
-        $exception = new ApiServerException('foo', 123);
+        $exception = new ServerException('foo', 123);
         $expectedStatusCode = 123;
         $expectedMessage = 'foo';
         $responseError = [

@@ -9,7 +9,6 @@ use FactorioItemBrowser\Api\Database\Entity\Item;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
 use FactorioItemBrowser\Api\Database\Repository\RecipeRepository;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -20,17 +19,9 @@ use Ramsey\Uuid\UuidInterface;
  */
 class RecipeService
 {
-    /**
-     * The repository of the recipes.
-     * @var RecipeRepository
-     */
-    protected $recipeRepository;
-
-    /**
-     * The already requested recipe details.
-     * @var array|Recipe[]
-     */
-    protected $recipeCache = [];
+    protected RecipeRepository $recipeRepository;
+    /** @var array<string, Recipe> */
+    protected array $recipeCache = [];
 
     /**
      * Initializes the service.
@@ -43,40 +34,37 @@ class RecipeService
 
     /**
      * Returns the recipe data having one of the names.
-     * @param array|string[] $names
-     * @param AuthorizationToken $authorizationToken
+     * @param array<string> $names
+     * @param UuidInterface $combinationId
      * @return RecipeDataCollection
      */
-    public function getDataWithNames(array $names, AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getDataWithNames(UuidInterface $combinationId, array $names): RecipeDataCollection
     {
-        $recipeData = $this->recipeRepository->findDataByNames(
-            $authorizationToken->getCombinationId(),
-            $names
-        );
+        $recipeData = $this->recipeRepository->findDataByNames($combinationId, $names);
         return $this->createDataCollection($recipeData);
     }
 
     /**
      * Returns all recipe data.
-     * @param AuthorizationToken $authorizationToken
+     * @param UuidInterface $combinationId
      * @return RecipeDataCollection
      */
-    public function getAllData(AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getAllData(UuidInterface $combinationId): RecipeDataCollection
     {
-        $recipeData = $this->recipeRepository->findAllData($authorizationToken->getCombinationId());
+        $recipeData = $this->recipeRepository->findAllData($combinationId);
         return $this->createDataCollection($recipeData);
     }
 
     /**
      * Returns the recipe data having any of the items as ingredient.
-     * @param array|Item[] $items
-     * @param AuthorizationToken $authorizationToken
+     * @param array<Item> $items
+     * @param UuidInterface $combinationId
      * @return RecipeDataCollection
      */
-    public function getDataWithIngredients(array $items, AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getDataWithIngredients(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByIngredientItemIds(
-            $authorizationToken->getCombinationId(),
+            $combinationId,
             $this->extractIdsFromItems($items)
         );
         return $this->createDataCollection($recipeData);
@@ -84,14 +72,14 @@ class RecipeService
 
     /**
      * Returns the recipe data having any of the items as product.
-     * @param array|Item[] $items
-     * @param AuthorizationToken $authorizationToken
+     * @param UuidInterface $combinationId
+     * @param array<Item> $items
      * @return RecipeDataCollection
      */
-    public function getDataWithProducts(array $items, AuthorizationToken $authorizationToken): RecipeDataCollection
+    public function getDataWithProducts(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
         $recipeData = $this->recipeRepository->findDataByProductItemIds(
-            $authorizationToken->getCombinationId(),
+            $combinationId,
             $this->extractIdsFromItems($items)
         );
         return $this->createDataCollection($recipeData);
@@ -99,8 +87,8 @@ class RecipeService
 
     /**
      * Extracts the ids from the items.
-     * @param array|Item[] $items
-     * @return array|UuidInterface[]
+     * @param array<Item> $items
+     * @return array<UuidInterface>
      */
     protected function extractIdsFromItems(array $items): array
     {
@@ -113,7 +101,7 @@ class RecipeService
 
     /**
      * Creates a data collection with the recipe data.
-     * @param array|RecipeData[] $recipeData
+     * @param array<RecipeData> $recipeData
      * @return RecipeDataCollection
      */
     protected function createDataCollection(array $recipeData): RecipeDataCollection
@@ -127,8 +115,8 @@ class RecipeService
 
     /**
      * Returns the details of the recipes with the specified IDs.
-     * @param array|UuidInterface[] $recipeIds
-     * @return array|Recipe[]
+     * @param array<UuidInterface> $recipeIds
+     * @return array<string, Recipe>
      */
     public function getDetailsByIds(array $recipeIds): array
     {
@@ -145,7 +133,7 @@ class RecipeService
 
     /**
      * Fetches the recipe details into the local cache.
-     * @param array|UuidInterface[] $recipeIds
+     * @param array<UuidInterface> $recipeIds
      */
     protected function fetchRecipeDetails(array $recipeIds): void
     {

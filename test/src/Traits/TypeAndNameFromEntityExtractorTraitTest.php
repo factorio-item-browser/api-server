@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Traits;
 
 use BluePsyduck\TestHelper\ReflectionTrait;
-use FactorioItemBrowser\Api\Client\Entity\Entity;
+use FactorioItemBrowser\Api\Client\Transfer\Entity;
 use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,45 +17,40 @@ use ReflectionException;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait
+ * @covers \FactorioItemBrowser\Api\Server\Traits\TypeAndNameFromEntityExtractorTrait
  */
 class TypeAndNameFromEntityExtractorTraitTest extends TestCase
 {
     use ReflectionTrait;
 
     /**
-     * Tests the extractTypesAndNames method.
+     * @param array<string> $mockedMethods
+     * @return MockObject
+     */
+    private function createInstance(array $mockedMethods = []): MockObject
+    {
+        return $this->getMockBuilder(TypeAndNameFromEntityExtractorTrait::class)
+                    ->disableProxyingToOriginalMethods()
+                    ->onlyMethods($mockedMethods)
+                    ->getMockForTrait();
+    }
+
+    /**
      * @throws ReflectionException
-     * @covers ::extractTypesAndNames
      */
     public function testExtractTypesAndNames(): void
     {
-        /* @var Entity&MockObject $entity1 */
-        $entity1 = $this->createMock(Entity::class);
-        $entity1->expects($this->once())
-                ->method('getType')
-                ->willReturn('abc');
-        $entity1->expects($this->once())
-                ->method('getName')
-                ->willReturn('def');
+        $entity1 = new Entity();
+        $entity1->type = 'abc';
+        $entity1->name = 'def';
 
-        /* @var Entity&MockObject $entity2 */
-        $entity2 = $this->createMock(Entity::class);
-        $entity2->expects($this->once())
-                ->method('getType')
-                ->willReturn('abc');
-        $entity2->expects($this->once())
-                ->method('getName')
-                ->willReturn('ghi');
+        $entity2 = new Entity();
+        $entity2->type = 'abc';
+        $entity2->name = 'ghi';
 
-        /* @var Entity&MockObject $entity3 */
-        $entity3 = $this->createMock(Entity::class);
-        $entity3->expects($this->once())
-                ->method('getType')
-                ->willReturn('jkl');
-        $entity3->expects($this->once())
-                ->method('getName')
-                ->willReturn('mno');
+        $entity3 = new Entity();
+        $entity3->type = 'jkl';
+        $entity3->name = 'mno';
 
         $entities = [$entity1, $entity2, $entity3];
         $expectedResult = new NamesByTypes();
@@ -63,11 +58,8 @@ class TypeAndNameFromEntityExtractorTraitTest extends TestCase
                        ->addName('abc', 'ghi')
                        ->addName('jkl', 'mno');
 
-        /* @var TypeAndNameFromEntityExtractorTrait&MockObject $trait */
-        $trait = $this->getMockBuilder(TypeAndNameFromEntityExtractorTrait::class)
-                      ->getMockForTrait();
-
-        $result = $this->invokeMethod($trait, 'extractTypesAndNames', $entities);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'extractTypesAndNames', $entities);
 
         $this->assertEquals($expectedResult, $result);
     }

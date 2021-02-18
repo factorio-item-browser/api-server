@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Server\SearchDecorator\SearchDecoratorInterface;
 
@@ -18,13 +18,12 @@ class SearchDecoratorService
 {
     /**
      * The search decorators by their supported result class.
-     * @var array|SearchDecoratorInterface[]
+     * @var array<class-string, SearchDecoratorInterface<ResultInterface>>
      */
-    protected $searchDecoratorsByClass;
+    protected array $searchDecoratorsByClass;
 
     /**
-     * SearchDecoratorService constructor.
-     * @param array|SearchDecoratorInterface[] $searchDecorators
+     * @param array<SearchDecoratorInterface<ResultInterface>> $searchDecorators
      */
     public function __construct(array $searchDecorators)
     {
@@ -35,9 +34,9 @@ class SearchDecoratorService
 
     /**
      * Decorates the search results to client entities.
-     * @param array|ResultInterface[] $searchResults
+     * @param array<ResultInterface> $searchResults
      * @param int $numberOfRecipesPerResult
-     * @return array|GenericEntityWithRecipes[]
+     * @return array<GenericEntityWithRecipes>
      */
     public function decorate(array $searchResults, int $numberOfRecipesPerResult): array
     {
@@ -60,7 +59,7 @@ class SearchDecoratorService
 
     /**
      * Announces the search results to the search decorators.
-     * @param array|ResultInterface[] $searchResults
+     * @param array<ResultInterface> $searchResults
      */
     protected function announceSearchResults(array $searchResults): void
     {
@@ -84,8 +83,8 @@ class SearchDecoratorService
 
     /**
      * Actually decorates the search results through the search decorators.
-     * @param array|ResultInterface[] $searchResults
-     * @return array|GenericEntityWithRecipes[]
+     * @param array<ResultInterface> $searchResults
+     * @return array<GenericEntityWithRecipes>
      */
     protected function decorateSearchResults(array $searchResults): array
     {

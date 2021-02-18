@@ -5,86 +5,72 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Exception;
-use FactorioItemBrowser\Api\Client\Request\RequestInterface;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\MalformedRequestException;
+use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
+use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
+use FactorioItemBrowser\Common\Constant\Defaults;
 use JMS\Serializer\SerializerInterface;
+use Mezzio\Router\RouteResult;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * The middleware deserializing the request into a client request entity.
+ * The middleware deserializing the request body if required.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
 class RequestDeserializerMiddleware implements MiddlewareInterface
 {
-    use MatchedRouteNameTrait;
+    private SerializerInterface $serializer;
+
+    /** @var array<string, class-string<AbstractRequest>> */
+    private array $requestClassesByRoutes;
 
     /**
-     * The serializer.
-     * @var SerializerInterface
+     * @param SerializerInterface $apiClientSerializer
+     * @param array<string, class-string<AbstractRequest>> $requestClassesByRoutes
      */
-    protected $serializer;
-
-    /**
-     * The map of the routes to their corresponding requests.
-     * @var array<class-string<RequestInterface>>
-     */
-    protected $mapRouteToRequest;
-
-    /**
-     * Initializes the middleware.
-     * @param SerializerInterface $serializer
-     * @param array<string,class-string<RequestInterface>> $mapRouteToRequest
-     */
-    public function __construct(SerializerInterface $serializer, array $mapRouteToRequest)
+    public function __construct(SerializerInterface $apiClientSerializer, array $requestClassesByRoutes)
     {
-        $this->serializer = $serializer;
-        $this->mapRouteToRequest = $mapRouteToRequest;
+        $this->serializer = $apiClientSerializer;
+        $this->requestClassesByRoutes = $requestClassesByRoutes;
     }
 
     /**
-     * Process an incoming server request and return a response, optionally delegating response creation to a handler.
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws ApiServerException
+     * @throws ServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $routeName = $this->getMatchedRouteName($request);
-        $requestClass = $this->mapRouteToRequest[$routeName] ?? '';
+        /** @var RouteResult $routeResult */
+        $routeResult = $request->getAttribute(RouteResult::class);
+        $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()] ?? '';
+        $locale = $request->getHeaderLine('Accept-Language');
 
         if ($requestClass !== '') {
-            $clientRequest = $this->deserializeRequestBody($request, $requestClass);
-            $request = $request->withAttribute(RequestInterface::class, $clientRequest);
+            try {
+                if ($request->getHeaderLine('Content-Type') === 'application/json') {
+                    $requestBody = $request->getBody()->getContents();
+                } else {
+                    $requestBody = '{}';
+                }
+
+                /** @var AbstractRequest $clientRequest */
+                $clientRequest = $this->serializer->deserialize($requestBody, $requestClass, 'json');
+                $clientRequest->locale = $locale === '' ? Defaults::LOCALE : $locale;
+                $clientRequest->combinationId =  $request->getAttribute('combination-id');
+
+                $request = $request->withParsedBody($clientRequest);
+            } catch (Exception $e) {
+                throw new InvalidRequestBodyException($e->getMessage(), $e);
+            }
         }
 
         return $handler->handle($request);
-    }
-
-    /**
-     * Deserializes the request body into a client request entity.
-     * @param ServerRequestInterface $request
-     * @param class-string<RequestInterface> $requestClass
-     * @return RequestInterface
-     * @throws ApiServerException
-     */
-    protected function deserializeRequestBody(ServerRequestInterface $request, $requestClass): RequestInterface
-    {
-        try {
-            $requestBody = $request->getBody()->getContents();
-            if ($requestBody === '') {
-                $requestBody = '{}';
-            }
-            $result = $this->serializer->deserialize($requestBody, $requestClass, 'json');
-        } catch (Exception $e) {
-            throw new MalformedRequestException($e->getMessage(), $e);
-        }
-        return $result;
     }
 }

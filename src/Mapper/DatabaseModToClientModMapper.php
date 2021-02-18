@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use BluePsyduck\MapperManager\Mapper\StaticMapperInterface;
-use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
+use FactorioItemBrowser\Api\Client\Transfer\Mod as ClientMod;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 
 /**
@@ -13,38 +13,31 @@ use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements StaticMapperInterface<DatabaseMod, ClientMod>
  */
 class DatabaseModToClientModMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
 {
-    /**
-     * Returns the source class supported by this mapper.
-     * @return string
-     */
     public function getSupportedSourceClass(): string
     {
         return DatabaseMod::class;
     }
 
-    /**
-     * Returns the destination class supported by this mapper.
-     * @return string
-     */
     public function getSupportedDestinationClass(): string
     {
         return ClientMod::class;
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param DatabaseMod $databaseMod
-     * @param ClientMod $clientMod
+     * @param DatabaseMod $source
+     * @param ClientMod $destination
      */
-    public function map($databaseMod, $clientMod): void
+    public function map(object $source, object $destination): void
     {
-        $clientMod->setName($databaseMod->getName())
-                  ->setAuthor($databaseMod->getAuthor())
-                  ->setVersion($databaseMod->getVersion());
+        $destination->name = $source->getName();
+        $destination->author = $source->getAuthor();
+        $destination->version = $source->getVersion();
 
-        $this->addToTranslationService($clientMod);
+        $this->addToTranslationService($destination);
     }
 }

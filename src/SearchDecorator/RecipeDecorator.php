@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
+use FactorioItemBrowser\Api\Client\Transfer\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
+use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use Ramsey\Uuid\UuidInterface;
 
@@ -19,155 +19,92 @@ use Ramsey\Uuid\UuidInterface;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements SearchDecoratorInterface<RecipeResult>
  */
 class RecipeDecorator implements SearchDecoratorInterface
 {
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    protected MapperManagerInterface $mapperManager;
+    protected RecipeService $recipeService;
 
-    /**
-     * The recipe service.
-     * @var RecipeService
-     */
-    protected $recipeService;
+    /** @var array<string, UuidInterface> */
+    protected array $announcedRecipeIds = [];
+    /** @var array<DatabaseRecipe> */
+    protected array $databaseRecipes = [];
 
-    /**
-     * The recipe ids of the announced search results.
-     * @var array|UuidInterface[]
-     */
-    protected $recipeIds = [];
-
-    /**
-     * The recipes of the search results.
-     * @var array|DatabaseRecipe[]
-     */
-    protected $recipes = [];
-
-    /**
-     * Initializes the decorator.
-     * @param MapperManagerInterface $mapperManager
-     * @param RecipeService $recipeService
-     */
     public function __construct(MapperManagerInterface $mapperManager, RecipeService $recipeService)
     {
         $this->mapperManager = $mapperManager;
         $this->recipeService = $recipeService;
     }
 
-    /**
-     * Returns the result class supported by the decorator.
-     * @return string
-     */
     public function getSupportedResultClass(): string
     {
         return RecipeResult::class;
     }
 
-    /**
-     * Initializes the decorator.
-     * @param int $numberOfRecipesPerResult
-     */
     public function initialize(int $numberOfRecipesPerResult): void
     {
-        $this->recipeIds = [];
-        $this->recipes = [];
+        $this->announcedRecipeIds = [];
+        $this->databaseRecipes = [];
     }
 
     /**
-     * Announces a search result to be decorated.
-     * @param RecipeResult $recipeResult
+     * @param RecipeResult $searchResult
      */
-    public function announce($recipeResult): void
+    public function announce(ResultInterface $searchResult): void
     {
-        if ($recipeResult->getNormalRecipeId() !== null) {
-            $this->recipeIds[] = $recipeResult->getNormalRecipeId();
-        }
-        if ($recipeResult->getExpensiveRecipeId() !== null) {
-            $this->recipeIds[] = $recipeResult->getExpensiveRecipeId();
+        foreach ([$searchResult->getNormalRecipeId(), $searchResult->getExpensiveRecipeId()] as $recipeId) {
+            if ($recipeId !== null) {
+                $this->announcedRecipeIds[$recipeId->toString()] = $recipeId;
+            }
         }
     }
 
-    /**
-     * Prepares the data for the actual decoration.
-     */
     public function prepare(): void
     {
-        $recipeIds = array_values(array_unique(array_filter($this->recipeIds)));
-        $this->recipes = $this->recipeService->getDetailsByIds($recipeIds);
+        $this->databaseRecipes = $this->recipeService->getDetailsByIds($this->announcedRecipeIds);
     }
 
     /**
-     * Actually decorates the search result.
-     * @param RecipeResult $recipeResult
+     * @param RecipeResult $searchResult
      * @return GenericEntityWithRecipes|null
-     * @throws MapperException
      */
-    public function decorate($recipeResult): ?GenericEntityWithRecipes
+    public function decorate(ResultInterface $searchResult): ?GenericEntityWithRecipes
     {
-        $recipeId = $this->getRecipeIdFromResult($recipeResult);
-        if ($recipeId === null) {
+        $entity = $this->mapRecipeWithId(
+            $searchResult->getNormalRecipeId() ?? $searchResult->getExpensiveRecipeId(),
+            new GenericEntityWithRecipes(),
+        );
+        if ($entity === null) {
             return null;
         }
 
-        $recipeId = $recipeId->toString();
-        if (!isset($this->recipes[$recipeId])) {
-            return null;
-        }
-
-        $result = $this->createEntityForRecipe($this->recipes[$recipeId]);
-        $recipe = $this->decorateRecipe($recipeResult);
+        $recipe = $this->decorateRecipe($searchResult);
         if ($recipe instanceof ClientRecipe) {
-            $result->addRecipe($recipe)
-                   ->setTotalNumberOfRecipes(1);
+            $entity->recipes[] = $recipe;
+            $entity->totalNumberOfRecipes = 1;
         }
-        return $result;
-    }
-
-    /**
-     * Creates the entity to the recipe.
-     * @param DatabaseRecipe $recipe
-     * @return GenericEntityWithRecipes
-     * @throws MapperException
-     */
-    protected function createEntityForRecipe(DatabaseRecipe $recipe): GenericEntityWithRecipes
-    {
-        $result = new GenericEntityWithRecipes();
-        $this->mapperManager->map($recipe, $result);
-        return $result;
-    }
-
-    /**
-     * Returns the recipe id from the result.
-     * @param RecipeResult $recipeResult
-     * @return UuidInterface|null
-     */
-    protected function getRecipeIdFromResult(RecipeResult $recipeResult): ?UuidInterface
-    {
-        $result = $recipeResult->getNormalRecipeId();
-        if ($result === null) {
-            $result = $recipeResult->getExpensiveRecipeId();
-        }
-        return $result;
+        return $entity;
     }
 
     /**
      * Maps the recipe result to a client recipe entity, if it actually has recipe ids set.
      * @param RecipeResult $recipeResult
      * @return RecipeWithExpensiveVersion|null
-     * @throws MapperException
      */
     public function decorateRecipe(RecipeResult $recipeResult): ?RecipeWithExpensiveVersion
     {
-        $normalRecipe = $this->mapRecipeWithId($recipeResult->getNormalRecipeId());
-        $expensiveRecipe = $this->mapRecipeWithId($recipeResult->getExpensiveRecipeId());
+        $normalRecipe = $this->mapRecipeWithId($recipeResult->getNormalRecipeId(), new RecipeWithExpensiveVersion());
+        $expensiveRecipe = $this->mapRecipeWithId(
+            $recipeResult->getExpensiveRecipeId(),
+            new RecipeWithExpensiveVersion(),
+        );
 
         $result = null;
         if ($normalRecipe !== null) {
             if ($expensiveRecipe !== null) {
-                $normalRecipe->setExpensiveVersion($expensiveRecipe);
+                $normalRecipe->expensiveVersion = $expensiveRecipe;
             }
             $result = $normalRecipe;
         } elseif ($expensiveRecipe !== null) {
@@ -177,19 +114,22 @@ class RecipeDecorator implements SearchDecoratorInterface
     }
 
     /**
-     * Maps the recipe with the id.
+     * Maps the recipe with the specified id.
+     * @template T of object
      * @param UuidInterface|null $recipeId
-     * @return RecipeWithExpensiveVersion
-     * @throws MapperException
+     * @param T $destination
+     * @return T|null
      */
-    protected function mapRecipeWithId(?UuidInterface $recipeId): ?RecipeWithExpensiveVersion
+    protected function mapRecipeWithId(?UuidInterface $recipeId, object $destination): ?object
     {
-        if ($recipeId === null || !isset($this->recipes[$recipeId->toString()])) {
+        if ($recipeId === null) {
+            return null;
+        }
+        $recipeId = $recipeId->toString();
+        if (!isset($this->databaseRecipes[$recipeId])) {
             return null;
         }
 
-        $result = new RecipeWithExpensiveVersion();
-        $this->mapperManager->map($this->recipes[$recipeId->toString()], $result);
-        return $result;
+        return $this->mapperManager->map($this->databaseRecipes[$recipeId], $destination);
     }
 }

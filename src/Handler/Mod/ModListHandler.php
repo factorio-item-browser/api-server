@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Mod;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\Mod as ClientMod;
 use FactorioItemBrowser\Api\Client\Request\Mod\ModListRequest;
 use FactorioItemBrowser\Api\Client\Response\Mod\ModListResponse;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
+use FactorioItemBrowser\Api\Client\Transfer\Mod as ClientMod;
 use FactorioItemBrowser\Api\Database\Entity\Mod as DatabaseMod;
 use FactorioItemBrowser\Api\Database\Repository\ModRepository;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * The handler of the /mod/list request.
@@ -20,25 +22,11 @@ use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class ModListHandler extends AbstractRequestHandler
+class ModListHandler implements RequestHandlerInterface
 {
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    private MapperManagerInterface $mapperManager;
+    private ModRepository $modRepository;
 
-    /**
-     * The mod repository.
-     * @var ModRepository
-     */
-    protected $modRepository;
-
-    /**
-     * Initializes the auth handler.
-     * @param MapperManagerInterface $mapperManager
-     * @param ModRepository $modRepository
-     */
     public function __construct(
         MapperManagerInterface $mapperManager,
         ModRepository $modRepository
@@ -47,43 +35,17 @@ class ModListHandler extends AbstractRequestHandler
         $this->modRepository = $modRepository;
     }
 
-    /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return ModListRequest::class;
-    }
-
-    /**
-     * Creates the response data from the validated request data.
-     * @param ModListRequest $request
-     * @return ResponseInterface
-     * @throws MapperException
-     */
-    protected function handleRequest($request): ResponseInterface
-    {
-        $authorizationToken = $this->getAuthorizationToken();
-        $mods = $this->modRepository->findByCombinationId($authorizationToken->getCombinationId());
+        /** @var ModListRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
+        $mods = $this->modRepository->findByCombinationId(Uuid::fromString($clientRequest->combinationId));
 
         $response = new ModListResponse();
-        foreach ($mods as $databaseMod) {
-            $response->addMod($this->createClientMod($databaseMod));
-        }
-        return $response;
-    }
+        $response->mods = array_map(function (DatabaseMod $mod): ClientMod {
+            return $this->mapperManager->map($mod, new ClientMod());
+        }, $mods);
 
-    /**
-     * Creates the client mod entity from the database mod.
-     * @param DatabaseMod $databaseMod
-     * @return ClientMod
-     * @throws MapperException
-     */
-    protected function createClientMod(DatabaseMod $databaseMod): ClientMod
-    {
-        $result = new ClientMod();
-        $this->mapperManager->map($databaseMod, $result);
-        return $result;
+        return new ClientResponse($response);
     }
 }

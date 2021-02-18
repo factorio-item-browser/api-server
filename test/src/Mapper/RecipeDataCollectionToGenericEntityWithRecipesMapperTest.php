@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Mapper;
 
 use BluePsyduck\TestHelper\ReflectionTrait;
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntityWithRecipes;
-use FactorioItemBrowser\Api\Client\Entity\RecipeWithExpensiveVersion;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\RecipeWithExpensiveVersion;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Server\Collection\RecipeDataCollection;
@@ -18,6 +17,7 @@ use FactorioItemBrowser\Common\Constant\RecipeMode;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -25,92 +25,60 @@ use ReflectionException;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper
+ * @covers \FactorioItemBrowser\Api\Server\Mapper\RecipeDataCollectionToGenericEntityWithRecipesMapper
  */
 class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
 {
     use ReflectionTrait;
 
-    /**
-     * The mocked recipe service.
-     * @var RecipeService&MockObject
-     */
-    protected $recipeService;
+    /** @var MapperManagerInterface&MockObject */
+    private MapperManagerInterface $mapperManager;
+    /** @var RecipeService&MockObject */
+    private RecipeService $recipeService;
 
-    /**
-     * The mocked mapper manager.
-     * @var MapperManagerInterface&MockObject
-     */
-    protected $mapperManager;
-
-    /**
-     * Sets up the test case.
-     */
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->recipeService = $this->createMock(RecipeService::class);
         $this->mapperManager = $this->createMock(MapperManagerInterface::class);
     }
 
     /**
-     * Tests the constructing.
-     * @throws ReflectionException
-     * @covers ::__construct
-     * @covers ::setMapperManager
+     * @param array<string> $mockedMethods
+     * @return RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject
      */
-    public function testConstruct(): void
+    private function createInstance(array $mockedMethods = []): RecipeDataCollectionToGenericEntityWithRecipesMapper
     {
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $mapper->setMapperManager($this->mapperManager);
-
-        $this->assertSame($this->recipeService, $this->extractProperty($mapper, 'recipeService'));
-        $this->assertSame($this->mapperManager, $this->extractProperty($mapper, 'mapperManager'));
+        $instance = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
+                         ->disableProxyingToOriginalMethods()
+                         ->onlyMethods($mockedMethods)
+                         ->setConstructorArgs([
+                             $this->recipeService
+                         ])
+                         ->getMock();
+        $instance->setMapperManager($this->mapperManager);
+        return $instance;
     }
 
-    /**
-     * Tests the getSupportedSourceClass method.
-     * @covers ::getSupportedSourceClass
-     */
-    public function testGetSupportedSourceClass(): void
+    public function testSupports(): void
     {
-        $expectedResult = RecipeDataCollection::class;
+        $instance = $this->createInstance();
 
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $result = $mapper->getSupportedSourceClass();
-
-        $this->assertSame($expectedResult, $result);
+        $this->assertSame(RecipeDataCollection::class, $instance->getSupportedSourceClass());
+        $this->assertSame(GenericEntityWithRecipes::class, $instance->getSupportedDestinationClass());
     }
 
-    /**
-     * Tests the getSupportedDestinationClass method.
-     * @covers ::getSupportedDestinationClass
-     */
-    public function testGetSupportedDestinationClass(): void
-    {
-        $expectedResult = GenericEntityWithRecipes::class;
-
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $result = $mapper->getSupportedDestinationClass();
-
-        $this->assertSame($expectedResult, $result);
-    }
-
-    /**
-     * Tests the map method.
-     * @throws MapperException
-     * @throws ReflectionException
-     * @covers ::map
-     */
     public function testMap(): void
     {
-        $recipeIds = [42, 1337];
-
-        $databaseRecipes = [
-            42 => $this->createMock(DatabaseRecipe::class),
-            1337 => $this->createMock(DatabaseRecipe::class),
+        $recipeIds = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
         ];
+        $databaseRecipes = [
+            'abc' => $this->createMock(DatabaseRecipe::class),
+            'def' => $this->createMock(DatabaseRecipe::class),
+        ];
+        $normalData = $this->createMock(RecipeDataCollection::class);
+        $expensiveData = $this->createMock(RecipeDataCollection::class);
         $normalRecipes = [
             $this->createMock(RecipeWithExpensiveVersion::class),
             $this->createMock(RecipeWithExpensiveVersion::class),
@@ -120,337 +88,170 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
             $this->createMock(RecipeWithExpensiveVersion::class),
         ];
 
-        /* @var RecipeDataCollection&MockObject $normalRecipeData */
-        $normalRecipeData = $this->createMock(RecipeDataCollection::class);
-        /* @var RecipeDataCollection&MockObject $expensiveRecipeData */
-        $expensiveRecipeData = $this->createMock(RecipeDataCollection::class);
+        $expectedDestination = new GenericEntityWithRecipes();
+        $expectedDestination->recipes = $expensiveRecipes;
 
-        /* @var RecipeDataCollection&MockObject $recipeData */
-        $recipeData = $this->createMock(RecipeDataCollection::class);
-        $recipeData->expects($this->once())
-                   ->method('getAllIds')
-                   ->willReturn($recipeIds);
-        $recipeData->expects($this->exactly(2))
-                   ->method('filterMode')
-                   ->withConsecutive(
-                       [$this->identicalTo(RecipeMode::NORMAL)],
-                       [$this->identicalTo(RecipeMode::EXPENSIVE)]
-                   )
-                   ->willReturnOnConsecutiveCalls(
-                       $normalRecipeData,
-                       $expensiveRecipeData
-                   );
+        $destination = new GenericEntityWithRecipes();
 
-        /* @var GenericEntityWithRecipes&MockObject $entity */
-        $entity = $this->createMock(GenericEntityWithRecipes::class);
-        $entity->expects($this->once())
-               ->method('setRecipes')
-               ->with($this->identicalTo($expensiveRecipes));
+        $source = $this->createMock(RecipeDataCollection::class);
+        $source->expects($this->once())
+               ->method('getAllIds')
+               ->willReturn($recipeIds);
+        $source->expects($this->exactly(2))
+               ->method('filterMode')
+               ->withConsecutive(
+                   [$this->identicalTo(RecipeMode::NORMAL)],
+                   [$this->identicalTo(RecipeMode::EXPENSIVE)],
+               )
+               ->willReturnOnConsecutiveCalls(
+                   $normalData,
+                   $expensiveData
+               );
 
         $this->recipeService->expects($this->once())
                             ->method('getDetailsByIds')
                             ->with($this->identicalTo($recipeIds))
                             ->willReturn($databaseRecipes);
 
-        /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
-        $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->onlyMethods(['mapNormalRecipes', 'mapExpensiveRecipes'])
-                       ->setConstructorArgs([$this->recipeService])
-                       ->getMock();
-        $mapper->setMapperManager($this->mapperManager);
-        $mapper->expects($this->once())
-               ->method('mapNormalRecipes')
-               ->with($this->identicalTo($normalRecipeData))
-               ->willReturn($normalRecipes);
-        $mapper->expects($this->once())
-               ->method('mapExpensiveRecipes')
-               ->with($this->identicalTo($normalRecipes), $this->identicalTo($expensiveRecipeData))
-               ->willReturn($expensiveRecipes);
+        $instance = $this->createInstance(['mapNormalRecipes', 'mapExpensiveRecipes']);
+        $instance->expects($this->once())
+                 ->method('mapNormalRecipes')
+                 ->with($this->identicalTo($databaseRecipes), $this->identicalTo($normalData))
+                 ->willReturn($normalRecipes);
+        $instance->expects($this->once())
+                 ->method('mapExpensiveRecipes')
+                 ->with(
+                     $this->identicalTo($databaseRecipes),
+                     $this->identicalTo($normalRecipes),
+                     $this->identicalTo($expensiveData)
+                 )
+                 ->willReturn($expensiveRecipes);
 
-        $mapper->map($recipeData, $entity);
+        $instance->map($source, $destination);
 
-        $this->assertSame($databaseRecipes, $this->extractProperty($mapper, 'databaseRecipes'));
+        $this->assertEquals($expectedDestination, $destination);
     }
 
     /**
-     * Tests the mapNormalRecipes method.
      * @throws ReflectionException
-     * @covers ::mapNormalRecipes
      */
     public function testMapNormalRecipes(): void
     {
-        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
-        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
-        $id3 = Uuid::fromString('56ebd60d-1852-45a5-abf5-2b31bbcb148d');
+        $recipeData1 = new RecipeData();
+        $recipeData1->setId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'));
+        $recipeData2 = new RecipeData();
+        $recipeData2->setId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
+        $recipeData3 = new RecipeData();
+        $recipeData3->setId(Uuid::fromString('34c0f9b6-ec83-45d0-8283-cdfafd9d838a'));
 
-        /* @var RecipeData&MockObject $recipeData1 */
-        $recipeData1 = $this->createMock(RecipeData::class);
-        $recipeData1->expects($this->any())
-                    ->method('getId')
-                    ->willReturn($id1);
+        $recipeData = $this->createMock(RecipeDataCollection::class);
+        $recipeData->expects($this->once())
+                   ->method('getValues')
+                   ->willReturn([$recipeData1, $recipeData2, $recipeData3]);
 
-        /* @var RecipeData&MockObject $recipeData2 */
-        $recipeData2 = $this->createMock(RecipeData::class);
-        $recipeData2->expects($this->any())
-                    ->method('getId')
-                    ->willReturn($id2);
-
-        /* @var RecipeData&MockObject $recipeData3 */
-        $recipeData3 = $this->createMock(RecipeData::class);
-        $recipeData3->expects($this->any())
-                    ->method('getId')
-                    ->willReturn($id3);
-
-        /* @var RecipeDataCollection&MockObject $recipeDataCollection */
-        $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
-        $recipeDataCollection->expects($this->once())
-                             ->method('getValues')
-                             ->willReturn([$recipeData1, $recipeData2, $recipeData3]);
-
-        /* @var DatabaseRecipe&MockObject $databaseRecipe1 */
         $databaseRecipe1 = $this->createMock(DatabaseRecipe::class);
-        /* @var DatabaseRecipe&MockObject $databaseRecipe2 */
         $databaseRecipe2 = $this->createMock(DatabaseRecipe::class);
-
         $databaseRecipes = [
-            $id1->toString() => $databaseRecipe1,
-            $id3->toString() => $databaseRecipe2,
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => $databaseRecipe1,
+            '34c0f9b6-ec83-45d0-8283-cdfafd9d838a' => $databaseRecipe2,
         ];
 
-        /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe1 */
-        $clientRecipe1 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $clientRecipe1->expects($this->once())
-                      ->method('getName')
-                      ->willReturn('abc');
-
-        /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe2 */
-        $clientRecipe2 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $clientRecipe2->expects($this->once())
-                      ->method('getName')
-                      ->willReturn('def');
+        $mappedRecipe1 = new RecipeWithExpensiveVersion();
+        $mappedRecipe1->name = 'abc';
+        $mappedRecipe2 = new RecipeWithExpensiveVersion();
+        $mappedRecipe2->name = 'def';
 
         $expectedResult = [
-            'abc' => $clientRecipe1,
-            'def' => $clientRecipe2,
+            'abc' => $mappedRecipe1,
+            'def' => $mappedRecipe2,
         ];
 
-        /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
-        $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->onlyMethods(['mapDatabaseRecipe'])
-                       ->setConstructorArgs([$this->recipeService])
-                       ->getMock();
-        $mapper->setMapperManager($this->mapperManager);
-        $mapper->expects($this->exactly(2))
-               ->method('mapDatabaseRecipe')
-               ->withConsecutive(
-                   [$this->identicalTo($databaseRecipe1)],
-                   [$this->identicalTo($databaseRecipe2)]
-               )
-               ->willReturnOnConsecutiveCalls(
-                   $clientRecipe1,
-                   $clientRecipe2
-               );
-        $this->injectProperty($mapper, 'databaseRecipes', $databaseRecipes);
+        $this->mapperManager->expects($this->exactly(2))
+                            ->method('map')
+                            ->withConsecutive(
+                                [
+                                    $this->identicalTo($databaseRecipe1),
+                                    $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                                ],
+                                [
+                                    $this->identicalTo($databaseRecipe2),
+                                    $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                                ],
+                            )
+                            ->willReturnOnConsecutiveCalls(
+                                $mappedRecipe1,
+                                $mappedRecipe2,
+                            );
 
-        $result = $this->invokeMethod($mapper, 'mapNormalRecipes', $recipeDataCollection);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'mapNormalRecipes', $databaseRecipes, $recipeData);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Tests the mapExpensiveRecipes method.
      * @throws ReflectionException
-     * @covers ::mapExpensiveRecipes
      */
     public function testMapExpensiveRecipes(): void
     {
-        $id1 = Uuid::fromString('999a23e4-addb-4821-91b5-1adf0971f6f4');
-        $id2 = Uuid::fromString('db700367-c38d-437f-aa12-9cdedb63faa4');
-        $id3 = Uuid::fromString('56ebd60d-1852-45a5-abf5-2b31bbcb148d');
+        $recipeData1 = new RecipeData();
+        $recipeData1->setId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'));
+        $recipeData2 = new RecipeData();
+        $recipeData2->setId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
+        $recipeData3 = new RecipeData();
+        $recipeData3->setId(Uuid::fromString('34c0f9b6-ec83-45d0-8283-cdfafd9d838a'));
 
-        /* @var RecipeData&MockObject $recipeData1 */
-        $recipeData1 = $this->createMock(RecipeData::class);
-        $recipeData1->expects($this->atLeastOnce())
-                    ->method('getId')
-                    ->willReturn($id1);
+        $recipeData = $this->createMock(RecipeDataCollection::class);
+        $recipeData->expects($this->once())
+                   ->method('getValues')
+                   ->willReturn([$recipeData1, $recipeData2, $recipeData3]);
 
-        /* @var RecipeData&MockObject $recipeData2 */
-        $recipeData2 = $this->createMock(RecipeData::class);
-        $recipeData2->expects($this->atLeastOnce())
-                    ->method('getId')
-                    ->willReturn($id2);
-
-        /* @var RecipeData&MockObject $recipeData3 */
-        $recipeData3 = $this->createMock(RecipeData::class);
-        $recipeData3->expects($this->atLeastOnce())
-                    ->method('getId')
-                    ->willReturn($id3);
-
-        /* @var RecipeDataCollection&MockObject $recipeDataCollection */
-        $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
-        $recipeDataCollection->expects($this->once())
-                             ->method('getValues')
-                             ->willReturn([$recipeData1, $recipeData2, $recipeData3]);
-
-        /* @var DatabaseRecipe&MockObject $databaseRecipe1 */
         $databaseRecipe1 = $this->createMock(DatabaseRecipe::class);
-        /* @var DatabaseRecipe&MockObject $databaseRecipe2 */
         $databaseRecipe2 = $this->createMock(DatabaseRecipe::class);
-
         $databaseRecipes = [
-            $id1->toString() => $databaseRecipe1,
-            $id3->toString() => $databaseRecipe2,
+            '16cbc2ac-266d-4249-beb1-8c07850b732b' => $databaseRecipe1,
+            '34c0f9b6-ec83-45d0-8283-cdfafd9d838a' => $databaseRecipe2,
         ];
 
-        /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe1 */
-        $clientRecipe1 = $this->createMock(RecipeWithExpensiveVersion::class);
-        /* @var RecipeWithExpensiveVersion&MockObject $clientRecipe2 */
-        $clientRecipe2 = $this->createMock(RecipeWithExpensiveVersion::class);
+        $normalRecipe = new RecipeWithExpensiveVersion();
+        $normalRecipe->name = 'abc';
+        $normalRecipe->mode = 'def';
+        $normalRecipes = ['abc' => $normalRecipe];
 
-        $recipes1 = [
-            $this->createMock(RecipeWithExpensiveVersion::class),
-            $this->createMock(RecipeWithExpensiveVersion::class),
-        ];
-        $recipes2 = [
-            $this->createMock(RecipeWithExpensiveVersion::class),
-            $this->createMock(RecipeWithExpensiveVersion::class),
-        ];
-        $recipes3 = [
-            $this->createMock(RecipeWithExpensiveVersion::class),
-            $this->createMock(RecipeWithExpensiveVersion::class),
-        ];
+        $mappedRecipe1 = new RecipeWithExpensiveVersion();
+        $mappedRecipe1->name = 'abc';
+        $mappedRecipe2 = new RecipeWithExpensiveVersion();
+        $mappedRecipe2->name = 'ghi';
 
-        /* @var RecipeDataCollectionToGenericEntityWithRecipesMapper&MockObject $mapper */
-        $mapper = $this->getMockBuilder(RecipeDataCollectionToGenericEntityWithRecipesMapper::class)
-                       ->onlyMethods(['mapDatabaseRecipe', 'addExpensiveRecipe'])
-                       ->setConstructorArgs([$this->recipeService])
-                       ->getMock();
-        $mapper->setMapperManager($this->mapperManager);
-        $mapper->expects($this->exactly(2))
-               ->method('mapDatabaseRecipe')
-               ->withConsecutive(
-                   [$this->identicalTo($databaseRecipe1)],
-                   [$this->identicalTo($databaseRecipe2)]
-               )
-               ->willReturnOnConsecutiveCalls(
-                   $clientRecipe1,
-                   $clientRecipe2
-               );
-        $mapper->expects($this->exactly(2))
-               ->method('addExpensiveRecipe')
-               ->withConsecutive(
-                   [$this->identicalTo($recipes1), $this->identicalTo($clientRecipe1)],
-                   [$this->identicalTo($recipes2), $this->identicalTo($clientRecipe2)]
-               )
-               ->willReturnOnConsecutiveCalls(
-                   $recipes2,
-                   $recipes3
-               );
-        $this->injectProperty($mapper, 'databaseRecipes', $databaseRecipes);
-
-        $result = $this->invokeMethod($mapper, 'mapExpensiveRecipes', $recipes1, $recipeDataCollection);
-
-        $this->assertEquals($recipes3, $result);
-    }
-
-    /**
-     * Tests the addExpensiveRecipe method with a match.
-     * @throws ReflectionException
-     * @covers ::addExpensiveRecipe
-     */
-    public function testAddExpensiveRecipeWithMatch(): void
-    {
-        /* @var RecipeWithExpensiveVersion&MockObject $expensiveRecipe */
-        $expensiveRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-        $expensiveRecipe->expects($this->atLeastOnce())
-                        ->method('getName')
-                        ->willReturn('abc');
-
-        /* @var RecipeWithExpensiveVersion&MockObject $recipe1 */
-        $recipe1 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $recipe1->expects($this->once())
-                ->method('setExpensiveVersion')
-                ->with($this->identicalTo($expensiveRecipe));
-
-        /* @var RecipeWithExpensiveVersion&MockObject $recipe2 */
-        $recipe2 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $recipe2->expects($this->never())
-                ->method('setExpensiveVersion');
-
-        $recipes = [
-            'abc' => $recipe1,
-            'def' => $recipe2,
+        $expectedRecipe1 = new RecipeWithExpensiveVersion();
+        $expectedRecipe1->name = 'abc';
+        $expectedRecipe1->mode = 'def';
+        $expectedRecipe1->expensiveVersion = $mappedRecipe1;
+        $expectedResult = [
+            'abc' => $expectedRecipe1,
+            'ghi' => $mappedRecipe2,
         ];
 
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $mapper->setMapperManager($this->mapperManager);
-
-        $result = $this->invokeMethod($mapper, 'addExpensiveRecipe', $recipes, $expensiveRecipe);
-
-        $this->assertEquals($recipes, $result);
-    }
-
-    /**
-     * Tests the addExpensiveRecipe method without a match.
-     * @throws ReflectionException
-     * @covers ::addExpensiveRecipe
-     */
-    public function testAddExpensiveRecipeWithoutMatch(): void
-    {
-        /* @var RecipeWithExpensiveVersion&MockObject $expensiveRecipe */
-        $expensiveRecipe = $this->createMock(RecipeWithExpensiveVersion::class);
-        $expensiveRecipe->expects($this->atLeastOnce())
-                        ->method('getName')
-                        ->willReturn('abc');
-
-        /* @var RecipeWithExpensiveVersion&MockObject $recipe1 */
-        $recipe1 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $recipe1->expects($this->never())
-                ->method('setExpensiveVersion');
-
-        /* @var RecipeWithExpensiveVersion&MockObject $recipe2 */
-        $recipe2 = $this->createMock(RecipeWithExpensiveVersion::class);
-        $recipe2->expects($this->never())
-                ->method('setExpensiveVersion');
-
-        $recipes = [
-            'foo' => $recipe1,
-            'bar' => $recipe2,
-        ];
-        $expectedRecipes = [
-            'foo' => $recipe1,
-            'bar' => $recipe2,
-            'abc' => $expensiveRecipe,
-        ];
-
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $mapper->setMapperManager($this->mapperManager);
-
-        $result = $this->invokeMethod($mapper, 'addExpensiveRecipe', $recipes, $expensiveRecipe);
-
-        $this->assertEquals($expectedRecipes, $result);
-    }
-
-    /**
-     * Tests the mapDatabaseRecipe method.
-     * @throws ReflectionException
-     * @covers ::mapDatabaseRecipe
-     */
-    public function testMapDatabaseRecipe(): void
-    {
-        /* @var DatabaseRecipe&MockObject $databaseRecipe */
-        $databaseRecipe = $this->createMock(DatabaseRecipe::class);
-
-        $this->mapperManager->expects($this->once())
+        $this->mapperManager->expects($this->exactly(2))
                             ->method('map')
-                            ->with(
-                                $this->identicalTo($databaseRecipe),
-                                $this->isInstanceOf(RecipeWithExpensiveVersion::class)
+                            ->withConsecutive(
+                                [
+                                    $this->identicalTo($databaseRecipe1),
+                                    $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                                ],
+                                [
+                                    $this->identicalTo($databaseRecipe2),
+                                    $this->isInstanceOf(RecipeWithExpensiveVersion::class),
+                                ],
+                            )
+                            ->willReturnOnConsecutiveCalls(
+                                $mappedRecipe1,
+                                $mappedRecipe2,
                             );
 
-        $mapper = new RecipeDataCollectionToGenericEntityWithRecipesMapper($this->recipeService);
-        $mapper->setMapperManager($this->mapperManager);
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'mapExpensiveRecipes', $databaseRecipes, $normalRecipes, $recipeData);
 
-        $this->invokeMethod($mapper, 'mapDatabaseRecipe', $databaseRecipe);
+        $this->assertEquals($expectedResult, $result);
     }
 }

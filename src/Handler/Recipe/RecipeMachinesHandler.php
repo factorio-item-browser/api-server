@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Handler\Recipe;
 
-use BluePsyduck\MapperManager\Exception\MapperException;
 use BluePsyduck\MapperManager\MapperManagerInterface;
-use FactorioItemBrowser\Api\Client\Entity\Machine as ClientMachine;
+use FactorioItemBrowser\Api\Client\Transfer\Machine as ClientMachine;
 use FactorioItemBrowser\Api\Client\Request\Recipe\RecipeMachinesRequest;
 use FactorioItemBrowser\Api\Client\Response\Recipe\RecipeMachinesResponse;
-use FactorioItemBrowser\Api\Client\Response\ResponseInterface;
 use FactorioItemBrowser\Api\Database\Data\RecipeData;
 use FactorioItemBrowser\Api\Database\Entity\Machine as DatabaseMachine;
 use FactorioItemBrowser\Api\Database\Entity\Recipe;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
+use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\MachineService;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use FactorioItemBrowser\Api\Server\Exception\EntityNotFoundException;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Handler\AbstractRequestHandler;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Common\Constant\EntityType;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * The handler of the /recipe/machines request.
@@ -27,32 +29,12 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
-class RecipeMachinesHandler extends AbstractRequestHandler
+class RecipeMachinesHandler implements RequestHandlerInterface
 {
-    /**
-     * The mapper manager.
-     * @var MapperManagerInterface
-     */
-    protected $mapperManager;
+    protected MapperManagerInterface $mapperManager;
+    protected MachineService $machineService;
+    protected RecipeService $recipeService;
 
-    /**
-     * The machine service.
-     * @var MachineService
-     */
-    protected $machineService;
-
-    /**
-     * The database service of the recipes.
-     * @var RecipeService
-     */
-    protected $recipeService;
-
-    /**
-     * Initializes the request handler.
-     * @param MachineService $machineService
-     * @param MapperManagerInterface $mapperManager
-     * @param RecipeService $recipeService
-     */
     public function __construct(
         MachineService $machineService,
         MapperManagerInterface $mapperManager,
@@ -64,106 +46,67 @@ class RecipeMachinesHandler extends AbstractRequestHandler
     }
 
     /**
-     * Returns the request class the handler is expecting.
-     * @return string
-     */
-    protected function getExpectedRequestClass(): string
-    {
-        return RecipeMachinesRequest::class;
-    }
-
-    /**
-     * Creates the response data from the validated request data.
-     * @param RecipeMachinesRequest $request
+     * @param ServerRequestInterface $request
      * @return ResponseInterface
-     * @throws ApiServerException
-     * @throws MapperException
+     * @throws ServerException
      */
-    protected function handleRequest($request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $authorizationToken = $this->getAuthorizationToken();
-        $recipe = $this->fetchRecipe($request, $authorizationToken);
+        /** @var RecipeMachinesRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
 
-        $machines = $this->fetchMachines($recipe, $authorizationToken);
+        $combinationId = Uuid::fromString($clientRequest->combinationId);
+        $recipe = $this->fetchRecipe($combinationId, $clientRequest->name);
+        $machines = $this->fetchMachines($combinationId, $recipe);
         $limitedMachines = array_values(array_slice(
             $machines,
-            $request->getIndexOfFirstResult(),
-            $request->getNumberOfResults()
+            $clientRequest->indexOfFirstResult,
+            $clientRequest->numberOfResults,
         ));
 
-        return $this->createResponse($limitedMachines, count($machines));
+        $response = new RecipeMachinesResponse();
+        $response->machines = array_map(
+            fn (DatabaseMachine $machine): ClientMachine => $this->mapperManager->map($machine, new ClientMachine()),
+            $limitedMachines
+        );
+        $response->totalNumberOfResults = count($machines);
+
+        return new ClientResponse($response);
     }
 
     /**
-     * Fetches the recipe for the request.
-     * @param RecipeMachinesRequest $request
-     * @param AuthorizationToken $authorizationToken
+     * @param UuidInterface $combinationId
+     * @param string $name
      * @return Recipe
      * @throws EntityNotFoundException
      */
-    protected function fetchRecipe(RecipeMachinesRequest $request, AuthorizationToken $authorizationToken): Recipe
+    protected function fetchRecipe(UuidInterface $combinationId, string $name): Recipe
     {
-        $recipeData = $this->recipeService->getDataWithNames([$request->getName()], $authorizationToken);
-        $firstData = $recipeData->getFirstValue();
-        if (!$firstData instanceof RecipeData) {
-            throw new EntityNotFoundException(EntityType::RECIPE, $request->getName());
+        $recipeData = $this->recipeService->getDataWithNames($combinationId, [$name])->getFirstValue();
+        if (!$recipeData instanceof RecipeData) {
+            throw new EntityNotFoundException(EntityType::RECIPE, $name);
         }
 
-        $recipes = $this->recipeService->getDetailsByIds([$firstData->getId()]);
+        $recipes = $this->recipeService->getDetailsByIds([$recipeData->getId()]);
         $recipe = reset($recipes);
         if (!$recipe instanceof Recipe) {
-            throw new EntityNotFoundException(EntityType::RECIPE, $request->getName());
+            throw new EntityNotFoundException(EntityType::RECIPE, $name);
         }
-
         return $recipe;
     }
 
     /**
-     * Fetches the machines able to craft the recipe.
+     * @param UuidInterface $combinationId
      * @param Recipe $recipe
-     * @param AuthorizationToken $authorizationToken
-     * @return array|DatabaseMachine[]
+     * @return array<DatabaseMachine>
      */
-    protected function fetchMachines(Recipe $recipe, AuthorizationToken $authorizationToken): array
+    protected function fetchMachines(UuidInterface $combinationId, Recipe $recipe): array
     {
-        $craftingCategory = $recipe->getCraftingCategory();
-
-        $databaseMachines = $this->machineService->getMachinesByCraftingCategory(
-            $craftingCategory,
-            $authorizationToken
+        $machines = $this->machineService->getMachinesByCraftingCategory(
+            $combinationId,
+            $recipe->getCraftingCategory(),
         );
-        $filteredMachines = $this->machineService->filterMachinesForRecipe($databaseMachines, $recipe);
-        $sortedMachines = $this->machineService->sortMachines($filteredMachines);
-        return $sortedMachines;
-    }
-
-    /**
-     * Creates the response with the machines.
-     * @param array|DatabaseMachine[] $databaseMachines
-     * @param int $totalNumberOfMachines
-     * @return RecipeMachinesResponse
-     * @throws MapperException
-     */
-    protected function createResponse(array $databaseMachines, int $totalNumberOfMachines): RecipeMachinesResponse
-    {
-        $result = new RecipeMachinesResponse();
-        foreach ($databaseMachines as $databaseMachine) {
-            $result->addMachine($this->mapMachine($databaseMachine));
-        }
-        $result->setTotalNumberOfResults($totalNumberOfMachines);
-        return $result;
-    }
-
-    /**
-     * Maps the database machine to a client one.
-     * @param DatabaseMachine $databaseMachine
-     * @return ClientMachine
-     * @throws MapperException
-     */
-    protected function mapMachine(DatabaseMachine $databaseMachine): ClientMachine
-    {
-        $result = new ClientMachine();
-        $this->mapperManager->map($databaseMachine, $result);
-        return $result;
+        $filteredMachines = $this->machineService->filterMachinesForRecipe($machines, $recipe);
+        return $this->machineService->sortMachines($filteredMachines);
     }
 }

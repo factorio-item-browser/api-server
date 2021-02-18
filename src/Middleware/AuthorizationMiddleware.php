@@ -4,92 +4,62 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
-use FactorioItemBrowser\Api\Server\Constant\RouteName;
-use FactorioItemBrowser\Api\Server\Entity\AuthorizationToken;
-use FactorioItemBrowser\Api\Server\Exception\ApiServerException;
-use FactorioItemBrowser\Api\Server\Exception\MissingAuthorizationTokenException;
-use FactorioItemBrowser\Api\Server\Service\AuthorizationService;
+use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
+use FactorioItemBrowser\Api\Server\Exception\InvalidApiKeyException;
+use FactorioItemBrowser\Common\Constant\Defaults;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * The middleware to check the authorization token.
+ * The middleware to check the authorization to the API.
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  */
 class AuthorizationMiddleware implements MiddlewareInterface
 {
-    use MatchedRouteNameTrait;
+    /** @var array<array{name: string, api-key: string}> */
+    private array $agents;
 
     /**
-     * The routes which are whitelisted from the authorization.
-     * @var array
+     * @param array<array{name: string, api-key: string}> $agents
      */
-    protected const WHITELISTED_ROUTES = [
-        RouteName::AUTH,
-    ];
-
-    /**
-     * The authorization service.
-     * @var AuthorizationService
-     */
-    protected $authorizationService;
-
-    /**
-     * Initializes the authorization middleware class.
-     * @param AuthorizationService $authorizationService
-     */
-    public function __construct(AuthorizationService $authorizationService)
+    public function __construct(array $agents)
     {
-        $this->authorizationService = $authorizationService;
+        $this->agents = $agents;
     }
 
     /**
-     * Process an incoming server request and return a response, optionally delegating
-     * response creation to a handler.
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws ApiServerException
+     * @throws InvalidApiKeyException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!in_array($this->getMatchedRouteName($request), self::WHITELISTED_ROUTES, true)) {
-            $request = $this->readAuthorizationFromRequest($request);
+        $agentName = $this->getAgentName($request->getHeaderLine('Api-Key'));
+        /** @var AbstractRequest $clientRequest */
+        $clientRequest = $request->getParsedBody();
+
+        if ($agentName === '' && $clientRequest->combinationId !== Defaults::COMBINATION_ID) {
+            throw new InvalidApiKeyException();
         }
+
         return $handler->handle($request);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ServerRequestInterface
-     * @throws MissingAuthorizationTokenException
-     * @throws ApiServerException
-     */
-    protected function readAuthorizationFromRequest(ServerRequestInterface $request): ServerRequestInterface
+    private function getAgentName(string $apiKey): string
     {
-        $serializedToken = $this->extractSerializedTokenFromHeader($request->getHeaderLine('Authorization'));
-        $token = $this->authorizationService->deserializeToken($serializedToken);
-
-        $request = $request->withAttribute(AuthorizationToken::class, $token);
-        return $request;
-    }
-
-    /**
-     * Extracts the serialized token from the specified Bearer header.
-     * @param string $header
-     * @return string
-     * @throws MissingAuthorizationTokenException
-     */
-    protected function extractSerializedTokenFromHeader(string $header): string
-    {
-        if (substr($header, 0, 7) !== 'Bearer ') {
-            throw new MissingAuthorizationTokenException();
+        if ($apiKey !== '') {
+            foreach ($this->agents as $agent) {
+                if ($agent[ConfigKey::AGENT_API_KEY] === $apiKey) {
+                    return $agent[ConfigKey::AGENT_NAME];
+                }
+            }
         }
-
-        return substr($header, 7);
+        return '';
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use BluePsyduck\MapperManager\Mapper\StaticMapperInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Database\Entity\Machine;
 use FactorioItemBrowser\Common\Constant\EntityType;
 
@@ -14,37 +14,30 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements StaticMapperInterface<Machine, GenericEntity>
  */
 class DatabaseMachineToGenericEntityMapper extends TranslationServiceAwareMapper implements StaticMapperInterface
 {
-    /**
-     * Returns the source class supported by this mapper.
-     * @return string
-     */
     public function getSupportedSourceClass(): string
     {
         return Machine::class;
     }
 
-    /**
-     * Returns the destination class supported by this mapper.
-     * @return string
-     */
     public function getSupportedDestinationClass(): string
     {
         return GenericEntity::class;
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param Machine $machine
-     * @param GenericEntity $genericEntity
+     * @param Machine $source
+     * @param GenericEntity $destination
      */
-    public function map($machine, $genericEntity): void
+    public function map(object $source, object $destination): void
     {
-        $genericEntity->setType(EntityType::MACHINE)
-                      ->setName($machine->getName());
+        $destination->type = EntityType::MACHINE;
+        $destination->name = $source->getName();
 
-        $this->addToTranslationService($genericEntity);
+        $this->addToTranslationService($destination);
     }
 }

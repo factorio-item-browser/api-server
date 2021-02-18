@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Mapper;
 
 use BluePsyduck\MapperManager\Mapper\DynamicMapperInterface;
-use FactorioItemBrowser\Api\Client\Entity\GenericEntity;
-use FactorioItemBrowser\Api\Client\Entity\Recipe as ClientRecipe;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
+use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Common\Constant\EntityType;
 
@@ -15,16 +15,12 @@ use FactorioItemBrowser\Common\Constant\EntityType;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @implements DynamicMapperInterface<DatabaseRecipe, GenericEntity>
  */
 class DatabaseRecipeToGenericEntityMapper extends TranslationServiceAwareMapper implements DynamicMapperInterface
 {
-    /**
-     * Returns whether the mapper supports the combination of source and destination object.
-     * @param object $source
-     * @param object $destination
-     * @return bool
-     */
-    public function supports($source, $destination): bool
+    public function supports(object $source, object $destination): bool
     {
         return $source instanceof DatabaseRecipe
             && $destination instanceof GenericEntity
@@ -32,15 +28,14 @@ class DatabaseRecipeToGenericEntityMapper extends TranslationServiceAwareMapper 
     }
 
     /**
-     * Maps the source object to the destination one.
-     * @param DatabaseRecipe $databaseRecipe
-     * @param GenericEntity $genericEntity
+     * @param DatabaseRecipe $source
+     * @param GenericEntity $destination
      */
-    public function map($databaseRecipe, $genericEntity): void
+    public function map(object $source, object $destination): void
     {
-        $genericEntity->setType(EntityType::RECIPE)
-                      ->setName($databaseRecipe->getName());
+        $destination->type = EntityType::RECIPE;
+        $destination->name = $source->getName();
 
-        $this->addToTranslationService($genericEntity);
+        $this->addToTranslationService($destination);
     }
 }
