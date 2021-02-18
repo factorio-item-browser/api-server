@@ -1,10 +1,25 @@
 # Changelog
 
+## 3.0.0 - 2021-02-18
+
+### Changed
+
+- **[BC Break]** All requests require the full combination id in the URL. E.g. vanilla electronic circle becomes
+  `/2f4a45fa-a509-a9d1-aae6-ffcf984a7a76/item/electronic-circuit`. Use the new Combination API to get the id of a 
+  combination.
+- **[BC Break]** Replaced `/auth` request and its JWT token with an API key for all requests.
+- Search cache is now stored in a binary format instead of a readable string.
+
+### Removed
+
+- Requests `/combination/status`, `/combination/validate` and `/combination/trigger`. Those are now handled by the
+  Combination API itself.
+
 ## 2.3.0 - 2020-11-01
 
 ### Added
 
-- New endpoint `/combinatio0n/validate` to validate a combination against the Factorio Mod Portal.
+- New endpoint `/combination/validate` to validate a combination against the Factorio Mod Portal.
 - Parameters `last-usage` and `max-updates` to the `update-combinations` command to overwrite default values from the config.
 
 ## 2.2.0 - 2020-06-03
