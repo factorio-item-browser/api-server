@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Factorio Item Browser API
-  description:
+  title: Factorio Item Browser - Data API
+  description: >
     This API provides access to the mod data of the Factorio Item Browser, including item details, recipe details as
     well as any translation available from the mods.
   contact:
@@ -15,29 +15,28 @@ servers:
 
 tags:
   - name: Generic
-    description: Requests providing generic data to entities.
   - name: Items
-    description: Requests providing data to a specific item.
   - name: Mods
-    description: Requests providing mod related data.
   - name: Recipes
-    description: Requests providing data to a specific recipe.
   - name: Search
-    description: Requests to search for items, recipes etc. using queries.
 
 paths:
   /{combination-id}/generic/details:
     post:
-      summary: Provides basic data to items and recipes.
-      description:
-        This request provides very basic information to items and recipes, like the translated labels and description.
-        It will NOT provide any additional data like ingredients and products of recipes.
+      summary: Provides generic data to the entities.
+      description: >
+        This request provides generic data to the entities specified in the request. This data includes the translated
+        label and description of the entities, as well as the information whether they exist at all. Non-existing
+        entities will be missing in the response.
+        <br><br>
+        The response will not contain additional data for recipes, machines etc. Use the respective endpoints instead
+        to get all of the details.
       operationId: generic.details
       tags:
         - Generic
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/genericEntities"
       responses:
@@ -52,18 +51,31 @@ paths:
 
   /{combination-id}/generic/icon:
     post:
-      summary: Provides the icon file contents to specific items and recipes.
-      description:
-        This request will return the icon file in base64 encoding. The icons are always provided in PNG format. Make
-        sure to cache the returned icons, and remember to clear the cache when the mods are changed.
-        The response may contain types and names of entities not explicitely requested, but which have the same icon as
-        one of the requested one.
+      summary: Provides icons to the entities.
+      description: >
+        This request provides the icons for the entities specified in the request.
+        <br><br>
+        The icons are provided in the PNG format and use a base64 encoding in the response. The size of the icons
+        differs depending of the entity type: Mod icons are 144x144 pixel, and icons of items, recipes and machines are
+        the default 64x64 pixel in size. Icons which use a different size ingame than what was mentioned before are
+        resized to their respective size (e.g. older icons with 32x32 pixel in size are enlarged to 64x64 pixel). Icons
+        which consist of several layers ingame are already baked together to a final image, the information of the
+        layers is not available anymore.
+        <br><br>
+        Next to the actual icon content, the response also contains a list of entities which are using this exact icon.
+        This list is exhaustive, i.e. there is no other entity using that particular icon if it is not listed for it.
+        This means that the entity lists contain more entities than originally requested. If a requested entity does
+        not exist in any of the lists in the response, it does either not exist or does not have an icon assigned to it.
+        <br><br>
+        Responses can get quite large with several KB per icon, depending on how many icons have been requested. It is
+        advised to split the icons into several requests if a large number of them is requested. It is also advised to
+        keep the icons in some form of a cache to avoid re-requesting the same icon over and over again.
       operationId: generic.icon
       tags:
         - Generic
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/genericEntities"
       responses:
@@ -78,16 +90,22 @@ paths:
 
   /{combination-id}/item/list:
     post:
-      summary: Returns a list of all items.
-      description:
-        This request will return a paginated list of all items available in the current combination of mods. The items
-        are sorted by their name.
+      summary: Provides a list of all items.
+      description: >
+        This request provides a paginated list of all items available in the combination. The items are sorted by their
+        internal name.
+        <br><br>
+        Please be aware that requesting a large number of items will lead to longer loading times, as information about
+        their production recipes must be fetched alongside. If you are only interested in the available item types and
+        names and not the recipes, set "numberOfRecipesPerResult" to 0: In that case, no information about the recipes
+        will be present in the response, making the request execute a lot quicker. Note that in this case the keys
+        "recipes" and "totalNumberOfRecipes" will be missing completely from the response.
       operationId: item.list
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/itemList"
       responses:
@@ -102,18 +120,22 @@ paths:
 
   /{combination-id}/item/ingredient:
     post:
-      summary: Provides all recipes in which a specific item as an ingredient of.
-      description:
-        This request will return all recipes with a specific item as one of its ingredients. The recipes in the response
-        will be grouped together by their name, so that normal and expensive versions will always be returned together,
-        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
-        not on the recipes itself.
+      summary: Provides all recipes having a specific item as ingredient.
+      description: >
+        This request provides a paginated list of all recipes having the item specified in the request as one of its
+        ingredients. Normal and expensive variants of the same recipe will be grouped together and will be returned as
+        one entry of the list.
+        <br><br>
+        The recipes are primarily ordered by the number of ingredients they have, and secondarily by their internal
+        name.
+        <br><br>
+        If the item specified in the request is not known, the status code 404 will be triggered.
       operationId: item.ingredient
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/itemRecipes"
       responses:
@@ -130,18 +152,23 @@ paths:
 
   /{combination-id}/item/product:
     post:
-      summary: Provides all recipes which produce a specific item.
-      description:
-        This request will return all recipes with a specific item as one of its products. The recipes in the response
-        will be grouped together by their name, so that normal and expensive versions will always be returned together,
-        if both are available. The parameters "numberOfResults" and "indexOfFirstResult" are applied to these groups,
-        not on the recipes itself.
+      summary: Provides all recipes having a specific item as product.
+      description: >
+        This request provides a paginated list of all recipes having the item specified in the request as one of its
+        products. Normal and expensive variants of the same recipe will be grouped together and will be returned as one
+        entry of the list.
+        <br><br>
+        The recipes are primarily ordered by the number of products they have, and secondarily by their internal name.
+        That way the recipe actually producing the item will be coming first, before recipes which use that item as a
+        catalyst.
+        <br><br>
+        If the item specified in the request is not known, the status code 404 will be triggered.
       operationId: item.product
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/itemRecipes"
       responses:
@@ -159,12 +186,20 @@ paths:
   /{combination-id}/item/random:
     post:
       summary: Provides random items of the currently enabled mods.
+      description: >
+        This request provides a list of random items available in the combination.
+        <br><br>
+        Please be aware that requesting a large number of items will lead to longer loading times, as information about
+        their production recipes must be fetched alongside. If you are only interested in the available item types and
+        names and not the recipes, set "numberOfRecipesPerResult" to 0: In that case, no information about the recipes
+        will be present in the response, making the request execute a lot quicker. Note that in this case the keys
+        "recipes" and "totalNumberOfRecipes" will be missing completely from the response.
       operationId: item.random
       tags:
         - Items
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/itemRandom"
       responses:
@@ -179,16 +214,21 @@ paths:
 
   /{combination-id}/mod/list:
     post:
-      summary: Lists the mods available in the browser.
-      description:
-        This request will list all mods known to the browser, including whether they are enabled for the current token
-        or not.
+      summary: Provides a list of all mods.
+      description: >
+        This request provides a list of all mods used in the specified combination, together with some details like
+        the ingame name and its description, as well as the version of the mod which has been used to extract the data
+        from the Factorio game.
+        <br><br>
+        The data in the response is from the time when the export happened. There is no synchronisation with e.g. the
+        Factorio Mod Portal, newer versions of the mod, including changes in the authors etc., will only be applied if
+        a new export of the combination is executed.
       operationId: mod.list
       tags:
         - Mods
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       responses:
         "200":
           $ref: "#/components/responses/modList"
@@ -201,16 +241,18 @@ paths:
 
   /{combination-id}/recipe/list:
     post:
-      summary: Returns a list of all available recipes.
-      description:
-        This request will return a paginated list of all recipes available with the current combination of mods. Normal
-        and expensive variant will be grouped together. The recipes are sorted by their name.
+      summary: Provides a list of all recipes.
+      description: >
+        This request provides a paginated list of all recipes available in the combination. Normal and expensive
+        variants of the same recipe will be grouped together and will be returned as one entry of the list.
+        <br><br>
+        The recipes are sorted by their internal name.
       operationId: recipe.list
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/recipeList"
       responses:
@@ -225,16 +267,20 @@ paths:
 
   /{combination-id}/recipe/details:
     post:
-      summary: Returns the details of specific recipes, including the ingredients and products.
-      description:
-        This request will return all details to specific recipes. If the recipe has a normal and an expensive version,
-        then both are returned. The order of the returned recipes must be assumed to be random.
+      summary: Provides the details of specific recipes.
+      description: >
+        This request provides the details to the recipes specified in the request. The request must contain the
+        internal names of the recipes to be returned. Normal and expensive variants of the same recipe will be grouped
+        together and will be returned as one entry in the response.
+        <br><br>
+        If a requested recipe does not exist, it will be missing in the response. No error status will be triggered in
+        that case.
       operationId: recipe.details
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/recipeDetails"
       responses:
@@ -249,17 +295,21 @@ paths:
 
   /{combination-id}/recipe/machines:
     post:
-      summary: Returns the details of all machines able to craft the recipe.
-      description:
-        This request will return all machines with their details which are able to craft the recipe specified in the
-        request. If the recipe supports being crafted by hand, a machine named "character" will appear in the list. When
-        present, the player will be at the very first position of the results.
+      summary: Provides the list of machines able to craft a specific recipe.
+      description: >
+        This request will provide all machines, including their details, which are able to craft the recipe specified
+        in the request, as a paginated list.
+        <br><br>
+        If a recipe can be crafted in-hand, a special machine with the name "character" is returned as first result of
+        the list. All other machines are sorted by their internal name.
+        <br><br>
+        If the recipe specified in the request is not known, the status code 404 will be triggered.
       operationId: recipe.machines
       tags:
         - Recipes
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/recipeMachines"
       responses:
@@ -276,13 +326,34 @@ paths:
 
   /{combination-id}/search/query:
     post:
-      summary: Searches for items, recipes etc. using a query string.
+      summary: Searches for items and recipes using a query string.
+      description: >
+        The request searches for items and recipes matching the query string specified in the request body.
+        <br><br>
+        There is currently no special syntax for the search query. All keywords are specified case-insensitive as space
+        separated list, and results must include all of the keywords to be returned for the query. Additional filter,
+        like only returning recipes, are not available.
+        <br><br>
+        The search uses the following properties to find results:
+
+          - Label and description of the language specified in the request header, e.g. "Elektronischer Schaltkreis" in
+            case of "Accept-Language: de".
+          - Label and description of the english translation as fallback for missing translations, e.g. "Electronic
+            circuit".
+          - Internal name of the entity, e.g. "electronic-circuit".
+
+        The results of the search will be cached on the server, so subsequent requests for later pages of the search
+        results will return quicker.
+
+        Please be aware that if "numberOfRecipesPerResult" is set to 0, no information about the recipes will be
+        present in the response. Note that in this case the keys "recipes" and "totalNumberOfRecipes" will be missing
+        completely from the response. This is the same behavior as in the responses of "item/list" and "item/random".
       operationId: search.query
       tags:
         - Search
       parameters:
-        - $ref: "#/components/parameters/Accept-Language"
         - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
       requestBody:
         $ref: "#/components/requestBodies/searchQuery"
       responses:
