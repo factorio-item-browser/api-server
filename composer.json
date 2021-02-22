@@ -19,7 +19,7 @@
     "bluepsyduck/mapper-manager": "^1.0",
     "bluepsyduck/laminas-autowire-factory": "^1.0",
     "factorio-item-browser/api-client": "^4.0",
-    "factorio-item-browser/api-database": "^3.4",
+    "factorio-item-browser/api-database": "^3.5",
     "factorio-item-browser/api-search": "^2.1",
     "laminas/laminas-config-aggregator": "^1.0",
     "laminas/laminas-diactoros": "^1.7",

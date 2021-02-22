@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60d9fbe6db4b4170f1599784837668e5",
+    "content-hash": "1da0ca9c3bf4d5e1b215d8b19f297b31",
     "packages": [
         {
             "name": "bluepsyduck/jms-serializer-factory",
@@ -338,16 +338,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "1.11.1",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "ce77a7ba1770462cd705a91a151b6c3746f9c6ad"
+                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/ce77a7ba1770462cd705a91a151b6c3746f9c6ad",
-                "reference": "ce77a7ba1770462cd705a91a151b6c3746f9c6ad",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/b17c5014ef81d212ac539f07a1001832df1b6d3b",
+                "reference": "b17c5014ef81d212ac539f07a1001832df1b6d3b",
                 "shasum": ""
             },
             "require": {
@@ -362,11 +362,6 @@
                 "phpunit/phpunit": "^7.5 || ^9.1.5"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.11.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Doctrine\\Common\\Annotations\\": "lib/Doctrine/Common/Annotations"
@@ -407,9 +402,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/annotations/issues",
-                "source": "https://github.com/doctrine/annotations/tree/1.11.1"
+                "source": "https://github.com/doctrine/annotations/tree/1.12.1"
             },
-            "time": "2020-10-26T10:28:16+00:00"
+            "time": "2021-02-21T21:00:45+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -1573,16 +1568,16 @@
         },
         {
             "name": "factorio-item-browser/api-database",
-            "version": "3.4.0",
+            "version": "3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "50dd41f7cf4a9c6ea424c6c2666782fe39625b6c"
+                "reference": "7a389ea6a414793f0b4467682e33b71761810c05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/50dd41f7cf4a9c6ea424c6c2666782fe39625b6c",
-                "reference": "50dd41f7cf4a9c6ea424c6c2666782fe39625b6c",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/7a389ea6a414793f0b4467682e33b71761810c05",
+                "reference": "7a389ea6a414793f0b4467682e33b71761810c05",
                 "shasum": ""
             },
             "require": {
@@ -1631,9 +1626,9 @@
                 "database"
             ],
             "support": {
-                "source": "https://github.com/factorio-item-browser/api-database/tree/3.4.0"
+                "source": "https://github.com/factorio-item-browser/api-database/tree/3.5.0"
             },
-            "time": "2021-02-06T10:00:46+00:00"
+            "time": "2021-02-22T10:17:26+00:00"
         },
         {
             "name": "factorio-item-browser/api-search",
@@ -3671,16 +3666,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "0.4.10",
+            "version": "0.4.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430"
+                "reference": "2ce4c6623376d2613cf02e055ea1a926d906cef7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430",
-                "reference": "5c1eb9aac80cb236f1b7fbe52e691afe4cc9f430",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/2ce4c6623376d2613cf02e055ea1a926d906cef7",
+                "reference": "2ce4c6623376d2613cf02e055ea1a926d906cef7",
                 "shasum": ""
             },
             "require": {
@@ -3693,7 +3688,7 @@
                 "phpstan/phpstan": "^0.12.60",
                 "phpstan/phpstan-strict-rules": "^0.12.5",
                 "phpunit/phpunit": "^7.5.20",
-                "symfony/process": "^4.0"
+                "symfony/process": "^5.2"
             },
             "type": "library",
             "extra": {
@@ -3715,9 +3710,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.4.10"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/0.4.11"
             },
-            "time": "2020-12-12T15:45:28+00:00"
+            "time": "2021-02-19T11:57:27+00:00"
         },
         {
             "name": "psr/container",
@@ -5921,16 +5916,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.76",
+            "version": "0.12.78",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "7aaaf9a759a29795e8f46d48041af1c1f1b23d38"
+                "reference": "eecce8d2ee3cac6769f37b4cb1998b2715f82984"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/7aaaf9a759a29795e8f46d48041af1c1f1b23d38",
-                "reference": "7aaaf9a759a29795e8f46d48041af1c1f1b23d38",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/eecce8d2ee3cac6769f37b4cb1998b2715f82984",
+                "reference": "eecce8d2ee3cac6769f37b4cb1998b2715f82984",
                 "shasum": ""
             },
             "require": {
@@ -5961,7 +5956,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.76"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.78"
             },
             "funding": [
                 {
@@ -5977,7 +5972,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-02-13T11:47:44+00:00"
+            "time": "2021-02-20T13:24:36+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",

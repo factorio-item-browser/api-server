@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 - 2021-02-22
+
+### Changed
+
+- Updated dependency `factorio-item-browser/api-database` to version 3.5.0.
+
 ## 3.0.0 - 2021-02-18
 
 ### Changed
