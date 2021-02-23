@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\SearchDecorator;
 
-use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 
 /**
@@ -43,7 +43,7 @@ interface SearchDecoratorInterface
     /**
      * Actually decorates the search result.
      * @param TResult $searchResult
-     * @return GenericEntityWithRecipes|null
+     * @return GenericEntity|null
      */
-    public function decorate(ResultInterface $searchResult): ?GenericEntityWithRecipes;
+    public function decorate(ResultInterface $searchResult): ?GenericEntity;
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
-use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Server\SearchDecorator\SearchDecoratorInterface;
 
@@ -36,7 +36,7 @@ class SearchDecoratorService
      * Decorates the search results to client entities.
      * @param array<ResultInterface> $searchResults
      * @param int $numberOfRecipesPerResult
-     * @return array<GenericEntityWithRecipes>
+     * @return array<GenericEntity>
      */
     public function decorate(array $searchResults, int $numberOfRecipesPerResult): array
     {
@@ -84,7 +84,7 @@ class SearchDecoratorService
     /**
      * Actually decorates the search results through the search decorators.
      * @param array<ResultInterface> $searchResults
-     * @return array<GenericEntityWithRecipes>
+     * @return array<GenericEntity>
      */
     protected function decorateSearchResults(array $searchResults): array
     {
@@ -93,7 +93,7 @@ class SearchDecoratorService
             $class = get_class($searchResult);
             if (isset($this->searchDecoratorsByClass[$class])) {
                 $entity = $this->searchDecoratorsByClass[$class]->decorate($searchResult);
-                if ($entity instanceof GenericEntityWithRecipes) {
+                if ($entity instanceof GenericEntity) {
                     $result[] = $entity;
                 }
             }

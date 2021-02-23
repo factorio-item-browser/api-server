@@ -342,9 +342,11 @@ paths:
             circuit".
           - Internal name of the entity, e.g. "electronic-circuit".
 
+        The search is limited to 1000 results. If a query would return more results, they will get cut off.
+        <br><br>
         The results of the search will be cached on the server, so subsequent requests for later pages of the search
         results will return quicker.
-
+        <br><br>
         Please be aware that if "numberOfRecipesPerResult" is set to 0, no information about the recipes will be
         present in the response. Note that in this case the keys "recipes" and "totalNumberOfRecipes" will be missing
         completely from the response. This is the same behavior as in the responses of "item/list" and "item/random".

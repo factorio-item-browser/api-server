@@ -8,7 +8,6 @@ use BluePsyduck\MapperManager\MapperManagerInterface;
 use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Transfer\Recipe as ClientRecipe;
 use FactorioItemBrowser\Api\Client\Transfer\RecipeWithExpensiveVersion;
-use FactorioItemBrowser\Api\Database\Entity\Recipe as DatabaseRecipe;
 use FactorioItemBrowser\Api\Search\Entity\Result\RecipeResult;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
 use FactorioItemBrowser\Api\Server\Service\RecipeService;
@@ -20,21 +19,16 @@ use Ramsey\Uuid\UuidInterface;
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
  *
- * @implements SearchDecoratorInterface<RecipeResult>
+ * @extends AbstractEntityDecorator<RecipeResult>
  */
-class RecipeDecorator implements SearchDecoratorInterface
+class RecipeDecorator extends AbstractEntityDecorator
 {
-    protected MapperManagerInterface $mapperManager;
     protected RecipeService $recipeService;
-
-    /** @var array<string, UuidInterface> */
-    protected array $announcedRecipeIds = [];
-    /** @var array<DatabaseRecipe> */
-    protected array $databaseRecipes = [];
 
     public function __construct(MapperManagerInterface $mapperManager, RecipeService $recipeService)
     {
-        $this->mapperManager = $mapperManager;
+        parent::__construct($mapperManager);
+
         $this->recipeService = $recipeService;
     }
 
@@ -43,49 +37,40 @@ class RecipeDecorator implements SearchDecoratorInterface
         return RecipeResult::class;
     }
 
-    public function initialize(int $numberOfRecipesPerResult): void
-    {
-        $this->announcedRecipeIds = [];
-        $this->databaseRecipes = [];
-    }
-
     /**
      * @param RecipeResult $searchResult
      */
     public function announce(ResultInterface $searchResult): void
     {
-        foreach ([$searchResult->getNormalRecipeId(), $searchResult->getExpensiveRecipeId()] as $recipeId) {
-            if ($recipeId !== null) {
-                $this->announcedRecipeIds[$recipeId->toString()] = $recipeId;
-            }
-        }
+        $this->addAnnouncedId($searchResult->getNormalRecipeId());
+        $this->addAnnouncedId($searchResult->getExpensiveRecipeId());
     }
 
-    public function prepare(): void
+    protected function fetchDatabaseEntities(array $ids): array
     {
-        $this->databaseRecipes = $this->recipeService->getDetailsByIds($this->announcedRecipeIds);
+        return $this->recipeService->getDetailsByIds($ids);
     }
 
     /**
      * @param RecipeResult $searchResult
-     * @return GenericEntityWithRecipes|null
+     * @return UuidInterface|null
      */
-    public function decorate(ResultInterface $searchResult): ?GenericEntityWithRecipes
+    protected function getIdFromResult(ResultInterface $searchResult): ?UuidInterface
     {
-        $entity = $this->mapRecipeWithId(
-            $searchResult->getNormalRecipeId() ?? $searchResult->getExpensiveRecipeId(),
-            new GenericEntityWithRecipes(),
-        );
-        if ($entity === null) {
-            return null;
-        }
+        return $searchResult->getNormalRecipeId() ?? $searchResult->getExpensiveRecipeId();
+    }
 
+    /**
+     * @param RecipeResult $searchResult
+     * @param GenericEntityWithRecipes $entity
+     */
+    protected function hydrateRecipes(ResultInterface $searchResult, GenericEntityWithRecipes $entity): void
+    {
         $recipe = $this->decorateRecipe($searchResult);
         if ($recipe instanceof ClientRecipe) {
             $entity->recipes[] = $recipe;
             $entity->totalNumberOfRecipes = 1;
         }
-        return $entity;
     }
 
     /**
@@ -95,8 +80,8 @@ class RecipeDecorator implements SearchDecoratorInterface
      */
     public function decorateRecipe(RecipeResult $recipeResult): ?RecipeWithExpensiveVersion
     {
-        $normalRecipe = $this->mapRecipeWithId($recipeResult->getNormalRecipeId(), new RecipeWithExpensiveVersion());
-        $expensiveRecipe = $this->mapRecipeWithId(
+        $normalRecipe = $this->mapEntityWithId($recipeResult->getNormalRecipeId(), new RecipeWithExpensiveVersion());
+        $expensiveRecipe = $this->mapEntityWithId(
             $recipeResult->getExpensiveRecipeId(),
             new RecipeWithExpensiveVersion(),
         );
@@ -111,25 +96,5 @@ class RecipeDecorator implements SearchDecoratorInterface
             $result = $expensiveRecipe;
         }
         return $result;
-    }
-
-    /**
-     * Maps the recipe with the specified id.
-     * @template T of object
-     * @param UuidInterface|null $recipeId
-     * @param T $destination
-     * @return T|null
-     */
-    protected function mapRecipeWithId(?UuidInterface $recipeId, object $destination): ?object
-    {
-        if ($recipeId === null) {
-            return null;
-        }
-        $recipeId = $recipeId->toString();
-        if (!isset($this->databaseRecipes[$recipeId])) {
-            return null;
-        }
-
-        return $this->mapperManager->map($this->databaseRecipes[$recipeId], $destination);
     }
 }

@@ -54,7 +54,7 @@ class SearchQueryHandler implements RequestHandlerInterface
         );
 
         $response = new SearchQueryResponse();
-        $response->results = $decoratedSearchResults;
+        $response->results = $decoratedSearchResults; // @phpstan-ignore-line
         $response->totalNumberOfResults = $searchResults->count();
         return new ClientResponse($response);
     }
