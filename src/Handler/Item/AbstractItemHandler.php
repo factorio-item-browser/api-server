@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Handler\Item;
 
 use BluePsyduck\MapperManager\MapperManagerInterface;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Database\Entity\Item;
@@ -66,6 +67,15 @@ abstract class AbstractItemHandler
      */
     protected function mapItems(UuidInterface $combinationId, array $items, int $numberOfRecipesPerResult): array
     {
+        if ($numberOfRecipesPerResult === 0) {
+            // We are not interested in any recipe data, so skip fetching and mapping for it.
+            // @phpstan-ignore-next-line Keys "recipes" and "totalNumberOfRecipes" intentionally cut from the response.
+            return array_map(
+                fn (Item $item): GenericEntity => $this->mapperManager->map($item, new GenericEntity()),
+                $items,
+            );
+        }
+
         // Prefetch recipes for later mapping
         $recipeData = $this->recipeService->getDataWithProducts($combinationId, $items);
         $this->recipeService->getDetailsByIds($recipeData->getAllIds());

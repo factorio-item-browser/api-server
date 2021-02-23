@@ -37,6 +37,7 @@ class ItemDecoratorTest extends TestCase
     private MapperManagerInterface $mapperManager;
     /** @var RecipeDecorator&MockObject */
     private RecipeDecorator $recipeDecorator;
+    private int $numberOfRecipesPerResult = 42;
 
     protected function setUp(): void
     {
@@ -51,15 +52,17 @@ class ItemDecoratorTest extends TestCase
      */
     private function createInstance(array $mockedMethods = []): ItemDecorator
     {
-        return $this->getMockBuilder(ItemDecorator::class)
-                    ->disableProxyingToOriginalMethods()
-                    ->onlyMethods($mockedMethods)
-                    ->setConstructorArgs([
-                        $this->itemRepository,
-                        $this->mapperManager,
-                        $this->recipeDecorator,
-                    ])
-                    ->getMock();
+        $instance = $this->getMockBuilder(ItemDecorator::class)
+                         ->disableProxyingToOriginalMethods()
+                         ->onlyMethods($mockedMethods)
+                         ->setConstructorArgs([
+                             $this->itemRepository,
+                             $this->mapperManager,
+                             $this->recipeDecorator,
+                         ])
+                         ->getMock();
+        $instance->initialize($this->numberOfRecipesPerResult);
+        return $instance;
     }
 
     public function testGetSupportedResultClass(): void
@@ -69,47 +72,20 @@ class ItemDecoratorTest extends TestCase
         $this->assertSame(ItemResult::class, $instance->getSupportedResultClass());
     }
 
-    /**
-     * @throws ReflectionException
-     */
-    public function testInitialize(): void
-    {
-        $numberOfRecipesPerResult = 42;
-
-        $instance = $this->createInstance();
-        $this->injectProperty($instance, 'announcedItemIds', [$this->createMock(UuidInterface::class)]);
-        $this->injectProperty($instance, 'databaseItems', [$this->createMock(ItemResult::class)]);
-
-        $instance->initialize($numberOfRecipesPerResult);
-
-        $this->assertSame($numberOfRecipesPerResult, $this->extractProperty($instance, 'numberOfRecipesPerResult'));
-        $this->assertSame([], $this->extractProperty($instance, 'announcedItemIds'));
-        $this->assertSame([], $this->extractProperty($instance, 'databaseItems'));
-    }
-
-    /**
-     * @throws ReflectionException
-     */
     public function testAnnounce(): void
     {
-        $announcedItemIds = [
-            '04041eb4-cb94-4c47-8b17-90a5f5b28cae' => Uuid::fromString('04041eb4-cb94-4c47-8b17-90a5f5b28cae'),
-        ];
-        $expectedAnnouncedItemIds = [
-            '04041eb4-cb94-4c47-8b17-90a5f5b28cae' => Uuid::fromString('04041eb4-cb94-4c47-8b17-90a5f5b28cae'),
-            '16cbc2ac-266d-4249-beb1-8c07850b732b' => Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'),
-        ];
-
+        $id = $this->createMock(UuidInterface::class);
         $recipe1 = $this->createMock(RecipeResult::class);
         $recipe2 = $this->createMock(RecipeResult::class);
         $recipe3 = $this->createMock(RecipeResult::class);
 
-        $itemResult = new ItemResult();
-        $itemResult->setId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'))
-                   ->addRecipe($recipe1)
-                   ->addRecipe($recipe2)
-                   ->addRecipe($recipe3);
+        $searchResult = new ItemResult();
+        $searchResult->setId($id)
+                     ->addRecipe($recipe1)
+                     ->addRecipe($recipe2)
+                     ->addRecipe($recipe3);
 
+        $this->numberOfRecipesPerResult = 2;
         $this->recipeDecorator->expects($this->exactly(2))
                               ->method('announce')
                               ->withConsecutive(
@@ -117,27 +93,22 @@ class ItemDecoratorTest extends TestCase
                                   [$this->identicalTo($recipe2)]
                               );
 
-        $instance = $this->createInstance();
-        $this->injectProperty($instance, 'numberOfRecipesPerResult', 2)
-             ->injectProperty($instance, 'announcedItemIds', $announcedItemIds);
+        $instance = $this->createInstance(['addAnnouncedId']);
+        $instance->expects($this->once())
+                 ->method('addAnnouncedId')
+                 ->with($this->identicalTo($id));
 
-        $instance->announce($itemResult);
-
-        $this->assertEquals($expectedAnnouncedItemIds, $this->extractProperty($instance, 'announcedItemIds'));
+        $instance->announce($searchResult);
     }
 
     /**
      * @throws ReflectionException
      */
-    public function testPrepare(): void
+    public function testFetchDatabaseEntities(): void
     {
-        $announcedItemIds = [
-            '16cbc2ac-266d-4249-beb1-8c07850b732b' => Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'),
-            '2a098339-f069-4941-a0f8-1f9518dc036b' => Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'),
-        ];
-        $expectedItemIds = [
-            Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'),
-            Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'),
+        $ids = [
+            $this->createMock(UuidInterface::class),
+            $this->createMock(UuidInterface::class),
         ];
 
         $item1 = new DatabaseItem();
@@ -145,27 +116,42 @@ class ItemDecoratorTest extends TestCase
         $item2 = new DatabaseItem();
         $item2->setId(Uuid::fromString('2a098339-f069-4941-a0f8-1f9518dc036b'));
 
-        $expectedDatabaseItems = [
+        $expectedResult = [
             '16cbc2ac-266d-4249-beb1-8c07850b732b' => $item1,
             '2a098339-f069-4941-a0f8-1f9518dc036b' => $item2,
         ];
 
         $this->itemRepository->expects($this->once())
                              ->method('findByIds')
-                             ->with($this->equalTo($expectedItemIds))
+                             ->with($this->identicalTo($ids))
                              ->willReturn([$item1, $item2]);
 
         $instance = $this->createInstance();
-        $this->injectProperty($instance, 'announcedItemIds', $announcedItemIds);
+        $result = $this->invokeMethod($instance, 'fetchDatabaseEntities', $ids);
 
-        $instance->prepare();
-
-        $this->assertEquals($expectedDatabaseItems, $this->extractProperty($instance, 'databaseItems'));
+        $this->assertEquals($expectedResult, $result);
     }
+
     /**
      * @throws ReflectionException
      */
-    public function testDecorate(): void
+    public function testGetIdFromResult(): void
+    {
+        $id = $this->createMock(UuidInterface::class);
+
+        $searchResult = new ItemResult();
+        $searchResult->setId($id);
+
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'getIdFromResult', $searchResult);
+
+        $this->assertSame($id, $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testHydrateRecipes(): void
     {
         $recipeResult1 = $this->createMock(RecipeResult::class);
         $recipeResult2 = $this->createMock(RecipeResult::class);
@@ -184,11 +170,12 @@ class ItemDecoratorTest extends TestCase
         $entity = new GenericEntityWithRecipes();
         $entity->name = 'abc';
 
-        $expectedResult = new GenericEntityWithRecipes();
-        $expectedResult->name = 'abc';
-        $expectedResult->recipes = [$recipe1, $recipe2];
-        $expectedResult->totalNumberOfRecipes = 4;
+        $expectedEntity = new GenericEntityWithRecipes();
+        $expectedEntity->name = 'abc';
+        $expectedEntity->recipes = [$recipe1, $recipe2];
+        $expectedEntity->totalNumberOfRecipes = 4;
 
+        $this->numberOfRecipesPerResult = 3;
         $this->recipeDecorator->expects($this->exactly(3))
                               ->method('decorateRecipe')
                               ->withConsecutive(
@@ -202,97 +189,9 @@ class ItemDecoratorTest extends TestCase
                                   $recipe2
                               );
 
-        $instance = $this->createInstance(['mapItemWithId']);
-        $instance->expects($this->once())
-                 ->method('mapItemWithId')
-                 ->with($this->equalTo(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b')))
-                 ->willReturn($entity);
-        $this->injectProperty($instance, 'numberOfRecipesPerResult', 3);
-
-        $result = $instance->decorate($searchResult);
-
-        $this->assertEquals($expectedResult, $result);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public function testDecorateWithoutEntity(): void
-    {
-        $searchResult = new ItemResult();
-        $searchResult->setId(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b'));
-
-        $this->recipeDecorator->expects($this->never())
-                              ->method('decorateRecipe');
-
-        $instance = $this->createInstance(['mapItemWithId']);
-        $instance->expects($this->once())
-                 ->method('mapItemWithId')
-                 ->with($this->equalTo(Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b')))
-                 ->willReturn(null);
-        $this->injectProperty($instance, 'numberOfRecipesPerResult', 3);
-
-        $result = $instance->decorate($searchResult);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public function testMapItemWithId(): void
-    {
-        $itemId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
-        $databaseItem = $this->createMock(DatabaseItem::class);
-        $mappedItem = $this->createMock(GenericEntityWithRecipes::class);
-
-        $databaseItems = [
-            '16cbc2ac-266d-4249-beb1-8c07850b732b' => $databaseItem,
-        ];
-
-        $this->mapperManager->expects($this->once())
-                            ->method('map')
-                            ->with(
-                                $this->identicalTo($databaseItem),
-                                $this->isInstanceOf(GenericEntityWithRecipes::class),
-                            )
-                            ->willReturn($mappedItem);
-
         $instance = $this->createInstance();
-        $this->injectProperty($instance, 'databaseItems', $databaseItems);
+        $this->invokeMethod($instance, 'hydrateRecipes', $searchResult, $entity);
 
-        $result = $this->invokeMethod($instance, 'mapItemWithId', $itemId);
-
-        $this->assertSame($mappedItem, $result);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public function testMapItemWithIdWithoutDatabaseItem(): void
-    {
-        $itemId = Uuid::fromString('16cbc2ac-266d-4249-beb1-8c07850b732b');
-
-        $this->mapperManager->expects($this->never())
-                            ->method('map');
-
-        $instance = $this->createInstance();
-        $result = $this->invokeMethod($instance, 'mapItemWithId', $itemId);
-
-        $this->assertNull($result);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    public function testMapItemWithIdWithoutId(): void
-    {
-        $this->mapperManager->expects($this->never())
-                            ->method('map');
-
-        $instance = $this->createInstance();
-        $result = $this->invokeMethod($instance, 'mapItemWithId', null);
-
-        $this->assertNull($result);
+        $this->assertEquals($expectedEntity, $entity);
     }
 }

@@ -6,6 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Handler\Item;
 
 use BluePsyduck\MapperManager\MapperManagerInterface;
 use BluePsyduck\TestHelper\ReflectionTrait;
+use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Database\Collection\NamesByTypes;
 use FactorioItemBrowser\Api\Database\Entity\Item;
@@ -181,6 +182,42 @@ class AbstractItemHandlerTest extends TestCase
                  );
 
         $result = $this->invokeMethod($instance, 'mapItems', $combinationId, $items, 21);
+
+        $this->assertSame($expectedResult, $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testMapItemsWithoutRecipes(): void
+    {
+        $combinationId = $this->createMock(UuidInterface::class);
+        $numberOfRecipesPerResult = 0;
+
+        $item1 = $this->createMock(Item::class);
+        $item2 = $this->createMock(Item::class);
+        $mappedItem1 = $this->createMock(GenericEntity::class);
+        $mappedItem2 = $this->createMock(GenericEntity::class);
+        $items = [$item1, $item2];
+        $expectedResult = [$mappedItem1, $mappedItem2];
+
+        $this->mapperManager->expects($this->exactly(2))
+                            ->method('map')
+                            ->withConsecutive(
+                                [$this->identicalTo($item1), $this->isInstanceOf(GenericEntity::class)],
+                                [$this->identicalTo($item2), $this->isInstanceOf(GenericEntity::class)],
+                            )
+                            ->willReturnOnConsecutiveCalls(
+                                $mappedItem1,
+                                $mappedItem2,
+                            );
+        $this->recipeService->expects($this->never())
+                            ->method('getDataWithProducts');
+        $this->recipeService->expects($this->never())
+                            ->method('getDetailsByIds');
+
+        $instance = $this->createInstance();
+        $result = $this->invokeMethod($instance, 'mapItems', $combinationId, $items, $numberOfRecipesPerResult);
 
         $this->assertSame($expectedResult, $result);
     }
