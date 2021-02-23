@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0 - 2021-02-23
+
+### Changed
+
+- Reduced responses in `item/list`, `item/random` and `search/query`: If `numberOfRecipesPerResult` is set to 0 in the
+  request, the response will no longer contain the keys `recipes` and `totalNumberOfRecipes` for the entries, for a 
+  performance increase.
+
 ## 3.0.1 - 2021-02-22
 
 ### Changed
