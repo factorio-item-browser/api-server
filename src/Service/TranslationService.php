@@ -64,7 +64,7 @@ class TranslationService
      * @param array<GenericEntity> $entities
      * @param UuidInterface $combinationId
      * @param string $locale
-     * @return array<Translation>
+     * @return array<string, array<Translation>>
      */
     protected function fetchTranslations(array $entities, UuidInterface $combinationId, string $locale): array
     {
@@ -113,14 +113,14 @@ class TranslationService
     /**
      * Prepares the translations for matching to the entities.
      * @param array<Translation> $translations
-     * @return array<Translation>
+     * @return array<string, array<Translation>>
      */
     protected function prepareTranslations(array $translations): array
     {
         $result = [];
         foreach ($translations as $translation) {
             foreach ($this->getTypesForTranslation($translation) as $type) {
-                $result[$this->getTranslationKey($type, $translation->getName())] = $translation;
+                $result[$this->getTranslationKey($type, $translation->getName())][] = $translation;
             }
         }
         return $result;
@@ -145,17 +145,20 @@ class TranslationService
 
     /**
      * Matches the translations to the entities.
-     * @param array<Translation> $translations
+     * @param array<string, array<Translation>> $translations
      * @param array<GenericEntity> $entities
      */
     protected function matchTranslationsToEntities(array $translations, array $entities): void
     {
         foreach ($entities as $entity) {
             $translationKey = $this->getTranslationKey($entity->type, $entity->name);
-            if (isset($translations[$translationKey])) {
-                $translation = $translations[$translationKey];
-                $entity->label = $translation->getValue();
-                $entity->description = $translation->getDescription();
+            foreach ($translations[$translationKey] ?? [] as $translation) {
+                if ($translation->getValue() !== '') {
+                    $entity->label = $translation->getValue();
+                }
+                if ($translation->getDescription() !== '') {
+                    $entity->description = $translation->getDescription();
+                }
             }
         }
     }
