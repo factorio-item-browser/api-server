@@ -261,16 +261,18 @@ class TranslationServiceTest extends TestCase
         $translation1->setName('abc');
         $translation2 = new Translation();
         $translation2->setName('def');
+        $translation3 = new Translation();
+        $translation3->setName('abc');
 
-        $translations = [$translation1, $translation2];
+        $translations = [$translation1, $translation2, $translation3];
         $expectedResult = [
-            'pqr' => $translation1,
-            'stu' => $translation1,
-            'vwx' => $translation2,
+            'pqr' => [$translation1, $translation3],
+            'stu' => [$translation1],
+            'vwx' => [$translation2],
         ];
 
         $instance = $this->createInstance(['getTypesForTranslation', 'getTranslationKey']);
-        $instance->expects($this->exactly(2))
+        $instance->expects($this->exactly(3))
                  ->method('getTypesForTranslation')
                  ->withConsecutive(
                      [$this->identicalTo($translation1)],
@@ -278,19 +280,22 @@ class TranslationServiceTest extends TestCase
                  )
                  ->willReturnOnConsecutiveCalls(
                      ['ghi', 'jkl'],
-                     ['mno']
+                     ['mno'],
+                     ['ghi'],
                  );
-        $instance->expects($this->exactly(3))
+        $instance->expects($this->exactly(4))
                  ->method('getTranslationKey')
                  ->withConsecutive(
                      [$this->identicalTo('ghi'), $this->identicalTo('abc')],
                      [$this->identicalTo('jkl'), $this->identicalTo('abc')],
-                     [$this->identicalTo('mno'), $this->identicalTo('def')]
+                     [$this->identicalTo('mno'), $this->identicalTo('def')],
+                     [$this->identicalTo('ghi'), $this->identicalTo('abc')],
                  )
                  ->willReturnOnConsecutiveCalls(
                      'pqr',
                      'stu',
-                     'vwx'
+                     'vwx',
+                     'pqr',
                  );
 
         $result = $this->invokeMethod($instance, 'prepareTranslations', $translations);
@@ -371,25 +376,17 @@ class TranslationServiceTest extends TestCase
      */
     public function testMatchTranslationsToEntities(): void
     {
-        /* @var Translation&MockObject $translation1 */
-        $translation1 = $this->createMock(Translation::class);
-        $translation1->expects($this->once())
-                     ->method('getValue')
-                     ->willReturn('ghi');
-        $translation1->expects($this->once())
-                     ->method('getDescription')
-                     ->willReturn('jkl');
+        $translation1a = new Translation();
+        $translation1a->setValue('ghi')
+                      ->setDescription('foo');
+        $translation1b = new Translation();
+        $translation1b->setDescription('jkl');
 
-        /* @var Translation&MockObject $translation1 */
-        $translation2 = $this->createMock(Translation::class);
-        $translation2->expects($this->never())
-                     ->method('getValue');
-        $translation2->expects($this->never())
-                     ->method('getDescription');
+        $translation2 = new Translation();
 
         $translations = [
-            'stu' => $translation1,
-            'foo' => $translation2,
+            'stu' => [$translation1a, $translation1b],
+            'foo' => [$translation2],
         ];
 
         $entity1 = new GenericEntity();
