@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.1 - 2021-05-14
+
+### Fixed
+
+- Fixed translations not always using the English as fallback.
+
 ## 3.1.0 - 2021-02-23
 
 ### Changed
