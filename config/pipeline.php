@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Blast\BaseUrl\BaseUrlMiddleware;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
 use Mezzio\Helper\ServerUrlMiddleware;
@@ -29,7 +28,6 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(ErrorHandler::class);
     $app->pipe(Middleware\CleanupMiddleware::class);
 
-    $app->pipe(BaseUrlMiddleware::class);
     $app->pipe(ServerUrlMiddleware::class);
     $app->pipe(RouteMiddleware::class);
     $app->pipe(ImplicitHeadMiddleware::class);

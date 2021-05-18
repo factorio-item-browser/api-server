@@ -11,22 +11,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
-use Doctrine\Migrations\Tools\Console\Helper\ConfigurationHelper;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
+use Doctrine\Migrations\DependencyFactory;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Console\Helper\HelperSet;
 
 /* @var ContainerInterface $container */
 $container = require(__DIR__  . '/container.php');
-/* @var EntityManagerInterface $entityManager */
-$entityManager = $container->get(EntityManagerInterface::class);
 
-return new HelperSet([
-    'em' => new EntityManagerHelper($entityManager),
-    'configuration' => new ConfigurationHelper(
-        $entityManager->getConnection(),
-        $container->get('doctrine.migrations.orm_default')
-    ),
-]);
-
+return $container->get(DependencyFactory::class);
