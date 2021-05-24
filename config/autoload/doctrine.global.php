@@ -15,10 +15,12 @@ return [
     'doctrine' => [
         'migrations' => [
             'orm_default' => [
-                'directory' => 'data/migrations',
-                'name'      => 'API Server Database Migrations',
-                'namespace' => 'FactorioItemBrowser\Api\Server\Migrations',
-                'table'     => '_Migrations',
+                'table_storage' => [
+                    'table_name' => '_Migrations',
+                ],
+                'migrations_paths' => [
+                    'FactorioItemBrowser\Api\Server\Migrations' => 'data/migrations'
+                ],
             ],
         ],
     ],

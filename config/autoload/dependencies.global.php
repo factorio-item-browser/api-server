@@ -13,11 +13,14 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server;
 
 use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
+use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
+use Doctrine\Migrations\DependencyFactory;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
 use Mezzio\Router\Middleware\ImplicitOptionsMiddleware;
-use Roave\PsrContainerDoctrine\MigrationsConfigurationFactory;
+use Roave\PsrContainerDoctrine\Migrations\ConfigurationLoaderFactory;
+use Roave\PsrContainerDoctrine\Migrations\DependencyFactoryFactory;
 
 use function BluePsyduck\LaminasAutoWireFactory\injectAliasArray;
 use function BluePsyduck\LaminasAutoWireFactory\readConfig;
@@ -73,8 +76,9 @@ return [
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => AutoWireFactory::class,
+            ConfigurationLoader::class => ConfigurationLoaderFactory::class,
+            DependencyFactory::class => DependencyFactoryFactory::class,
             ImplicitOptionsMiddleware::class => Middleware\ImplicitOptionsMiddlewareFactory::class,
-            'doctrine.migrations.orm_default' => MigrationsConfigurationFactory::class,
 
             // Auto-wire helpers
             'array $agents' => readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),
