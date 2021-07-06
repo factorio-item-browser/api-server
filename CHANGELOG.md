@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.3 - 2021-07-06
+
+### Added
+
+- Updating the `lastUsageTime` column in the Combination table with each request.
+- Verification of the combination id in the paths, returning status code 404 if the combination does not exist.
+
 ## 3.1.2 - 2021-05-24
 
 ### Changed
