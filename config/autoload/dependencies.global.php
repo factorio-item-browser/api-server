@@ -57,6 +57,7 @@ return [
 
             Middleware\AuthorizationMiddleware::class => AutoWireFactory::class,
             Middleware\CleanupMiddleware::class => AutoWireFactory::class,
+            Middleware\CombinationMiddleware::class => AutoWireFactory::class,
             Middleware\CorsHeaderMiddleware::class => AutoWireFactory::class,
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,

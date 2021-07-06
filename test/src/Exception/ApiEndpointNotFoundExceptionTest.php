@@ -25,7 +25,7 @@ class ApiEndpointNotFoundExceptionTest extends TestCase
         $exception = new ApiEndpointNotFoundException($endpoint, $previous);
 
         $this->assertSame('API endpoint not found: abc', $exception->getMessage());
-        $this->assertSame(404, $exception->getCode());
+        $this->assertSame(400, $exception->getCode());
         $this->assertSame($previous, $exception->getPrevious());
     }
 }
