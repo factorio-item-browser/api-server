@@ -18,6 +18,6 @@ class ApiEndpointNotFoundException extends ServerException
 
     public function __construct(string $endpoint, ?Throwable $previous = null)
     {
-        parent::__construct(sprintf(self::MESSAGE, $endpoint), 404, $previous);
+        parent::__construct(sprintf(self::MESSAGE, $endpoint), 400, $previous);
     }
 }
