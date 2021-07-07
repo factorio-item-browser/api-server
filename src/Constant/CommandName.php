@@ -13,4 +13,5 @@ namespace FactorioItemBrowser\Api\Server\Constant;
 interface CommandName
 {
     public const CLEAN_CACHE = 'clean-cache';
+    public const TRIGGER_COMBINATION_UPDATES = 'trigger-combination-updates';
 }
