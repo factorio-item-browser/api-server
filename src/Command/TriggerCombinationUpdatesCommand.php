@@ -10,8 +10,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
 use FactorioItemBrowser\Api\Server\Constant\CommandName;
+use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Service\CombinationUpdateService;
+use FactorioItemBrowser\Common\Constant\Constant;
+use FactorioItemBrowser\Common\Constant\Defaults;
 use GuzzleHttp\Promise\Utils;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -87,6 +91,7 @@ class TriggerCombinationUpdatesCommand extends Command
         $intervalUpdateCheck = new DateInterval(strval($input->getOption('update-check')));
         $limit = intval($input->getOption('limit'));
         $dryRun = boolval($input->getOption('dry-run'));
+        $factorioVersion = $this->detectFactorioVersion();
 
         $combinations = $this->combinationRepository->findPossibleCombinationsForUpdate(
             (new DateTime('now'))->sub($intervalLastUsage),
@@ -101,7 +106,7 @@ class TriggerCombinationUpdatesCommand extends Command
                 $this->entityManager->persist($combination);
             }
 
-            $promise = $this->combinationUpdateService->checkCombination($combination)->then(
+            $promise = $this->combinationUpdateService->checkCombination($combination, $factorioVersion)->then(
                 function (UuidInterface $updateHash) use ($combination, $dryRun, $output): void {
                     if (!$dryRun) {
                         $combination->setLastUpdateHash($updateHash);
@@ -124,5 +129,23 @@ class TriggerCombinationUpdatesCommand extends Command
             $this->entityManager->flush();
         }
         return 0;
+    }
+
+    /**
+     * @return string
+     * @throws ServerException
+     */
+    protected function detectFactorioVersion(): string
+    {
+        $combination = $this->combinationRepository->findById(Uuid::fromString(Defaults::COMBINATION_ID));
+        if ($combination !== null) {
+            foreach ($combination->getMods() as $mod) {
+                if ($mod->getName() === Constant::MOD_NAME_BASE) {
+                    return $mod->getVersion();
+                }
+            }
+        }
+
+        throw new ServerException('Unable to detect base version.');
     }
 }

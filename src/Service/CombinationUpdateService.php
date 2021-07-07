@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FactorioItemBrowser\Api\Server\Service;
 
 use FactorioItemBrowser\Api\Database\Entity\Combination;
-use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
 use FactorioItemBrowser\Api\Server\Exception\RejectedCombinationUpdateException;
 use FactorioItemBrowser\CombinationApi\Client\ClientInterface;
 use FactorioItemBrowser\CombinationApi\Client\Constant\JobPriority;
@@ -13,8 +12,6 @@ use FactorioItemBrowser\CombinationApi\Client\Exception\ClientException;
 use FactorioItemBrowser\CombinationApi\Client\Request\Combination\ValidateRequest;
 use FactorioItemBrowser\CombinationApi\Client\Request\Job\CreateRequest;
 use FactorioItemBrowser\CombinationApi\Client\Response\Combination\ValidateResponse;
-use FactorioItemBrowser\Common\Constant\Constant;
-use FactorioItemBrowser\Common\Constant\Defaults;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\RejectedPromise;
 use Ramsey\Uuid\Uuid;
@@ -28,32 +25,11 @@ use Ramsey\Uuid\UuidInterface;
  */
 class CombinationUpdateService
 {
-    private CombinationRepository $combinationRepository;
     private ClientInterface $combinationApiClient;
-    private string $baseVersion = '';
 
-    public function __construct(
-        CombinationRepository $combinationRepository,
-        ClientInterface $combinationApiClient,
-    ) {
-        $this->combinationRepository = $combinationRepository;
-        $this->combinationApiClient = $combinationApiClient;
-    }
-
-    private function getBaseVersion(): string
+    public function __construct(ClientInterface $combinationApiClient)
     {
-        if ($this->baseVersion === '') {
-            $combination = $this->combinationRepository->findById(Uuid::fromString(Defaults::COMBINATION_ID));
-            if ($combination !== null) {
-                foreach ($combination->getMods() as $mod) {
-                    if ($mod->getName() === Constant::MOD_NAME_BASE) {
-                        $this->baseVersion = $mod->getVersion();
-                        break;
-                    }
-                }
-            }
-        }
-        return $this->baseVersion;
+        $this->combinationApiClient = $combinationApiClient;
     }
 
     /**
@@ -64,16 +40,17 @@ class CombinationUpdateService
      * rejected with an exception containing the reason.
      *
      * @param Combination $combination
+     * @param string $factorioVersion
      * @return PromiseInterface
      */
-    public function checkCombination(Combination $combination): PromiseInterface
+    public function checkCombination(Combination $combination, string $factorioVersion): PromiseInterface
     {
-        $validateRequest = new ValidateRequest();
-        $validateRequest->combinationId = $combination->getId()->toString();
-        $validateRequest->factorioVersion = $this->getBaseVersion();
+        $request = new ValidateRequest();
+        $request->combinationId = $combination->getId()->toString();
+        $request->factorioVersion = $factorioVersion;
 
         try {
-            $promise = $this->combinationApiClient->sendRequest($validateRequest);
+            $promise = $this->combinationApiClient->sendRequest($request);
         } catch (ClientException $e) {
             return new RejectedPromise($e);
         }
