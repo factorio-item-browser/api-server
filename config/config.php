@@ -27,6 +27,7 @@ $aggregator = new ConfigAggregator([
     \FactorioItemBrowser\Api\Client\ConfigProvider::class,
     \FactorioItemBrowser\Api\Database\ConfigProvider::class,
     \FactorioItemBrowser\Api\Search\ConfigProvider::class,
+    \FactorioItemBrowser\CombinationApi\Client\ConfigProvider::class,
     \Laminas\HttpHandlerRunner\ConfigProvider::class,
     \Laminas\Log\ConfigProvider::class,
     \Mezzio\ConfigProvider::class,

@@ -32,6 +32,7 @@ return [
         ],
         'factories'  => [
             Command\CleanCacheCommand::class => AutoWireFactory::class,
+            Command\TriggerCombinationUpdatesCommand::class => AutoWireFactory::class,
 
             Handler\Generic\GenericDetailsHandler::class => AutoWireFactory::class,
             Handler\Generic\GenericIconHandler::class => AutoWireFactory::class,
@@ -69,6 +70,7 @@ return [
             SearchDecorator\ItemDecorator::class => AutoWireFactory::class,
             SearchDecorator\RecipeDecorator::class => AutoWireFactory::class,
 
+            Service\CombinationUpdateService::class => AutoWireFactory::class,
             Service\IconService::class => AutoWireFactory::class,
             Service\MachineService::class => AutoWireFactory::class,
             Service\RecipeService::class => AutoWireFactory::class,
