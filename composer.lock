@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cdc3afd779478142235b7bb14beeda96",
+    "content-hash": "80fead691283d367b1a1576567f604b9",
     "packages": [
         {
             "name": "bluepsyduck/jms-serializer-factory",
@@ -1555,16 +1555,16 @@
         },
         {
             "name": "factorio-item-browser/api-database",
-            "version": "dev-feature/combination-update",
+            "version": "3.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-database.git",
-                "reference": "9ce113ccb350712d09d6a479b7f815e011cf5021"
+                "reference": "9442b8f153b28046b8de4d2bc6be893a31bfe6bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/9ce113ccb350712d09d6a479b7f815e011cf5021",
-                "reference": "9ce113ccb350712d09d6a479b7f815e011cf5021",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-database/zipball/9442b8f153b28046b8de4d2bc6be893a31bfe6bc",
+                "reference": "9442b8f153b28046b8de4d2bc6be893a31bfe6bc",
                 "shasum": ""
             },
             "require": {
@@ -1612,9 +1612,9 @@
                 "database"
             ],
             "support": {
-                "source": "https://github.com/factorio-item-browser/api-database/tree/feature/combination-update"
+                "source": "https://github.com/factorio-item-browser/api-database/tree/3.7.0"
             },
-            "time": "2021-07-06T12:50:31+00:00"
+            "time": "2021-07-09T10:12:03+00:00"
         },
         {
             "name": "factorio-item-browser/api-search",
@@ -2324,16 +2324,16 @@
         },
         {
             "name": "laminas/laminas-code",
-            "version": "4.4.0",
+            "version": "4.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-code.git",
-                "reference": "2b0bb59ade31a045fd3ff0097dc558bb896f6596"
+                "reference": "0919a1b7ca2c262f07557f70cca810689b0d3b43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/2b0bb59ade31a045fd3ff0097dc558bb896f6596",
-                "reference": "2b0bb59ade31a045fd3ff0097dc558bb896f6596",
+                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/0919a1b7ca2c262f07557f70cca810689b0d3b43",
+                "reference": "0919a1b7ca2c262f07557f70cca810689b0d3b43",
                 "shasum": ""
             },
             "require": {
@@ -2387,7 +2387,7 @@
                     "type": "community_bridge"
                 }
             ],
-            "time": "2021-06-17T13:39:43+00:00"
+            "time": "2021-07-09T09:19:31+00:00"
         },
         {
             "name": "laminas/laminas-config-aggregator",
@@ -7672,18 +7672,9 @@
             "time": "2020-07-12T23:59:07+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "factorio-item-browser/api-database",
-            "version": "dev-feature/combination-update",
-            "alias": "3.7.0",
-            "alias_normalized": "3.7.0.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-database": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
