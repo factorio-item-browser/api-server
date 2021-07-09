@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.4 - 2021-07-09
+
+### Added
+
+- Command for auto-updating combinations under certain conditions.
+
 ## 3.1.3 - 2021-07-06
 
 ### Added
