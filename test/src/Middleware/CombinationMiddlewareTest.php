@@ -6,10 +6,13 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Client\Request\Generic\GenericDetailsRequest;
 use FactorioItemBrowser\Api\Database\Entity\Combination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
 use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\CombinationNotFoundException;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Middleware\CombinationMiddleware;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -55,13 +58,22 @@ class CombinationMiddlewareTest extends TestCase
     public function testProcess(): void
     {
         $combinationId = '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76';
-        $combination = $this->createMock(Combination::class);
+        $combination = new Combination();
+        $combination->getMods()->add(new Mod());
+        $combination->getMods()->add(new Mod());
 
         $clientRequest = new GenericDetailsRequest();
         $clientRequest->combinationId = $combinationId;
+        $response = $this->createMock(ResponseInterface::class);
+        $trackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent->modCount = 2;
 
         $newRequest = $this->createMock(ServerRequestInterface::class);
-        $response = $this->createMock(ResponseInterface::class);
+        $newRequest->expects($this->any())
+                   ->method('getAttribute')
+                   ->with($this->identicalTo(RequestAttributeName::TRACKING_REQUEST_EVENT))
+                   ->willReturn($trackingRequestEvent);
 
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->any())
@@ -69,7 +81,7 @@ class CombinationMiddlewareTest extends TestCase
                 ->willReturn($clientRequest);
         $request->expects($this->once())
                 ->method('withAttribute')
-                ->with($this->identicalTo(Combination::class), $this->identicalTo($combination))
+                ->with($this->identicalTo(RequestAttributeName::COMBINATION), $this->identicalTo($combination))
                 ->willReturn($newRequest);
 
         $handler = $this->createMock(RequestHandlerInterface::class);
@@ -90,26 +102,7 @@ class CombinationMiddlewareTest extends TestCase
         $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
-
-
-
-        /*
-        $clientRequest = $request->getParsedBody();
-        try {
-            $combinationId = Uuid::fromString($clientRequest->combinationId);
-        } catch (Exception $e) {
-            throw new CombinationNotFoundException($clientRequest->combinationId, $e);
-        }
-
-        $combination = $this->combinationRepository->findById(Uuid::fromString($clientRequest->combinationId));
-        if ($combination === null) {
-            throw new CombinationNotFoundException($combinationId->toString());
-        }
-
-        $this->combinationRepository->updateLastUsageTime($combination);
-        $request = $request->withAttribute(Combination::class, $combination);
-        return $handler->handle($request);
-         */
+        $this->assertEquals($expectedTrackingRequestEvent, $trackingRequestEvent);
     }
 
     /**

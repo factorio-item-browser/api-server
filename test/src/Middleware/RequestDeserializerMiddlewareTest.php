@@ -7,9 +7,11 @@ namespace FactorioItemBrowserTest\Api\Server\Middleware;
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
 use FactorioItemBrowser\Api\Server\Middleware\RequestDeserializerMiddleware;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use JMS\Serializer\SerializerInterface;
 use Mezzio\Router\RouteResult;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -79,6 +81,12 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $expectedClientRequest->combinationId = 'def';
         $expectedClientRequest->locale = 'ghi';
 
+        $trackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent->routeName = $matchedRouteName;
+        $expectedTrackingRequestEvent->combinationId = 'def';
+        $expectedTrackingRequestEvent->locale = 'ghi';
+
         $routeResult = $this->createMock(RouteResult::class);
         $routeResult->expects($this->any())
                     ->method('getMatchedRouteName')
@@ -95,8 +103,9 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $request->expects($this->any())
                 ->method('getAttribute')
                 ->willReturnMap([
-                    [RouteResult::class, null, $routeResult],
+                    [RequestAttributeName::ROUTE_RESULT, null, $routeResult],
                     ['combination-id', null, $combinationId],
+                    [RequestAttributeName::TRACKING_REQUEST_EVENT, null, $trackingRequestEvent],
                 ]);
         $request->expects($this->any())
                 ->method('getHeaderLine')
@@ -131,6 +140,7 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
+        $this->assertEquals($expectedTrackingRequestEvent, $trackingRequestEvent);
     }
 
     /**
@@ -157,6 +167,12 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $expectedClientRequest->combinationId = 'def';
         $expectedClientRequest->locale = 'ghi';
 
+        $trackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent->routeName = $matchedRouteName;
+        $expectedTrackingRequestEvent->combinationId = 'def';
+        $expectedTrackingRequestEvent->locale = 'ghi';
+
         $routeResult = $this->createMock(RouteResult::class);
         $routeResult->expects($this->any())
                     ->method('getMatchedRouteName')
@@ -168,8 +184,9 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $request->expects($this->any())
                 ->method('getAttribute')
                 ->willReturnMap([
-                    [RouteResult::class, null, $routeResult],
+                    [RequestAttributeName::ROUTE_RESULT, null, $routeResult],
                     ['combination-id', null, $combinationId],
+                    [RequestAttributeName::TRACKING_REQUEST_EVENT, null, $trackingRequestEvent],
                 ]);
         $request->expects($this->any())
                 ->method('getHeaderLine')
@@ -203,8 +220,12 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
+        $this->assertEquals($expectedTrackingRequestEvent, $trackingRequestEvent);
     }
 
+    /**
+     * @throws ServerException
+     */
     public function testProcessWithSerializerException(): void
     {
         $matchedRouteName = 'abc';
@@ -225,6 +246,12 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $expectedClientRequest->combinationId = 'def';
         $expectedClientRequest->locale = 'ghi';
 
+        $trackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent->routeName = $matchedRouteName;
+        $expectedTrackingRequestEvent->combinationId = 'def';
+        $expectedTrackingRequestEvent->locale = 'ghi';
+
         $routeResult = $this->createMock(RouteResult::class);
         $routeResult->expects($this->any())
                     ->method('getMatchedRouteName')
@@ -239,8 +266,9 @@ class RequestDeserializerMiddlewareTest extends TestCase
         $request->expects($this->any())
                 ->method('getAttribute')
                 ->willReturnMap([
-                    [RouteResult::class, null, $routeResult],
+                    [RequestAttributeName::ROUTE_RESULT, null, $routeResult],
                     ['combination-id', null, $combinationId],
+                    [RequestAttributeName::TRACKING_REQUEST_EVENT, null, $trackingRequestEvent],
                 ]);
         $request->expects($this->any())
                 ->method('getHeaderLine')
@@ -271,5 +299,6 @@ class RequestDeserializerMiddlewareTest extends TestCase
 
         $instance = $this->createInstance();
         $instance->process($request, $handler);
+        $this->assertEquals($expectedTrackingRequestEvent, $trackingRequestEvent);
     }
 }
