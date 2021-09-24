@@ -81,7 +81,6 @@ return [
             BodyParamsMiddleware::class => AutoWireFactory::class,
             ConfigurationLoader::class => ConfigurationLoaderFactory::class,
             DependencyFactory::class => DependencyFactoryFactory::class,
-            ImplicitOptionsMiddleware::class => Middleware\ImplicitOptionsMiddlewareFactory::class,
 
             // Auto-wire helpers
             'array $agents' => readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),

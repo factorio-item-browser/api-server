@@ -56,7 +56,14 @@ class CorsHeaderMiddlewareTest extends TestCase
                 ->willReturn($serverParams);
 
         /* @var ResponseInterface&MockObject $response */
+        $response2 = $this->createMock(ResponseInterface::class);
+
         $response = $this->createMock(ResponseInterface::class);
+        $response->expects($this->once())
+                 ->method('withHeader')
+                 ->with($this->identicalTo('Access-Control-Max-Age'), $this->identicalTo('3600'))
+                 ->willReturn($response2);
+
         /* @var ResponseInterface&MockObject $responseWithHeaders */
         $responseWithHeaders = $this->createMock(ResponseInterface::class);
 
@@ -78,7 +85,7 @@ class CorsHeaderMiddlewareTest extends TestCase
                    ->willReturn(true);
         $middleware->expects($this->once())
                    ->method('addHeaders')
-                   ->with($this->identicalTo($response), $this->identicalTo($origin))
+                   ->with($this->identicalTo($response2), $this->identicalTo($origin))
                    ->willReturn($responseWithHeaders);
 
         $result = $middleware->process($request, $handler);
@@ -104,7 +111,13 @@ class CorsHeaderMiddlewareTest extends TestCase
                 ->willReturn($serverParams);
 
         /* @var ResponseInterface&MockObject $response */
+        $response2 = $this->createMock(ResponseInterface::class);
+
         $response = $this->createMock(ResponseInterface::class);
+        $response->expects($this->once())
+                 ->method('withHeader')
+                 ->with($this->identicalTo('Access-Control-Max-Age'), $this->identicalTo('3600'))
+                 ->willReturn($response2);
 
         /* @var RequestHandlerInterface&MockObject $handler */
         $handler = $this->createMock(RequestHandlerInterface::class);
@@ -127,7 +140,7 @@ class CorsHeaderMiddlewareTest extends TestCase
 
         $result = $middleware->process($request, $handler);
 
-        $this->assertSame($response, $result);
+        $this->assertSame($response2, $result);
     }
 
     /**

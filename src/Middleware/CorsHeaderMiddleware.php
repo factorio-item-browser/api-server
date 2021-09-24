@@ -17,6 +17,8 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class CorsHeaderMiddleware implements MiddlewareInterface
 {
+    protected const MAX_AGE = 3600;
+
     /**
      * The headers which are allowed in the requests.
      */
@@ -52,6 +54,7 @@ class CorsHeaderMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
+        $response = $response->withHeader('Access-Control-Max-Age', (string) self::MAX_AGE);
 
         $origin = $request->getServerParams()['HTTP_ORIGIN'] ?? '';
         if ($this->isOriginAllowed($origin)) {
