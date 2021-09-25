@@ -10,7 +10,7 @@ info:
   version: 3.1.4
 
 servers:
-  - url: https://api.factorio-item-browser.com/
+  - url: https://data-api.factorio-item-browser.com/
     description: Live API server
 
 tags:
