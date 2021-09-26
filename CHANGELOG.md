@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.5 - 2021-09-26
+
+### Added
+
+- Tracking of request-related data as a first test.
+
 ## 3.1.4 - 2021-07-09
 
 ### Added
