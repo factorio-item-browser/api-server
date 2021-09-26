@@ -6,10 +6,11 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
-use FactorioItemBrowser\Api\Database\Entity\Combination;
 use FactorioItemBrowser\Api\Database\Repository\CombinationRepository;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\CombinationNotFoundException;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -53,7 +54,12 @@ class CombinationMiddleware implements MiddlewareInterface
         }
 
         $this->combinationRepository->updateLastUsageTime($combination);
-        $request = $request->withAttribute(Combination::class, $combination);
+        $request = $request->withAttribute(RequestAttributeName::COMBINATION, $combination);
+
+        /** @var RequestEvent $trackingRequestEvent */
+        $trackingRequestEvent = $request->getAttribute(RequestAttributeName::TRACKING_REQUEST_EVENT);
+        $trackingRequestEvent->modCount = $combination->getMods()->count();
+
         return $handler->handle($request);
     }
 }

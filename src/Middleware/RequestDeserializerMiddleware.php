@@ -6,8 +6,10 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use Exception;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use FactorioItemBrowser\Common\Constant\Defaults;
 use JMS\Serializer\SerializerInterface;
 use Mezzio\Router\RouteResult;
@@ -51,6 +53,13 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
         $routeResult = $request->getAttribute(RouteResult::class);
         $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()] ?? '';
         $locale = $request->getHeaderLine('Accept-Language');
+        $combinationId = $request->getAttribute('combination-id');
+
+        /** @var RequestEvent $trackingRequestEvent */
+        $trackingRequestEvent = $request->getAttribute(RequestAttributeName::TRACKING_REQUEST_EVENT);
+        $trackingRequestEvent->routeName = (string) $routeResult->getMatchedRouteName();
+        $trackingRequestEvent->combinationId = $combinationId;
+        $trackingRequestEvent->locale = $locale;
 
         if ($requestClass !== '') {
             try {
@@ -63,7 +72,7 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
                 /** @var AbstractRequest $clientRequest */
                 $clientRequest = $this->serializer->deserialize($requestBody, $requestClass, 'json');
                 $clientRequest->locale = $locale === '' ? Defaults::LOCALE : $locale;
-                $clientRequest->combinationId =  $request->getAttribute('combination-id');
+                $clientRequest->combinationId =  $combinationId;
 
                 $request = $request->withParsedBody($clientRequest);
             } catch (Exception $e) {

@@ -20,8 +20,8 @@ final class Version20210629135112 extends AbstractMigration
     {
         $this->addSql(<<<EOT
             ALTER TABLE Combination 
-                ADD lastUpdateCheckTime TIMESTAMP DEFAULT NULL COMMENT 'The last time this combination was checked for an update.(DC2Type:timestamp)', 
-                ADD lastUpdateHash BINARY(16) DEFAULT NULL COMMENT 'The hash representing the mod versions used when the combination was last updated.(DC2Type:uuid_binary)'
+                ADD lastUpdateCheckTime TIMESTAMP NULL DEFAULT NULL COMMENT 'The last time this combination was checked for an update.(DC2Type:timestamp)', 
+                ADD lastUpdateHash BINARY(16) NULL DEFAULT NULL COMMENT 'The hash representing the mod versions used when the combination was last updated.(DC2Type:uuid_binary)'
         EOT);
     }
 

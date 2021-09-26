@@ -46,4 +46,8 @@ interface ConfigKey
      * The key holding the search decorators to use.
      */
     public const SEARCH_DECORATORS = 'search-decorators';
+
+    public const TRACKING = 'tracking';
+    public const TRACKING_MEASUREMENT_ID = 'measurement-id';
+    public const TRACKING_API_SECRET = 'api-secret';
 }

@@ -6,7 +6,10 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\InvalidApiKeyException;
+use FactorioItemBrowser\Api\Server\Service\TrackingService;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use FactorioItemBrowser\Common\Constant\Defaults;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -47,6 +50,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
         if ($agentName === '' && $clientRequest->combinationId !== Defaults::COMBINATION_ID) {
             throw new InvalidApiKeyException();
         }
+
+        /** @var RequestEvent $trackingRequestEvent */
+        $trackingRequestEvent = $request->getAttribute(RequestAttributeName::TRACKING_REQUEST_EVENT);
+        $trackingRequestEvent->agentName = $agentName;
 
         return $handler->handle($request);
     }

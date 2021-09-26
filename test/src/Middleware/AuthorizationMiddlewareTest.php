@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace FactorioItemBrowserTest\Api\Server\Middleware;
 
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
+use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\InvalidApiKeyException;
 use FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddleware;
+use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -48,12 +50,12 @@ class AuthorizationMiddlewareTest extends TestCase
     public function provideProcess(): array
     {
         return [
-            ['bar', 'abc', false],
-            ['bar', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false],
-            ['baz', 'abc', true],
-            ['baz', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false],
-            ['', 'abc', true],
-            ['', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false],
+            ['bar', 'abc', false, 'foo'],
+            ['bar', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false, 'foo'],
+            ['baz', 'abc', true, null],
+            ['baz', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false, ''],
+            ['', 'abc', true, null],
+            ['', '2f4a45fa-a509-a9d1-aae6-ffcf984a7a76', false, ''],
         ];
     }
 
@@ -61,15 +63,23 @@ class AuthorizationMiddlewareTest extends TestCase
      * @param string $apiKey
      * @param string $combinationId
      * @param bool $expectException
+     * @param string|null $expectedAgentName
      * @throws InvalidApiKeyException
      * @dataProvider provideProcess
      */
-    public function testProcess(string $apiKey, string $combinationId, bool $expectException): void
-    {
+    public function testProcess(
+        string $apiKey,
+        string $combinationId,
+        bool $expectException,
+        ?string $expectedAgentName,
+    ): void {
         $clientRequest = new SearchQueryRequest();
         $clientRequest->combinationId = $combinationId;
-
         $response = $this->createMock(ResponseInterface::class);
+
+        $trackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent = new RequestEvent();
+        $expectedTrackingRequestEvent->agentName = $expectedAgentName;
 
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
@@ -79,6 +89,10 @@ class AuthorizationMiddlewareTest extends TestCase
         $request->expects($this->once())
                 ->method('getParsedBody')
                 ->willReturn($clientRequest);
+        $request->expects($this->any())
+                ->method('getAttribute')
+                ->with($this->identicalTo(RequestAttributeName::TRACKING_REQUEST_EVENT))
+                ->willReturn($trackingRequestEvent);
 
         $handler = $this->createMock(RequestHandlerInterface::class);
         $handler->expects($expectException ? $this->never() : $this->once())
@@ -94,5 +108,6 @@ class AuthorizationMiddlewareTest extends TestCase
         $result = $instance->process($request, $handler);
 
         $this->assertSame($response, $result);
+        $this->assertEquals($expectedTrackingRequestEvent, $trackingRequestEvent);
     }
 }

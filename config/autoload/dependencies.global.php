@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server;
 
+use BluePsyduck\Ga4MeasurementProtocol\ClientInterface;
 use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
 use Doctrine\Migrations\DependencyFactory;
@@ -63,6 +64,7 @@ return [
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
+            Middleware\TrackingMiddleware::class => AutoWireFactory::class,
             Middleware\TranslationMiddleware::class => AutoWireFactory::class,
 
             Response\ErrorResponseGenerator::class => AutoWireFactory::class,
@@ -75,13 +77,14 @@ return [
             Service\MachineService::class => AutoWireFactory::class,
             Service\RecipeService::class => AutoWireFactory::class,
             Service\SearchDecoratorService::class => AutoWireFactory::class,
+            Service\TrackingService::class => AutoWireFactory::class,
             Service\TranslationService::class => AutoWireFactory::class,
 
             // Dependencies of other libraries
             BodyParamsMiddleware::class => AutoWireFactory::class,
+            ClientInterface::class => Tracking\ClientFactory::class,
             ConfigurationLoader::class => ConfigurationLoaderFactory::class,
             DependencyFactory::class => DependencyFactoryFactory::class,
-            ImplicitOptionsMiddleware::class => Middleware\ImplicitOptionsMiddlewareFactory::class,
 
             // Auto-wire helpers
             'array $agents' => readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),
