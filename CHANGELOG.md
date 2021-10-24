@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.6 - 2021-10-24
+
+### Fixed
+
+- Invalid routes returning wrong status code of 500 instead of the intended 400.
+- Missing tracking values on errors.
+
 ## 3.1.5 - 2021-09-26
 
 ### Added
