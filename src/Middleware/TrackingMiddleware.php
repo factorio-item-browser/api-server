@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Middleware;
 use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Service\TrackingService;
 use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
+use FactorioItemBrowser\Common\Constant\Defaults;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -31,6 +32,11 @@ class TrackingMiddleware implements MiddlewareInterface
     {
         $startTime = microtime(true);
         $trackingRequestEvent = new RequestEvent();
+
+        // Set some default values in case we do not come as far as actually setting them.
+        $trackingRequestEvent->agentName = 'anonymous';
+        $trackingRequestEvent->locale = Defaults::LOCALE;
+        $trackingRequestEvent->routeName = 'unknown';
 
         $request = $request->withAttribute(RequestAttributeName::TRACKING_REQUEST_EVENT, $trackingRequestEvent);
         $response = $handler->handle($request);
