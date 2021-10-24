@@ -51,7 +51,7 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
     {
         /** @var RouteResult $routeResult */
         $routeResult = $request->getAttribute(RouteResult::class);
-        $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()] ?? '';
+        $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()];
         $locale = $request->getHeaderLine('Accept-Language');
         $combinationId = $request->getAttribute('combination-id');
 
@@ -61,25 +61,23 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
         $trackingRequestEvent->combinationId = $combinationId;
         $trackingRequestEvent->locale = $locale;
 
-        if ($requestClass !== '') {
-            try {
-                if ($request->getHeaderLine('Content-Type') === 'application/json') {
-                    $requestBody = $request->getBody()->getContents();
-                } else {
-                    $requestBody = '{}';
-                }
-
-                /** @var AbstractRequest $clientRequest */
-                $clientRequest = $this->serializer->deserialize($requestBody, $requestClass, 'json');
-                $clientRequest->locale = $locale === '' ? Defaults::LOCALE : $locale;
-                $clientRequest->combinationId =  $combinationId;
-
-                $request = $request->withParsedBody($clientRequest);
-            } catch (Exception $e) {
-                throw new InvalidRequestBodyException($e->getMessage(), $e);
+        try {
+            if ($request->getHeaderLine('Content-Type') === 'application/json') {
+                $requestBody = $request->getBody()->getContents();
+            } else {
+                $requestBody = '{}';
             }
+
+            /** @var AbstractRequest $clientRequest */
+            $clientRequest = $this->serializer->deserialize($requestBody, $requestClass, 'json');
+        } catch (Exception $e) {
+            throw new InvalidRequestBodyException($e->getMessage(), $e);
         }
 
+        $clientRequest->locale = $locale === '' ? Defaults::LOCALE : $locale;
+        $clientRequest->combinationId =  $combinationId;
+
+        $request = $request->withParsedBody($clientRequest);
         return $handler->handle($request);
     }
 }

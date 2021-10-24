@@ -19,7 +19,6 @@ use Doctrine\Migrations\DependencyFactory;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
-use Mezzio\Router\Middleware\ImplicitOptionsMiddleware;
 use Roave\PsrContainerDoctrine\Migrations\ConfigurationLoaderFactory;
 use Roave\PsrContainerDoctrine\Migrations\DependencyFactoryFactory;
 
@@ -42,7 +41,6 @@ return [
             Handler\Item\ItemProductHandler::class => AutoWireFactory::class,
             Handler\Item\ItemRandomHandler::class => AutoWireFactory::class,
             Handler\Mod\ModListHandler::class => AutoWireFactory::class,
-            Handler\NotFoundHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeListHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeMachinesHandler::class => AutoWireFactory::class,
@@ -62,6 +60,7 @@ return [
             Middleware\CombinationMiddleware::class => AutoWireFactory::class,
             Middleware\CorsHeaderMiddleware::class => AutoWireFactory::class,
             Middleware\MetaMiddleware::class => AutoWireFactory::class,
+            Middleware\RejectUnknownRoutesMiddleware::class => AutoWireFactory::class,
             Middleware\RequestDeserializerMiddleware::class => AutoWireFactory::class,
             Middleware\ResponseSerializerMiddleware::class => AutoWireFactory::class,
             Middleware\TrackingMiddleware::class => AutoWireFactory::class,
