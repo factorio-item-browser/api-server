@@ -13,6 +13,8 @@ use BluePsyduck\Ga4MeasurementProtocol\Request\Event\EventInterface;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
+ *
+ * @codeCoverageIgnore -- Should not need any coverage to begin with
  */
 #[Event('request')]
 class RequestEvent implements EventInterface

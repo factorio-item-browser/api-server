@@ -20,7 +20,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  *
  * @author BluePsyduck <bluepsyduck@gmx.com>
  * @license http://opensource.org/licenses/GPL-3.0 GPL v3
- * @coversDefaultClass \FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddleware
+ * @covers \FactorioItemBrowser\Api\Server\Middleware\AuthorizationMiddleware
  */
 class AuthorizationMiddlewareTest extends TestCase
 {
