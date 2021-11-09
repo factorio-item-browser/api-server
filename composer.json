@@ -18,7 +18,7 @@
     "ext-PDO": "*",
     "bluepsyduck/mapper-manager": "^1.0",
     "bluepsyduck/laminas-autowire-factory": "^1.0",
-    "bluepsyduck/ga4-measurement-protocol": "^1.0",
+    "bluepsyduck/ga4-measurement-protocol": "^2.0",
     "doctrine/cache": "^1.10",
     "factorio-item-browser/api-client": "^4.0",
     "factorio-item-browser/api-database": "^3.7",
@@ -33,7 +33,7 @@
     "mezzio/mezzio-fastroute": "^3.0",
     "mezzio/mezzio-helpers": "^5.0",
     "ramsey/uuid": "^4.0",
-    "symfony/console": "^4.0 | ^5.0"
+    "symfony/console": "^5.0"
   },
   "require-dev": {
     "bluepsyduck/test-helper": "^2.0",

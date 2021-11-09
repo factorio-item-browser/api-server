@@ -7,6 +7,7 @@ namespace FactorioItemBrowser\Api\Server\Tracking;
 use BluePsyduck\Ga4MeasurementProtocol\Client;
 use BluePsyduck\Ga4MeasurementProtocol\ClientInterface;
 use BluePsyduck\Ga4MeasurementProtocol\Config;
+use BluePsyduck\Ga4MeasurementProtocol\Serializer\Serializer;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -27,11 +28,12 @@ class ClientFactory implements FactoryInterface
 
         $guzzleClient = new GuzzleClient();
         $httpFactory = new HttpFactory();
+        $serializer = new Serializer();
 
         $clientConfig = new Config();
         $clientConfig->measurementId = $config[ConfigKey::TRACKING_MEASUREMENT_ID];
         $clientConfig->apiSecret = $config[ConfigKey::TRACKING_API_SECRET];
 
-        return new Client($guzzleClient, $httpFactory, $httpFactory, $clientConfig);
+        return new Client($guzzleClient, $httpFactory, $httpFactory, $serializer, $clientConfig);
     }
 }

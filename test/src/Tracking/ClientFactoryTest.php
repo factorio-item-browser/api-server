@@ -6,6 +6,7 @@ namespace FactorioItemBrowserTest\Api\Server\Tracking;
 
 use BluePsyduck\Ga4MeasurementProtocol\Client;
 use BluePsyduck\Ga4MeasurementProtocol\Config;
+use BluePsyduck\Ga4MeasurementProtocol\Serializer\Serializer;
 use FactorioItemBrowser\Api\Client\ClientInterface;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Tracking\ClientFactory;
@@ -41,7 +42,13 @@ class ClientFactoryTest extends TestCase
         $expectedConfig->measurementId = $measurementId;
         $expectedConfig->apiSecret = $apiSecret;
 
-        $expectedResult = new Client(new GuzzleClient(), new HttpFactory(), new HttpFactory(), $expectedConfig);
+        $expectedResult = new Client(
+            new GuzzleClient(),
+            new HttpFactory(),
+            new HttpFactory(),
+            new Serializer(),
+            $expectedConfig,
+        );
 
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())

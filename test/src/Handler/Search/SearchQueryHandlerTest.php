@@ -7,6 +7,8 @@ namespace FactorioItemBrowserTest\Api\Server\Handler\Search;
 use FactorioItemBrowser\Api\Client\Transfer\GenericEntityWithRecipes;
 use FactorioItemBrowser\Api\Client\Request\Search\SearchQueryRequest;
 use FactorioItemBrowser\Api\Client\Response\Search\SearchQueryResponse;
+use FactorioItemBrowser\Api\Database\Entity\Combination;
+use FactorioItemBrowser\Api\Database\Entity\Mod;
 use FactorioItemBrowser\Api\Search\Collection\PaginatedResultCollection;
 use FactorioItemBrowser\Api\Search\Entity\Query;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
@@ -14,6 +16,8 @@ use FactorioItemBrowser\Api\Search\SearchManagerInterface;
 use FactorioItemBrowser\Api\Server\Handler\Search\SearchQueryHandler;
 use FactorioItemBrowser\Api\Server\Response\ClientResponse;
 use FactorioItemBrowser\Api\Server\Service\SearchDecoratorService;
+use FactorioItemBrowser\Api\Server\Service\TrackingService;
+use FactorioItemBrowser\Api\Server\Tracking\Event\SearchEvent;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,11 +36,14 @@ class SearchQueryHandlerTest extends TestCase
     private SearchDecoratorService $searchDecoratorService;
     /** @var SearchManagerInterface&MockObject */
     private SearchManagerInterface $searchManager;
+    /** @var TrackingService&MockObject */
+    private TrackingService $trackingService;
 
     protected function setUp(): void
     {
         $this->searchDecoratorService = $this->createMock(SearchDecoratorService::class);
         $this->searchManager = $this->createMock(SearchManagerInterface::class);
+        $this->trackingService = $this->createMock(TrackingService::class);
     }
 
     /**
@@ -51,6 +58,7 @@ class SearchQueryHandlerTest extends TestCase
                     ->setConstructorArgs([
                         $this->searchDecoratorService,
                         $this->searchManager,
+                        $this->trackingService,
                     ])
                     ->getMock();
     }
@@ -65,6 +73,9 @@ class SearchQueryHandlerTest extends TestCase
         $locale = 'def';
         $countResults = 7331;
 
+        $combination = new Combination();
+        $combination->getMods()->add(new Mod());
+        $combination->getMods()->add(new Mod());
         $searchQuery = $this->createMock(Query::class);
 
         $currentSearchResults = [
@@ -96,11 +107,26 @@ class SearchQueryHandlerTest extends TestCase
         $searchResults->expects($this->once())
                       ->method('count')
                       ->willReturn($countResults);
+        $searchResults->expects($this->any())
+                      ->method('getIsCached')
+                      ->willReturn(true);
+
+        $expectedEvent = new SearchEvent();
+        $expectedEvent->combinationId = $combinationId;
+        $expectedEvent->modCount = 2;
+        $expectedEvent->locale = $locale;
+        $expectedEvent->queryString = $query;
+        $expectedEvent->resultCount = $countResults;
+        $expectedEvent->cached = true;
 
         $request = $this->createMock(ServerRequestInterface::class);
         $request->expects($this->once())
                 ->method('getParsedBody')
                 ->willReturn($clientRequest);
+        $request->expects($this->once())
+                ->method('getAttribute')
+                ->with($this->identicalTo(Combination::class))
+                ->willReturn($combination);
 
         $this->searchManager->expects($this->once())
                             ->method('parseQuery')
@@ -122,6 +148,16 @@ class SearchQueryHandlerTest extends TestCase
                                          $this->identicalTo($numberOfRecipesPerResult)
                                      )
                                      ->willReturn($decoratedSearchResults);
+
+        $this->trackingService->expects($this->once())
+                              ->method('addEvent')
+                              ->with($this->callback(function (SearchEvent $event) use ($expectedEvent): bool {
+                                  $this->assertGreaterThan(0, $event->runtime);
+                                  $event->runtime = null;
+
+                                  $this->assertEquals($expectedEvent, $event);
+                                  return true;
+                              }));
 
         $instance = $this->createInstance();
         $result = $instance->handle($request);
