@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.7 - 2021-11-09
+
+### Added
+
+- Tracking for the search requests.
+
 ## 3.1.6 - 2021-10-24
 
 ### Fixed
