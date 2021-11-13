@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.8 - 2021-11-13
+
+### Fixed
+
+- Tracking of search runtimes in seconds instead of intended milliseconds.
+
 ## 3.1.7 - 2021-11-09
 
 ### Added
