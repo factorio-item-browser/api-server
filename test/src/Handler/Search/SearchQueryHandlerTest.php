@@ -152,8 +152,7 @@ class SearchQueryHandlerTest extends TestCase
         $this->trackingService->expects($this->once())
                               ->method('addEvent')
                               ->with($this->callback(function (SearchEvent $event) use ($expectedEvent): bool {
-                                  $this->assertGreaterThan(0, $event->runtime);
-                                  $event->runtime = null;
+                                  $event->runtime = null; // Will most likely be 0 because rounding to milliseconds.
 
                                   $this->assertEquals($expectedEvent, $event);
                                   return true;

@@ -73,7 +73,7 @@ class SearchQueryHandler implements RequestHandlerInterface
         $trackingEvent->locale = $clientRequest->locale;
         $trackingEvent->queryString = $clientRequest->query;
         $trackingEvent->resultCount = $response->totalNumberOfResults;
-        $trackingEvent->runtime = microtime(true) - $startTime;
+        $trackingEvent->runtime = round((microtime(true) - $startTime) * 1000);
         $trackingEvent->cached = $searchResults->getIsCached();
         $this->trackingService->addEvent($trackingEvent);
 
