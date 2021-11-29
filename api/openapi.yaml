@@ -31,7 +31,7 @@ paths:
         <br><br>
         The data availability is represented by the status code: If data is available, a status 200 is returned,
         together with some meta data. If the data is not available, a status 404 is returned.
-      operationId: status
+      operationId: meta.status
       tags:
         - Meta
       parameters:
@@ -901,13 +901,13 @@ components:
               name:
                 type: string
                 description: The name of the entity using this icon.
-            example:
-              - type: item
-                name: iron-plate
-              - type: item
-                name: bob-iron-plate
-              - type: recipe
-                name: irom-plate
+          example:
+            - type: item
+              name: iron-plate
+            - type: item
+              name: bob-iron-plate
+            - type: recipe
+              name: irom-plate
         content:
           type: string
           description: The base64 encoded contents of the icon file.

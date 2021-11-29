@@ -18,6 +18,8 @@ use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
 
 return function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
+    $app->post('/{combination-id}', Handler\Meta\StatusHandler::class, RouteName::META_STATUS);
+
     $app->post('/{combination-id}/generic/details', Handler\Generic\GenericDetailsHandler::class, RouteName::GENERIC_DETAILS);
     $app->post('/{combination-id}/generic/icon', Handler\Generic\GenericIconHandler::class, RouteName::GENERIC_ICON);
 

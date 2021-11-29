@@ -12,7 +12,6 @@ namespace FactorioItemBrowser\Api\Server\Constant;
  */
 interface RouteName
 {
-    public const AUTH = 'auth';
     public const COMBINATION_EXPORT = 'combination.export';
     public const COMBINATION_STATUS = 'combination.status';
     public const COMBINATION_VALIDATE = 'combination.validate';
@@ -22,6 +21,7 @@ interface RouteName
     public const ITEM_LIST = 'item.list';
     public const ITEM_PRODUCT = 'item.product';
     public const ITEM_RANDOM = 'item.random';
+    public const META_STATUS = 'meta.status';
     public const MOD_LIST = 'mod.list';
     public const RECIPE_DETAILS = 'recipe.details';
     public const RECIPE_LIST = 'recipe.list';

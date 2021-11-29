@@ -24,6 +24,7 @@ return [
             RouteName::ITEM_LIST => Request\Item\ItemListRequest::class,
             RouteName::ITEM_PRODUCT => Request\Item\ItemProductRequest::class,
             RouteName::ITEM_RANDOM => Request\Item\ItemRandomRequest::class,
+            RouteName::META_STATUS => Request\Meta\StatusRequest::class,
             RouteName::MOD_LIST => Request\Mod\ModListRequest::class,
             RouteName::RECIPE_DETAILS => Request\Recipe\RecipeDetailsRequest::class,
             RouteName::RECIPE_LIST => Request\Recipe\RecipeListRequest::class,
