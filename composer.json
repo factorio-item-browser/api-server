@@ -20,7 +20,7 @@
     "bluepsyduck/laminas-autowire-factory": "^1.0",
     "bluepsyduck/ga4-measurement-protocol": "^2.0",
     "doctrine/cache": "^1.10",
-    "factorio-item-browser/api-client": "^4.0",
+    "factorio-item-browser/api-client": "^4.1",
     "factorio-item-browser/api-database": "^3.7",
     "factorio-item-browser/api-search": "^2.1",
     "factorio-item-browser/combination-api-client": "^1.1",
@@ -37,9 +37,9 @@
   },
   "require-dev": {
     "bluepsyduck/test-helper": "^2.0",
-    "phpstan/phpstan": "^0.12",
-    "phpstan/phpstan-phpunit": "^0.12",
-    "phpstan/phpstan-strict-rules": "^0.12",
+    "phpstan/phpstan": "^1.0",
+    "phpstan/phpstan-phpunit": "^1.0",
+    "phpstan/phpstan-strict-rules": "^1.0",
     "phpunit/phpunit": "^9.0",
     "rregeer/phpunit-coverage-check": "^0.3",
     "squizlabs/php_codesniffer": "^3.3"

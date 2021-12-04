@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.0 - 2021-12-04
+
+### Added
+
+- Status request providing meta-level data to a combination.
+
 ## 3.1.8 - 2021-11-13
 
 ### Fixed

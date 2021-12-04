@@ -40,6 +40,7 @@ return [
             Handler\Item\ItemListHandler::class => AutoWireFactory::class,
             Handler\Item\ItemProductHandler::class => AutoWireFactory::class,
             Handler\Item\ItemRandomHandler::class => AutoWireFactory::class,
+            Handler\Meta\StatusHandler::class => AutoWireFactory::class,
             Handler\Mod\ModListHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeDetailsHandler::class => AutoWireFactory::class,
             Handler\Recipe\RecipeListHandler::class => AutoWireFactory::class,

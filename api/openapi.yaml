@@ -7,13 +7,14 @@ info:
   contact:
     name: BluePsyduck
     email: bluepsyduck@gmx.com
-  version: 3.1.8
+  version: 3.2.0
 
 servers:
   - url: https://data-api.factorio-item-browser.com/
     description: Live API server
 
 tags:
+  - name: Meta
   - name: Generic
   - name: Items
   - name: Mods
@@ -21,6 +22,29 @@ tags:
   - name: Search
 
 paths:
+  /{combination-id}:
+    post:
+      summary: Provides the data status and availability of the combination.
+      description: >
+        This request provides some meta-level data to the requested combination, mainly whether or not data for it is
+        actually available.
+        <br><br>
+        The data availability is represented by the status code: If data is available, a status 200 is returned,
+        together with some meta data. If the data is not available, a status 404 is returned.
+      operationId: meta.status
+      tags:
+        - Meta
+      parameters:
+        - $ref: "#/components/parameters/combination-id"
+        - $ref: "#/components/parameters/Accept-Language"
+      responses:
+        "200":
+          $ref: "#/components/responses/status"
+        "404":
+          $ref: "#/components/responses/combinationNotFound"
+      security:
+        - apiKey: []
+
   /{combination-id}/generic/details:
     post:
       summary: Provides generic data to the entities.
@@ -723,6 +747,13 @@ components:
                 description: The total number of results of the search.
                 example: 1
 
+    status:
+      description: The status of the combination.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CombinationStatus"
+
     # 400 responses
     badRequest:
       description:
@@ -756,6 +787,20 @@ components:
                     example: Invalid or missing Api-Key.
 
     # 404 responses
+    combinationNotFound:
+      description: The requested combination is not available.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The combination with the id "01234567-89ab-cdef-0123-456789abcdef" is not known.
+
     itemNotFound:
       description: The requested item is not known in the combination of mods.
       content:
@@ -785,6 +830,20 @@ components:
                     example: Recipe not found in the combination of mods.
 
   schemas:
+    CombinationStatus:
+      type: object
+      description: The status of the combination.
+      properties:
+        dataVersion:
+          type: integer
+          description: The version of the data available in the API.
+          example: 1
+        importTime:
+          type: string
+          format: datetime
+          description: The time when the data of the combination was imported into the database.
+          example: 2038-01-19T03:14:07Z
+
     GenericEntity:
       type: object
       description: A generic entity with basic information.
@@ -842,13 +901,13 @@ components:
               name:
                 type: string
                 description: The name of the entity using this icon.
-            example:
-              - type: item
-                name: iron-plate
-              - type: item
-                name: bob-iron-plate
-              - type: recipe
-                name: irom-plate
+          example:
+            - type: item
+              name: iron-plate
+            - type: item
+              name: bob-iron-plate
+            - type: recipe
+              name: irom-plate
         content:
           type: string
           description: The base64 encoded contents of the icon file.
