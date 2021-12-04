@@ -20,7 +20,7 @@
     "bluepsyduck/laminas-autowire-factory": "^1.0",
     "bluepsyduck/ga4-measurement-protocol": "^2.0",
     "doctrine/cache": "^1.10",
-    "factorio-item-browser/api-client": "dev-feature/status-request",
+    "factorio-item-browser/api-client": "^4.1",
     "factorio-item-browser/api-database": "^3.7",
     "factorio-item-browser/api-search": "^2.1",
     "factorio-item-browser/combination-api-client": "^1.1",

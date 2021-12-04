@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "575056a070d47d72a093e16b97b728c5",
+    "content-hash": "8dde686bb680ee2b816d040dcb2bc771",
     "packages": [
         {
             "name": "bluepsyduck/ga4-measurement-protocol",
@@ -1566,16 +1566,16 @@
         },
         {
             "name": "factorio-item-browser/api-client",
-            "version": "dev-feature/status-request",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/factorio-item-browser/api-client.git",
-                "reference": "be0f554db0421f9eda897a3494ece50166f9d289"
+                "reference": "74000a2bd208a75055e488d02706bdabe3580f45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/be0f554db0421f9eda897a3494ece50166f9d289",
-                "reference": "be0f554db0421f9eda897a3494ece50166f9d289",
+                "url": "https://api.github.com/repos/factorio-item-browser/api-client/zipball/74000a2bd208a75055e488d02706bdabe3580f45",
+                "reference": "74000a2bd208a75055e488d02706bdabe3580f45",
                 "shasum": ""
             },
             "require": {
@@ -1623,9 +1623,9 @@
                 "client"
             ],
             "support": {
-                "source": "https://github.com/factorio-item-browser/api-client/tree/feature/status-request"
+                "source": "https://github.com/factorio-item-browser/api-client/tree/4.1.0"
             },
-            "time": "2021-11-29T15:59:01+00:00"
+            "time": "2021-12-04T11:16:21+00:00"
         },
         {
             "name": "factorio-item-browser/api-database",
@@ -8014,9 +8014,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "factorio-item-browser/api-client": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
