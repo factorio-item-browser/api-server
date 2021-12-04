@@ -7,7 +7,7 @@ info:
   contact:
     name: BluePsyduck
     email: bluepsyduck@gmx.com
-  version: 3.1.8
+  version: 3.2.0
 
 servers:
   - url: https://data-api.factorio-item-browser.com/
