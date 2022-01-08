@@ -14,6 +14,7 @@ namespace FactorioItemBrowser\Api\Server;
 
 use BluePsyduck\Ga4MeasurementProtocol\ClientInterface;
 use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
+use BluePsyduck\LaminasAutoWireFactory\AutoWireUtils;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
 use Doctrine\Migrations\DependencyFactory;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
@@ -21,9 +22,6 @@ use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
 use Roave\PsrContainerDoctrine\Migrations\ConfigurationLoaderFactory;
 use Roave\PsrContainerDoctrine\Migrations\DependencyFactoryFactory;
-
-use function BluePsyduck\LaminasAutoWireFactory\injectAliasArray;
-use function BluePsyduck\LaminasAutoWireFactory\readConfig;
 
 return [
     'dependencies' => [
@@ -87,12 +85,12 @@ return [
             DependencyFactory::class => DependencyFactoryFactory::class,
 
             // Auto-wire helpers
-            'array $agents' => readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),
-            'array $allowedOrigins' => readConfig(ConfigKey::MAIN, ConfigKey::ALLOWED_ORIGINS),
-            'array $requestClassesByRoutes' => readConfig(ConfigKey::MAIN, ConfigKey::REQUEST_CLASSES_BY_ROUTES),
-            'array $searchDecorators' => injectAliasArray(ConfigKey::MAIN, ConfigKey::SEARCH_DECORATORS),
-            'bool $isDebug' => readConfig('debug'),
-            'string $version' => readConfig('version'),
+            'array $agents' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),
+            'array $allowedOrigins' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::ALLOWED_ORIGINS),
+            'array $requestClassesByRoutes' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::REQUEST_CLASSES_BY_ROUTES),
+            'array $searchDecorators' => AutoWireUtils::injectAliasArray(ConfigKey::MAIN, ConfigKey::SEARCH_DECORATORS),
+            'bool $isDebug' => AutoWireUtils::readConfig('debug'),
+            'string $version' => AutoWireUtils::readConfig('version'),
         ],
     ],
 ];

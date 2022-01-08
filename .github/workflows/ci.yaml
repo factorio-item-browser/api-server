@@ -11,6 +11,7 @@ jobs:
     uses: factorio-item-browser/github-workflows/.github/workflows/ci-php-general.yaml@v1
     with:
       extensions: json, pdo_mysql, zip
+      php-version: "8.0"
 
   call-workflow-ci-php-tests:
     name: Tests

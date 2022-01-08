@@ -114,11 +114,6 @@ final class Version20200603082746 extends AbstractMigration
                 CHANGE value value TEXT COLLATE 'utf8mb4_general_ci' NOT NULL COMMENT 'The actual translation.', 
                 CHANGE description description TEXT COLLATE 'utf8mb4_general_ci' NOT NULL COMMENT 'The translated description.'
         EOT);
-        $this->addSql(<<<EOT
-            ALTER TABLE _Migrations 
-                COLLATE='utf8mb4_bin',
-                CHANGE version version VARCHAR(14) COLLATE 'utf8mb4_bin' NOT NULL
-        EOT);
     }
 
     public function down(Schema $schema) : void
@@ -220,11 +215,6 @@ final class Version20200603082746 extends AbstractMigration
                 CHANGE name name VARCHAR(255) COLLATE 'utf8_general_ci' NOT NULL COMMENT 'The name of the translation.', 
                 CHANGE value value TEXT COLLATE 'utf8_general_ci' NOT NULL COMMENT 'The actual translation.', 
                 CHANGE description description TEXT COLLATE 'utf8_general_ci' NOT NULL COMMENT 'The translated description.'
-        EOT);
-        $this->addSql(<<<EOT
-            ALTER TABLE _Migrations 
-                COLLATE='utf8_general_ci',
-                CHANGE version version VARCHAR(14) COLLATE 'utf8_general_ci' NOT NULL
         EOT);
     }
 }

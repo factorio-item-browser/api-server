@@ -13,17 +13,16 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": "^8.0",
-    "ext-json": "*",
+    "php": "^8.1",
     "ext-PDO": "*",
     "bluepsyduck/mapper-manager": "^1.0",
-    "bluepsyduck/laminas-autowire-factory": "^1.0",
+    "bluepsyduck/laminas-autowire-factory": "^2.0",
     "bluepsyduck/ga4-measurement-protocol": "^2.0",
     "doctrine/cache": "^1.10",
-    "factorio-item-browser/api-client": "^4.1",
-    "factorio-item-browser/api-database": "^3.7",
-    "factorio-item-browser/api-search": "^2.1",
-    "factorio-item-browser/combination-api-client": "^1.1",
+    "factorio-item-browser/api-client": "dev-feature/refactor-php81",
+    "factorio-item-browser/api-database": "dev-feature/refactor-php81 as 3.8",
+    "factorio-item-browser/api-search": "dev-feature/refactor-php81",
+    "factorio-item-browser/combination-api-client": "^1.2",
     "guzzlehttp/guzzle": "^7.3",
     "laminas/laminas-config-aggregator": "^1.0",
     "laminas/laminas-diactoros": "^2.5",
@@ -33,7 +32,7 @@
     "mezzio/mezzio-fastroute": "^3.0",
     "mezzio/mezzio-helpers": "^5.0",
     "ramsey/uuid": "^4.0",
-    "symfony/console": "^5.0"
+    "symfony/console": "^6.0"
   },
   "require-dev": {
     "bluepsyduck/test-helper": "^2.0",
