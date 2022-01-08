@@ -10,12 +10,10 @@ jobs:
     name: General
     uses: factorio-item-browser/github-workflows/.github/workflows/ci-php-general.yaml@v1
     with:
-      extensions: json, pdo_mysql, zip
-      php-version: "8.0"
+      extensions: pdo_mysql, zip
 
   call-workflow-ci-php-tests:
     name: Tests
     uses: factorio-item-browser/github-workflows/.github/workflows/ci-php-tests.yaml@v1
     with:
-      extensions: json, pdo_mysql, zip
-      php-versions: "8.0" # Package "laminas/laminas-log" does not support PHP 8.1 yet.
+      extensions: pdo_mysql, zip
