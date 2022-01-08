@@ -50,7 +50,7 @@ class RequestDeserializerMiddleware implements MiddlewareInterface
         $routeResult = $request->getAttribute(RouteResult::class);
         $requestClass = $this->requestClassesByRoutes[$routeResult->getMatchedRouteName()];
         $locale = $request->getHeaderLine('Accept-Language');
-        $combinationId = $request->getAttribute('combination-id');
+        $combinationId = strval($request->getAttribute('combination-id'));
 
         /** @var RequestEvent $trackingRequestEvent */
         $trackingRequestEvent = $request->getAttribute(RequestAttributeName::TRACKING_REQUEST_EVENT);

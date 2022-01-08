@@ -31,7 +31,8 @@ class ClientFactory implements FactoryInterface
         mixed $requestedName,
         ?array $options = null,
     ): ClientInterface {
-        $config = $container->get('config')[ConfigKey::MAIN][ConfigKey::TRACKING];
+        /** @var array{measurement-id: string, api-secret: string} $config */
+        $config = $container->get('config')[ConfigKey::MAIN][ConfigKey::TRACKING]; // @phpstan-ignore-line
 
         $guzzleClient = new GuzzleClient();
         $httpFactory = new HttpFactory();
