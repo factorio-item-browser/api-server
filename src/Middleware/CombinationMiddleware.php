@@ -25,17 +25,12 @@ use Ramsey\Uuid\Uuid;
  */
 class CombinationMiddleware implements MiddlewareInterface
 {
-    private CombinationRepository $combinationRepository;
-
-    public function __construct(CombinationRepository $combinationRepository)
-    {
-        $this->combinationRepository = $combinationRepository;
+    public function __construct(
+        private readonly CombinationRepository $combinationRepository,
+    ) {
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      * @throws ServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

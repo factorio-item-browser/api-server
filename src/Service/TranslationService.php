@@ -22,17 +22,15 @@ class TranslationService
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    protected TranslationRepository $translationRepository;
-
     /**
      * The entities to be translated.
      * @var array<GenericEntity>
      */
     protected array $entities = [];
 
-    public function __construct(TranslationRepository $translationRepository)
-    {
-        $this->translationRepository = $translationRepository;
+    public function __construct(
+        protected readonly TranslationRepository $translationRepository,
+    ) {
     }
 
     /**

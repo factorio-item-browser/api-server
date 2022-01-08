@@ -13,6 +13,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\HttpFactory;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerExceptionInterface;
 
 /**
  * The factory for the tracking client.
@@ -22,8 +23,14 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  */
 class ClientFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): ClientInterface
-    {
+    /**
+     * @throws ContainerExceptionInterface
+     */
+    public function __invoke(
+        ContainerInterface $container,
+        mixed $requestedName,
+        ?array $options = null,
+    ): ClientInterface {
         $config = $container->get('config')[ConfigKey::MAIN][ConfigKey::TRACKING];
 
         $guzzleClient = new GuzzleClient();

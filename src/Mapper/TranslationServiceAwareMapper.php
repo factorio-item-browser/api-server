@@ -15,16 +15,13 @@ use FactorioItemBrowser\Api\Server\Service\TranslationService;
  */
 abstract class TranslationServiceAwareMapper
 {
-    private TranslationService $translationService;
-
-    public function __construct(TranslationService $translationService)
-    {
-        $this->translationService = $translationService;
+    public function __construct(
+        private readonly TranslationService $translationService,
+    ) {
     }
 
     /**
      * Adds the specified entity to the translation service.
-     * @param GenericEntity $entity
      */
     protected function addToTranslationService(GenericEntity $entity): void
     {

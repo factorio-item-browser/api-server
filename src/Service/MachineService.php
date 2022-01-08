@@ -25,17 +25,13 @@ class MachineService
 {
     protected const PREFERRED_MACHINE_NAME = Constant::ENTITY_NAME_CHARACTER;
 
-    protected MachineRepository $machineRepository;
-
-    public function __construct(MachineRepository $machineRepository)
-    {
-        $this->machineRepository = $machineRepository;
+    public function __construct(
+        protected readonly MachineRepository $machineRepository
+    ) {
     }
 
     /**
      * Returns the machines supporting the specified crafting category.
-     * @param UuidInterface $combinationId
-     * @param CraftingCategory $craftingCategory
      * @return array<Machine>
      */
     public function getMachinesByCraftingCategory(
@@ -48,7 +44,6 @@ class MachineService
     /**
      * Filters the machines which actually can craft the recipe.
      * @param array<Machine> $machines
-     * @param Recipe $recipe
      * @return array<Machine>
      */
     public function filterMachinesForRecipe(array $machines, Recipe $recipe): array
@@ -85,8 +80,6 @@ class MachineService
 
     /**
      * Returns the item type of the entity.
-     * @param object $entity
-     * @return string|null
      */
     protected function getItemType(object $entity): ?string
     {
@@ -99,11 +92,6 @@ class MachineService
 
     /**
      * Returns whether the machine is valid with the number of inputs and outputs.
-     * @param Machine $machine
-     * @param int $numberOfItems
-     * @param int $numberOfFluidInputs
-     * @param int $numberOfFluidOutputs
-     * @return bool
      */
     protected function isMachineValid(
         Machine $machine,
@@ -130,9 +118,6 @@ class MachineService
 
     /**
      * Compares the two machines for sorting.
-     * @param Machine $left
-     * @param Machine $right
-     * @return int
      */
     protected function compareMachines(Machine $left, Machine $right): int
     {

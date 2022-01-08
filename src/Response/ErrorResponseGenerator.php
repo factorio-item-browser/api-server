@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Response;
 
+use BluePsyduck\LaminasAutoWireFactory\Attribute\ReadConfig;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -19,88 +19,36 @@ use Throwable;
  */
 class ErrorResponseGenerator
 {
-    /**
-     * The logger.
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * Whether the debug mode is enabled.
-     * @var bool
-     */
-    protected $isDebug;
-
-    /**
-     * Initializes the generator.
-     * @param LoggerInterface $errorLogger
-     * @param bool $isDebug
-     */
-    public function __construct(LoggerInterface $errorLogger, bool $isDebug)
-    {
-        $this->logger = $errorLogger;
-        $this->isDebug = $isDebug;
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        #[ReadConfig('debug')]
+        private readonly bool $debug,
+    ) {
     }
 
-    /**
-     * Handles the thrown exception.
-     * @param Throwable $exception
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @return ResponseInterface
-     */
-    public function __invoke(
-        Throwable $exception,
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ): ResponseInterface {
-        if ($exception instanceof ServerException) {
-            $statusCode = $exception->getCode();
-            $message = $exception->getMessage();
-        } else {
-            $statusCode = 500;
-            $message = 'Internal server error.';
-        }
-
-        $this->logException($statusCode, $exception);
-
-        $errorResponse = [
-            'error' => $this->createResponseError($message, $exception)
-        ];
-        return new JsonResponse($errorResponse, $statusCode);
-    }
-
-    /**
-     * Logs the exception if an actual logger is present.
-     * @param int $statusCode
-     * @param Throwable $exception
-     */
-    protected function logException(int $statusCode, Throwable $exception): void
+    public function __invoke(Throwable $exception): ResponseInterface
     {
+        $statusCode = $exception instanceof ServerException ? $exception->getCode() : 500;
         if (floor($statusCode / 100) === 5.) {
-            $this->logger->crit($exception);
+            $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
-    }
 
-    /**
-     * Creates the error response data.
-     * @param string $message
-     * @param Throwable $exception
-     * @return array<mixed>
-     */
-    protected function createResponseError(string $message, Throwable $exception): array
-    {
-        if ($this->isDebug) {
-            $result = [
-                'message' => $exception->getMessage(),
-                'backtrace' => $exception->getTrace(),
+        if ($this->debug) {
+            $errorResponse = [
+                'error' => [
+                    'message' => $exception->getMessage(),
+                    'backtrace' => $exception->getTrace(),
+                ],
             ];
         } else {
-            $result = [
-                'message' => $message,
+            $message = $exception instanceof ServerException ? $exception->getMessage() : 'Internal server error';
+            $errorResponse = [
+                'error' => [
+                    'message' => $message,
+                ],
             ];
         }
 
-        return $result;
+        return new JsonResponse($errorResponse, $statusCode);
     }
 }

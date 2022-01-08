@@ -25,11 +25,9 @@ use Ramsey\Uuid\UuidInterface;
  */
 class CombinationUpdateService
 {
-    private ClientInterface $combinationApiClient;
-
-    public function __construct(ClientInterface $combinationApiClient)
-    {
-        $this->combinationApiClient = $combinationApiClient;
+    public function __construct(
+        private readonly ClientInterface $combinationApiClient
+    ) {
     }
 
     /**
@@ -38,10 +36,6 @@ class CombinationUpdateService
      * If the combination requires an update, the returned promise will fulfill to a UUID, which represents the
      * update hash for the combination. If the combination does not require an update, the returned promise will be
      * rejected with an exception containing the reason.
-     *
-     * @param Combination $combination
-     * @param string $factorioVersion
-     * @return PromiseInterface
      */
     public function checkCombination(Combination $combination, string $factorioVersion): PromiseInterface
     {
@@ -61,9 +55,6 @@ class CombinationUpdateService
     }
 
     /**
-     * @param Combination $combination
-     * @param ValidateResponse $validateResponse
-     * @return UuidInterface
      * @throws RejectedCombinationUpdateException
      */
     private function handleValidateResponse(
@@ -102,8 +93,6 @@ class CombinationUpdateService
 
     /**
      * Converts the version string to an integer for easier comparison.
-     * @param string $version
-     * @return int
      */
     private function convertVersion(string $version): int
     {

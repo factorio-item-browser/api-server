@@ -30,20 +30,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class TriggerCombinationUpdatesCommand extends Command
 {
-    private CombinationRepository $combinationRepository;
-    private CombinationUpdateService $combinationUpdateService;
-    private EntityManagerInterface $entityManager;
-
     public function __construct(
-        CombinationRepository $combinationRepository,
-        CombinationUpdateService $combinationUpdateService,
-        EntityManagerInterface $entityManager,
+        private readonly CombinationRepository $combinationRepository,
+        private readonly CombinationUpdateService $combinationUpdateService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
-
-        $this->combinationRepository = $combinationRepository;
-        $this->combinationUpdateService = $combinationUpdateService;
-        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -80,9 +72,6 @@ class TriggerCombinationUpdatesCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
      * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -132,7 +121,6 @@ class TriggerCombinationUpdatesCommand extends Command
     }
 
     /**
-     * @return string
      * @throws ServerException
      */
     protected function detectFactorioVersion(): string

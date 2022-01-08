@@ -25,18 +25,11 @@ use Ramsey\Uuid\Uuid;
  */
 class SearchQueryHandler implements RequestHandlerInterface
 {
-    private SearchDecoratorService $searchDecoratorService;
-    private SearchManagerInterface $searchManager;
-    private TrackingService $trackingService;
-
     public function __construct(
-        SearchDecoratorService $searchDecoratorService,
-        SearchManagerInterface $searchManager,
-        TrackingService $trackingService,
+        private readonly SearchDecoratorService $searchDecoratorService,
+        private readonly SearchManagerInterface $searchManager,
+        private readonly TrackingService $trackingService,
     ) {
-        $this->searchDecoratorService = $searchDecoratorService;
-        $this->searchManager = $searchManager;
-        $this->trackingService = $trackingService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

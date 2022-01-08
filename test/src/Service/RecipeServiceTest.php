@@ -14,7 +14,6 @@ use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -60,7 +59,7 @@ class RecipeServiceTest extends TestCase
             $this->createMock(RecipeData::class),
         ];
 
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
 
         $this->recipeRepository->expects($this->once())
@@ -86,7 +85,7 @@ class RecipeServiceTest extends TestCase
             $this->createMock(RecipeData::class),
         ];
 
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
 
         $this->recipeRepository->expects($this->once())
@@ -118,7 +117,7 @@ class RecipeServiceTest extends TestCase
             $this->createMock(RecipeData::class),
         ];
 
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
 
         $this->recipeRepository->expects($this->once())
@@ -154,7 +153,7 @@ class RecipeServiceTest extends TestCase
             $this->createMock(RecipeData::class),
         ];
 
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $recipeDataCollection = $this->createMock(RecipeDataCollection::class);
 
         $this->recipeRepository->expects($this->once())
@@ -182,8 +181,8 @@ class RecipeServiceTest extends TestCase
      */
     public function testExtractIdsFromItems(): void
     {
-        $id1 = $this->createMock(UuidInterface::class);
-        $id2 = $this->createMock(UuidInterface::class);
+        $id1 = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
+        $id2 = Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e');
 
         $item1 = new Item();
         $item1->setId($id1);

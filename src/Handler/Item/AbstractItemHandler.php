@@ -23,26 +23,15 @@ use Ramsey\Uuid\UuidInterface;
  */
 abstract class AbstractItemHandler
 {
-    protected ItemRepository $itemRepository;
-    protected MapperManagerInterface $mapperManager;
-    protected RecipeService $recipeService;
-
     public function __construct(
-        ItemRepository $itemRepository,
-        MapperManagerInterface $mapperManager,
-        RecipeService $recipeService
+        protected readonly ItemRepository $itemRepository,
+        protected readonly MapperManagerInterface $mapperManager,
+        protected readonly RecipeService $recipeService,
     ) {
-        $this->itemRepository = $itemRepository;
-        $this->mapperManager = $mapperManager;
-        $this->recipeService = $recipeService;
     }
 
     /**
      * Fetches the specified item from the database, throwing an exception when it is not found.
-     * @param UuidInterface $combinationId
-     * @param string $type
-     * @param string $name
-     * @return Item
      * @throws EntityNotFoundException
      */
     protected function fetchItem(UuidInterface $combinationId, string $type, string $name): Item
@@ -60,9 +49,7 @@ abstract class AbstractItemHandler
 
     /**
      * Maps the specified items, fetching the production recipes for them.
-     * @param UuidInterface $combinationId
      * @param array<Item> $items
-     * @param int $numberOfRecipesPerResult
      * @return array<GenericEntityWithRecipes>
      */
     protected function mapItems(UuidInterface $combinationId, array $items, int $numberOfRecipesPerResult): array
@@ -95,11 +82,6 @@ abstract class AbstractItemHandler
 
     /**
      * Creates a mapped item object for the response.
-     * @param Item $item
-     * @param RecipeDataCollection $recipeData
-     * @param int $numberOfRecipes
-     * @param int $indexOfFirstRecipe
-     * @return GenericEntityWithRecipes
      */
     protected function createItem(
         Item $item,

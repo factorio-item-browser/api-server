@@ -29,7 +29,7 @@ $container = new ServiceManager();
 $container->setService('config', $config);
 
 if ($config[ConfigAggregator::ENABLE_CACHE] ?? false) {
-    AutoWireFactory::setCacheFile(__DIR__ . '/../data/cache/autowire-factory-cache.php');
+    AutoWireFactory::setCacheFile(__DIR__ . '/../data/cache/autowire-factory.cache');
 }
 
 return $container;

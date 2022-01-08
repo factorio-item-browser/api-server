@@ -94,8 +94,8 @@ class AbstractEntityDecoratorTest extends TestCase
     public function testPrepare(): void
     {
         $announcedIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $entities = [
             $this->createMock(Item::class),
@@ -117,7 +117,7 @@ class AbstractEntityDecoratorTest extends TestCase
     public function testDecorateWithRecipes(): void
     {
         $searchResult = $this->createMock(ResultInterface::class);
-        $id = $this->createMock(UuidInterface::class);
+        $id = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
         $entity = $this->createMock(GenericEntityWithRecipes::class);
 
         $instance = $this->createInstance(['getIdFromResult', 'mapEntityWithId', 'hydrateRecipes']);
@@ -141,7 +141,7 @@ class AbstractEntityDecoratorTest extends TestCase
     public function testDecorateWithoutRecipes(): void
     {
         $searchResult = $this->createMock(ResultInterface::class);
-        $id = $this->createMock(UuidInterface::class);
+        $id = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
         $entity = $this->createMock(GenericEntity::class);
 
         $this->numberOfRecipesPerResult = 0;

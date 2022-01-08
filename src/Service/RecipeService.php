@@ -19,7 +19,6 @@ use Ramsey\Uuid\UuidInterface;
  */
 class RecipeService
 {
-    protected RecipeRepository $recipeRepository;
     /** @var array<string, Recipe> */
     protected array $recipeCache = [];
 
@@ -27,16 +26,14 @@ class RecipeService
      * Initializes the service.
      * @param RecipeRepository $recipeRepository
      */
-    public function __construct(RecipeRepository $recipeRepository)
-    {
-        $this->recipeRepository = $recipeRepository;
+    public function __construct(
+        protected readonly RecipeRepository $recipeRepository,
+    ) {
     }
 
     /**
      * Returns the recipe data having one of the names.
      * @param array<string> $names
-     * @param UuidInterface $combinationId
-     * @return RecipeDataCollection
      */
     public function getDataWithNames(UuidInterface $combinationId, array $names): RecipeDataCollection
     {
@@ -46,8 +43,6 @@ class RecipeService
 
     /**
      * Returns all recipe data.
-     * @param UuidInterface $combinationId
-     * @return RecipeDataCollection
      */
     public function getAllData(UuidInterface $combinationId): RecipeDataCollection
     {
@@ -58,8 +53,6 @@ class RecipeService
     /**
      * Returns the recipe data having any of the items as ingredient.
      * @param array<Item> $items
-     * @param UuidInterface $combinationId
-     * @return RecipeDataCollection
      */
     public function getDataWithIngredients(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
@@ -72,9 +65,7 @@ class RecipeService
 
     /**
      * Returns the recipe data having any of the items as product.
-     * @param UuidInterface $combinationId
      * @param array<Item> $items
-     * @return RecipeDataCollection
      */
     public function getDataWithProducts(UuidInterface $combinationId, array $items): RecipeDataCollection
     {
@@ -102,7 +93,6 @@ class RecipeService
     /**
      * Creates a data collection with the recipe data.
      * @param array<RecipeData> $recipeData
-     * @return RecipeDataCollection
      */
     protected function createDataCollection(array $recipeData): RecipeDataCollection
     {

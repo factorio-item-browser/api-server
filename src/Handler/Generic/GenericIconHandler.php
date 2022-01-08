@@ -28,11 +28,9 @@ class GenericIconHandler implements RequestHandlerInterface
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    protected IconService $iconService;
-
-    public function __construct(IconService $iconService)
-    {
-        $this->iconService = $iconService;
+    public function __construct(
+        protected readonly IconService $iconService,
+    ) {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -55,7 +53,6 @@ class GenericIconHandler implements RequestHandlerInterface
     }
 
     /**
-     * @param NamesByTypes $namesByTypes
      * @return array<UuidInterface>
      */
     protected function fetchImageIds(NamesByTypes $namesByTypes): array
@@ -88,7 +85,6 @@ class GenericIconHandler implements RequestHandlerInterface
 
     /**
      * @param array<string, ClientIcon> $icons
-     * @param NamesByTypes $namesByTypes
      * @return array<string, ClientIcon>
      */
     protected function filterRequestedIcons(array $icons, NamesByTypes $namesByTypes): array

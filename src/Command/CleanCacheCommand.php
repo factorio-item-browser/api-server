@@ -18,26 +18,12 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CleanCacheCommand extends Command
 {
-    /**
-     * The search cache clear.
-     * @var SearchCacheClearInterface
-     */
-    protected $searchCacheClear;
-
-    /**
-     * Initializes the command.
-     * @param SearchCacheClearInterface $searchCacheClear
-     */
-    public function __construct(SearchCacheClearInterface $searchCacheClear)
-    {
+    public function __construct(
+        private readonly SearchCacheClearInterface $searchCacheClear,
+    ) {
         parent::__construct();
-
-        $this->searchCacheClear = $searchCacheClear;
     }
 
-    /**
-     * Configures the command.
-     */
     protected function configure(): void
     {
         parent::configure();
@@ -46,12 +32,6 @@ class CleanCacheCommand extends Command
         $this->setDescription('Cleans the caches from already out-dated entries.');
     }
 
-    /**
-     * Executes the command.
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->searchCacheClear->clearExpiredResults();

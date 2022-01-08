@@ -21,11 +21,9 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class TrackingMiddleware implements MiddlewareInterface
 {
-    private TrackingService $trackingService;
-
-    public function __construct(TrackingService $trackingService)
-    {
-        $this->trackingService = $trackingService;
+    public function __construct(
+        private readonly TrackingService $trackingService,
+    ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

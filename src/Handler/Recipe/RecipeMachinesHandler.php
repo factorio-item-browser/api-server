@@ -31,18 +31,11 @@ use Ramsey\Uuid\UuidInterface;
  */
 class RecipeMachinesHandler implements RequestHandlerInterface
 {
-    protected MapperManagerInterface $mapperManager;
-    protected MachineService $machineService;
-    protected RecipeService $recipeService;
-
     public function __construct(
-        MachineService $machineService,
-        MapperManagerInterface $mapperManager,
-        RecipeService $recipeService
+        protected readonly MachineService $machineService,
+        protected readonly MapperManagerInterface $mapperManager,
+        protected readonly RecipeService $recipeService,
     ) {
-        $this->machineService = $machineService;
-        $this->mapperManager = $mapperManager;
-        $this->recipeService = $recipeService;
     }
 
     /**

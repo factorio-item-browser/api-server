@@ -23,15 +23,10 @@ use Ramsey\Uuid\Uuid;
  */
 class RecipeDetailsHandler implements RequestHandlerInterface
 {
-    private MapperManagerInterface $mapperManager;
-    private RecipeService $recipeService;
-
     public function __construct(
-        MapperManagerInterface $mapperManager,
-        RecipeService $recipeService
+        private readonly MapperManagerInterface $mapperManager,
+        private readonly RecipeService $recipeService
     ) {
-        $this->mapperManager = $mapperManager;
-        $this->recipeService = $recipeService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

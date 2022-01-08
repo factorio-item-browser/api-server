@@ -68,8 +68,8 @@ class RecipeDecoratorTest extends TestCase
 
     public function testAnnounce(): void
     {
-        $normalId = $this->createMock(UuidInterface::class);
-        $expensiveId = $this->createMock(UuidInterface::class);
+        $normalId = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
+        $expensiveId = Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e');
 
         $searchResult = new RecipeResult();
         $searchResult->setNormalRecipeId($normalId)
@@ -93,8 +93,8 @@ class RecipeDecoratorTest extends TestCase
     public function testFetchDatabaseEntities(): void
     {
         $ids = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $databaseRecipes = [
             '16cbc2ac-266d-4249-beb1-8c07850b732b' => $this->createMock(DatabaseRecipe::class),
@@ -117,8 +117,8 @@ class RecipeDecoratorTest extends TestCase
      */
     public function provideGetIdFromResult(): array
     {
-        $normalId = $this->createMock(UuidInterface::class);
-        $expensiveId = $this->createMock(UuidInterface::class);
+        $normalId = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
+        $expensiveId = Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e');
 
         $searchResult1 = new RecipeResult();
         $searchResult1->setNormalRecipeId($normalId)

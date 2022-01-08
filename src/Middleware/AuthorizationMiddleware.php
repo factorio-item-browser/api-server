@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use BluePsyduck\LaminasAutoWireFactory\Attribute\ReadConfig;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
 use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\InvalidApiKeyException;
-use FactorioItemBrowser\Api\Server\Service\TrackingService;
 use FactorioItemBrowser\Api\Server\Tracking\Event\RequestEvent;
 use FactorioItemBrowser\Common\Constant\Defaults;
 use Psr\Http\Message\ResponseInterface;
@@ -24,21 +24,16 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class AuthorizationMiddleware implements MiddlewareInterface
 {
-    /** @var array<array{name: string, api-key: string}> */
-    private array $agents;
-
     /**
      * @param array<array{name: string, api-key: string}> $agents
      */
-    public function __construct(array $agents)
-    {
-        $this->agents = $agents;
+    public function __construct(
+        #[ReadConfig(ConfigKey::MAIN, ConfigKey::AGENTS)]
+        private readonly array $agents,
+    ) {
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      * @throws InvalidApiKeyException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

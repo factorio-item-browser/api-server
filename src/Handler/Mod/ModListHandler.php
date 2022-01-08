@@ -24,15 +24,10 @@ use Ramsey\Uuid\Uuid;
  */
 class ModListHandler implements RequestHandlerInterface
 {
-    private MapperManagerInterface $mapperManager;
-    private ModRepository $modRepository;
-
     public function __construct(
-        MapperManagerInterface $mapperManager,
-        ModRepository $modRepository
+        private readonly MapperManagerInterface $mapperManager,
+        private readonly ModRepository $modRepository
     ) {
-        $this->mapperManager = $mapperManager;
-        $this->modRepository = $modRepository;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

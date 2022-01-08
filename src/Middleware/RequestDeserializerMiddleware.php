@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use BluePsyduck\LaminasAutoWireFactory\Attribute\Alias;
+use BluePsyduck\LaminasAutoWireFactory\Attribute\ReadConfig;
 use Exception;
+use FactorioItemBrowser\Api\Client\Constant\ServiceName;
 use FactorioItemBrowser\Api\Client\Request\AbstractRequest;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\Constant\RequestAttributeName;
 use FactorioItemBrowser\Api\Server\Exception\ServerException;
 use FactorioItemBrowser\Api\Server\Exception\InvalidRequestBodyException;
@@ -26,25 +30,18 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class RequestDeserializerMiddleware implements MiddlewareInterface
 {
-    private SerializerInterface $serializer;
-
-    /** @var array<string, class-string<AbstractRequest>> */
-    private array $requestClassesByRoutes;
-
     /**
-     * @param SerializerInterface $apiClientSerializer
      * @param array<string, class-string<AbstractRequest>> $requestClassesByRoutes
      */
-    public function __construct(SerializerInterface $apiClientSerializer, array $requestClassesByRoutes)
-    {
-        $this->serializer = $apiClientSerializer;
-        $this->requestClassesByRoutes = $requestClassesByRoutes;
+    public function __construct(
+        #[Alias(ServiceName::SERIALIZER)]
+        private readonly SerializerInterface $serializer,
+        #[ReadConfig(ConfigKey::MAIN, ConfigKey::REQUEST_CLASSES_BY_ROUTES)]
+        private readonly array $requestClassesByRoutes,
+    ) {
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      * @throws ServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

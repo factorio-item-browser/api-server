@@ -17,7 +17,6 @@ use FactorioItemBrowser\Common\Constant\RecipeMode;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -70,8 +69,8 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapperTest extends TestCase
     public function testMap(): void
     {
         $recipeIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $databaseRecipes = [
             'abc' => $this->createMock(DatabaseRecipe::class),

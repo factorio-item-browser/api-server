@@ -19,11 +19,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 class CleanupMiddleware implements MiddlewareInterface
 {
     private const CLEANUP_FACTOR = 1000;
-    private SearchCacheClearInterface $searchCacheClearer;
 
-    public function __construct(SearchCacheClearInterface $searchCacheClearer)
-    {
-        $this->searchCacheClearer = $searchCacheClearer;
+    public function __construct(
+        private readonly SearchCacheClearInterface $searchCacheClearer,
+    ) {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

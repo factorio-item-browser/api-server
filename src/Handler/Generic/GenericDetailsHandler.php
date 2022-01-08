@@ -31,21 +31,12 @@ class GenericDetailsHandler implements RequestHandlerInterface
 {
     use TypeAndNameFromEntityExtractorTrait;
 
-    protected ItemRepository $itemRepository;
-    protected MachineRepository $machineRepository;
-    protected MapperManagerInterface $mapperManager;
-    protected RecipeRepository $recipeRepository;
-
     public function __construct(
-        ItemRepository $itemRepository,
-        MachineRepository $machineRepository,
-        MapperManagerInterface $mapperManager,
-        RecipeRepository $recipeRepository
+        protected readonly ItemRepository $itemRepository,
+        protected readonly MachineRepository $machineRepository,
+        protected readonly MapperManagerInterface $mapperManager,
+        protected readonly RecipeRepository $recipeRepository,
     ) {
-        $this->itemRepository = $itemRepository;
-        $this->machineRepository = $machineRepository;
-        $this->mapperManager = $mapperManager;
-        $this->recipeRepository = $recipeRepository;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -68,8 +59,6 @@ class GenericDetailsHandler implements RequestHandlerInterface
     }
 
     /**
-     * @param UuidInterface $combinationId
-     * @param NamesByTypes $namesByTypes
      * @return array<string, GenericEntity>
      */
     protected function processItems(UuidInterface $combinationId, NamesByTypes $namesByTypes): array
@@ -79,8 +68,6 @@ class GenericDetailsHandler implements RequestHandlerInterface
     }
 
     /**
-     * @param UuidInterface $combinationId
-     * @param NamesByTypes $namesByTypes
      * @return array<string, GenericEntity>
      */
     protected function processMachines(UuidInterface $combinationId, NamesByTypes $namesByTypes): array
@@ -93,8 +80,6 @@ class GenericDetailsHandler implements RequestHandlerInterface
     }
 
     /**
-     * @param UuidInterface $combinationId
-     * @param NamesByTypes $namesByTypes
      * @return array<string, GenericEntity>
      */
     protected function processRecipes(UuidInterface $combinationId, NamesByTypes $namesByTypes): array

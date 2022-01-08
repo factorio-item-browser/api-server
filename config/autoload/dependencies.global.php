@@ -14,12 +14,12 @@ namespace FactorioItemBrowser\Api\Server;
 
 use BluePsyduck\Ga4MeasurementProtocol\ClientInterface;
 use BluePsyduck\LaminasAutoWireFactory\AutoWireFactory;
-use BluePsyduck\LaminasAutoWireFactory\AutoWireUtils;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
 use Doctrine\Migrations\DependencyFactory;
-use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\Middleware\ErrorResponseGenerator;
+use MonologFactory\DiContainerLoggerFactory;
+use Psr\Log\LoggerInterface;
 use Roave\PsrContainerDoctrine\Migrations\ConfigurationLoaderFactory;
 use Roave\PsrContainerDoctrine\Migrations\DependencyFactoryFactory;
 
@@ -83,14 +83,7 @@ return [
             ClientInterface::class => Tracking\ClientFactory::class,
             ConfigurationLoader::class => ConfigurationLoaderFactory::class,
             DependencyFactory::class => DependencyFactoryFactory::class,
-
-            // Auto-wire helpers
-            'array $agents' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::AGENTS),
-            'array $allowedOrigins' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::ALLOWED_ORIGINS),
-            'array $requestClassesByRoutes' => AutoWireUtils::readConfig(ConfigKey::MAIN, ConfigKey::REQUEST_CLASSES_BY_ROUTES),
-            'array $searchDecorators' => AutoWireUtils::injectAliasArray(ConfigKey::MAIN, ConfigKey::SEARCH_DECORATORS),
-            'bool $isDebug' => AutoWireUtils::readConfig('debug'),
-            'string $version' => AutoWireUtils::readConfig('version'),
+            LoggerInterface::class => [DiContainerLoggerFactory::class, 'app'],
         ],
     ],
 ];

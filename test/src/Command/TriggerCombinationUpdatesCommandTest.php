@@ -22,7 +22,6 @@ use GuzzleHttp\Promise\RejectedPromise;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -60,7 +59,6 @@ class TriggerCombinationUpdatesCommandTest extends TestCase
     private function createInstance(array $mockedMethods = []): TriggerCombinationUpdatesCommand
     {
         return $this->getMockBuilder(TriggerCombinationUpdatesCommand::class)
-                    ->disableProxyingToOriginalMethods()
                     ->onlyMethods($mockedMethods)
                     ->setConstructorArgs([
                         $this->combinationRepository,
@@ -125,7 +123,7 @@ class TriggerCombinationUpdatesCommandTest extends TestCase
         $dryRun = false;
         $factorioVersion = '1.2.3';
         $expectedResult = 0;
-        $updateHash1 = $this->createMock(UuidInterface::class);
+        $updateHash1 = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
         $exception2 = new RejectedCombinationUpdateException('test exception');
 
         $input = $this->createMock(InputInterface::class);
@@ -216,7 +214,7 @@ class TriggerCombinationUpdatesCommandTest extends TestCase
         $dryRun = true;
         $factorioVersion = '1.2.3';
         $expectedResult = 0;
-        $updateHash1 = $this->createMock(UuidInterface::class);
+        $updateHash1 = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
         $exception2 = new RejectedCombinationUpdateException('test exception');
 
         $input = $this->createMock(InputInterface::class);

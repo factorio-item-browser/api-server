@@ -6,7 +6,6 @@ parameters:
 
   ignoreErrors:
     - '#Dynamic call to static method PHPUnit\\Framework\\.*#'
-    - '#Parameter \#1 \$message of method Laminas\\Log\\LoggerInterface::.*\(\) expects string, .* given.#'
 
 includes:
   - vendor/phpstan/phpstan-phpunit/extension.neon

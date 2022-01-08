@@ -21,17 +21,15 @@ use Ramsey\Uuid\UuidInterface;
  */
 abstract class AbstractEntityDecorator implements SearchDecoratorInterface
 {
-    protected MapperManagerInterface $mapperManager;
-
     protected int $numberOfRecipesPerResult = 0;
     /** @var array<string, UuidInterface> */
     protected array $announcedIds = [];
     /** @var array<string, object> */
     protected array $databaseEntities = [];
 
-    public function __construct(MapperManagerInterface $mapperManager)
-    {
-        $this->mapperManager = $mapperManager;
+    public function __construct(
+        protected readonly MapperManagerInterface $mapperManager,
+    ) {
     }
 
     public function initialize(int $numberOfRecipesPerResult): void
@@ -43,7 +41,6 @@ abstract class AbstractEntityDecorator implements SearchDecoratorInterface
 
     /**
      * Adds an id that was announced.
-     * @param UuidInterface|null $id
      */
     protected function addAnnouncedId(?UuidInterface $id): void
     {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Middleware;
 
+use BluePsyduck\LaminasAutoWireFactory\Attribute\ReadConfig;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -31,25 +33,17 @@ class CorsHeaderMiddleware implements MiddlewareInterface
     ];
 
     /**
-     * The allowed origins to access the Portal API server.
-     * @var array<string>
-     */
-    protected $allowedOrigins;
-
-    /**
      * Initializes the middleware.
      * @param array<string> $allowedOrigins
      */
-    public function __construct(array $allowedOrigins)
-    {
-        $this->allowedOrigins = $allowedOrigins;
+    public function __construct(
+        #[ReadConfig(ConfigKey::MAIN, ConfigKey::ALLOWED_ORIGINS)]
+        protected readonly array $allowedOrigins,
+    ) {
     }
 
     /**
      * Process an incoming server request and return a response, optionally delegating response creation to a handler.
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -66,8 +60,6 @@ class CorsHeaderMiddleware implements MiddlewareInterface
 
     /**
      * Returns whether the origin is allowed.
-     * @param string $origin
-     * @return bool
      */
     protected function isOriginAllowed(string $origin): bool
     {
@@ -81,9 +73,6 @@ class CorsHeaderMiddleware implements MiddlewareInterface
 
     /**
      * Adds the needed headers to the response.
-     * @param ResponseInterface $response
-     * @param string $origin
-     * @return ResponseInterface
      */
     protected function addHeaders(ResponseInterface $response, string $origin): ResponseInterface
     {

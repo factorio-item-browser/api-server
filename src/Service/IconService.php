@@ -19,16 +19,12 @@ use Ramsey\Uuid\UuidInterface;
  */
 class IconService
 {
-    private IconImageRepository $iconImageRepository;
-    private IconRepository $iconRepository;
     private UuidInterface $combinationId;
 
     public function __construct(
-        IconImageRepository $iconImageRepository,
-        IconRepository $iconRepository
+        private readonly IconImageRepository $iconImageRepository,
+        private readonly IconRepository $iconRepository
     ) {
-        $this->iconImageRepository = $iconImageRepository;
-        $this->iconRepository = $iconRepository;
     }
 
     public function setCombinationId(UuidInterface $combinationId): void
@@ -38,7 +34,6 @@ class IconService
 
     /**
      * Returns the image ids used by the specified entities.
-     * @param NamesByTypes $namesByTypes
      * @return array<UuidInterface>
      */
     public function getImageIdsByTypesAndNames(NamesByTypes $namesByTypes): array
@@ -58,7 +53,6 @@ class IconService
     /**
      * Returns types and names of icons which are using any of the specified hashes.
      * @param array<UuidInterface> $imageIds
-     * @return NamesByTypes
      */
     public function getTypesAndNamesByImageIds(array $imageIds): NamesByTypes
     {

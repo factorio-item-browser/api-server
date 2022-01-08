@@ -19,7 +19,7 @@ use FactorioItemBrowser\Common\Constant\Constant;
 use FactorioItemBrowser\Common\Constant\ItemType;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\UuidInterface;
+use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
 /**
@@ -65,7 +65,7 @@ class MachineServiceTest extends TestCase
             $this->createMock(Machine::class),
         ];
 
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
 
         $craftingCategory = new CraftingCategory();
         $craftingCategory->setName($craftingCategoryName);

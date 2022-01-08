@@ -19,7 +19,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -68,8 +67,8 @@ class GenericIconHandlerTest extends TestCase
 
         $namesByTypes = $this->createMock(NamesByTypes::class);
         $imageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $icons = [
             $this->createMock(ClientIcon::class),
@@ -132,12 +131,12 @@ class GenericIconHandlerTest extends TestCase
     public function testFetchImageIds(): void
     {
         $imageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $allImageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('37451ec1-6b60-4870-a24f-41afd4cdd477'),
+            Uuid::fromString('4a3a8c6c-8d68-41f6-997a-8761c380cd7d'),
         ];
 
         $namesByTypes = $this->createMock(NamesByTypes::class);

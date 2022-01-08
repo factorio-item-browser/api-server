@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace FactorioItemBrowser\Api\Server\Service;
 
+use BluePsyduck\LaminasAutoWireFactory\Attribute\InjectAliasArray;
 use FactorioItemBrowser\Api\Client\Transfer\GenericEntity;
 use FactorioItemBrowser\Api\Search\Entity\Result\ResultInterface;
+use FactorioItemBrowser\Api\Server\Constant\ConfigKey;
 use FactorioItemBrowser\Api\Server\SearchDecorator\SearchDecoratorInterface;
 
 /**
@@ -25,8 +27,10 @@ class SearchDecoratorService
     /**
      * @param array<SearchDecoratorInterface<ResultInterface>> $searchDecorators
      */
-    public function __construct(array $searchDecorators)
-    {
+    public function __construct(
+        #[InjectAliasArray(ConfigKey::MAIN, ConfigKey::SEARCH_DECORATORS)]
+        array $searchDecorators,
+    ) {
         foreach ($searchDecorators as $searchDecorator) {
             $this->searchDecoratorsByClass[$searchDecorator->getSupportedResultClass()] = $searchDecorator;
         }
@@ -35,7 +39,6 @@ class SearchDecoratorService
     /**
      * Decorates the search results to client entities.
      * @param array<ResultInterface> $searchResults
-     * @param int $numberOfRecipesPerResult
      * @return array<GenericEntity>
      */
     public function decorate(array $searchResults, int $numberOfRecipesPerResult): array
@@ -48,7 +51,6 @@ class SearchDecoratorService
 
     /**
      * Initializes all the search decorators.
-     * @param int $numberOfRecipesPerResult
      */
     protected function initializeSearchDecorators(int $numberOfRecipesPerResult): void
     {

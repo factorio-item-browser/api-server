@@ -22,7 +22,7 @@ class TrackingService
     private array $events = [];
 
     public function __construct(
-        private ClientInterface $client,
+        private readonly ClientInterface $client,
     ) {
     }
 

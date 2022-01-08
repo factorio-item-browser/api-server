@@ -26,11 +26,9 @@ class RecipeDataCollectionToGenericEntityWithRecipesMapper implements StaticMapp
 {
     use MapperManagerAwareTrait;
 
-    private RecipeService $recipeService;
-
-    public function __construct(RecipeService $recipeService)
-    {
-        $this->recipeService = $recipeService;
+    public function __construct(
+        private readonly RecipeService $recipeService,
+    ) {
     }
 
     public function getSupportedSourceClass(): string

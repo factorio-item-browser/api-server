@@ -26,11 +26,12 @@
     "guzzlehttp/guzzle": "^7.3",
     "laminas/laminas-config-aggregator": "^1.0",
     "laminas/laminas-diactoros": "^2.5",
-    "laminas/laminas-log": "^2.9",
     "laminas/laminas-servicemanager": "^3.3",
     "mezzio/mezzio": "^3.0",
     "mezzio/mezzio-fastroute": "^3.0",
     "mezzio/mezzio-helpers": "^5.0",
+    "monolog/monolog": "^2.3",
+    "nikolaposa/monolog-factory": "^3.1",
     "ramsey/uuid": "^4.0",
     "symfony/console": "^6.0"
   },
@@ -66,7 +67,7 @@
     "phpstan": "phpstan analyse --no-interaction --ansi",
     "phpunit": "phpunit --colors=always --coverage-html=test/coverage --coverage-clover=test/coverage/clover.xml",
     "post-autoload-dump": [
-      "mkdir -p data/cache data/log && chmod 0777 data/cache data/log"
+      "mkdir -m a=rwx -p data/cache data/logs"
     ],
     "test": [
       "@composer validate --strict",

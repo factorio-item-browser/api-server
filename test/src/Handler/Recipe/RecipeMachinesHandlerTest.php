@@ -24,7 +24,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -142,8 +141,8 @@ class RecipeMachinesHandlerTest extends TestCase
     public function testFetchRecipe(): void
     {
         $name = 'abc';
-        $combinationId = $this->createMock(UuidInterface::class);
-        $recipeId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
+        $recipeId = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
 
         $recipeData = new RecipeData();
         $recipeData->setId($recipeId);
@@ -175,7 +174,7 @@ class RecipeMachinesHandlerTest extends TestCase
     public function testFetchRecipeWithoutRecipeData(): void
     {
         $name = 'abc';
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
 
         $recipeDataCollection = new RecipeDataCollection();
 
@@ -201,8 +200,8 @@ class RecipeMachinesHandlerTest extends TestCase
     public function testFetchRecipeWithoutEntity(): void
     {
         $name = 'abc';
-        $combinationId = $this->createMock(UuidInterface::class);
-        $recipeId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
+        $recipeId = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
 
         $recipeData = new RecipeData();
         $recipeData->setId($recipeId);
@@ -232,7 +231,7 @@ class RecipeMachinesHandlerTest extends TestCase
      */
     public function testFetchMachines(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $craftingCategory = $this->createMock(CraftingCategory::class);
 
         $recipe = new Recipe();

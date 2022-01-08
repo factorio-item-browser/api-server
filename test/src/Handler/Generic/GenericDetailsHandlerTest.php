@@ -24,7 +24,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -146,7 +145,7 @@ class GenericDetailsHandlerTest extends TestCase
      */
     public function testProcessItems(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $namesByTypes = $this->createMock(NamesByTypes::class);
 
         $items = [
@@ -179,7 +178,7 @@ class GenericDetailsHandlerTest extends TestCase
      */
     public function testProcessMachines(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $machineNames = ['abc', 'def'];
 
         $namesByTypes = $this->createMock(NamesByTypes::class);
@@ -221,7 +220,7 @@ class GenericDetailsHandlerTest extends TestCase
      */
     public function testProcessRecipes(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $recipeNames = ['abc', 'def'];
 
         $namesByTypes = $this->createMock(NamesByTypes::class);

@@ -22,8 +22,6 @@ use Ramsey\Uuid\Uuid;
 class ItemProductHandler extends AbstractItemHandler implements RequestHandlerInterface
 {
     /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
      * @throws ServerException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface

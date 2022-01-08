@@ -21,9 +21,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 class RejectUnknownRoutesMiddleware implements MiddlewareInterface
 {
     /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
      * @throws ServerException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

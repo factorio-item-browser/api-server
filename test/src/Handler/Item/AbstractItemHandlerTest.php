@@ -18,7 +18,6 @@ use FactorioItemBrowser\Api\Server\Service\RecipeService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -68,7 +67,7 @@ class AbstractItemHandlerTest extends TestCase
      */
     public function testFetchItem(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $type = 'abc';
         $name = 'def';
 
@@ -93,7 +92,7 @@ class AbstractItemHandlerTest extends TestCase
      */
     public function testFetchItemWithoutEntity(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $type = 'abc';
         $name = 'def';
 
@@ -116,7 +115,7 @@ class AbstractItemHandlerTest extends TestCase
      */
     public function testMapItems(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
 
         $item1 = new Item();
         $item1->setId(Uuid::fromString('114a2421-893a-4113-b67d-b4bc1eac2cd2'));
@@ -125,8 +124,8 @@ class AbstractItemHandlerTest extends TestCase
 
         $items = [$item1, $item2];
         $itemIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
 
         $mappedItem1 = $this->createMock(GenericEntityWithRecipes::class);
@@ -191,7 +190,7 @@ class AbstractItemHandlerTest extends TestCase
      */
     public function testMapItemsWithoutRecipes(): void
     {
-        $combinationId = $this->createMock(UuidInterface::class);
+        $combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
         $numberOfRecipesPerResult = 0;
 
         $item1 = $this->createMock(Item::class);

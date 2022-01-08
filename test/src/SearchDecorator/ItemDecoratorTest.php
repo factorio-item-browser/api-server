@@ -17,7 +17,6 @@ use FactorioItemBrowser\Api\Server\SearchDecorator\RecipeDecorator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionException;
 
 /**
@@ -74,7 +73,7 @@ class ItemDecoratorTest extends TestCase
 
     public function testAnnounce(): void
     {
-        $id = $this->createMock(UuidInterface::class);
+        $id = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
         $recipe1 = $this->createMock(RecipeResult::class);
         $recipe2 = $this->createMock(RecipeResult::class);
         $recipe3 = $this->createMock(RecipeResult::class);
@@ -107,8 +106,8 @@ class ItemDecoratorTest extends TestCase
     public function testFetchDatabaseEntities(): void
     {
         $ids = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
 
         $item1 = new DatabaseItem();
@@ -137,7 +136,7 @@ class ItemDecoratorTest extends TestCase
      */
     public function testGetIdFromResult(): void
     {
-        $id = $this->createMock(UuidInterface::class);
+        $id = Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1');
 
         $searchResult = new ItemResult();
         $searchResult->setId($id);

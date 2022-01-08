@@ -28,14 +28,13 @@ class IconServiceTest extends TestCase
     private IconImageRepository $iconImageRepository;
     /** @var IconRepository&MockObject */
     private IconRepository $iconRepository;
-    /** @var UuidInterface&MockObject */
     private UuidInterface $combinationId;
 
     protected function setUp(): void
     {
         $this->iconImageRepository = $this->createMock(IconImageRepository::class);
         $this->iconRepository = $this->createMock(IconRepository::class);
-        $this->combinationId = $this->createMock(UuidInterface::class);
+        $this->combinationId = Uuid::fromString('2f4a45fa-a509-a9d1-aae6-ffcf984a7a76');
     }
 
     /**
@@ -103,8 +102,8 @@ class IconServiceTest extends TestCase
               ->setName('jkl');
 
         $imageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $icons = [$icon1, $icon2];
 
@@ -126,8 +125,8 @@ class IconServiceTest extends TestCase
     public function testGetIconsByImageIds(): void
     {
         $imageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $icons = [
             $this->createMock(Icon::class),
@@ -148,8 +147,8 @@ class IconServiceTest extends TestCase
     public function testGetIconFilesByHashes(): void
     {
         $imageIds = [
-            $this->createMock(UuidInterface::class),
-            $this->createMock(UuidInterface::class),
+            Uuid::fromString('11b19ed3-e772-44b1-9938-2cca1c63c7a1'),
+            Uuid::fromString('24db0d5a-a933-4e46-bb5a-0b7d88c6272e'),
         ];
         $iconFiles = [
             $this->createMock(IconImage::class),
